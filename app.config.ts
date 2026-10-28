@@ -4,10 +4,10 @@ import type { ConfigContext, ExpoConfig } from 'expo/config';
  * Expo config, formerly `app.json`.
  *
  * Adds the identifiers required for EAS builds and the native capabilities the
- * v1 feature set depends on. Values that are still owned by later PRs (fonts,
- * audio, image picker) are called out inline so the plugin list does not drift
- * from what is actually installed — a config plugin for a missing package
- * breaks `expo config` / prebuild.
+ * v1 feature set depends on. Values that are still owned by later PRs (audio)
+ * are called out inline so the plugin list does not drift from what is actually
+ * installed — a config plugin for a missing package breaks `expo config` /
+ * prebuild.
  */
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -76,8 +76,16 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         ],
       },
     ],
-    // expo-audio (P6.1) and expo-image-picker (P4.3) add their plugins when the
-    // packages are installed.
+    // expo-audio (P6.1) adds its plugin when the package is installed.
+    [
+      'expo-image-picker',
+      {
+        // Only the library is used (profile photo); the camera and microphone
+        // are not, so their permission strings are deliberately absent.
+        photosPermission:
+          'Allow Othman to choose a photo for your profile picture.',
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,

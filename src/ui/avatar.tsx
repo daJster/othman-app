@@ -24,6 +24,7 @@ const avatar = tv({
       sm: { root: 'h-6 w-6', initials: 'text-2xs' },
       md: { root: 'h-8 w-8', initials: 'text-xs' },
       lg: { root: 'h-10 w-10', initials: 'text-sm' },
+      xl: { root: 'h-16 w-16', initials: 'text-lg' },
     },
   },
   defaultVariants: {

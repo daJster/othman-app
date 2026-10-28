@@ -1,7 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { AccountProfile } from '@/core/domain/account/merge-profile';
 import type { AccountData, AuthUser } from '@/core/types';
-import { toAsyncResult, type AsyncResult } from '@/features/query/async-state';
+import {
+  toAsyncResult,
+  type AsyncPresentResult,
+} from '@/features/query/async-state';
 import { profileService } from '@/services/profile';
 import { queryKeys } from '@/services/query';
 
@@ -22,7 +25,7 @@ const ANONYMOUS = 'anonymous';
 
 export function useAccount(
   authUser: AuthUser | null,
-): AsyncResult<AccountData> {
+): AsyncPresentResult<AccountData> {
   const query = useQuery({
     queryKey: queryKeys.account.byUid(authUser?.uid ?? ANONYMOUS),
     queryFn: () => profileService.getAccount(authUser as AuthUser),

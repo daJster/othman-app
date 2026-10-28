@@ -21,6 +21,7 @@
     "cancel": "Cancel",
     "close": "Close",
     "continue": "Continue",
+    "edit": "Edit",
     "goBackHome": "Back to home",
     "join": "Join",
     "loading": "Loading…",
@@ -102,6 +103,61 @@
     "signOutLoading": "Signing you out…",
     "signOutSuccess": "You have been signed out",
     "redirect": "Taking you home in {{countdown}}…"
+  },
+  "account": {
+    "sections": {
+      "settings": "Settings",
+      "session": "Session"
+    },
+    "profile": {
+      "anonymous": "No name yet",
+      "noEmail": "No email on file"
+    },
+    "role": {
+      "guest": "Guest",
+      "user": "Student",
+      "admin": "Administrator",
+      "superadmin": "Super administrator"
+    },
+    "demoNote": "Demo account — replaced by sign-in in a later update.",
+    "signedOut": {
+      "title": "You are signed out",
+      "description": "Sign in to see your profile and progress.",
+      "action": "Use the demo account"
+    },
+    "signOut": {
+      "title": "Sign out?",
+      "message": "You can sign back in at any time.",
+      "confirm": "Sign out",
+      "cancel": "Keep signed in"
+    },
+    "edit": {
+      "title": "Edit profile",
+      "photo": "Change photo",
+      "photoHint": "Choose an image from your library.",
+      "photoFailed": "Could not open your photo library.",
+      "displayName": "Display name",
+      "displayNamePlaceholder": "Your name",
+      "email": "Email",
+      "emailHint": "Email cannot be changed.",
+      "phone": "Phone number",
+      "phonePlaceholder": "+212 6 12 34 56 78",
+      "phoneHint": "Include the country code, starting with +.",
+      "role": "Role",
+      "roleHint": "Only an administrator can change a role.",
+      "saved": "Saved",
+      "saving": "Saving…",
+      "saveFailed": "Could not save your changes. Try again."
+    },
+    "validation": {
+      "displayNameRequired": "Enter a name.",
+      "displayNameLength": "Use between 2 and 60 characters.",
+      "phone": "Use a country code and digits only, like +212612345678."
+    },
+    "a11y": {
+      "profilePhoto": "Profile photo",
+      "edit": "Edit profile"
+    }
   },
   "meeting": {
     "status": {

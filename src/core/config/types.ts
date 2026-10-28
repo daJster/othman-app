@@ -47,7 +47,11 @@ export type IconName =
   | 'chevron-up'
   | 'clock'
   | 'map-pin'
-  | 'users';
+  | 'users'
+  // Added with the account screens (P4.3).
+  | 'camera'
+  | 'info'
+  | 'logout';
 
 /** Component type for an icon registry, kept platform-agnostic. */
 export type IconRegistry<Component> = Readonly<Record<IconName, Component>>;

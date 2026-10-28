@@ -99,10 +99,12 @@ function AppShell() {
  * schemes. Navigation props take style objects, not classNames, so the token is
  * resolved through `useResolveClassNames` instead of duplicating a hex value.
  *
- * The root stack holds exactly two things: the tab group (the app) and the
+ * The root stack holds the tab group (the app), the account sub-screens and the
  * reader. The reader is a sibling rather than a tab child so it can present
- * full-screen over the tab bar, which is the point of a mushaf view. Auth
- * gating (`Stack.Protected`) joins this list in P3.3.
+ * full-screen over the tab bar, which is the point of a mushaf view. The edit
+ * sheet is a `formSheet`: it is a task, not a destination, so it must not become
+ * a tab or a pushed page. Auth gating (`Stack.Protected`) joins this list in
+ * P3.3.
  */
 function RootNavigator() {
   const contentStyle = useResolveClassNames('bg-background');
@@ -115,6 +117,19 @@ function RootNavigator() {
       }}
     >
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen
+        name="account/edit"
+        options={{
+          presentation: 'formSheet',
+          // Nearly full height, expandable: the form is taller than a compact
+          // sheet, and the user can still pull it down when nothing is saving.
+          sheetAllowedDetents: [0.9, 1],
+          sheetInitialDetentIndex: 0,
+          sheetGrabberVisible: true,
+          sheetCornerRadius: 24,
+        }}
+      />
+      <Stack.Screen name="account/progress" />
       <Stack.Screen
         name="reader/[page]"
         options={{ presentation: 'fullScreenModal', headerShown: false }}

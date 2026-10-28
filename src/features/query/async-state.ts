@@ -33,6 +33,19 @@ export type AsyncResult<T> = {
   isFetching: boolean;
 };
 
+/**
+ * The same union without `empty`.
+ *
+ * A query that has no emptiness rule can never resolve to `empty` (see
+ * `toAsyncResult`), so a screen reading one would have to handle a state that
+ * cannot happen — and would invite an `EmptyState` for a value that always
+ * exists. `AsyncPresentResult` makes that branch unrepresentable instead.
+ */
+export type AsyncPresentResult<T> = {
+  state: Exclude<AsyncState<T>, { status: 'empty' }>;
+  isFetching: boolean;
+};
+
 export type AsyncQueryLike<T> = Pick<
   UseQueryResult<T>,
   'data' | 'error' | 'isError' | 'isPending' | 'isFetching' | 'refetch'
@@ -43,7 +56,19 @@ export type AsyncQueryLike<T> = Pick<
  * @param isEmpty Domain rule for "resolved but nothing to show" — usually
  *                `rows => rows.length === 0`. Defaults to never empty, because
  *                guessing would hide a real result.
+ *
+ * Two signatures: passing an `isEmpty` rule returns the full union (the result
+ * may be `empty`), while omitting it returns `AsyncPresentResult`, where
+ * `empty` cannot appear. The caller states the domain rule, and the type
+ * follows without a cast.
  */
+export function toAsyncResult<T>(
+  query: AsyncQueryLike<T>,
+): AsyncPresentResult<T>;
+export function toAsyncResult<T>(
+  query: AsyncQueryLike<T>,
+  isEmpty: (data: T) => boolean,
+): AsyncResult<T>;
 export function toAsyncResult<T>(
   query: AsyncQueryLike<T>,
   isEmpty: (data: T) => boolean = () => false,

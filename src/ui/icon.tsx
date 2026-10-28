@@ -98,6 +98,14 @@ const ICONS = {
   clock: { ios: 'clock', md: 'schedule', mdSymbol: 'schedule' },
   'map-pin': { ios: 'mappin.and.ellipse', md: 'place', mdSymbol: 'place' },
   users: { ios: 'person.2', md: 'group', mdSymbol: 'group' },
+  // Added with the account screens (P4.3).
+  camera: { ios: 'camera', md: 'photo-camera', mdSymbol: 'photo_camera' },
+  info: { ios: 'info.circle', md: 'info-outline', mdSymbol: 'info' },
+  logout: {
+    ios: 'rectangle.portrait.and.arrow.right',
+    md: 'logout',
+    mdSymbol: 'logout',
+  },
 } satisfies IconRegistry<IconSet>;
 
 const StyledSymbol = withUniwind(SymbolView);

@@ -765,19 +765,62 @@ Depends: P3.5
 
 ---
 
-### [ ] P4.3 — Account · L
+### [x] P4.3 — Account · L
 
 Depends: P4.2
 
-- [ ] `(tabs)/account.tsx`, `account/edit.tsx` (`formSheet`), `account/progress.tsx`.
-- [ ] Profile header + `@expo/ui` `List`/`ListItem` settings groups.
-- [ ] Edit form with `@expo/ui` controls + `expo-image-picker` avatar.
-- [ ] Draft preservation, pending/failure states, no dismiss before success.
-- [ ] Validation: display name, phone dial code, role read-only for non-admins.
-- [ ] Sign-out row behind an `Alert`.
-- [ ] Keyboard never covers the save button.
+> Change: **the account is a fixture until P3.3.** Authentication was skipped, so
+> there is no Firebase user to read a profile for. `services/profile/index.ts`
+> points at `demo-profile.repository.ts` (in-memory, partial-merge `update`) and
+> `features/account/demo-session.ts` holds one signed-in `AuthUser` in a module
+> store. That keeps the whole surface explorable — edit, save, sign out, sign
+> back in — while the screens already speak the real `ProfileService`. P3.3 swaps
+> the two files and deletes the demo pair; nothing in `app/` changes.
+>
+> Change: the settings rows are `@expo/ui` `List`/`ListItem` (SwiftUI List /
+> Compose LazyColumn / a plain list on web), but the **form text fields are the
+> app's `Input`**, not `@expo/ui` `TextInput`. The latter is backed by an
+> `ObservableState` and worklets, so its value does not live in React state — a
+> form that must keep an invalid draft on screen after a failed save cannot use
+> it. `@expo/ui` still supplies the one genuinely native control here: the role
+> `Picker` for administrators.
+>
+> Change: the **phone number is a single E.164-style input** (`+`, 8–15 digits,
+> separators stripped), not a dial-code picker. `core/config/phone.ts` ships only
+> FR/MA and the profile fixture is Saudi; a two-country picker would be a
+> regression in reach, so the field accepts any country until a real dial-code
+> table replaces it.
+>
+> Change: the role is **read-only for everyone below `admin`**, shown as a
+> `Badge`. An administrator gets the native `Picker`, and only a changed value is
+> written.
+>
+> Change: the editor is a **`formSheet`** with a grabber and `usePreventRemove`
+> armed only while the write is pending. The hook is not exported from
+> `expo-router` until SDK 58, so the route imports
+> `expo-router/build/react-navigation/core/usePreventRemove` — the
+> implementation the native stack already uses.
+>
+> Change: a picked photo stays a **device-local URI** until P3.3 adds the storage
+> upload. The write still persists the string, so the screen shows it; a fresh
+> install would not have the file.
 
-**Done when:** edit → save → persist → header updates; cancel discards.
+- [x] `(tabs)/account.tsx` hosts a `ProfileHeader` (avatar `xl`, name, email, role `Badge`, Edit) inside the native list via `RNHostView`, then a Progress row and a Sign out row. Sections are `RNHostView` + `Text` because `List` has no section API; `FieldGroup` does, but it owns a second scroll surface.
+- [x] `core/domain/account/profile-validation.ts`: `ProfileDraft`, `validateProfileDraft` (name 2–60, optional `^\+[0-9]{8,15}$`), `normalizePhoneNumber`, `isProfileDraftDirty`, `toProfileDraft`. Returns codes, never sentences — `core` has no locale.
+- [x] `features/account/edit-profile-form.tsx`: draft in `useState`, Save enabled only for a dirty **and** valid draft, only changed fields patched (`null` clears the phone), avatar via `expo-image-picker` (`mediaTypes: ['images']`, 1:1 crop), email read-only, role gated by `canEditRoles`.
+- [x] Pending: fields, Cancel and Save disabled; the route's `usePreventRemove` blocks swipe/back; the failure banner keeps every typed value.
+- [x] Success closes through a **one-shot `useRef`** guard: an effect reacts to `isPending` going false, so a re-render with a new `onSaved` identity cannot fire `back()` twice and pop the screen underneath.
+- [x] Keyboard: `KeyboardAvoidingView` + the Save footer **outside** the `ScrollView`, so the primary action is never under the keyboard.
+- [x] Sign out is behind `Alert.alert` (destructive confirm), then `EmptyState` with "Use the demo account" so the signed-out state is reachable and reversible.
+- [x] `toAsyncResult` gained an overload: **without** an `isEmpty` rule it returns `AsyncPresentResult<T>`, where `status: 'empty'` is unrepresentable. An account always has a uid, so the screens no longer carry a dead `empty` branch.
+- [x] `account/progress.tsx` exists as a stub with a working back affordance; P4.4 fills it.
+- [x] `expo-image-picker@57.0.20` + its config plugin (`photosPermission` only — no camera or microphone strings). `camera`, `info`, `logout` icons; `Avatar size="xl"`.
+- [x] Locales: `account.*` (sections, role labels, demo note, signed-out, sign-out dialog, edit form, validation, a11y) and `action.edit` in both languages.
+- [x] Tests: `profile-validation.test.ts` (normalization, boundaries, error codes, dirty comparison), `demo-profile.repository.test.ts` (uid/email lookup, partial merge, null clear, reset), `account-screen.test.tsx` (loading, header + rows, navigation, retry, sign-out, sign-in), `edit-account-screen.test.tsx` (initial draft, minimal patch, phone normalization, both validation errors, failed write keeps draft, cancel discards, read-only vs admin role, photo pick, pending disables everything).
+- [x] `__mocks__/@expo/ui.js`: the package renders native host adapters that expose no text or press handlers under Jest, so the universal components are mapped to RN primitives (behavioural mock; layout is verified on device).
+- [ ] **Manual:** `@expo/ui` list row measurement inside the account screen, formSheet detent + grabber, swipe-during-save guard, RTL chevrons and Arabic input, photo-library permission prompt, large text on iOS + Android (no device on this machine).
+
+**Done when:** edit → save → persist → header updates; cancel discards. — Covered end-to-end by `edit-account-screen.test.tsx` against the profile service; the device pass on native chrome is the outstanding manual step.
 
 ---
 
