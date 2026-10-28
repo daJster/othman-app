@@ -723,19 +723,45 @@ Depends: P3.5
 
 ---
 
-### [ ] P4.2 — Meetings · L
+### [x] P4.2 — Meetings · L
 
 Depends: P3.5
 
-- [ ] `(tabs)/meetings.tsx` + `features/meetings/*`.
-- [ ] Custom 42-cell month grid + Hijri toggle (port `hijri-calendar` logic to `core/utils`).
-- [ ] `useMeetings(dateKey)` query; `FlatList` with automatic insets.
-- [ ] `MeetingCard` status pill via `tv()` tone literals; attendee stack; Reanimated expand.
-- [ ] `expo-web-browser` for meet links.
-- [ ] Tooltips → long-press `Menu` or visible labels.
-- [ ] Four states.
+> Change: the Hijri conversion is **Umm al-Qura**, not the arithmetic Islamic
+> calendar the web library used. A one-day error sends the user to the wrong
+> day's meetings, so `core/utils/hijri.ts` carries a year-mask table generated
+> once from ICU's `islamic-umalqura` data (1395–1510). Doing the conversion at
+> runtime would depend on the engine: Hermes' `Intl` calendar support differs
+> between iOS and Android.
+>
+> Change: the grid is **always 42 cells starting Sunday** and the canonical
+> value is the Gregorian `Date`/`DateKey`. Switching to Hijri relabels the cells
+> (`14 Shawwal 1447`) but never moves the selection or the fetched day.
+>
+> Change: attendee **tooltips became visible labels**. A phone has no hover; the
+> collapsing stack shows the first avatars plus a `+n` counter, and the expanded
+> details list the names and the organizer as ordinary text.
+>
+> Change: expansion uses Reanimated (`layout={LinearTransition}` + `FadeIn`/
+> `FadeOut`) instead of the web's height transition.
+>
+> Change: the meet link opens in `expo-web-browser`, and only `https:` is
+> accepted — the URL is backend data, so any other scheme is dropped rather than
+> handed to the OS.
 
-**Done when:** date change fetches once; RTL grid order correct; 44 pt targets.
+- [x] `(tabs)/meetings.tsx` composes `features/meetings/{meeting-calendar,meeting-card,meeting-card-skeleton,attendee-stack}.tsx`, `calendar-format.ts` and `open-meet-link.ts`. The calendar is the `ListHeaderComponent` of the `FlatList`, so the day picker and the rows scroll as one surface.
+- [x] `core/utils/hijri.ts` (`hijriToGregorianDate`, `gregorianDateToHijri`, `try…`, month/year lengths) + `core/utils/calendar.ts` (`buildCalendarMonth`, `shiftCalendarMonth`, `canShiftCalendarMonth`). Both live in `core/`: pure TS, no React, no locale.
+- [x] `useMeetingsByDate(dateKey)` query with `meeting.found` counts; `FlatList` uses `contentInsetAdjustmentBehavior="automatic"` and a `RefreshControl` bound to `useRefreshMeetings`.
+- [x] Status pill reuses `Badge` with `getMeetingStatusConfig(status).tone` — tone words in `core`, class literals in `ui/tone.ts`, nothing dynamic. `MeetingStatusConfig.labelKey` is now a literal union so the typed `t()` accepts it.
+- [x] Attendee stack (`ATTENDEE_LIST_CONFIG.maxVisible`, `+n`) + names in expanded details. No long-press menu.
+- [x] Join opens the in-app browser; `openMeetLink` rejects every non-`https:` scheme and swallows a "no browser" failure.
+- [x] Four states: skeleton cards while pending, `ErrorState` with the query's retry, `EmptyState` for a day with nothing, cards when ready. The calendar stays mounted in all four.
+- [x] 44 pt targets: day cells `h-11`, month chevrons `h-11 w-11`, Details `min-h-11`, Join and Today at the default `h-11` size.
+- [x] Tests: `hijri.test.ts` (known Umm al-Qura dates, two-year round trip, month/year lengths, range rejection), `calendar.test.ts` (42 cells, Sunday start, canonical keys, month shifting, table clamping), `meeting-calendar.test.tsx`, `meeting-card.test.tsx`, `meetings-screen.test.tsx`, `open-meet-link.test.ts`.
+- [x] `__mocks__/react-native-reanimated.js`: the real library cannot load under Jest (`react-native-worklets` reaches a missing native module at import time, and the shipped `react-native-reanimated/mock` imports the real entry point). The manual mock keeps `Animated.View` a plain `View` and makes animation builders chainable no-ops.
+- [ ] **Manual:** RTL grid order, Arabic day numbers, 44 pt targets and expansion smoothness on iOS + Android (no device on this machine).
+
+**Done when:** date change fetches once; RTL grid order correct; 44 pt targets. — Date change is keyed by `DateKey` and covered by a test; RTL order and touch sizes are verified in code, the device pass is the outstanding manual step.
 
 ---
 

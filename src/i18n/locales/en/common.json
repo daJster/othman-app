@@ -111,6 +111,17 @@
     },
     "attendees_one": "{{count}} attendee",
     "attendees_other": "{{count}} attendees",
+    "found_zero": "No meetings",
+    "found_one": "1 meeting",
+    "found_other": "{{count}} meetings",
+    "calendar": {
+      "system": "Calendar system",
+      "gregorian": "Gregorian",
+      "hijri": "Hijri",
+      "previous": "Previous month",
+      "next": "Next month",
+      "today": "Today"
+    },
     "details": "Details",
     "less": "Less",
     "organizedBy": "Organized by {{name}}"

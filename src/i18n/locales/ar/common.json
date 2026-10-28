@@ -115,6 +115,20 @@
     "attendees_few": "{{count}} حاضرين",
     "attendees_many": "{{count}} حاضرًا",
     "attendees_other": "{{count}} حاضر",
+    "found_zero": "لا حلقات",
+    "found_one": "حلقة واحدة",
+    "found_two": "حلقتان",
+    "found_few": "{{count}} حلقات",
+    "found_many": "{{count}} حلقة",
+    "found_other": "{{count}} حلقة",
+    "calendar": {
+      "system": "نظام التقويم",
+      "gregorian": "ميلادي",
+      "hijri": "هجري",
+      "previous": "الشهر السابق",
+      "next": "الشهر التالي",
+      "today": "اليوم"
+    },
     "details": "التفاصيل",
     "less": "أقل",
     "organizedBy": "بإشراف {{name}}"

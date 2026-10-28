@@ -38,7 +38,16 @@ export type IconName =
   | 'user'
   // Added with the UI states (P2.1): error and empty screens need a glyph.
   | 'alert-circle'
-  | 'inbox';
+  | 'inbox'
+  // Added with the meetings calendar and card (P4.2).
+  | 'calendar'
+  | 'chevron-down'
+  | 'chevron-left'
+  | 'chevron-right'
+  | 'chevron-up'
+  | 'clock'
+  | 'map-pin'
+  | 'users';
 
 /** Component type for an icon registry, kept platform-agnostic. */
 export type IconRegistry<Component> = Readonly<Record<IconName, Component>>;
@@ -46,9 +55,22 @@ export type IconRegistry<Component> = Readonly<Record<IconName, Component>>;
 /** Semantic colour intent. The literal classes live in `tokens.ts`. */
 export type StatusTone = 'positive' | 'info' | 'neutral';
 
+/**
+ * Translation keys for the three meeting statuses.
+ *
+ * Declared as literals, not `string`: the UI passes this value straight to
+ * `t()`, and the typed `t()` rejects a widened string. Adding a status to
+ * `MeetingStatus` still fails to compile until this key union and
+ * `MEETING_STATUS_CONFIG` both gain the entry.
+ */
+export type MeetingStatusLabelKey =
+  | 'meeting.status.soon'
+  | 'meeting.status.upcoming'
+  | 'meeting.status.scheduled';
+
 export type MeetingStatusConfig = {
   /** Translation key, not display text. */
-  readonly labelKey: string;
+  readonly labelKey: MeetingStatusLabelKey;
   readonly tone: StatusTone;
   /** Render the status dot with a pulse, to signal urgency. */
   readonly pulse: boolean;

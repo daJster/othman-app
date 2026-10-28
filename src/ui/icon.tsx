@@ -70,6 +70,34 @@ const ICONS = {
     mdSymbol: 'error_outline',
   },
   inbox: { ios: 'tray', md: 'inbox', mdSymbol: 'inbox' },
+  calendar: {
+    ios: 'calendar',
+    md: 'calendar-today',
+    mdSymbol: 'calendar_today',
+  },
+  'chevron-down': {
+    ios: 'chevron.down',
+    md: 'expand-more',
+    mdSymbol: 'expand_more',
+  },
+  'chevron-left': {
+    ios: 'chevron.left',
+    md: 'chevron-left',
+    mdSymbol: 'chevron_left',
+  },
+  'chevron-right': {
+    ios: 'chevron.right',
+    md: 'chevron-right',
+    mdSymbol: 'chevron_right',
+  },
+  'chevron-up': {
+    ios: 'chevron.up',
+    md: 'expand-less',
+    mdSymbol: 'expand_less',
+  },
+  clock: { ios: 'clock', md: 'schedule', mdSymbol: 'schedule' },
+  'map-pin': { ios: 'mappin.and.ellipse', md: 'place', mdSymbol: 'place' },
+  users: { ios: 'person.2', md: 'group', mdSymbol: 'group' },
 } satisfies IconRegistry<IconSet>;
 
 const StyledSymbol = withUniwind(SymbolView);
