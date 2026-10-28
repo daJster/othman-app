@@ -2,6 +2,9 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    // TypeScript 6 no longer auto-includes every `@types/*` package, so the
+    // global test types have to be named explicitly.
+    "types": ["jest", "node"],
     "paths": {
       "@/*": [
         "./src/*"
@@ -16,5 +19,16 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "othman-web",
+    "dist",
+    "web-build",
+    "android",
+    "ios",
+    "babel.config.js",
+    "metro.config.js",
+    "jest.config.js"
   ]
 }

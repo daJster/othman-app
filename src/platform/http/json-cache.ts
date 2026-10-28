@@ -8,7 +8,11 @@ interface CachedEntry<T> {
 
 const cache = new Map<string, CachedEntry<unknown>>();
 
-export function setCachedJson<T>(url: string, data: T, ttlMs = DEFAULT_TTL_MS): void {
+export function setCachedJson<T>(
+  url: string,
+  data: T,
+  ttlMs = DEFAULT_TTL_MS,
+): void {
   if (cache.size >= MAX_CACHE_ENTRIES) {
     const oldestKey = cache.keys().next().value as string | undefined;
     if (oldestKey !== undefined) {

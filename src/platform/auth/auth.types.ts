@@ -1,4 +1,4 @@
-import type { AuthResult, AuthUser, Unsubscribe } from "@/platform/logic/types";
+import type { AuthResult, AuthUser, Unsubscribe } from '@/core/types';
 
 export interface AuthService {
   getCurrentUser(): Promise<AuthUser | null>;

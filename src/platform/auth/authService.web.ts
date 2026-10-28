@@ -1,54 +1,28 @@
-import { firebaseApp } from "@/platform/firebase/firebase";
-import type {
-  AuthErrorCode,
-  AuthResult,
-  AuthUser,
-  Unsubscribe,
-} from "@/platform/logic/types";
+import type { AuthResult, AuthUser, Unsubscribe } from '@/core/types';
+import { firebaseApp } from '@/platform/firebase/firebase';
 import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
-  onAuthStateChanged as firebaseOnAuthStateChanged,
-  signOut as firebaseSignOut,
-  updateProfile as firebaseUpdateProfile,
   getAuth,
+  onAuthStateChanged as firebaseOnAuthStateChanged,
   signInWithEmailAndPassword,
   signInWithPopup,
-} from "firebase/auth";
-import type { AuthService } from "./auth.types";
+  signOut as firebaseSignOut,
+  updateProfile as firebaseUpdateProfile,
+} from 'firebase/auth';
+import { toAuthError, toAuthUser } from './auth.mappers';
+import type { AuthService } from './auth.types';
 
+/**
+ * Web auth instance.
+ *
+ * `getAuth` is correct here: the browser SDK persists the session itself
+ * (IndexedDB), so there is nothing to configure. Google uses the popup flow,
+ * which needs no OAuth client ID in our config — the Firebase project's
+ * authorized domains list is the gate (see P8.1).
+ */
 const auth = getAuth(firebaseApp);
 const googleProvider = new GoogleAuthProvider();
-
-function toAuthUser(user: any): AuthUser {
-  return {
-    uid: user.uid,
-    email: user.email ?? null,
-    displayName: user.displayName ?? null,
-    photoURL: user.photoURL ?? null,
-  };
-}
-
-function mapErrorCode(error: any): AuthErrorCode {
-  const code = error?.code as string | undefined;
-  switch (code) {
-    case "auth/invalid-credential":
-    case "auth/wrong-password":
-    case "auth/user-not-found":
-      return "invalid-credential";
-    case "auth/email-already-in-use":
-      return "email-already-in-use";
-    case "auth/weak-password":
-      return "weak-password";
-    case "auth/network-request-failed":
-      return "network";
-    case "auth/cancelled-popup-request":
-    case "auth/popup-closed-by-user":
-      return "cancelled";
-    default:
-      return "unknown";
-  }
-}
 
 export const authService: AuthService = {
   async getCurrentUser(): Promise<AuthUser | null> {
@@ -70,13 +44,9 @@ export const authService: AuthService = {
   async signInWithEmail(email: string, password: string): Promise<AuthResult> {
     try {
       const res = await signInWithEmailAndPassword(auth, email, password);
-      return { status: "success", user: toAuthUser(res.user) };
-    } catch (error: any) {
-      return {
-        status: "error",
-        code: mapErrorCode(error),
-        message: error?.message ?? "Failed to sign in",
-      };
+      return { status: 'success', user: toAuthUser(res.user) };
+    } catch (error) {
+      return toAuthError(error, 'Failed to sign in');
     }
   },
 
@@ -86,26 +56,18 @@ export const authService: AuthService = {
   ): Promise<AuthResult> {
     try {
       const res = await createUserWithEmailAndPassword(auth, email, password);
-      return { status: "success", user: toAuthUser(res.user) };
-    } catch (error: any) {
-      return {
-        status: "error",
-        code: mapErrorCode(error),
-        message: error?.message ?? "Failed to register",
-      };
+      return { status: 'success', user: toAuthUser(res.user) };
+    } catch (error) {
+      return toAuthError(error, 'Failed to register');
     }
   },
 
   async signInWithGoogle(): Promise<AuthResult> {
     try {
       const res = await signInWithPopup(auth, googleProvider);
-      return { status: "success", user: toAuthUser(res.user) };
-    } catch (error: any) {
-      return {
-        status: "error",
-        code: mapErrorCode(error),
-        message: error?.message ?? "Failed to sign in with Google",
-      };
+      return { status: 'success', user: toAuthUser(res.user) };
+    } catch (error) {
+      return toAuthError(error, 'Failed to sign in with Google');
     }
   },
 

@@ -18,7 +18,10 @@ const expoConfig = require('eslint-config-expo/flat');
  *
  *   src/providers  isomorphic React contexts.
  *
- *   src/ui, src/app  presentation. May import anything above it.
+ *   src/ui, src/features, src/app  presentation. May import anything above it.
+ *
+ * Order matters: flat config lets a later block override an earlier one for the
+ * same rule, so the widest rules come first and the narrowest last.
  */
 
 const CORE_FORBIDDEN_IMPORTS = [
@@ -50,25 +53,44 @@ const CORE_FORBIDDEN_IMPORTS = [
       '@/services/*',
       '@/providers',
       '@/providers/*',
+      '@/ui',
+      '@/ui/*',
+      '@/features',
+      '@/features/*',
       '@/components',
       '@/components/*',
       '@/hooks',
       '@/hooks/*',
       '@/app',
       '@/app/*',
+      '@/firebase',
+      '@/firebase/*',
     ],
-    message: 'core/ is the lowest layer and must not import from a higher layer.',
+    message:
+      'core/ is the lowest layer and must not import from a higher layer.',
   },
 ];
 
 const DOM_GLOBALS = [
-  { name: 'window', message: 'No window in core/. Use a contract under src/platform.' },
-  { name: 'document', message: 'No document in core/. Use a contract under src/platform.' },
-  { name: 'localStorage', message: 'No localStorage in core/. Inject a StorageService.' },
+  {
+    name: 'window',
+    message: 'No window in core/. Use a contract under src/platform.',
+  },
+  {
+    name: 'document',
+    message: 'No document in core/. Use a contract under src/platform.',
+  },
+  {
+    name: 'localStorage',
+    message: 'No localStorage in core/. Inject a StorageService.',
+  },
   { name: 'sessionStorage', message: 'No sessionStorage in core/.' },
   { name: 'navigator', message: 'No navigator in core/.' },
   { name: 'location', message: 'No location in core/.' },
-  { name: 'alert', message: 'No alert() in core/. Surface the error to the caller.' },
+  {
+    name: 'alert',
+    message: 'No alert() in core/. Surface the error to the caller.',
+  },
   { name: 'confirm', message: 'No confirm() in core/.' },
   { name: 'prompt', message: 'No prompt() in core/.' },
   { name: 'HTMLElement', message: 'No DOM types in core/.' },
@@ -88,29 +110,59 @@ module.exports = defineConfig([
       '.expo/**',
       'expo-env.d.ts',
       'node_modules/**',
+      'scripts/**',
       // Frozen legacy Vite app, kept as a read-only reference for the port.
       'othman-web/**',
-      'othman-mobile/**',
     ],
   },
   {
-    files: ['src/core/**/*.{ts,tsx}'],
+    files: ['src/**/*.{ts,tsx}'],
     rules: {
-      'no-restricted-imports': ['error', { patterns: CORE_FORBIDDEN_IMPORTS }],
-      'no-restricted-globals': ['error', ...DOM_GLOBALS],
+      // The pre-migration Firebase barrel must not creep back in.
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@/firebase', '@/firebase/*'],
+              message:
+                'The old @/firebase barrel is gone. Use @/services/* or @/platform/auth.',
+            },
+          ],
+        },
+      ],
     },
   },
   {
-    // Only the transport layer inside core/ may touch the network.
-    files: ['src/core/**/*.{ts,tsx}'],
-    ignores: ['src/core/http/**'],
+    // Presentation never talks to the backend directly. Screens depend on the
+    // service barrels, which own the SDK and the concrete repositories.
+    files: [
+      'src/app/**/*.{ts,tsx}',
+      'src/ui/**/*.{ts,tsx}',
+      'src/features/**/*.{ts,tsx}',
+      'src/providers/**/*.{ts,tsx}',
+      'src/components/**/*.{ts,tsx}',
+      'src/hooks/**/*.{ts,tsx}',
+    ],
     rules: {
-      'no-restricted-globals': [
+      'no-restricted-imports': [
         'error',
-        ...DOM_GLOBALS,
         {
-          name: 'fetch',
-          message: 'Only src/core/http may call fetch. Route requests through the http client.',
+          patterns: [
+            {
+              // `firebase/*` covers the SDK entry points used by the app.
+              // The bootstrap and the concrete repositories are listed
+              // explicitly so a screen cannot reach around the service barrel.
+              group: [
+                'firebase/*',
+                '@/platform/firebase',
+                '@/platform/firebase/*',
+                '@/services/*/firestore-*',
+              ],
+              message:
+                'UI must not import the Firebase SDK, its bootstrap, or a concrete repository. Add a method to a service under src/services/ and import its barrel.',
+            },
+          ],
         },
       ],
     },
@@ -133,6 +185,8 @@ module.exports = defineConfig([
                 '@/providers/*',
                 '@/ui',
                 '@/ui/*',
+                '@/features',
+                '@/features/*',
               ],
               message: 'platform/ and services/ sit below the UI layer.',
             },
@@ -142,19 +196,25 @@ module.exports = defineConfig([
     },
   },
   {
-    files: ['src/**/*.{ts,tsx}'],
+    // Narrowest scope, applied last so it wins for everything under core/.
+    files: ['src/core/**/*.{ts,tsx}'],
     rules: {
-      // The pre-migration Firebase barrel must not creep back in.
-      'no-restricted-imports': [
+      'no-restricted-imports': ['error', { patterns: CORE_FORBIDDEN_IMPORTS }],
+      'no-restricted-globals': ['error', ...DOM_GLOBALS],
+    },
+  },
+  {
+    // Only the transport layer inside core/ may touch the network.
+    files: ['src/core/**/*.{ts,tsx}'],
+    ignores: ['src/core/http/**'],
+    rules: {
+      'no-restricted-globals': [
         'error',
+        ...DOM_GLOBALS,
         {
-          patterns: [
-            {
-              group: ['@/firebase', '@/firebase/*'],
-              message:
-                'The old @/firebase barrel is gone. Use @/services/firebase or @/platform/auth.',
-            },
-          ],
+          name: 'fetch',
+          message:
+            'Only src/core/http may call fetch. Route requests through the http client.',
         },
       ],
     },
