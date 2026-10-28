@@ -691,16 +691,35 @@ Depends: P3.3 (skipped — see P3.4)
 
 ## Stage 4 — Feature screens
 
-### [ ] P4.1 — Home · M
+### [x] P4.1 — Home · M
 
 Depends: P3.5
 
-- [ ] `(tabs)/index.tsx` + `features/home/*`; `ScrollView` with automatic insets, hero, verse card, feature cards.
-- [ ] Gradient hero via Uniwind `bg-gradient-*`.
-- [ ] Remove marketing claims for unimplemented features.
-- [ ] Large-text and long-Arabic-title check.
+> Change: the hero is a **token gradient**, not the mosque photograph. The web
+> hero was a viewport-high image with the calligraphy overlaid; on a phone that
+> either cropped the Arabic or pushed every action below the fold. The gradient
+> runs lighter at the top and closes on solid `primary`, which is the only
+> pairing in the block that clears AA at body size (`text-primary-foreground`).
+>
+> Change: the legacy feature grid advertised **tafsir, search and bookmarks**.
+> None of them ships in this app, so all three are gone rather than disabled —
+> the cards are derived from `APP_ROUTES` and can only point at routes that
+> exist. About joins the list in P4.5.
+>
+> Change: the verse uses the automatic UI family, not `font-quran`: `en` shows
+> a translation and Amiri Quran has no Latin glyphs. In `ar` the automatic
+> family is Noto Naskh, which renders the diacritics.
 
-**Done when:** correct in `ar`/`en`, light/dark, all targets.
+- [x] `(tabs)/index.tsx` composes `features/home/{hero,verse-card,feature-card}.tsx`; `Screen` supplies the `ScrollView`, automatic inset adjustment and `keyboardShouldPersistTaps`. Padding sits on the inner sections so the gradient stays full-bleed.
+- [x] `HOME_LINKS` (`features/home/feature-links.ts`) filters `APP_ROUTES` down to quran/meetings/account. A row without a `descriptionKey` is dropped instead of rendering a blank line; a test asserts every card resolves through `getRoute`.
+- [x] Hero: `bg-gradient-to-b from-primary/85 to-primary`; the exported web stylesheet contains the matching `linear-gradient(...)` and `color-mix` stops. No fixed height — the basmalah, app name and tagline wrap.
+- [x] No claim for an unbuilt feature remains; a test asserts `Tafsir`, `Search` and `Bookmarks` do not render.
+- [x] Locales: `home.hero.opening`, `home.verse.{title,text,reference}`, `home.explore.title` in both languages, with the legacy Al-Isra 9 text kept verbatim in `ar`.
+- [x] Tests: `features/home/__tests__/home-screen.test.tsx` (identity, basmalah, verse, one link per registry row, tab descriptions, removed marketing claims) and `feature-links.test.ts` (registered routes, order, self-description).
+- [x] Large text / long Arabic title: no fixed heights and no `numberOfLines`; the hero title is `text-3xl` and wraps. `npm run verify` covers the code side.
+- [ ] **Manual:** eyeball at the largest OS text size, both languages and both themes on iOS + Android (no device on this machine).
+
+**Done when:** correct in `ar`/`en`, light/dark, all targets. — Code, locales and web CSS verified; the device eyeball pass is the outstanding manual step.
 
 ---
 

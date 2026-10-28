@@ -3,6 +3,19 @@
     "name": "Othman",
     "tagline": "Contemplate the Book of Allah"
   },
+  "home": {
+    "hero": {
+      "opening": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
+    },
+    "verse": {
+      "title": "Verse of the Day",
+      "text": "Indeed, this Quran guides to that which is most upright",
+      "reference": "Al-Isra 9"
+    },
+    "explore": {
+      "title": "Explore"
+    }
+  },
   "action": {
     "back": "Back",
     "cancel": "Cancel",
