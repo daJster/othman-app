@@ -126,6 +126,17 @@ function PickerItem() {
 
 Picker.Item = PickerItem;
 
+/**
+ * The real sheet is a platform modal: under Jest nothing is presented, so the
+ * mock renders its children only while `isPresented` is true — enough to assert
+ * "the detail sheet is open/closed".
+ */
+function BottomSheet({ isPresented, children, testID }) {
+  if (!isPresented) return null;
+
+  return h(View, { testID }, children);
+}
+
 module.exports = {
   __esModule: true,
   Host,
@@ -133,4 +144,5 @@ module.exports = {
   List,
   ListItem,
   Picker,
+  BottomSheet,
 };

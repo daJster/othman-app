@@ -37,4 +37,11 @@ export const queryKeys = {
     /** One user's merged auth + profile record. */
     byUid: (uid: string) => ['othman', 'account', uid] as const,
   },
+
+  progress: {
+    /** Every progress read. Sign-out clears this. */
+    root: ['othman', 'progress'] as const,
+    /** The 114 surah rows behind the heatmap. */
+    surah: ['othman', 'progress', 'surah'] as const,
+  },
 } as const;

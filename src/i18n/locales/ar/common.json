@@ -205,11 +205,32 @@
       "progress": {
         "title": "التقدّم",
         "subtitle": "حفظك عبر الوقت",
+        "gridTitle": "السور",
         "legend": {
           "less": "أقل",
           "more": "أكثر"
         },
         "empty": "لا يوجد تقدّم مسجّل بعد.",
+        "summary": {
+          "average": "الحفظ الإجمالي",
+          "memorised": "محفوظة",
+          "started": "بدأت",
+          "surahs": "السور"
+        },
+        "surah": "سورة {{number}}",
+        "band": {
+          "notStarted": "لم تبدأ",
+          "inProgress": "قيد الحفظ",
+          "memorised": "محفوظة"
+        },
+        "cell": {
+          "a11y": "سورة {{number}}: {{percent}} محفوظة"
+        },
+        "detail": {
+          "memorised": "محفوظة",
+          "lastReviewed": "آخر مراجعة {{date}}",
+          "neverReviewed": "لم تُراجع بعد"
+        },
         "recentTasks": {
           "title": "المهام الأخيرة"
         }

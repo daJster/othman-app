@@ -824,17 +824,48 @@ Depends: P4.2
 
 ---
 
-### [ ] P4.4 — Progress · M
+### [x] P4.4 — Progress · M
 
 Depends: P4.3
 
-- [ ] `account/progress.tsx` + `features/progress/*`.
-- [ ] 114-cell heatmap, deterministic mock data, colors from `core/utils/heatmap`.
-- [ ] Cell `Pressable` with `data-selected`; detail `BottomSheet` instead of tooltips.
-- [ ] Summary + legend; `useWindowDimensions` columns; `md:`/`lg:` breakpoints.
-- [ ] Four states; `useDeferredValue` if filtering is added.
+> Change: **the fixture stores a percentage per surah, not an ayah count.** The
+> legacy mock carried `totalAyat` and `checkpointAyahNumber`, but no such table
+> exists in this app yet — it is exactly the metadata P5.1 ports from the real
+> source. Inventing 114 ayah counts here would create a second source of truth
+> and a lie in the detail sheet, so the mock answers only what the heatmap asks:
+> how much of this surah is memorised. The repository interface takes the same
+> shape, so the account-backed implementation drops in unchanged.
+>
+> Change: **the mock is deterministic, never `Math.random()`.** A random fixture
+> repaints the grid on every launch, moves the summary counts mid-session and
+> makes a screenshot impossible to compare. `demo-progress.repository.ts` derives
+> each row from the surah number — Juz' Amma mostly done, Al-Fatiha and the first
+> twenty scattered, the long middle patchy — and anchors "last reviewed" to a
+> fixed date so labels do not drift with today.
+>
+> Change: **the cell is 24–32 px, not a 44 pt target.** 114 squares at 44 pt
+> would not fit a phone; the accessible control is the _sheet_, which opens from
+> any cell and is a normal, full-size target, while each cell still carries a
+> spoken label (`Surah 12: 40% memorised`) and `accessibilityState.selected`.
+> The size steps live in `heatmap-geometry.ts` (pure, unit-tested) rather than
+> `md:`/`lg:` classNames, because a fractional cell would break every row.
+>
+> Change: **no "Continue reading" action.** The web summary linked into the
+> reader, but a surah still has no page mapping until P5 ports the mushaf
+> metadata; a button that guesses would be worse than none.
 
-**Done when:** 60 fps on mid-tier Android; selection works in RTL.
+- [x] `account/progress.tsx` + `features/progress/*` (`progress-summary`, `progress-legend`, `surah-heatmap`, `surah-detail-sheet`, `heatmap-geometry`, `progress-format`, `surah-band`, `use-surah-progress`).
+- [x] 114-cell heatmap: `flex-row flex-wrap` of squares, colour from `core/utils/heatmap.ts`. The inline `backgroundColor` is the one documented exception to the colour rule — the value is a ramp position, not a token.
+- [x] Cell `Pressable` with `data-selected` (web) and `accessibilityState.selected` (native); tapping opens an `@expo/ui` `BottomSheet` instead of the web tooltip. `dataSet` is not in React Native's types, so `ui/pressable.tsx` widens `Pressable` once rather than casting at each call site.
+- [x] Summary card: overall percent, progress bar, memorised/started/total counts, legend. Surahs count equally in the average — weighting by ayat would need the table P5.1 owns.
+- [x] `useWindowDimensions` drives the geometry, with the cell stepping at 768/1024 px and 6–20+ columns; the grid has a capped width and is centred, not stretched.
+- [x] Four states: loading, error + retry, empty (no rows), ready. The header stays mounted in all four, so leaving never depends on the read succeeding. `useDeferredValue` is not used yet — there is no filter to defer.
+- [x] `ui/progress.tsx`: a clamped 0–100 bar with `accessibilityValue`; negative, oversized and non-finite values render as an empty/full track instead of overflowing.
+- [x] Locales: `pages.account.progress.{gridTitle,summary,surah,band,cell,detail}*` in both languages.
+- [x] Tests: `surah-progress.test.ts` (clamping, bands, averages, empty list), `heatmap-geometry.test.ts` (no overflow, width from whole columns, breakpoints, clamping), `surah-heatmap.test.tsx` (114 cells, labels, selection + dataset), `progress-screen.test.tsx` (four states, summary counts, select → sheet → close, back), `demo-progress.repository.test.ts` (order, bounds, null-date rule, determinism, detached rows), `ui/progress.test.tsx` (a11y value, clamping).
+- [ ] **Manual:** 60 fps scrolling on a mid-tier Android device, RTL grid order (surah 1 at the inline start), native sheet detent/back-button behaviour, large text (no device on this machine).
+
+**Done when:** 60 fps on mid-tier Android; selection works in RTL. — Selection, summary and state handling are covered by tests; the frame-rate and RTL checks are in code (no layout animation, `flex-row` starts at the inline start) and remain in the manual device pass.
 
 ---
 

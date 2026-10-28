@@ -198,11 +198,32 @@
       "progress": {
         "title": "Progress",
         "subtitle": "Your memorisation over time",
+        "gridTitle": "Surahs",
         "legend": {
           "less": "Less",
           "more": "More"
         },
         "empty": "No progress recorded yet.",
+        "summary": {
+          "average": "Overall memorisation",
+          "memorised": "Memorised",
+          "started": "Started",
+          "surahs": "Surahs"
+        },
+        "surah": "Surah {{number}}",
+        "band": {
+          "notStarted": "Not started",
+          "inProgress": "In progress",
+          "memorised": "Memorised"
+        },
+        "cell": {
+          "a11y": "Surah {{number}}: {{percent}} memorised"
+        },
+        "detail": {
+          "memorised": "memorised",
+          "lastReviewed": "Last reviewed {{date}}",
+          "neverReviewed": "Not reviewed yet"
+        },
         "recentTasks": {
           "title": "Recent tasks"
         }
