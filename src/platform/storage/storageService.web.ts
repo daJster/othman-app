@@ -1,59 +1,46 @@
-import { type StorageKey, type StorageService } from './storage.types';
+import { createStorageService } from './storage.backend';
+import type { StorageBackend } from './storage.backend';
 
-function isLocalStorageAvailable(): boolean {
+/**
+ * `localStorage` throws on access in private mode / when storage is disabled,
+ * so availability is probed once and cached — probing on every read meant a
+ * test write on every theme or language lookup.
+ *
+ * `getStorage()` is a function, not a module-level constant: during static
+ * rendering (Expo Router `web.output: 'static'`) this module is evaluated in
+ * Node, where `window` does not exist.
+ */
+let cached: Storage | null | undefined;
+
+function getStorage(): Storage | null {
+  if (cached !== undefined) return cached;
+
   try {
-    const testKey = '__storage_test__';
-    window.localStorage.setItem(testKey, testKey);
-    window.localStorage.removeItem(testKey);
-    return true;
+    const probe = '__storage_probe__';
+    window.localStorage.setItem(probe, probe);
+    window.localStorage.removeItem(probe);
+    cached = window.localStorage;
   } catch {
-    return false;
+    cached = null;
   }
+
+  return cached;
 }
 
-export const storageService: StorageService = {
-  async getItem<T>(key: StorageKey, fallback: T): Promise<T> {
-    try {
-      if (!isLocalStorageAvailable()) return fallback;
-      const item = window.localStorage.getItem(key);
-      if (item === null) return fallback;
-      return JSON.parse(item) as T;
-    } catch (error) {
-      console.warn(`[storage:web] getItem failed for key "${key}":`, error);
-      return fallback;
-    }
-  },
+function requireStorage(): Storage {
+  const storage = getStorage();
+  if (!storage) {
+    throw new Error('localStorage is unavailable');
+  }
 
-  async setItem<T>(key: StorageKey, value: T): Promise<boolean> {
-    try {
-      if (!isLocalStorageAvailable()) return false;
-      window.localStorage.setItem(key, JSON.stringify(value));
-      return true;
-    } catch (error) {
-      console.warn(`[storage:web] setItem failed for key "${key}":`, error);
-      return false;
-    }
-  },
+  return storage;
+}
 
-  async removeItem(key: StorageKey): Promise<boolean> {
-    try {
-      if (!isLocalStorageAvailable()) return false;
-      window.localStorage.removeItem(key);
-      return true;
-    } catch (error) {
-      console.warn(`[storage:web] removeItem failed for key "${key}":`, error);
-      return false;
-    }
-  },
-
-  async clear(): Promise<boolean> {
-    try {
-      if (!isLocalStorageAvailable()) return false;
-      window.localStorage.clear();
-      return true;
-    } catch (error) {
-      console.warn('[storage:web] clear failed:', error);
-      return false;
-    }
-  },
+const backend: StorageBackend = {
+  getItem: (key) => requireStorage().getItem(key),
+  setItem: (key, value) => requireStorage().setItem(key, value),
+  removeItem: (key) => requireStorage().removeItem(key),
+  clear: () => requireStorage().clear(),
 };
+
+export const storageService = createStorageService(backend, 'web');

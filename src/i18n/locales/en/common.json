@@ -1,0 +1,132 @@
+{
+  "app": {
+    "name": "Othman",
+    "tagline": "Contemplate the Book of Allah"
+  },
+  "action": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "close": "Close",
+    "continue": "Continue",
+    "goBackHome": "Back to home",
+    "join": "Join",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "save": "Save",
+    "signIn": "Sign in",
+    "signOut": "Sign out"
+  },
+  "label": {
+    "email": "Email",
+    "password": "Password"
+  },
+  "nav": {
+    "home": "Home",
+    "quran": "Quran",
+    "quranFull": "The Holy Quran",
+    "meetings": "Meetings",
+    "account": "Account",
+    "profile": "Profile",
+    "quranDesc": "Read the mushaf page by page",
+    "meetingsDesc": "Your upcoming sessions",
+    "accountDesc": "Profile, progress and preferences",
+    "toggleLanguage": "Change language",
+    "toggleTheme": "Change theme",
+    "login": "Sign in",
+    "logout": "Sign out"
+  },
+  "language": {
+    "title": "Language",
+    "arabic": "العربية",
+    "english": "English",
+    "restartTitle": "Restart needed",
+    "restartMessage": "The text direction changes now. A few native controls, such as text fields and alerts, follow it after the app restarts."
+  },
+  "theme": {
+    "title": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "state": {
+    "loading": "Loading…",
+    "errorTitle": "Something went wrong",
+    "errorDescription": "We could not load this. Check your connection and try again.",
+    "emptyTitle": "Nothing here yet",
+    "emptyDescription": "There is nothing to show right now.",
+    "offline": "No connection"
+  },
+  "error": {
+    "400": {
+      "title": "Bad request",
+      "description": "The request could not be understood. Try again."
+    },
+    "401": {
+      "title": "Sign in required",
+      "description": "Your session has ended. Sign in to continue."
+    },
+    "403": {
+      "title": "Access denied",
+      "description": "Your account does not have access to this page."
+    },
+    "404": {
+      "title": "Page not found",
+      "description": "The page you are looking for does not exist or has moved."
+    },
+    "500": {
+      "title": "Server error",
+      "description": "Something failed on our side. Please try again later."
+    }
+  },
+  "auth": {
+    "title": "Sign in",
+    "subtitle": "Welcome back. Sign in to continue.",
+    "google": "Continue with Google",
+    "email": "Continue with email",
+    "noAccount": "No account found",
+    "accountExists": "No account exists with this email.",
+    "error": "Sign-in failed",
+    "signOutLoading": "Signing you out…",
+    "signOutSuccess": "You have been signed out",
+    "redirect": "Taking you home in {{countdown}}…"
+  },
+  "meeting": {
+    "status": {
+      "soon": "Starting soon",
+      "upcoming": "Today",
+      "scheduled": "Scheduled"
+    },
+    "attendees_one": "{{count}} attendee",
+    "attendees_other": "{{count}} attendees",
+    "details": "Details",
+    "less": "Less",
+    "organizedBy": "Organized by {{name}}"
+  },
+  "page": {
+    "meetings": {
+      "header": {
+        "title": "Meetings",
+        "description": "Sessions with your shaykh and classmates"
+      },
+      "list": {
+        "empty": "No meetings on this day."
+      }
+    }
+  },
+  "pages": {
+    "account": {
+      "progress": {
+        "title": "Progress",
+        "subtitle": "Your memorisation over time",
+        "legend": {
+          "less": "Less",
+          "more": "More"
+        },
+        "empty": "No progress recorded yet.",
+        "recentTasks": {
+          "title": "Recent tasks"
+        }
+      }
+    }
+  }
+}

@@ -1,9 +1,107 @@
-:root {
-  --font-display:
-    Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,
-    Segoe UI Symbol, Noto Color Emoji;
-  --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
-  --font-rounded: 'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif;
-  --font-serif: Georgia, 'Times New Roman', serif;
+@import 'tailwindcss';
+@import 'uniwind';
+
+/*
+ * Design tokens, ported from the legacy web app (`othman-web/src/index.css`).
+ *
+ * Contract: every theme block below defines the *same* set of variables.
+ * Uniwind resolves `bg-background`, `text-foreground`, `border-border`, … from
+ * these, and a variable missing from one theme is a runtime error rather than
+ * a silent fallback.
+ *
+ * Deliberately not ported: `--sidebar-*` and `--chart-*` (no sidebar, no
+ * charts), `--popover-*` (sheets and menus are native, not floating panels),
+ * `tw-animate-css` and the `slideIn/Out` keyframes (Reanimated owns motion).
+ *
+ * Colors stay in `oklch()`: Uniwind parses it for `className`. Anything that
+ * has to reach a JS prop (Reanimated, gradients, native tints) must go through
+ * `useCSSVariable`/`getCSSVariable` and be converted there — React Native's
+ * own `normalize-colors` has no `oklch` parser.
+ */
+
+@theme {
+  /* Radius scale, expanded from the web's `--radius: 0.625rem` (= 10px).
+     Written as concrete values because `@theme` only accepts static values. */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 18px;
+  --radius-3xl: 22px;
+  --radius-4xl: 26px;
+
+  /* Type scale. Fixed px, not rem: Arabic glyphs need a predictable body size
+     and RN does not let users zoom text with a root font size anyway. */
+  --text-2xs: 11px;
+  --text-xs: 12px;
+  --text-sm: 14px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 36px;
+
+  /* Fonts (P2.3). Each value is the key the family is registered under in
+     `src/providers/font-provider.tsx` — and the key is the file basename, so a
+     rename cannot silently point at a family that is never loaded.
+     RN has no font fallback list: an unresolvable family is a device-level
+     rendering bug, not a graceful degrade. */
+  --font-ui: 'Inter-Variable';
+  --font-arabic: 'NotoNaskhArabic-Variable';
+  --font-quran: 'AmiriQuran-Regular';
+}
+
+/* JS-only values: read with `useCSSVariable`/`getCSSVariable`, never emitted as
+   a utility. */
+@theme static {
+  --reader-page-width: 412;
+  --reader-page-height: 600;
+  --reader-max-width: 720;
+  --motion-page-turn: 260;
+  --motion-press: 120;
+}
+
+@layer theme {
+  :root {
+    @variant light {
+      --color-background: oklch(1 0 0);
+      --color-foreground: oklch(0.145 0 0);
+      --color-card: oklch(1 0 0);
+      --color-card-foreground: oklch(0.145 0 0);
+      --color-primary: oklch(0.5 0.15 160);
+      --color-primary-foreground: oklch(0.985 0 0);
+      --color-secondary: oklch(0.96 0.04 160);
+      --color-secondary-foreground: oklch(0.205 0 0);
+      --color-muted: oklch(0.97 0 0);
+      --color-muted-foreground: oklch(0.556 0 0);
+      --color-accent: oklch(0.95 0.06 160);
+      --color-accent-foreground: oklch(0.205 0 0);
+      --color-destructive: oklch(0.577 0.245 27.325);
+      --color-destructive-foreground: oklch(0.985 0 0);
+      --color-border: oklch(0.922 0 0);
+      --color-input: oklch(0.922 0 0);
+      --color-ring: oklch(0.708 0 0);
+    }
+
+    @variant dark {
+      --color-background: oklch(0.2 0.1 160);
+      --color-foreground: oklch(0.95 0.04 160);
+      --color-card: oklch(0.25 0.1 160);
+      --color-card-foreground: oklch(0.95 0.04 160);
+      --color-primary: oklch(0.6 0.15 160);
+      --color-primary-foreground: oklch(0.2 0.1 160);
+      --color-secondary: oklch(0.3 0.1 160);
+      --color-secondary-foreground: oklch(0.95 0.04 160);
+      --color-muted: oklch(0.3 0.1 160);
+      --color-muted-foreground: oklch(0.7 0.1 160);
+      --color-accent: oklch(0.3 0.1 160);
+      --color-accent-foreground: oklch(0.95 0.04 160);
+      --color-destructive: oklch(0.704 0.191 22.216);
+      --color-destructive-foreground: oklch(0.2 0.1 160);
+      --color-border: oklch(1 0 0 / 10%);
+      --color-input: oklch(1 0 0 / 15%);
+      --color-ring: oklch(0.45 0.15 160);
+    }
+  }
 }
