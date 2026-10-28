@@ -114,7 +114,7 @@ describe('AccountScreen', () => {
     ).toBeTruthy();
   });
 
-  it('opens the edit sheet and the progress screen', async () => {
+  it('opens the edit sheet, the progress screen and about', async () => {
     await render(<AccountScreen />, { wrapper: makeWrapper(client) });
     await waitFor(() =>
       expect(screen.getByText('Othman Al-Farsi')).toBeTruthy(),
@@ -125,6 +125,9 @@ describe('AccountScreen', () => {
 
     await fireEvent.press(screen.getByTestId('account-progress-row'));
     expect(mockPush).toHaveBeenCalledWith('/account/progress');
+
+    await fireEvent.press(screen.getByTestId('account-about-row'));
+    expect(mockPush).toHaveBeenCalledWith('/about');
   });
 
   it('offers the query retry when the profile read fails', async () => {

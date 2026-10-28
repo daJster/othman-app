@@ -44,6 +44,8 @@
     "quranDesc": "اقرأ المصحف صفحة بصفحة",
     "meetingsDesc": "حلقاتك القادمة",
     "accountDesc": "ملفك وتقدّمك وتفضيلاتك",
+    "about": "حول التطبيق",
+    "aboutDesc": "معلومات التطبيق وروابطه",
     "toggleLanguage": "تغيير اللغة",
     "toggleTheme": "تغيير السمة",
     "login": "تسجيل الدخول",
@@ -201,6 +203,18 @@
     }
   },
   "pages": {
+    "about": {
+      "description": "منصة تعليمية لحفظ القرآن الكريم وتلاوته وتدبّره.",
+      "version": "الإصدار {{version}}",
+      "sections": {
+        "explore": "استكشف",
+        "resources": "روابط",
+        "legal": "قانوني"
+      },
+      "website": "الموقع الإلكتروني",
+      "websiteDesc": "افتح موقع كُتَّاب عُثمَان",
+      "copyright": "© {{year}} {{name}}. جميع الحقوق محفوظة."
+    },
     "account": {
       "progress": {
         "title": "التقدّم",

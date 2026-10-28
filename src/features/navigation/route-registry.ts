@@ -29,16 +29,16 @@ import type { IconName } from '@/core/config';
 
 export type TabName = 'index' | 'quran' | 'meetings' | 'account';
 
-export type AppHref = '/' | '/quran' | '/meetings' | '/account';
+export type AppHref = '/' | '/quran' | '/meetings' | '/account' | '/about';
 
 export type RouteAccess = 'public' | 'private';
 
 /** Literal keys, not `string`: `t()` checks them against the locale. */
 export type RouteTitleKey =
-  'nav.home' | 'nav.quran' | 'nav.meetings' | 'nav.account';
+  'nav.home' | 'nav.quran' | 'nav.meetings' | 'nav.account' | 'nav.about';
 
 export type RouteDescriptionKey =
-  'nav.quranDesc' | 'nav.meetingsDesc' | 'nav.accountDesc';
+  'nav.quranDesc' | 'nav.meetingsDesc' | 'nav.accountDesc' | 'nav.aboutDesc';
 
 export type AppRoute = {
   /** Expo Router route name inside `(tabs)`, or `null` when the route is not a tab. */
@@ -53,6 +53,12 @@ export type AppRoute = {
    * discover a typo.
    */
   readonly access: RouteAccess;
+  /**
+   * Opt a **non-tab** route into the Home cards. Tabs opt in implicitly; About
+   * is the first destination that is reachable from Account but is not a tab,
+   * and a card for it belongs on Home without a second list to maintain.
+   */
+  readonly showOnHome?: true;
 };
 
 export type TabRoute = AppRoute & {
@@ -95,14 +101,31 @@ export const APP_ROUTES = [
     icon: 'user',
     access: 'private',
   },
+  {
+    tab: null,
+    href: '/about',
+    titleKey: 'nav.about',
+    descriptionKey: 'nav.aboutDesc',
+    icon: 'info',
+    access: 'public',
+    showOnHome: true,
+  },
 ] as const satisfies readonly AppRoute[];
 
 function hasTab(route: AppRoute): route is TabRoute {
   return route.tab !== null;
 }
 
+/**
+ * Widened once, deliberately: `APP_ROUTES` is `as const`, so its element type is
+ * a union of exact rows. Since P4.5 that union includes a non-tab row (`/about`),
+ * and a type predicate over the wider `AppRoute` no longer narrows the exact
+ * union — `AppRoute[]` is the shape the filter is allowed to narrow.
+ */
+const routes: readonly AppRoute[] = APP_ROUTES;
+
 /** Tab destinations, derived so the two shells cannot disagree. */
-export const TABS: readonly TabRoute[] = APP_ROUTES.filter(hasTab);
+export const TABS: readonly TabRoute[] = routes.filter(hasTab);
 
 const ROUTES_BY_HREF = new Map<string, AppRoute>(
   APP_ROUTES.map((route) => [route.href, route]),

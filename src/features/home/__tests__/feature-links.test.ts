@@ -15,11 +15,12 @@ describe('HOME_LINKS', () => {
     }
   });
 
-  it('offers the reader, the meetings and the account, in that order', () => {
+  it('offers the reader, the meetings, the account and About, in that order', () => {
     expect(HOME_LINKS.map((link) => link.href)).toEqual([
       '/quran',
       '/meetings',
       '/account',
+      '/about',
     ]);
   });
 

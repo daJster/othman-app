@@ -13,6 +13,15 @@ export const ALQURAN_API_BASE_URL = 'https://api.alquran.cloud';
 export const ALQURAN_CDN_BASE_URL = 'https://cdn.islamic.network';
 export const QURANPEDIA_BASE_URL = 'https://api.quranpedia.net';
 
+/**
+ * The project's public site.
+ *
+ * The only external destination About offers: everything else the legacy footer
+ * linked to (`/terms`, `/privacy`, `/faq`, `/download`) was a route the web app
+ * never built, so those links 404'd. A dead link is worse than a missing one.
+ */
+export const WEBSITE_URL = 'https://kuttab-othman.web.app/';
+
 export const QURAN_METADATA_URL = `${CDN_BASE_URL}/quran.json`;
 export const QURAN_EDITIONS_URL = `${CDN_BASE_URL}/editions.json`;
 

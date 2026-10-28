@@ -45,6 +45,7 @@ export {
   QURAN_EDITIONS_URL,
   QURAN_METADATA_URL,
   QURANPEDIA_BASE_URL,
+  WEBSITE_URL,
   adjacentAyahNumbers,
   isAudioQuality,
   isAyahNumberValid,

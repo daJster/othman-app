@@ -13,11 +13,12 @@ import {
  * `APP_ROUTES` also means the title, description and icon cannot drift from the
  * tab that owns them.
  *
- * A route without a `descriptionKey` is skipped instead of rendered with an
- * empty line. `quran`, `meetings` and `account` all have one today; the filter
- * is what keeps this list honest if that changes.
+ * Tabs opt in implicitly (Home itself excepted, since a card back to Home is
+ * noise); a non-tab route opts in with `showOnHome`. About is the first such
+ * row, and the flag keeps this filter from growing an `href === '/about'` case.
  *
- * About lands here in P4.5, once its route exists.
+ * A route without a `descriptionKey` is skipped instead of rendered with an
+ * empty line.
  */
 type HomeLink = AppRoute & { readonly descriptionKey: RouteDescriptionKey };
 
@@ -29,7 +30,7 @@ const HOME_TABS: ReadonlySet<string> = new Set([
 
 /**
  * Widened once, deliberately: `APP_ROUTES` is `as const`, so its element type
- * is a union of four exact rows and a type predicate narrowing it to
+ * is a union of five exact rows and a type predicate narrowing it to
  * `HomeLink` (a wider shape) is rejected. `AppRoute[]` is the shape the filter
  * is allowed to narrow.
  */
@@ -37,7 +38,6 @@ const routes: readonly AppRoute[] = APP_ROUTES;
 
 export const HOME_LINKS: readonly HomeLink[] = routes.filter(
   (route): route is HomeLink =>
-    route.tab !== null &&
-    HOME_TABS.has(route.tab) &&
-    route.descriptionKey !== undefined,
+    route.descriptionKey !== undefined &&
+    (route.tab === null ? route.showOnHome === true : HOME_TABS.has(route.tab)),
 );

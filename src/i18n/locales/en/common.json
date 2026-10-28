@@ -44,6 +44,8 @@
     "quranDesc": "Read the mushaf page by page",
     "meetingsDesc": "Your upcoming sessions",
     "accountDesc": "Profile, progress and preferences",
+    "about": "About",
+    "aboutDesc": "App information and links",
     "toggleLanguage": "Change language",
     "toggleTheme": "Change theme",
     "login": "Sign in",
@@ -194,6 +196,18 @@
     }
   },
   "pages": {
+    "about": {
+      "description": "An educational platform dedicated to learning the Quran, with tools for reading, understanding and contemplation.",
+      "version": "Version {{version}}",
+      "sections": {
+        "explore": "Explore",
+        "resources": "Resources",
+        "legal": "Legal"
+      },
+      "website": "Website",
+      "websiteDesc": "Open the Kuttab Othman website",
+      "copyright": "© {{year}} {{name}}. All rights reserved."
+    },
     "account": {
       "progress": {
         "title": "Progress",

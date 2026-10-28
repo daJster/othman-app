@@ -42,6 +42,18 @@ describe('route registry', () => {
     });
   });
 
+  it('registers About as a public, non-tab destination', () => {
+    expect(getRoute('/about')).toMatchObject({
+      tab: null,
+      titleKey: 'nav.about',
+      icon: 'info',
+      access: 'public',
+    });
+    expect(TABS.map((tab) => tab.href)).not.toContain('/about');
+    expect(isAppHref('/about')).toBe(true);
+    expect(requiresAuth('/about')).toBe(false);
+  });
+
   it('reports legacy and unbuilt paths as missing', () => {
     // The ported web nav pointed at these; the registry exists so no link can
     // offer one of them and land on the 404 route.

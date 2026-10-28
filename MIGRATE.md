@@ -869,15 +869,49 @@ Depends: P4.3
 
 ---
 
-### [ ] P4.5 — About + footer surface · S
+### [x] P4.5 — About + footer surface · S
 
 Depends: P4.1
 
-- [ ] `src/app/about.tsx` — footer content (about, quick links, resources, legal) as `List` sections.
-- [ ] External links via `expo-web-browser`.
-- [ ] Remove the web `Footer` concept everywhere.
+> Change: **the footer became one screen with no columns.** The legacy footer was
+> four columns of marketing plus links to `/terms`, `/privacy`, `/cookies`,
+> `/faq`, `/tafsir`, `/features`, `/contact`, `/download` and `/desktop` — routes
+> the web app never built, so every one of them 404'd. Reproducing that on a
+> phone would be a footer that is both unreachable and wrong. The About screen
+> keeps what is true: what the app is, the destinations that exist, the one
+> external link that resolves, and the copyright.
+>
+> Change: **legal is a copyright line, not four dead links.** There is no terms,
+> privacy or cookie page in this project to link to, and a mobile app has no
+> cookies to disclose. When those documents exist they get rows here; inventing
+> URLs today would violate the PR's own "no dead links" rule.
+>
+> Change: **no `Footer` exists in the Expo app to delete.** The web `Footer`
+> stays in `othman-web/` as reference material along with the rest of the Vite
+> app. What P4.5 removes is the _concept_: no layout appends a footer, and the
+> footer namespaces were already dropped in P2.4. If a web-only footer is ever
+> wanted again it belongs behind `Platform.OS === 'web'`, not in a shared layout.
+>
+> Change: **About is registered in `APP_ROUTES` although it is not a tab.** Home
+> cards come from the registry, and `FeatureCard` takes an `AppHref`; a
+> hand-written `/about` card outside the table is exactly the dead-link risk the
+> table exists to remove. Non-tab rows opt into Home with `showOnHome`, and
+> `TABS` still filters them out, so the tab bar is unchanged.
+>
+> Change: the previous account-only `openMeetLink` guard moved to
+> `platform/browser.ts` as `openHttpsLink`; the meeting helper now delegates. One
+> https-only boundary for every external link, including About's website.
 
-**Done when:** no dead links.
+- [x] `src/app/about.tsx` — identity block (name, tagline, description, version from `expo-constants`), Explore (the four tabs), Resources (website), Legal (copyright) as `@expo/ui` `List` sections. The list section title moved out of Account into `ui/list-section-header.tsx` so the two screens cannot drift.
+- [x] Quick links come from `TABS` and navigate with `router.navigate`, not `push`: About sits on the root stack above the tabs, and pushing a tab would stack a second copy of the app.
+- [x] External links via `expo-web-browser`, through the shared https-only guard.
+- [x] `WEBSITE_URL` in `core/config/urls.ts`; the legacy marketing/legal routes are deliberately absent.
+- [x] About is reachable from Home (fourth card, after Account) and from an Account settings row; `P4.3`'s account test now covers `/about` too.
+- [x] Locales: `nav.about`, `nav.aboutDesc`, `pages.about.*` in both languages. The English description is the legacy copy; the Arabic one was rewritten because the legacy value was a two-word stub (`منصة تعليمية`).
+- [x] Tests: `about-screen.test.tsx` (identity + version, every tab row, navigate, website guard, back, copyright), `browser.test.ts` (https only, no-browser), plus updated `route-registry`, `feature-links`, `home-screen` and `account-screen`.
+- [ ] **Manual:** native list chrome in both schemes, RTL chevrons and Arabic line height in the hosted prose blocks, external browser presentation on iOS + Android (no device on this machine).
+
+**Done when:** no dead links. — Every row resolves to a registered in-app route or to `WEBSITE_URL`; the legacy dead paths are not offered.
 
 ---
 

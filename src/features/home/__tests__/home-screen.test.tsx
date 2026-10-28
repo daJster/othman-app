@@ -66,6 +66,7 @@ describe('HomeScreen', () => {
     expect(screen.getByText('Read the mushaf page by page')).toBeTruthy();
     expect(screen.getByText('Your upcoming sessions')).toBeTruthy();
     expect(screen.getByText('Profile, progress and preferences')).toBeTruthy();
+    expect(screen.getByText('App information and links')).toBeTruthy();
   });
 
   it('does not advertise features the app does not ship', async () => {

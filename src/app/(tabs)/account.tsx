@@ -2,7 +2,7 @@ import { Host, List, ListItem, RNHostView } from '@expo/ui';
 import { useRouter } from 'expo-router';
 import Head from 'expo-router/head';
 import { useTranslation } from 'react-i18next';
-import { Alert, useColorScheme, View } from 'react-native';
+import { Alert, useColorScheme } from 'react-native';
 import { useDirection } from '@/i18n';
 import { ProfileHeader } from '@/features/account/profile-header';
 import { signInDemoSession } from '@/features/account/demo-session';
@@ -11,9 +11,9 @@ import {
   useSignOut,
 } from '@/features/account/use-current-account';
 import { Icon } from '@/ui/icon';
+import { ListSectionHeader } from '@/ui/list-section-header';
 import { Loading, ErrorState, EmptyState } from '@/ui/states';
 import { ScreenView } from '@/ui/screen';
-import { Text } from '@/ui/text';
 
 /**
  * Account tab.
@@ -116,7 +116,7 @@ export default function AccountScreen() {
             />
           </RNHostView>
 
-          <SectionHeader label={t('account.sections.settings')} />
+          <ListSectionHeader label={t('account.sections.settings')} />
 
           <ListItem
             testID="account-progress-row"
@@ -128,7 +128,17 @@ export default function AccountScreen() {
             {t('pages.account.progress.title')}
           </ListItem>
 
-          <SectionHeader label={t('account.sections.session')} />
+          <ListItem
+            testID="account-about-row"
+            leading={<Icon name="info" />}
+            trailing={<Icon name={chevron} tone="muted" />}
+            supportingText={t('nav.aboutDesc')}
+            onPress={() => router.push('/about')}
+          >
+            {t('nav.about')}
+          </ListItem>
+
+          <ListSectionHeader label={t('account.sections.session')} />
 
           <ListItem
             testID="account-sign-out-row"
@@ -140,25 +150,5 @@ export default function AccountScreen() {
         </List>
       </Host>
     </ScreenView>
-  );
-}
-
-/**
- * A list section title.
- *
- * `List` has no section API (unlike `FieldGroup`), so the title is a hosted RN
- * view. `matchContents={{ vertical: true }}` takes the width from the list and
- * the height from the text, which is what keeps Arabic's taller line box from
- * being clipped.
- */
-function SectionHeader({ label }: { label: string }) {
-  return (
-    <RNHostView matchContents={{ vertical: true }}>
-      <View className="px-4 pt-6 pb-2">
-        <Text variant="overline" tone="muted">
-          {label}
-        </Text>
-      </View>
-    </RNHostView>
   );
 }
