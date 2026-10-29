@@ -185,6 +185,7 @@ describe('initial state', () => {
       ayahKey: null,
       direction: null,
       status: 'idle',
+      restored: false,
       preferredEditionKey: null,
       restoredPage: null,
       edition: null,
@@ -206,6 +207,7 @@ describe('restore', () => {
     expect(store.getState()).toMatchObject({
       preferredEditionKey: '2',
       restoredPage: 120,
+      restored: true,
       editionKey: null,
       status: 'idle',
     });
@@ -274,6 +276,20 @@ describe('restore', () => {
     void store.getState().restore();
 
     expect(store.getState().status).toBe('restoring');
+  });
+
+  it('reads storage once per session, so a remount cannot undo a page turn', async () => {
+    const fake = fakeStorage({ [STORAGE_KEYS.lastVisitedPage]: 2 });
+    const store = createReaderStore(fake.storage);
+
+    await store.getState().restore();
+    await store.getState().restore();
+
+    expect(fake.reads).toEqual([
+      STORAGE_KEYS.quranEdition,
+      STORAGE_KEYS.lastVisitedPage,
+    ]);
+    expect(store.getState().restored).toBe(true);
   });
 });
 

@@ -23,6 +23,9 @@ jest.mock('@react-native-async-storage/async-storage', () =>
  *    React Native reports as unknown props.
  *  - A colour class (`accent-*`) cannot be resolved to a value, so Uniwind logs
  *    the accent error for every themed icon.
+ *  - `useCSSVariable` cannot see the `@theme static` block either, so a
+ *    JS-only token (`--motion-page-turn`) is reported as missing and the
+ *    component falls back to its documented default.
  *
  * Styling is verified on device and in the exported web CSS instead. Filtering
  * these two keeps every other warning visible.
@@ -30,6 +33,7 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 const IGNORED = [
   'unknown prop `className`',
   'was provided to extract accentColor',
+  "couldn't find your variable",
 ];
 
 beforeAll(() => {

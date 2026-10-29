@@ -17,6 +17,8 @@ export {
   useReaderEdition,
   useReaderEditionKey,
   useReaderPage,
+  useReaderPreferredEditionKey,
+  useReaderRestored,
   useReaderStatus,
   useReaderSurah,
   useRestoreReader,

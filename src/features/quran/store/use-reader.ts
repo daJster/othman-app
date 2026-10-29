@@ -65,6 +65,16 @@ export function useReaderBboxes(
   return useStore(store, (state) => state.bboxes);
 }
 
+export function useReaderRestored(store: ReaderStore = readerStore): boolean {
+  return useStore(store, (state) => state.restored);
+}
+
+export function useReaderPreferredEditionKey(
+  store: ReaderStore = readerStore,
+): string | null {
+  return useStore(store, (state) => state.preferredEditionKey);
+}
+
 /**
  * Actions, with stable identities.
  *

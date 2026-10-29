@@ -64,6 +64,11 @@
     "dark": "داكنة",
     "system": "النظام"
   },
+  "reader": {
+    "pageImage": "صفحة {{page}} من المصحف",
+    "ayahLabel": "الآية {{ayah}} من سورة {{surah}}",
+    "clearSelection": "إلغاء تحديد الآية"
+  },
   "state": {
     "loading": "جارٍ التحميل…",
     "errorTitle": "حدث خطأ",

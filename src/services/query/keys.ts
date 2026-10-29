@@ -44,4 +44,20 @@ export const queryKeys = {
     /** The 114 surah rows behind the heatmap. */
     surah: ['othman', 'progress', 'surah'] as const,
   },
+
+  quran: {
+    /**
+     * Every Qur'an read.
+     *
+     * Not cleared on sign-out: the mushaf is public content, and dropping a
+     * multi-megabyte bbox table because an unrelated session ended would make
+     * the next page turn hit the network.
+     */
+    root: ['othman', 'quran'] as const,
+    /** Editions + 114 surah metadata. Fetched once per launch. */
+    catalog: ['othman', 'quran', 'catalog'] as const,
+    /** Both bbox tables of one edition, keyed by the catalog's `key`. */
+    bboxes: (editionKey: string) =>
+      ['othman', 'quran', 'bboxes', editionKey] as const,
+  },
 } as const;

@@ -95,6 +95,16 @@ module.exports = {
   useAnimatedScrollHandler: () => () => undefined,
   useReducedMotion: () => false,
 
+  /**
+   * `GestureDetector` subscribes through this hook whenever Reanimated is
+   * importable, so the mock has to answer it even though no gesture in the app
+   * is a worklet. The returned function is the event handler that would run on
+   * the UI thread; here it simply forwards to the callback, which is enough for
+   * gesture-handler's own test utilities (they emit through `DeviceEventEmitter`
+   * and take the JS path, so this is never actually invoked).
+   */
+  useEvent: (callback) => callback,
+
   // Timing and sequencing.
   withTiming: (value) => value,
   withSpring: (value) => value,

@@ -64,6 +64,11 @@
     "dark": "Dark",
     "system": "System"
   },
+  "reader": {
+    "pageImage": "Page {{page}} of the mushaf",
+    "ayahLabel": "Ayah {{ayah}} of surah {{surah}}",
+    "clearSelection": "Clear the selected ayah"
+  },
   "state": {
     "loading": "Loading…",
     "errorTitle": "Something went wrong",

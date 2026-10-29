@@ -59,6 +59,15 @@ export type ReaderFields = {
   /** Consumed by the page-turn animation; `null` means "do not animate". */
   direction: PageTurnDirection;
   status: ReaderStatus;
+  /**
+   * Storage has been read once.
+   *
+   * `status` alone cannot answer this: it returns to `idle` after the read, and
+   * a screen that rendered before the read would resolve the *default* edition
+   * and then immediately fetch the stored one. A dedicated flag lets the reader
+   * wait for the preference without inventing a fourth status.
+   */
+  restored: boolean;
   /** Stored edition preference, before it is resolved against the catalog. */
   preferredEditionKey: string | null;
   /** Stored page, consumed once by `attachEdition`. */
@@ -175,6 +184,7 @@ export function createReaderStore(storage: StorageService): ReaderStore {
     ayahKey: null,
     direction: null,
     status: 'idle',
+    restored: false,
     preferredEditionKey: null,
     restoredPage: null,
     edition: null,
@@ -183,7 +193,7 @@ export function createReaderStore(storage: StorageService): ReaderStore {
     async restore() {
       // A second mount (Strict Mode, Fast Refresh) must not race the first
       // read, and a reader that is already attached has nothing to restore.
-      if (get().status !== 'idle') return;
+      if (get().status !== 'idle' || get().restored) return;
 
       set({ status: 'restoring' });
 
@@ -207,6 +217,7 @@ export function createReaderStore(storage: StorageService): ReaderStore {
       set((state) => ({
         preferredEditionKey,
         restoredPage,
+        restored: true,
         // `attachEdition` may have won the race; never downgrade a ready reader.
         status: state.status === 'ready' ? 'ready' : 'idle',
       }));

@@ -1,11 +1,10 @@
 import { useLocalSearchParams } from 'expo-router';
+import Head from 'expo-router/head';
 import { useTranslation } from 'react-i18next';
-import { EmptyState } from '@/ui/states';
-import { ScreenView } from '@/ui/screen';
-import { Text } from '@/ui/text';
+import { ReaderScreen } from '@/features/quran/reader-screen';
 
 /**
- * Reader route — stub.
+ * Reader route.
  *
  * The page is a full-screen modal because the mushaf is a distinct mode: it
  * hides the tab bar, and its own page-turn gesture competes with the stack's
@@ -13,32 +12,24 @@ import { Text } from '@/ui/text';
  * That presentation is declared once in the root layout (`src/app/_layout.tsx`),
  * not here, so the route's chrome cannot drift from the navigator that owns it.
  *
- * `page` is validated here rather than trusted: a deep link can carry anything,
- * and the real reader (P5.3) will need a 1–604 range anyway.
+ * The segment is parsed here and nowhere else: a deep link can carry anything,
+ * and the reader store expects a number. Non-integers fall back to the stored
+ * page; a number outside the edition is clamped by `goToPage`, which is what
+ * makes `/reader/9999` land on the last page instead of a 404 from the CDN.
  */
-export default function ReaderScreen() {
+export default function ReaderRoute() {
   const { t } = useTranslation();
-  const { page } = useLocalSearchParams<{ page: string }>();
-  const pageNumber = Number(page);
-  const valid =
-    Number.isInteger(pageNumber) && pageNumber >= 1 && pageNumber <= 604;
+  const { page } = useLocalSearchParams<{ page?: string }>();
+
+  const parsed = Number(page);
+  const initialPage = Number.isInteger(parsed) ? parsed : null;
 
   return (
-    <ScreenView>
-      {valid ? (
-        <EmptyState
-          title={`${t('nav.quran')} · ${pageNumber}`}
-          description={t('state.emptyDescription')}
-        />
-      ) : (
-        <EmptyState
-          title={t('error.404.title')}
-          description={t('error.404.description')}
-        />
-      )}
-      <Text variant="caption" tone="muted" className="p-4 text-center">
-        {t('nav.quranDesc')}
-      </Text>
-    </ScreenView>
+    <>
+      <Head>
+        <title>{`${t('nav.quran')} — ${initialPage ?? ''}`}</title>
+      </Head>
+      <ReaderScreen initialPage={initialPage} />
+    </>
   );
 }
