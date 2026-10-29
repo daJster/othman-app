@@ -989,17 +989,70 @@ Depends: P3.4
 
 ---
 
-### [ ] P5.2 — Reader state · L
+### [x] P5.2 — Reader state · L
 
 Depends: P5.1
 
-- [ ] `npm i zustand`.
-- [ ] `features/quran/store/reader-store.ts`: `editionKey`, `page`, `surah`, `ayahKey`, `direction`, `status` + navigation actions.
-- [ ] Port navigation helpers (`goNextPage`, `goPrevPage`, `goToPage`, `goToSurah`, `goToAyah`, `switchEdition`, `formatPageNumber`) with unit tests.
-- [ ] Persist `editionKey` + `lastVisitedPage`; restore on mount.
-- [ ] Selector-level subscriptions so a page turn re-renders only page + footer.
+> Change: **the store owns decisions, not data.** TanStack Query already owns
+> the catalog and the bbox tables, so duplicating them in Zustand would mean two
+> expiry rules for the same bytes. The store holds only what the user chose —
+> page, surah, selected ayah, edition, page-turn direction — plus the two
+> attached objects navigation needs (the `QuranEdition` and its
+> `EditionBboxes`). A bbox refetch therefore cannot move the reader, and a page
+> turn cannot invalidate a query.
+>
+> Change: **a vanilla Zustand store, with React hooks as a thin layer.** Page
+> turns come from a gesture callback, the keyboard, a deep link and the footer
+> button, none of which are renders. `reader-store.ts` imports no React, so all
+> navigation rules are unit-tested without a renderer; `use-reader.ts` exposes
+> one selector per slice (`useReaderPage`, `useReaderSurah`, `useReaderAyahKey`,
+> `useReaderDirection`, …). Selecting the whole state is possible but not the
+> default, which is what keeps a page turn from re-rendering the 114-row surah
+> picker.
+>
+> Change: **the page label comes from the smallest absolute ayah number.** The
+> web reader used `Object.keys(page.ayat)[0]`, but that map is keyed by
+> ayah-in-surah: on a page that ends one surah and starts the next, the keys
+> restart at `"1"` and the label names the surah the page _ends_ with. P5.2
+> derives it from `absoluteNumber` instead, and the fixture deliberately lists
+> the next surah first so the regression cannot come back silently.
+>
+> Change: **switching editions keeps the reader's place.** The web provider
+> reset to `first_page` on every switch, so one accidental tap on the edition
+> menu threw away the position. The page is now clamped into the new edition
+> (Warsh starts at page 4, MedinaOld ends at 605) and the key is persisted. A key
+> the catalog no longer has falls back to the first edition, same as boot.
+>
+> Change: **restore is two-phase.** Storage is read before the catalog, and
+> attaches only the _preference_ (`preferredEditionKey`, `restoredPage`). The
+> screen can then fetch the preferred edition's bbox tables directly instead of
+> fetching the default and immediately switching. `restoredPage` is consumed by
+> the first `attachEdition`; a later call (a refetch) keeps the page the user is
+> actually on. Once an edition is attached, `editionKey` wins over the stored
+> preference, so re-attaching cannot silently switch editions.
+>
+> Change: **`direction` is reading order, not screen direction.** `forward`
+> means "the next page in the mushaf", which in an Arabic UI slides in from the
+> left. Naming it after the reading order keeps `if (isRtl)` out of the
+> animation. A no-op at either end of the edition clears the pending direction
+> so a tap on a disabled edge cannot leave an animation waiting to fire.
+>
+> Selection is cleared by a page turn and by an edition switch, but preserved
+> across a bbox refetch when the same ayah is still on the page. Page writes are
+> fire-and-forget: a failed preference write must never block a turn. Fractional
+> pages round and `NaN` falls back to the first page, so P5.6's deep links can
+> hand the store unvalidated numbers. `formatPageNumber` is reused from
+> `core/domain/quran/page.ts` (already tested in P5.1) rather than copied into
+> the store.
 
-**Done when:** every navigation action has tests; page turn re-renders only what changed.
+- [x] `zustand` 5.0.16 installed.
+- [x] `features/quran/store/reader-store.ts`: `editionKey`, `page`, `surah`, `ayahKey`, `direction`, `status`, plus `preferredEditionKey` / `restoredPage` / `edition` / `bboxes` and the actions `restore`, `attachEdition`, `switchEdition`, `goToPage`, `goNextPage`, `goPrevPage`, `goToSurah`, `goToAyah`, `selectAyah`, `clearSelection`, `clearDirection`.
+- [x] Navigation helpers ported and tested, including the legacy boundary bug (surah label) and the reset-on-switch behaviour; `formatPageNumber` reused from core.
+- [x] `editionKey` and `lastVisitedPage` persisted through the injected `StorageService`; `useRestoreReader` reads them on mount; corrupt values are ignored, not repaired.
+- [x] Selector hooks in `features/quran/store/use-reader.ts`; the singleton is wired to `storageService` in `reader-store.instance.ts`, so the factory tests stay free of native modules.
+- [x] Tests: `reader-store.test.ts` (55 assertions across initial state, restore, attach, switch, jumps, page turns, selection) and `use-reader.test.tsx` (restore-on-mount + render-count proof that a same-surah page turn does not re-render the surah subscriber).
+
+**Done when:** every navigation action has tests; page turn re-renders only what changed. — All eleven actions are covered without a renderer; `use-reader.test.tsx` asserts that moving from page 1 to page 2 (same surah) renders the page probe once and the surah probe zero times, while moving into surah 2 renders both.
 
 ---
 
