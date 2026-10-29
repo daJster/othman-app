@@ -1,8 +1,8 @@
 import {
-  SURAH_COUNT,
   clampPercent,
   type SurahProgress,
 } from '@/core/domain/progress/surah-progress';
+import { SURAH_COUNT } from '@/core/domain/quran/surah';
 import { formatDateKey } from '@/core/domain/meetings/date-key';
 import type { DateKey } from '@/core/types';
 import type { ProgressRepository } from './progress.types';

@@ -1,8 +1,6 @@
 import { isDateKey } from '@/core/domain/meetings/date-key';
-import {
-  SURAH_COUNT,
-  type SurahProgress,
-} from '@/core/domain/progress/surah-progress';
+import { SURAH_COUNT } from '@/core/domain/quran/surah';
+import type { SurahProgress } from '@/core/domain/progress/surah-progress';
 import {
   DEMO_SURAH_PROGRESS,
   demoProgressRepository,

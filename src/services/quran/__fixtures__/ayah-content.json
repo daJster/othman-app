@@ -1,0 +1,32 @@
+{
+  "code": 200,
+  "status": "OK",
+  "data": {
+    "number": 1,
+    "text": "بِسۡمِ ٱللَّهِ ٱلرَّحۡمَـٰنِ ٱلرَّحِیمِ\n",
+    "edition": {
+      "identifier": "quran-uthmani-quran-academy",
+      "language": "ar",
+      "name": "القرآن الكريم برسم العثماني (quran-academy)",
+      "englishName": "Modified Quran Uthmani Text from the Quran Academy to work with the Kitab font",
+      "format": "text",
+      "type": "quran",
+      "direction": "rtl"
+    },
+    "surah": {
+      "number": 1,
+      "name": "سُورَةُ ٱلْفَاتِحَةِ",
+      "englishName": "Al-Faatiha",
+      "englishNameTranslation": "The Opening",
+      "numberOfAyahs": 7,
+      "revelationType": "Meccan"
+    },
+    "numberInSurah": 1,
+    "juz": 1,
+    "manzil": 1,
+    "page": 1,
+    "ruku": 1,
+    "hizbQuarter": 1,
+    "sajda": false
+  }
+}

@@ -645,7 +645,7 @@ Depends: P3.3 (skipped — see the gap note below)
 - [x] Query hooks: `useMeetingsByDate`, `useRefreshMeetings` (`src/features/meetings/use-meetings.ts`); `useAccount`, `useUpdateAccount` (`src/features/account/use-account.ts`). No `useEffect` fetching.
 - [x] Loading/error/empty contract: `toAsyncResult` + `AsyncState`, tested as a pure function; `ErrorState`'s default retry label is now `t('action.retry')` instead of a hard-coded English string.
 - [x] In-memory cache only — decision documented above.
-- [ ] Web `switchEditionInner` / edition→metadata waterfall — deferred to P5.3 (no reader to apply it to yet).
+- [x] Web `switchEditionInner` / edition→metadata waterfall — closed early in P5.1: `quranService.loadCatalog()` fetches editions + metadata in parallel, and the bbox repository does the same for its two tables.
 
 **Done when:** no component calls `fetch`; keys never inline. — Both hold. **P3.3's `AuthProvider` is still missing**, so `meetings`/`account` remain reachable without a session until that PR lands; the hooks themselves are ready for it.
 
@@ -917,18 +917,75 @@ Depends: P4.1
 
 ## Stage 5 — Quran reader
 
-### [ ] P5.1 — Quran repositories · L
+### [x] P5.1 — Quran repositories · L
 
 Depends: P3.4
 
-- [ ] `src/services/quran/`: `editions`, `metadata`, `bboxes` (norm + reversed norm), `content`.
-- [ ] Typed models in `src/core/types/quran.ts` (ported from the web context types).
-- [ ] Validate payloads at the boundary; typed errors.
-- [ ] Parallel prefetch of `editions.json` + `quran.json`.
-- [ ] Fixtures under `src/services/quran/__fixtures__/`.
-- [ ] Tests: URL builders, bbox normalization, malformed payloads.
+> Change: **the payloads are mapped once, at the boundary.** `editions.json`,
+> `quran.json`, both bbox tables and the ayah API spell their fields in
+> snake_case (`page_num`, `number_of_ayat`, `absolute_number`) and wrap ayah
+> text in `{code, status, data}`. `core/domain/quran/parse.ts` is the only code
+> that knows that; every consumer sees the camelCase models in
+> `core/types/quran.ts`. That is also what makes the reader portable: the CDN
+> can rename a field without a `find and replace` through the UI.
+>
+> Change: **a broken payload is rejected, not repaired.** A clamped box would
+> silently select the wrong words; a skipped surah would leave a hole in the
+> 114-row picker that nothing else notices; `first_page > last_page` would make
+> every navigation action produce an empty range. The parsers throw
+> `QuranDataError` with the offending `source` and the exact JSON path, so the
+> query error screen (P5.3) has something to retry and a bug report names the
+> bad file. Transport failures keep their own types (`HttpError`,
+> `HttpTimeoutError`, `HttpAbortError`): "the CDN said 503" and "the CDN sent
+> nonsense" are different problems.
+>
+> Change: **editions are keyed by their CDN key, not by name.** `editions.json`
+> is `{"1": …, "2": …, "3": …}`, while `core/config/quran.ts` is keyed by
+> `Tajweed` / `MedinaOld` / `Warsh1`. `QuranEdition` therefore carries both
+> `key` (preference, query key, cache identity) and `name` (page geometry). A
+> stored `editionKey` that no longer exists falls back to the first edition
+> rather than launching into a blank reader.
+>
+> Change: **`last_page` is not capped at 604.** MedinaOld's scans run to page
+> 605, so the standard mushaf length is a property of each edition's payload,
+> not a constant the parser can impose. `QURAN_PAGE_COUNT` is used only for the
+> ayah API's `page`, which is always the standard mapping.
+>
+> Change: **only the normalised bbox files are read.** The CDN also publishes
+> absolute-pixel boxes; those are kept on the model because the payload carries
+> them, but the reader scales the mushaf, and a pixel rectangle measured on the
+> 412×600 scan lands on the wrong words at any other size.
+>
+> Change: **both loads are parallel, and that closes the P3.4 deferral.**
+> `quranService.loadCatalog()` fetches `editions.json` + `quran.json` together,
+> and `createBboxesRepository` fetches the surah-indexed and page-indexed tables
+> together. The web provider fetched editions → metadata serially; P3.4 recorded
+> the waterfall as "deferred to P5.3". There is nothing to serialise, so the
+> service fixes it now and P5.3 only has to call it.
+>
+> Change: **no second cache.** TanStack Query owns server state, and adding
+> `platform/http/json-cache` here would give the same bytes two expiry rules.
+> The repositories are fetch-and-validate; P5.3 supplies the query hooks.
+>
+> Change: `SURAH_COUNT` moved from `core/domain/progress` to
+> `core/domain/quran/surah.ts`, next to `MAX_AYAH_IN_SURAH` and
+> `QURAN_PAGE_COUNT`: it is a fact about the mushaf that both the reader and the
+> heatmap use.
+>
+> The fixtures are **copies of the live payloads**, trimmed to pages 1–2 where
+> size matters (the real bbox files are ~2.8 MB each) but complete for the 114
+> surahs, because the metadata parser enforces the count. A hand-written "valid"
+> payload could only prove that the parser agrees with the test author.
 
-**Done when:** typed data offline-from-fixture; no crash on bad payload.
+- [x] `src/services/quran/`: `editions.repository`, `metadata.repository`, `bboxes.repository` (norm + reversed norm), `content.repository`, plus `quran.service` (the facade) and `quran.types` (interfaces).
+- [x] Typed models in `src/core/types/quran.ts`: `Bbox`, `SurahMetadata`, `QuranEdition`, `SurahAyahBboxes`, `PageAyahBboxes`, `EditionBboxes`, `AyahContent`.
+- [x] Pure parsers in `src/core/domain/quran/parse.ts`; `QuranDataError` in `core/domain/quran/errors.ts`; page arithmetic (`formatPageNumber`, clamping, image URL) in `core/domain/quran/page.ts`; edition fallback in `core/domain/quran/editions.ts`.
+- [x] Parallel prefetch: `loadCatalog()` and `loadBboxes()` both use `Promise.all`, with tests that assert both requests start before either resolves.
+- [x] Fixtures under `src/services/quran/__fixtures__/`: `editions.json`, `surah-metadata.json` (all 114), `surah-bboxes.json` (surahs 1–2), `page-bboxes.json` (pages 1–2), `ayah-content.json`.
+- [x] Tests: `parse.test.ts` (valid payloads + one broken field at a time), `page.test.ts` (padding, clamping, image URL), `editions.test.ts` (fallback, typed error), `quran.service.test.ts` (parallel ordering, propagation), `quran.repositories.test.ts` (fixtures through a fake `HttpClient`, URL assertions, malformed payloads).
+- [x] `src/platform/http/index.ts` barrel added (first non-test consumer of the HTTP client).
+
+**Done when:** typed data offline-from-fixture; no crash on bad payload. — Every repository is exercised against the recorded fixtures with no network, and every malformed case rejects with `QuranDataError` before it can reach a screen. Nothing renders yet (that is P5.3), so the user-visible half of "no crash" is the query error state P5.3 wires to this error type.
 
 ---
 
@@ -1118,7 +1175,7 @@ Depends: P8.2
 
 ---
 
-## Stage 9 — Release + CI
+## Stage 9 — Release + CI (DEFERRED)
 
 ### [ ] P9.1 — Build + store readiness · M
 

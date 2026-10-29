@@ -1,10 +1,10 @@
 import {
-  SURAH_COUNT,
   bandOf,
   clampPercent,
   summarizeProgress,
   type SurahProgress,
 } from '@/core/domain/progress/surah-progress';
+import { SURAH_COUNT } from '@/core/domain/quran/surah';
 
 describe('clampPercent', () => {
   it('rounds and clamps into 0-100', () => {

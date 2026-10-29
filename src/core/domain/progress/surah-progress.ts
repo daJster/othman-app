@@ -13,8 +13,6 @@ import type { DateKey } from '../../types';
  * producing a colour outside the heatmap ramp or a bar wider than its track.
  */
 
-export const SURAH_COUNT = 114;
-
 export type SurahProgressBand = 'not-started' | 'in-progress' | 'memorised';
 
 export type SurahProgress = {
