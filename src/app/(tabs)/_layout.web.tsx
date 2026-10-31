@@ -93,7 +93,9 @@ function TabLink({
       onClick: (event: MouseEvent<HTMLAnchorElement>) => {
         if (hidden || !shouldHandleWebLink(event)) return;
 
-        event.preventDefault();
+        // Let Expo Router's tab trigger call `preventDefault` and navigate.
+        // Doing it first makes its `shouldHandleMouseEvent` see
+        // `defaultPrevented === true` and skip navigation entirely.
         (onPress as unknown as (event: unknown) => void)?.(event);
       },
     },

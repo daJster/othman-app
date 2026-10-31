@@ -202,7 +202,12 @@ describe('ReaderMenuSheet', () => {
     const onSelect = jest.fn();
 
     await render(
-      <ReaderMenuSheet isPresented onDismiss={jest.fn()} onSelect={onSelect} />,
+      <ReaderMenuSheet
+        isPresented
+        hasSelection
+        onDismiss={jest.fn()}
+        onSelect={onSelect}
+      />,
     );
 
     await fireEvent.press(screen.getByTestId('reader-menu-read'));
@@ -217,6 +222,24 @@ describe('ReaderMenuSheet', () => {
     expect(screen.getByTestId('reader-menu-tafsir')).toBeTruthy();
     expect(screen.getByTestId('reader-menu-surah')).toBeTruthy();
     expect(screen.getByTestId('reader-menu-edition')).toBeTruthy();
+  });
+
+  it('hides ayah-only destinations when nothing is selected', async () => {
+    await render(
+      <ReaderMenuSheet
+        isPresented
+        hasSelection={false}
+        onDismiss={jest.fn()}
+        onSelect={jest.fn()}
+      />,
+    );
+
+    for (const id of ['read', 'tafsir', 'notes', 'audio']) {
+      expect(screen.queryByTestId(`reader-menu-${id}`)).toBeNull();
+    }
+    expect(screen.getByTestId('reader-menu-surah')).toBeTruthy();
+    expect(screen.getByTestId('reader-menu-edition')).toBeTruthy();
+    expect(screen.getByTestId('reader-menu-share')).toBeTruthy();
   });
 });
 

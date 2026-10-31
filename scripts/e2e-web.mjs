@@ -225,6 +225,18 @@ async function readerPanels(browser, language, theme) {
 
   await goto(page, '/reader/1');
   await page.waitForSelector('[data-testid="ayah:3:0"]', { timeout: 90000 });
+
+  // Destinations that need an ayah stay hidden until one is selected.
+  await page.locator('[data-testid="reader-menu"]').click();
+  for (const id of ['read', 'tafsir', 'notes', 'audio']) {
+    check(
+      `menu hides ${id} without a selection`,
+      (await page.locator(`[data-testid="reader-menu-${id}"]`).count()) === 0,
+    );
+  }
+  await page.locator('[data-testid="reader-menu-close"]').click();
+  await page.waitForTimeout(800);
+
   await page.locator('[data-testid="ayah:3:0"]').click();
 
   await page.locator('[data-testid="reader-menu"]').click();
@@ -409,6 +421,13 @@ async function main() {
       JSON.stringify((await navInfo(page)).hrefs),
     );
     check('active tab is announced', (await navInfo(page)).current === 1);
+
+    for (const path of ['/quran', '/meetings', '/account', '/']) {
+      await page.locator(`a[role="tab"][href="${path}"]`).click();
+      await page.waitForURL((url) => url.pathname === path, { timeout: 10000 });
+      check(`tab ${path} navigates`, new URL(page.url()).pathname === path);
+    }
+
     check('no runtime errors', errors.length === 0, errors.join(' | '));
     await context.close();
   });

@@ -48,16 +48,29 @@ const ACTIONS: readonly {
 
 export type ReaderMenuSheetProps = {
   isPresented: boolean;
+  /** Selected ayah exists; content/audio destinations need one. */
+  hasSelection: boolean;
   onDismiss: () => void;
   onSelect: (action: ReaderMenuAction) => void;
 };
 
+const SELECTION_ACTIONS: ReadonlySet<ReaderMenuAction> = new Set([
+  'read',
+  'tafsir',
+  'notes',
+  'audio',
+]);
+
 export function ReaderMenuSheet({
   isPresented,
+  hasSelection,
   onDismiss,
   onSelect,
 }: ReaderMenuSheetProps) {
   const { t } = useTranslation();
+  const actions = hasSelection
+    ? ACTIONS
+    : ACTIONS.filter((action) => !SELECTION_ACTIONS.has(action.id));
 
   return (
     <BottomSheet
@@ -78,7 +91,7 @@ export function ReaderMenuSheet({
             />
           </View>
 
-          {ACTIONS.map((action) => (
+          {actions.map((action) => (
             <Pressable
               key={action.id}
               className="flex-row items-center gap-3 rounded-lg px-3 py-3 active:bg-muted"

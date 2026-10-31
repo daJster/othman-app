@@ -457,6 +457,7 @@ export function ReaderScreen({
 
       <ReaderMenuSheet
         isPresented={sheet === 'menu'}
+        hasSelection={selectedAyah !== null}
         onDismiss={() => setSheet(null)}
         onSelect={openMenuAction}
       />
