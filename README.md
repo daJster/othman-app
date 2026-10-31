@@ -1,6 +1,36 @@
-# Welcome to your Expo app 👋
+# Othman
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Quran learning platform — Expo + React Native, with a static web target.
+
+## Run it
+
+```bash
+npm install
+cp .env.example .env      # public Firebase web config; Google IDs only for native
+npm run web               # Expo web dev server
+```
+
+Production-like web preview:
+
+```bash
+npm run build:web
+npm run preview:web       # http://localhost:8088
+```
+
+Browser regression (routing, guards, reader, notes, deep links, recovery):
+
+```bash
+npx playwright install chromium
+npm run e2e:web
+```
+
+Web details: [`docs/web-e2e.md`](docs/web-e2e.md),
+[`docs/web-deploy.md`](docs/web-deploy.md),
+[`docs/web-regression.md`](docs/web-regression.md).
+
+## Expo starter notes
+
+This project uses [Expo](https://expo.dev).
 
 ## Get started
 

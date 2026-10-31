@@ -8,13 +8,14 @@
 
 | Gate                        | Result                                           |
 | --------------------------- | ------------------------------------------------ |
-| `npm run verify`            | **PASS** — 92 suites / 731 tests                  |
+| `npm run verify`            | **PASS** — 92 suites / 732 tests                 |
 | `npm run build:web`         | **PASS** — 16 static routes, CSS, JS, 3 font files |
 | `npm run check:web`         | **PASS** — routes, hosting rules, no PWA/legacy  |
-| Browser smoke (Playwright)  | **PASS** — 66/66 checks                          |
+| `npm run e2e:web`           | **PASS** — 61/61 checks                          |
 
 Browser run: Chromium headless, English/light and Arabic/dark, widths 375, 768,
-1024. No console errors or page errors in the final run.
+1024. No console errors or page errors in the final run. The suite is documented
+and reproducible in [`docs/web-e2e.md`](web-e2e.md).
 
 ## Routes verified by direct navigation/refresh
 
@@ -62,6 +63,10 @@ preserved, instead of falling back to Home.
    Overlay boxes set `userSelect: none` (`d4051c2`).
 5. **Audio prefetch produced a guaranteed CORS error on web.** Prefetch is
    skipped on web; playback itself is unaffected (`d4051c2`).
+6. **A page turn did not update the reader URL.** Refreshing or sharing the
+   address bar jumped back to the page the reader started from. The URL now
+   follows the page and drops consumed `surah`/`ayah` params; reload restores
+   the current page (`reader-screen.tsx`, unit test + E2E).
 
 ## Evidence
 
