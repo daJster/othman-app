@@ -7,7 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Share, View } from 'react-native';
+import { Platform, Share, View } from 'react-native';
 import {
   ALL_READERS,
   DEFAULT_SHAYKH_IDENTIFIER,
@@ -177,6 +177,7 @@ export function ReaderScreen({
   // remounts when the edition changes: a per-body ref would re-apply the link
   // on a switch and undo the reader's new position.
   const linkApplied = useRef(false);
+  const linkStartPage = useRef<number | null>(null);
   const hasInitialLink = initialSurah !== null || initialPage !== null;
 
   const linkTarget =
@@ -192,6 +193,10 @@ export function ReaderScreen({
     if (linkApplied.current || linkTarget === null) return;
 
     linkApplied.current = true;
+    // The route-sync effect below runs in the same commit, still seeing the
+    // pre-link page. Remember where we started so it can wait for the store
+    // update to render instead of writing the old page into the URL.
+    linkStartPage.current = page;
 
     if (linkTarget.kind === 'ayah') {
       goToAyah(linkTarget.surah, linkTarget.ayah);
@@ -201,6 +206,49 @@ export function ReaderScreen({
 
     if (linkTarget.kind === 'page') goToPage(linkTarget.page);
   }, [goToAyah, goToPage, linkTarget]);
+
+  // Keep the route segment equal to the page the reader is actually on.
+  //
+  // Without this, a page turn only changed the store: the URL stayed at
+  // `/reader/1`, so refreshing (or sharing the address bar) sent the reader
+  // back to the page they started from. The ayah/surah params are dropped once
+  // consumed, otherwise a later turn would re-apply the original deep link.
+  useEffect(() => {
+    if (initialPage === null) return;
+
+    // A deep link is resolved after the catalog/bboxes attach. Until it has
+    // been applied, syncing would rewrite the URL with the pre-link page and
+    // discard the surah/ayah parameters the link needs.
+    if (hasInitialLink && !linkApplied.current) return;
+
+    if (linkStartPage.current !== null) {
+      if (page === linkStartPage.current) return;
+
+      linkStartPage.current = null;
+    }
+
+    if (initialPage === page && initialSurah === null && initialAyah === null) {
+      return;
+    }
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.pathname = `/reader/${page}`;
+      // Consumed link params must not survive a turn, or a reload would
+      // re-apply the original ayah over the newer page.
+      url.searchParams.delete('surah');
+      url.searchParams.delete('ayah');
+      window.history.replaceState(window.history.state, '', url);
+
+      return;
+    }
+
+    router.setParams({
+      page: String(page),
+      surah: undefined,
+      ayah: undefined,
+    });
+  }, [initialAyah, initialPage, initialSurah, page, router]);
 
   let body: ReactNode;
   let edition: QuranEdition | null = null;

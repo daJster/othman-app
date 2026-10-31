@@ -24,6 +24,7 @@ const mockRouter = {
   canGoBack: jest.fn(() => true),
   back: jest.fn(),
   replace: jest.fn(),
+  setParams: jest.fn(),
 };
 
 const mockUseQuranCatalog = jest.fn();
@@ -225,6 +226,7 @@ beforeEach(() => {
   mockRouter.canGoBack.mockReset().mockReturnValue(true);
   mockRouter.back.mockReset();
   mockRouter.replace.mockReset();
+  mockRouter.setParams.mockReset();
 
   mockAudioPlayer.replace.mockReset();
   mockAudioPlayer.play.mockReset();
@@ -463,6 +465,20 @@ describe('ReaderScreen deep link', () => {
     await view.rerender(<ReaderScreen initialPage={12} />);
 
     expect(readerStore.getState().page).toBe(13);
+  });
+
+  it('keeps the route segment in sync with the page', async () => {
+    await render(<ReaderScreen initialPage={12} />);
+
+    await fireEvent.press(screen.getByTestId('reader-next'));
+
+    await waitFor(() =>
+      expect(mockRouter.setParams).toHaveBeenCalledWith({
+        page: '13',
+        surah: undefined,
+        ayah: undefined,
+      }),
+    );
   });
 
   it('does not re-apply the link after an edition switch remounts the body', async () => {
