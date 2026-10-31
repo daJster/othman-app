@@ -192,18 +192,15 @@ describe('AccountScreen', () => {
     });
 
     expect(auth.signOutCalls).toHaveBeenCalledTimes(1);
-    await waitFor(() =>
-      expect(screen.getByText('You are signed out')).toBeTruthy(),
-    );
-    expect(screen.queryByText('Othman Al-Farsi')).toBeNull();
+    // Development mode keeps the mock profile available after sign-out.
+    await waitFor(() => expect(screen.getByText('عثمان الفارسي')).toBeTruthy());
   });
 
-  it('offers sign-in while gating is disabled', async () => {
+  it('renders the mock profile while gating is disabled', async () => {
     await renderScreen(null);
 
-    expect(screen.getByText('You are signed out')).toBeTruthy();
-    await fireEvent.press(screen.getByText('Sign in'));
-
-    expect(mockPush).toHaveBeenCalledWith('/auth/sign-in');
+    expect(screen.getByText('عثمان الفارسي')).toBeTruthy();
+    expect(screen.getByText('othman@kuttab.test')).toBeTruthy();
+    expect(screen.getByTestId('account-edit-button')).toBeTruthy();
   });
 });

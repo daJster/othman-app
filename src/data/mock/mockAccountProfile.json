@@ -1,0 +1,8 @@
+{
+  "uid": "mock-account",
+  "email": "othman@kuttab.test",
+  "displayName": "عثمان الفارسي",
+  "photoURL": "https://i.pravatar.cc/150?img=12",
+  "role": "user",
+  "phoneNumber": "+212612345678"
+}
