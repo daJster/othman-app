@@ -24,21 +24,21 @@ export type HeroProps = {
 
 export function Hero({ opening, title, tagline }: HeroProps) {
   return (
-    <View className="from-primary/85 to-primary items-center gap-3 rounded-b-3xl bg-gradient-to-b px-6 pt-12 pb-10">
+    <View className="items-center gap-3 rounded-b-3xl bg-gradient-to-b from-primary/85 to-primary px-6 pt-12 pb-10">
       <Text
         family="quran"
-        className="text-primary-foreground text-center text-2xl leading-relaxed"
+        className="text-center text-2xl leading-relaxed text-primary-foreground"
       >
         {opening}
       </Text>
       <Text
         accessibilityRole="header"
         variant="title"
-        className="text-primary-foreground text-center text-3xl"
+        className="text-center text-3xl text-primary-foreground"
       >
         {title}
       </Text>
-      <Text className="text-primary-foreground text-center">{tagline}</Text>
+      <Text className="text-center text-primary-foreground">{tagline}</Text>
     </View>
   );
 }

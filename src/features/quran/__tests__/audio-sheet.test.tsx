@@ -61,6 +61,7 @@ function MockBottomSheet({
 jest.mock('@expo/ui', () => ({
   BottomSheet: MockBottomSheet,
   Host: MockHost,
+  RNHostView: MockHost,
   Column: MockHost,
   Slider: MockSlider,
   Switch: MockSwitch,

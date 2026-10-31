@@ -6,6 +6,7 @@ import type { SurahMetadata } from '@/core/types';
 import { useDirection } from '@/i18n';
 import { Button } from '@/ui/button';
 import { Input } from '@/ui/input';
+import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { Pressable } from '@/ui/pressable';
 import { Text } from '@/ui/text';
 import { formatReaderNumber } from '../format';
@@ -66,84 +67,86 @@ export function SurahPickerSheet({
       onDismiss={dismiss}
       testID="surah-picker-sheet"
     >
-      <View className="gap-3">
-        <View className="flex-row items-center justify-between gap-2">
-          <Text variant="subtitle">{t('reader.surahPickerTitle')}</Text>
-          <Button
-            variant="ghost"
-            size="sm"
-            label={t('action.close')}
-            onPress={dismiss}
-            testID="surah-picker-close"
+      <NativeSheetContent>
+        <View className="gap-3">
+          <View className="flex-row items-center justify-between gap-2">
+            <Text variant="subtitle">{t('reader.surahPickerTitle')}</Text>
+            <Button
+              variant="ghost"
+              size="sm"
+              label={t('action.close')}
+              onPress={dismiss}
+              testID="surah-picker-close"
+            />
+          </View>
+
+          <Input
+            value={query}
+            onChangeText={setQuery}
+            placeholder={t('reader.searchSurahs')}
+            accessibilityLabel={t('reader.searchSurahs')}
+            autoCorrect={false}
+            returnKeyType="search"
+            testID="surah-search"
           />
-        </View>
 
-        <Input
-          value={query}
-          onChangeText={setQuery}
-          placeholder={t('reader.searchSurahs')}
-          accessibilityLabel={t('reader.searchSurahs')}
-          autoCorrect={false}
-          returnKeyType="search"
-          testID="surah-search"
-        />
+          {rows.length === 0 ? (
+            <Text variant="caption" tone="muted" testID="surah-empty">
+              {t('reader.noSurahsFound')}
+            </Text>
+          ) : (
+            <FlatList
+              className="h-80"
+              data={rows}
+              keyExtractor={(item) => String(item.number)}
+              keyboardShouldPersistTaps="handled"
+              initialNumToRender={16}
+              renderItem={({ item }) => {
+                const selected = item.number === currentSurah;
 
-        {rows.length === 0 ? (
-          <Text variant="caption" tone="muted" testID="surah-empty">
-            {t('reader.noSurahsFound')}
-          </Text>
-        ) : (
-          <FlatList
-            className="h-80"
-            data={rows}
-            keyExtractor={(item) => String(item.number)}
-            keyboardShouldPersistTaps="handled"
-            initialNumToRender={16}
-            renderItem={({ item }) => {
-              const selected = item.number === currentSurah;
-
-              return (
-                <Pressable
-                  className={
-                    selected
-                      ? 'bg-muted flex-row items-center gap-3 rounded-lg px-3 py-2'
-                      : 'flex-row items-center gap-3 rounded-lg px-3 py-2'
-                  }
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  accessibilityLabel={`${formatReaderNumber(
-                    item.number,
-                    language,
-                  )} ${language === 'ar' ? item.name : item.nameEnglish}`}
-                  onPress={() => select(item.number)}
-                  testID={`surah-row:${item.number}`}
-                >
-                  <Text
-                    variant="caption"
-                    tone="muted"
-                    className="w-8 text-end tabular-nums"
+                return (
+                  <Pressable
+                    className={
+                      selected
+                        ? 'flex-row items-center gap-3 rounded-lg bg-muted px-3 py-2'
+                        : 'flex-row items-center gap-3 rounded-lg px-3 py-2'
+                    }
+                    accessibilityRole="button"
+                    accessibilityState={{ selected }}
+                    accessibilityLabel={`${formatReaderNumber(
+                      item.number,
+                      language,
+                    )} ${language === 'ar' ? item.name : item.nameEnglish}`}
+                    onPress={() => select(item.number)}
+                    testID={`surah-row:${item.number}`}
                   >
-                    {formatReaderNumber(item.number, language)}
-                  </Text>
-                  <View className="min-w-0 flex-1">
-                    <Text variant="label" family="arabic" numberOfLines={1}>
-                      {item.name}
+                    <Text
+                      variant="caption"
+                      tone="muted"
+                      className="w-8 text-end tabular-nums"
+                    >
+                      {formatReaderNumber(item.number, language)}
                     </Text>
-                    <Text variant="caption" tone="muted" numberOfLines={1}>
-                      {item.nameEnglish}
+                    <View className="min-w-0 flex-1">
+                      <Text variant="label" family="arabic" numberOfLines={1}>
+                        {item.name}
+                      </Text>
+                      <Text variant="caption" tone="muted" numberOfLines={1}>
+                        {item.nameEnglish}
+                      </Text>
+                    </View>
+                    <Text variant="caption" tone="muted">
+                      {t('reader.ayahCount', {
+                        count: formatReaderNumber(item.ayahCount, language),
+                      })}
                     </Text>
-                  </View>
-                  <Text variant="caption" tone="muted">
-                    {t('reader.ayahCount', {
-                      count: formatReaderNumber(item.ayahCount, language),
-                    })}
-                  </Text>
-                </Pressable>
-              );
-            }}
-          />
-        )}
-      </View>
+                  </Pressable>
+                );
+              }}
+            />
+          )}
+        </View>
+      </NativeSheetContent>
     </BottomSheet>
   );
 }

@@ -22,6 +22,7 @@ jest.mock('@expo/ui', () => ({
     isPresented?: boolean;
     children?: ReactNode;
   }) => (isPresented ? children : null),
+  RNHostView: ({ children }: { children?: ReactNode }) => <>{children}</>,
 }));
 
 // The panel has its own suite and needs a QueryClient; this sheet test only

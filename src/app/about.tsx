@@ -49,7 +49,7 @@ export default function AboutScreen() {
         <title>{`${title} · ${t('app.name')}`}</title>
       </Head>
 
-      <View className="border-border flex-row items-center gap-2 border-b px-2 py-2">
+      <View className="flex-row items-center gap-2 border-b border-border px-2 py-2">
         <Button
           variant="ghost"
           accessibilityLabel={t('action.back')}
@@ -71,7 +71,7 @@ export default function AboutScreen() {
         <List testID="about-list">
           <RNHostView matchContents={{ vertical: true }}>
             <View className="gap-3 px-4 pt-6 pb-2">
-              <View className="bg-secondary h-14 w-14 items-center justify-center rounded-2xl">
+              <View className="h-14 w-14 items-center justify-center rounded-2xl bg-secondary">
                 <Icon name="book-open" size={28} tone="primary" />
               </View>
 

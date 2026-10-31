@@ -32,7 +32,7 @@ export function AttendeeStack({ attendees }: AttendeeStackProps) {
         <View
           key={`${attendee.name}-${index}`}
           className={cn(
-            'border-card rounded-full border-2',
+            'rounded-full border-2 border-card',
             index > 0 && '-ms-2',
           )}
         >
@@ -45,7 +45,7 @@ export function AttendeeStack({ attendees }: AttendeeStackProps) {
       ))}
 
       {hidden > 0 ? (
-        <View className="border-card bg-muted -ms-2 h-6 min-w-6 items-center justify-center rounded-full border-2 px-1">
+        <View className="-ms-2 h-6 min-w-6 items-center justify-center rounded-full border-2 border-card bg-muted px-1">
           <Text variant="caption" tone="muted">
             {`+${hidden}`}
           </Text>

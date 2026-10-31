@@ -5,6 +5,7 @@ import type { Shaykh } from '@/core/config';
 import { useDirection } from '@/i18n';
 import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
+import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { Text } from '@/ui/text';
 import type { SelectedAyah } from '../ayah-content';
 import { formatAudioTime, formatReaderNumber } from '../format';
@@ -81,169 +82,175 @@ export function AudioSheet({
       onDismiss={onDismiss}
       testID="audio-sheet"
     >
-      <View className="gap-3">
-        <View className="flex-row items-center justify-between gap-2">
-          <Text variant="subtitle">{t('reader.panelAudioTitle')}</Text>
-          <Button
-            variant="ghost"
-            size="sm"
-            label={t('action.close')}
-            onPress={onDismiss}
-            testID="audio-close"
-          />
-        </View>
+      <NativeSheetContent>
+        <View className="gap-3">
+          <View className="flex-row items-center justify-between gap-2">
+            <Text variant="subtitle">{t('reader.panelAudioTitle')}</Text>
+            <Button
+              variant="ghost"
+              size="sm"
+              label={t('action.close')}
+              onPress={onDismiss}
+              testID="audio-close"
+            />
+          </View>
 
-        {selected ? (
-          <>
-            <Text variant="caption" tone="muted" testID="audio-identity">
-              {position}
-            </Text>
-
-            <View className="flex-row items-center justify-center gap-4">
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={!canStepPrevious}
-                accessibilityLabel={t('reader.audioPreviousAyah')}
-                onPress={onPrevious}
-                testID="audio-prev"
-              >
-                <Icon name={previousIcon} size={22} />
-              </Button>
-
-              <Button
-                variant="outline"
-                size="icon"
-                disabled={!audio.isLoaded}
-                accessibilityLabel={
-                  audio.playing ? t('reader.audioPause') : t('reader.audioPlay')
-                }
-                onPress={audio.toggle}
-                testID="audio-toggle"
-              >
-                <Icon
-                  name={audio.playing ? 'pause' : 'play'}
-                  size={24}
-                  tone="primary"
-                />
-              </Button>
-
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled={!canStepNext}
-                accessibilityLabel={t('reader.audioNextAyah')}
-                onPress={onNext}
-                testID="audio-next"
-              >
-                <Icon name={nextIcon} size={22} />
-              </Button>
-            </View>
-
-            <View className="gap-1">
-              <Host
-                matchContents={{ vertical: true }}
-                style={{ alignSelf: 'stretch' }}
-              >
-                <Column spacing={12}>
-                  <Slider
-                    value={Math.min(
-                      audio.currentTime,
-                      Math.max(audio.duration, 1),
-                    )}
-                    min={0}
-                    max={Math.max(audio.duration, 1)}
-                    step={1}
-                    disabled={!audio.isLoaded}
-                    onValueChange={audio.seekTo}
-                    testID="audio-seek"
-                  />
-                </Column>
-              </Host>
-
-              <View className="flex-row justify-between">
-                <Text variant="caption" tone="muted" className="tabular-nums">
-                  {formatAudioTime(audio.currentTime)}
-                </Text>
-                <Text variant="caption" tone="muted" className="tabular-nums">
-                  {formatAudioTime(audio.duration)}
-                </Text>
-              </View>
-            </View>
-
-            {audio.buffering && !audio.error ? (
-              <Text variant="caption" tone="muted" testID="audio-buffering">
-                {t('reader.audioBuffering')}
+          {selected ? (
+            <>
+              <Text variant="caption" tone="muted" testID="audio-identity">
+                {position}
               </Text>
-            ) : null}
 
-            {audio.error ? (
-              <View className="gap-2" testID="audio-error">
-                <Text variant="caption" tone="muted">
-                  {t('reader.audioError')}
-                </Text>
+              <View className="flex-row items-center justify-center gap-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={!canStepPrevious}
+                  accessibilityLabel={t('reader.audioPreviousAyah')}
+                  onPress={onPrevious}
+                  testID="audio-prev"
+                >
+                  <Icon name={previousIcon} size={22} />
+                </Button>
+
                 <Button
                   variant="outline"
-                  size="sm"
-                  label={t('action.retry')}
-                  onPress={audio.retry}
-                  testID="audio-retry"
-                />
+                  size="icon"
+                  disabled={!audio.isLoaded}
+                  accessibilityLabel={
+                    audio.playing
+                      ? t('reader.audioPause')
+                      : t('reader.audioPlay')
+                  }
+                  onPress={audio.toggle}
+                  testID="audio-toggle"
+                >
+                  <Icon
+                    name={audio.playing ? 'pause' : 'play'}
+                    size={24}
+                    tone="primary"
+                  />
+                </Button>
+
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  disabled={!canStepNext}
+                  accessibilityLabel={t('reader.audioNextAyah')}
+                  onPress={onNext}
+                  testID="audio-next"
+                >
+                  <Icon name={nextIcon} size={22} />
+                </Button>
               </View>
-            ) : null}
 
-            <View className="gap-2">
-              <Text variant="overline" tone="muted">
-                {t('reader.audioReciter')}
+              <View className="gap-1">
+                <Host
+                  matchContents={{ vertical: true }}
+                  style={{ alignSelf: 'stretch' }}
+                >
+                  <Column spacing={12}>
+                    <Slider
+                      value={Math.min(
+                        audio.currentTime,
+                        Math.max(audio.duration, 1),
+                      )}
+                      min={0}
+                      max={Math.max(audio.duration, 1)}
+                      step={1}
+                      disabled={!audio.isLoaded}
+                      onValueChange={audio.seekTo}
+                      testID="audio-seek"
+                    />
+                  </Column>
+                </Host>
+
+                <View className="flex-row justify-between">
+                  <Text variant="caption" tone="muted" className="tabular-nums">
+                    {formatAudioTime(audio.currentTime)}
+                  </Text>
+                  <Text variant="caption" tone="muted" className="tabular-nums">
+                    {formatAudioTime(audio.duration)}
+                  </Text>
+                </View>
+              </View>
+
+              {audio.buffering && !audio.error ? (
+                <Text variant="caption" tone="muted" testID="audio-buffering">
+                  {t('reader.audioBuffering')}
+                </Text>
+              ) : null}
+
+              {audio.error ? (
+                <View className="gap-2" testID="audio-error">
+                  <Text variant="caption" tone="muted">
+                    {t('reader.audioError')}
+                  </Text>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    label={t('action.retry')}
+                    onPress={audio.retry}
+                    testID="audio-retry"
+                  />
+                </View>
+              ) : null}
+
+              <View className="gap-2">
+                <Text variant="overline" tone="muted">
+                  {t('reader.audioReciter')}
+                </Text>
+                <Host
+                  matchContents={{ vertical: true }}
+                  style={{ alignSelf: 'stretch' }}
+                >
+                  <Column spacing={12}>
+                    <Picker
+                      selectedValue={reciterId}
+                      onValueChange={onReciterChange}
+                      testID="audio-reciter"
+                    >
+                      {reciters.map((reciter) => (
+                        <Picker.Item
+                          key={reciter.identifier}
+                          label={
+                            language === 'ar'
+                              ? reciter.name
+                              : reciter.englishName
+                          }
+                          value={reciter.identifier}
+                        />
+                      ))}
+                    </Picker>
+
+                    <Switch
+                      value={autoRead}
+                      onValueChange={onAutoReadChange}
+                      label={t('reader.audioAutoRead')}
+                      testID="audio-auto-read"
+                    />
+
+                    <Switch
+                      value={wrap}
+                      onValueChange={onWrapChange}
+                      label={t('reader.audioWrap')}
+                      testID="audio-wrap"
+                    />
+                  </Column>
+                </Host>
+              </View>
+
+              <Text variant="caption" tone="muted">
+                {t('reader.audioBackgroundNote')}
               </Text>
-              <Host
-                matchContents={{ vertical: true }}
-                style={{ alignSelf: 'stretch' }}
-              >
-                <Column spacing={12}>
-                  <Picker
-                    selectedValue={reciterId}
-                    onValueChange={onReciterChange}
-                    testID="audio-reciter"
-                  >
-                    {reciters.map((reciter) => (
-                      <Picker.Item
-                        key={reciter.identifier}
-                        label={
-                          language === 'ar' ? reciter.name : reciter.englishName
-                        }
-                        value={reciter.identifier}
-                      />
-                    ))}
-                  </Picker>
-
-                  <Switch
-                    value={autoRead}
-                    onValueChange={onAutoReadChange}
-                    label={t('reader.audioAutoRead')}
-                    testID="audio-auto-read"
-                  />
-
-                  <Switch
-                    value={wrap}
-                    onValueChange={onWrapChange}
-                    label={t('reader.audioWrap')}
-                    testID="audio-wrap"
-                  />
-                </Column>
-              </Host>
-            </View>
-
-            <Text variant="caption" tone="muted">
-              {t('reader.audioBackgroundNote')}
+            </>
+          ) : (
+            <Text variant="body" tone="muted" testID="audio-empty">
+              {t('reader.panelNeedsSelection')}
             </Text>
-          </>
-        ) : (
-          <Text variant="body" tone="muted" testID="audio-empty">
-            {t('reader.panelNeedsSelection')}
-          </Text>
-        )}
-      </View>
+          )}
+        </View>
+      </NativeSheetContent>
     </BottomSheet>
   );
 }

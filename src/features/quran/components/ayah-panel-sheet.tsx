@@ -6,6 +6,7 @@ import type { AyahContent } from '@/core/types';
 import type { AsyncPresentResult } from '@/features/query/async-state';
 import { useDirection } from '@/i18n';
 import { Button } from '@/ui/button';
+import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { ErrorState, Loading } from '@/ui/states';
 import { Text } from '@/ui/text';
 import { buildAyahBlocks } from '../ayah-content';
@@ -90,47 +91,53 @@ export function AyahPanelSheet({
       testID="ayah-panel-sheet"
     >
       {copy ? (
-        <View className="gap-3">
-          <View className="flex-row items-center justify-between gap-2">
-            <Text variant="subtitle">{t(copy.titleKey)}</Text>
-            <Button
-              variant="ghost"
-              size="sm"
-              label={t('action.close')}
-              onPress={onDismiss}
-              testID="ayah-panel-close"
-            />
-          </View>
+        <NativeSheetContent>
+          <View className="gap-3">
+            <View className="flex-row items-center justify-between gap-2">
+              <Text variant="subtitle">{t(copy.titleKey)}</Text>
+              <Button
+                variant="ghost"
+                size="sm"
+                label={t('action.close')}
+                onPress={onDismiss}
+                testID="ayah-panel-close"
+              />
+            </View>
 
-          {selected ? (
-            <>
-              <Text variant="caption" tone="muted" testID="ayah-panel-identity">
-                {t('reader.selectedAyah', {
-                  ayah: formatReaderNumber(Number(ayahKey), language),
-                  surah: surahName ?? formatReaderNumber(surah, language),
-                })}
+            {selected ? (
+              <>
+                <Text
+                  variant="caption"
+                  tone="muted"
+                  testID="ayah-panel-identity"
+                >
+                  {t('reader.selectedAyah', {
+                    ayah: formatReaderNumber(Number(ayahKey), language),
+                    surah: surahName ?? formatReaderNumber(surah, language),
+                  })}
+                </Text>
+
+                {panel === 'read' ? <ReadPanelBody content={content} /> : null}
+
+                {panel === 'notes' ? (
+                  <NotesPanel
+                    // Remount per ayah: a draft belongs to the ayah it was typed
+                    // for, and an in-flight save must not leak into the next one.
+                    key={`${notes.namespace}:${notes.ayah?.absoluteNumber ?? 0}`}
+                    namespace={notes.namespace}
+                    ayah={notes.ayah}
+                  />
+                ) : null}
+
+                {panel === 'tafsir' ? <TafsirPanel ayah={ayah} /> : null}
+              </>
+            ) : (
+              <Text variant="body" tone="muted" testID="ayah-panel-empty">
+                {t('reader.panelNeedsSelection')}
               </Text>
-
-              {panel === 'read' ? <ReadPanelBody content={content} /> : null}
-
-              {panel === 'notes' ? (
-                <NotesPanel
-                  // Remount per ayah: a draft belongs to the ayah it was typed
-                  // for, and an in-flight save must not leak into the next one.
-                  key={`${notes.namespace}:${notes.ayah?.absoluteNumber ?? 0}`}
-                  namespace={notes.namespace}
-                  ayah={notes.ayah}
-                />
-              ) : null}
-
-              {panel === 'tafsir' ? <TafsirPanel ayah={ayah} /> : null}
-            </>
-          ) : (
-            <Text variant="body" tone="muted" testID="ayah-panel-empty">
-              {t('reader.panelNeedsSelection')}
-            </Text>
-          )}
-        </View>
+            )}
+          </View>
+        </NativeSheetContent>
       ) : null}
     </BottomSheet>
   );

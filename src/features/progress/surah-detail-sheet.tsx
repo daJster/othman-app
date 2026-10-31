@@ -9,6 +9,7 @@ import { useDirection } from '@/i18n';
 import { Badge } from '@/ui/badge';
 import { Button } from '@/ui/button';
 import { Progress } from '@/ui/progress';
+import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { Text } from '@/ui/text';
 import { bandBadgeVariant, bandLabelKey } from './surah-band';
 import {
@@ -45,51 +46,53 @@ export function SurahDetailSheet({ row, onClose }: SurahDetailSheetProps) {
       testID="surah-detail-sheet"
     >
       {row ? (
-        <View className="gap-4 p-4">
-          <View className="flex-row items-center justify-between gap-2">
-            <Text variant="title">
-              {t('pages.account.progress.surah', {
-                number: formatNumber(row.surahNumber, language),
-              })}
-            </Text>
-            <Badge
-              variant={bandBadgeVariant(bandOf(row.percent))}
-              label={t(bandLabelKey(bandOf(row.percent)))}
-            />
-          </View>
-
-          <View className="gap-1.5">
-            <View className="flex-row items-baseline justify-between gap-2">
-              <Text variant="subtitle">
-                {formatPercent(row.percent, language)}
+        <NativeSheetContent>
+          <View className="gap-4 p-4">
+            <View className="flex-row items-center justify-between gap-2">
+              <Text variant="title">
+                {t('pages.account.progress.surah', {
+                  number: formatNumber(row.surahNumber, language),
+                })}
               </Text>
-              <Text variant="caption" tone="muted">
-                {t('pages.account.progress.detail.memorised')}
-              </Text>
+              <Badge
+                variant={bandBadgeVariant(bandOf(row.percent))}
+                label={t(bandLabelKey(bandOf(row.percent)))}
+              />
             </View>
-            <Progress
-              value={row.percent}
-              testID="surah-detail-bar"
-              accessibilityLabel={t('pages.account.progress.surah', {
-                number: formatNumber(row.surahNumber, language),
-              })}
+
+            <View className="gap-1.5">
+              <View className="flex-row items-baseline justify-between gap-2">
+                <Text variant="subtitle">
+                  {formatPercent(row.percent, language)}
+                </Text>
+                <Text variant="caption" tone="muted">
+                  {t('pages.account.progress.detail.memorised')}
+                </Text>
+              </View>
+              <Progress
+                value={row.percent}
+                testID="surah-detail-bar"
+                accessibilityLabel={t('pages.account.progress.surah', {
+                  number: formatNumber(row.surahNumber, language),
+                })}
+              />
+            </View>
+
+            <Text variant="caption" tone="muted">
+              {row.lastReviewed
+                ? t('pages.account.progress.detail.lastReviewed', {
+                    date: formatReviewedDate(row.lastReviewed, language),
+                  })
+                : t('pages.account.progress.detail.neverReviewed')}
+            </Text>
+
+            <Button
+              label={t('action.close')}
+              onPress={onClose}
+              testID="surah-detail-close"
             />
           </View>
-
-          <Text variant="caption" tone="muted">
-            {row.lastReviewed
-              ? t('pages.account.progress.detail.lastReviewed', {
-                  date: formatReviewedDate(row.lastReviewed, language),
-                })
-              : t('pages.account.progress.detail.neverReviewed')}
-          </Text>
-
-          <Button
-            label={t('action.close')}
-            onPress={onClose}
-            testID="surah-detail-close"
-          />
-        </View>
+        </NativeSheetContent>
       ) : null}
     </BottomSheet>
   );

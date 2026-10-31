@@ -55,6 +55,7 @@ jest.mock('@expo/ui', () => {
       children?: unknown;
     }) => (isPresented ? children : null),
     Host: ({ children }: { children?: unknown }) => children,
+    RNHostView: ({ children }: { children?: unknown }) => children,
     Column: ({ children }: { children?: unknown }) => children,
     Slider: ({
       onValueChange,

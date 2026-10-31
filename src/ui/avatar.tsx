@@ -15,8 +15,8 @@ import { Text } from './text';
  */
 const avatar = tv({
   slots: {
-    root: 'bg-muted items-center justify-center overflow-hidden rounded-full',
-    initials: 'text-muted-foreground font-semibold',
+    root: 'items-center justify-center overflow-hidden rounded-full bg-muted',
+    initials: 'font-semibold text-muted-foreground',
   },
   variants: {
     size: {

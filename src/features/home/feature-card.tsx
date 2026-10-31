@@ -31,8 +31,8 @@ export function FeatureCard({
 }: FeatureCardProps) {
   return (
     <Link href={href} asChild>
-      <Pressable className="border-border bg-card active:bg-accent flex-row items-center gap-3 rounded-xl border p-4">
-        <View className="bg-secondary h-11 w-11 items-center justify-center rounded-lg">
+      <Pressable className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-4 active:bg-accent">
+        <View className="h-11 w-11 items-center justify-center rounded-lg bg-secondary">
           <Icon name={icon} size={22} tone="primary" />
         </View>
         <View className="flex-1 gap-0.5">

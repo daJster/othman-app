@@ -39,8 +39,8 @@ export default function WebTabsLayout() {
   const visibleNames = new Set(visible.map((tab) => tab.tab));
 
   return (
-    <Tabs className="bg-background flex-1">
-      <TabList className="border-border bg-card flex-row flex-wrap items-center gap-1 border-b px-2 py-2 sm:px-3">
+    <Tabs className="flex-1 bg-background">
+      <TabList className="flex-row flex-wrap items-center gap-1 border-b border-border bg-card px-2 py-2 sm:px-3">
         {/*
          * Every registry tab is a trigger, even while signed out. A trigger is
          * what registers the route with the navigator; rendering only the

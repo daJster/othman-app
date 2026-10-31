@@ -145,7 +145,7 @@ export function MushafPage({
 
           {imageStatus === 'loading' ? (
             <View
-              className="bg-background/70 absolute inset-0"
+              className="absolute inset-0 bg-background/70"
               testID="mushaf-image-loading"
               pointerEvents="none"
             >
@@ -155,7 +155,7 @@ export function MushafPage({
 
           {imageStatus === 'error' ? (
             <View
-              className="bg-background absolute inset-0 items-center justify-center gap-3 p-4"
+              className="absolute inset-0 items-center justify-center gap-3 bg-background p-4"
               testID="mushaf-image-error"
             >
               <Text variant="label" tone="destructive" className="text-center">

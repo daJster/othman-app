@@ -121,7 +121,7 @@ export function NotesPanel({ namespace, ayah }: NotesPanelProps) {
 
 function NoteRow({ note }: { note: QuranNote }) {
   return (
-    <View className="border-border gap-1 border-b py-2">
+    <View className="gap-1 border-b border-border py-2">
       <Text variant="body" selectable testID={`note:${note.id}`}>
         {note.text}
       </Text>

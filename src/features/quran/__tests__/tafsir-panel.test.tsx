@@ -53,6 +53,7 @@ jest.mock('@expo/ui', () => {
 
   return {
     Host: ({ children }: { children?: ReactNode }) => <>{children}</>,
+    RNHostView: ({ children }: { children?: ReactNode }) => <>{children}</>,
     Column: ({ children }: { children?: ReactNode }) => <>{children}</>,
     Picker: MockPicker,
   };

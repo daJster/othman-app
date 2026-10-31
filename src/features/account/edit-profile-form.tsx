@@ -178,9 +178,9 @@ export function EditProfileForm({
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      className="bg-background flex-1"
+      className="flex-1 bg-background"
     >
-      <View className="border-border flex-row items-center gap-2 border-b px-4 py-2">
+      <View className="flex-row items-center gap-2 border-b border-border px-4 py-2">
         <View className="flex-1 items-start">
           <Button
             variant="ghost"
@@ -341,7 +341,7 @@ export function EditProfileForm({
         but the action that ends the form must stay reachable. This is the
         "keyboard never covers Save" requirement.
       */}
-      <View className="border-border bg-background border-t p-4">
+      <View className="border-t border-border bg-background p-4">
         <Button
           label={update.isPending ? t('account.edit.saving') : t('action.save')}
           onPress={handleSave}

@@ -6,6 +6,7 @@ import type { QuranEdition } from '@/core/types';
 import { useDirection } from '@/i18n';
 import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
+import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { Pressable } from '@/ui/pressable';
 import { Text } from '@/ui/text';
 import { formatReaderNumber } from '../format';
@@ -51,60 +52,62 @@ export function EditionPickerSheet({
       onDismiss={onDismiss}
       testID="edition-picker-sheet"
     >
-      <View className="gap-3">
-        <View className="flex-row items-center justify-between gap-2">
-          <Text variant="subtitle">{t('reader.editionPickerTitle')}</Text>
-          <Button
-            variant="ghost"
-            size="sm"
-            label={t('action.close')}
-            onPress={onDismiss}
-            testID="edition-picker-close"
-          />
-        </View>
+      <NativeSheetContent>
+        <View className="gap-3">
+          <View className="flex-row items-center justify-between gap-2">
+            <Text variant="subtitle">{t('reader.editionPickerTitle')}</Text>
+            <Button
+              variant="ghost"
+              size="sm"
+              label={t('action.close')}
+              onPress={onDismiss}
+              testID="edition-picker-close"
+            />
+          </View>
 
-        {rows.map((edition) => {
-          const selected = edition.key === currentKey;
+          {rows.map((edition) => {
+            const selected = edition.key === currentKey;
 
-          return (
-            <Pressable
-              key={edition.key}
-              className={
-                selected
-                  ? 'bg-muted flex-row items-center gap-3 rounded-lg px-3 py-3'
-                  : 'flex-row items-center gap-3 rounded-lg px-3 py-3'
-              }
-              accessibilityRole="button"
-              accessibilityState={{ selected }}
-              accessibilityLabel={`${edition.name} — ${edition.riwaya}`}
-              onPress={() => onSelect(edition.key)}
-              testID={`edition-row:${edition.key}`}
-            >
-              <View className="min-w-0 flex-1 gap-1">
-                <Text variant="label" numberOfLines={1}>
-                  {edition.name}
-                </Text>
-                <Text variant="caption" tone="muted" numberOfLines={1}>
-                  {edition.riwaya} ·{' '}
-                  {t('reader.editionPages', {
-                    first: formatReaderNumber(edition.firstPage, language),
-                    last: formatReaderNumber(edition.lastPage, language),
-                  })}
-                </Text>
-              </View>
-
-              {selected ? (
-                <>
-                  <Text variant="caption" tone="muted">
-                    {t('reader.editionSelected')}
+            return (
+              <Pressable
+                key={edition.key}
+                className={
+                  selected
+                    ? 'flex-row items-center gap-3 rounded-lg bg-muted px-3 py-3'
+                    : 'flex-row items-center gap-3 rounded-lg px-3 py-3'
+                }
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                accessibilityLabel={`${edition.name} — ${edition.riwaya}`}
+                onPress={() => onSelect(edition.key)}
+                testID={`edition-row:${edition.key}`}
+              >
+                <View className="min-w-0 flex-1 gap-1">
+                  <Text variant="label" numberOfLines={1}>
+                    {edition.name}
                   </Text>
-                  <Icon name="check-circle" size={18} tone="primary" />
-                </>
-              ) : null}
-            </Pressable>
-          );
-        })}
-      </View>
+                  <Text variant="caption" tone="muted" numberOfLines={1}>
+                    {edition.riwaya} ·{' '}
+                    {t('reader.editionPages', {
+                      first: formatReaderNumber(edition.firstPage, language),
+                      last: formatReaderNumber(edition.lastPage, language),
+                    })}
+                  </Text>
+                </View>
+
+                {selected ? (
+                  <>
+                    <Text variant="caption" tone="muted">
+                      {t('reader.editionSelected')}
+                    </Text>
+                    <Icon name="check-circle" size={18} tone="primary" />
+                  </>
+                ) : null}
+              </Pressable>
+            );
+          })}
+        </View>
+      </NativeSheetContent>
     </BottomSheet>
   );
 }

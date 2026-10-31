@@ -14,10 +14,10 @@ import { Pressable, Text, View } from 'react-native';
  */
 function Subject({ label, onPress }: { label: string; onPress?: () => void }) {
   return (
-    <View className="bg-background flex-1 gap-2 p-4">
-      <Text className="text-foreground text-lg">{label}</Text>
+    <View className="flex-1 gap-2 bg-background p-4">
+      <Text className="text-lg text-foreground">{label}</Text>
       {onPress ? (
-        <Pressable className="bg-primary rounded-lg p-4" onPress={onPress}>
+        <Pressable className="rounded-lg bg-primary p-4" onPress={onPress}>
           <Text className="text-primary-foreground">press</Text>
         </Pressable>
       ) : null}

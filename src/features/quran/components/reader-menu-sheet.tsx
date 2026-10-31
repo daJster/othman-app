@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import type { IconName } from '@/core/config';
 import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
+import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { Pressable } from '@/ui/pressable';
 import { Text } from '@/ui/text';
 
@@ -64,32 +65,34 @@ export function ReaderMenuSheet({
       onDismiss={onDismiss}
       testID="reader-menu-sheet"
     >
-      <View className="gap-2">
-        <View className="flex-row items-center justify-between gap-2">
-          <Text variant="subtitle">{t('reader.menuTitle')}</Text>
-          <Button
-            variant="ghost"
-            size="sm"
-            label={t('action.close')}
-            onPress={onDismiss}
-            testID="reader-menu-close"
-          />
-        </View>
+      <NativeSheetContent>
+        <View className="gap-2">
+          <View className="flex-row items-center justify-between gap-2">
+            <Text variant="subtitle">{t('reader.menuTitle')}</Text>
+            <Button
+              variant="ghost"
+              size="sm"
+              label={t('action.close')}
+              onPress={onDismiss}
+              testID="reader-menu-close"
+            />
+          </View>
 
-        {ACTIONS.map((action) => (
-          <Pressable
-            key={action.id}
-            className="active:bg-muted flex-row items-center gap-3 rounded-lg px-3 py-3"
-            accessibilityRole="button"
-            accessibilityLabel={t(action.labelKey)}
-            onPress={() => onSelect(action.id)}
-            testID={`reader-menu-${action.id}`}
-          >
-            <Icon name={action.icon} size={20} tone="muted" />
-            <Text variant="label">{t(action.labelKey)}</Text>
-          </Pressable>
-        ))}
-      </View>
+          {ACTIONS.map((action) => (
+            <Pressable
+              key={action.id}
+              className="flex-row items-center gap-3 rounded-lg px-3 py-3 active:bg-muted"
+              accessibilityRole="button"
+              accessibilityLabel={t(action.labelKey)}
+              onPress={() => onSelect(action.id)}
+              testID={`reader-menu-${action.id}`}
+            >
+              <Icon name={action.icon} size={20} tone="muted" />
+              <Text variant="label">{t(action.labelKey)}</Text>
+            </Pressable>
+          ))}
+        </View>
+      </NativeSheetContent>
     </BottomSheet>
   );
 }
