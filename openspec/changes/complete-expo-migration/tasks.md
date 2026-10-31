@@ -167,19 +167,19 @@ Approach: D7. Depends on P6.2. The reference panel is read-only evidence, not co
 
 Approach: D8. Depends on a testable P5.3 implementation, not P6.3. Reuse one campaign to satisfy both P5.3 and P7.1; do not defer measurement until the end of the reader work.
 
-- [ ] 12.1 Identify the lowest-supported test device and representative build, then define repeatable cache conditions and timing/memory capture; verify: the protocol records device/OS/build/SHA/edition and the statistics that will be reported.
-- [ ] 12.2 Measure at least 20 page turns, tap-to-select latency, JS frame timings, frame rate, and repeated-run memory; verify: recorded results evaluate under-16-ms JS frames, at-least-55-fps rendering, and memory plateau without confusing cache warmup with a leak.
-- [ ] 12.3 Record the budget decision and bottleneck evidence in MIGRATE; verify: P7.2 is explicitly marked not needed when budgets pass, or a scoped go decision identifies why native work is justified, with unresolved measurements left blocked.
+- [ ] 12.1 Identify the lowest-supported test device and representative build, then define repeatable cache conditions and timing/memory capture; verify: the protocol records device/OS/build/SHA/edition and the statistics that will be reported. **Blocked:** no iOS/Android device, representative non-debug build, or profiler session on this machine; device/build identification requires the group-17 evidence owner.
+- [ ] 12.2 Measure at least 20 page turns, tap-to-select latency, JS frame timings, frame rate, and repeated-run memory; verify: recorded results evaluate under-16-ms JS frames, at-least-55-fps rendering, and memory plateau without confusing cache warmup with a leak. **Blocked:** no device/build/profiler; no measurements have been taken, so none are claimed.
+- [ ] 12.3 Record the budget decision and bottleneck evidence in MIGRATE; verify: P7.2 is explicitly marked not needed when budgets pass, or a scoped go decision identifies why native work is justified, with unresolved measurements left blocked. **Blocked:** the decision depends on 12.2 measurements; neither a pass nor a native go decision can be recorded.
 
 ## 13. Execute P7.2 only when justified
 
 Approach: D8. **CONDITIONAL: stop unless group 12 records a native go decision.** A no-go completes the decision record, not the unbuilt module tasks; annotate their disposition as conditional-not-needed rather than silently implementing them.
 
-- [ ] 13.1 Confirm the recorded native go decision and authorize the bounded module package; verify: the failed budget, bottleneck, native owner, parity criteria, and permissions are present before scaffolding.
-- [ ] 13.2 Scaffold the local Apple/Android Expo module and module registration using current compatible tooling; verify: platform configuration and development builds resolve the module without adding it to the web runtime.
-- [ ] 13.3 Implement image/normalized-rect props, ayah press events, and bounded prefetch with native caches and theme-agnostic contracts; verify: platform tests/builds and recorded hit-test/cache checks match the JS behavior.
-- [ ] 13.4 Add the typed wrapper, opt-in feature flag, and existing JS web/failure fallback with module documentation; verify: flag-on/off behavior tests, web export, and `npm run verify` pass.
-- [ ] 13.5 Compare flag-on/off performance with the group-12 protocol; verify: equivalent selection/navigation and improved failed-budget measurements are recorded before enabling the native implementation.
+- [ ] 13.1 Confirm the recorded native go decision and authorize the bounded module package; verify: the failed budget, bottleneck, native owner, parity criteria, and permissions are present before scaffolding. **Not started:** no group-12 go decision exists, so this package is not authorized.
+- [ ] 13.2 Scaffold the local Apple/Android Expo module and module registration using current compatible tooling; verify: platform configuration and development builds resolve the module without adding it to the web runtime. **Not started:** conditional on 13.1.
+- [ ] 13.3 Implement image/normalized-rect props, ayah press events, and bounded prefetch with native caches and theme-agnostic contracts; verify: platform tests/builds and recorded hit-test/cache checks match the JS behavior. **Not started:** conditional on 13.1.
+- [ ] 13.4 Add the typed wrapper, opt-in feature flag, and existing JS web/failure fallback with module documentation; verify: flag-on/off behavior tests, web export, and `npm run verify` pass. **Not started:** conditional on 13.1.
+- [ ] 13.5 Compare flag-on/off performance with the group-12 protocol; verify: equivalent selection/navigation and improved failed-budget measurements are recorded before enabling the native implementation. **Not started:** conditional on 13.1 and the group-12 protocol.
 
 ## 14. Close outstanding P4 feature-screen acceptance
 
