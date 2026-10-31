@@ -16,7 +16,10 @@ export type QuranDataSource =
   | 'surah-metadata'
   | 'surah-bboxes'
   | 'page-bboxes'
-  | 'ayah-content';
+  | 'ayah-content'
+  | 'content-sources'
+  | 'content-body'
+  | 'surah-info';
 
 export class QuranDataError extends Error {
   readonly source: QuranDataSource;

@@ -1,0 +1,34 @@
+{
+  "book": {
+    "id": 1947,
+    "name": "الترجمة الإنجليزية - صحيح انترناشونال",
+    "short_name": "الترجمة الإنجليزية - صحيح انترناشونال",
+    "parts": 1,
+    "publish_year": null,
+    "edition": "",
+    "nasher": "المنتدى الاسلامي",
+    "author": {
+      "id": 1725,
+      "ar_name": "المنتدى الإسلامي",
+      "full_name": null
+    },
+    "mohaqeq": null,
+    "introducer": null,
+    "reviewer": null,
+    "translator": null,
+    "language": {
+      "id": 2,
+      "name": "الإنجليزية",
+      "code": "en",
+      "direction": "ltr"
+    }
+  },
+  "content": [
+    {
+      "text": "(262) Those who spend their wealth in the way of Allāh and then do not follow up what they have spent with reminders [of it] or [other] injury will have their reward with their Lord, and there will be no fear concerning them, nor will they grieve.",
+      "part": "1",
+      "page": 269,
+      "ayahs": "269"
+    }
+  ]
+}

@@ -12,6 +12,7 @@ import { buildAyahBlocks } from '../ayah-content';
 import { formatReaderNumber } from '../format';
 import { AyahDisplayer } from './ayah-displayer';
 import { NotesPanel } from './notes-panel';
+import { TafsirPanel } from './tafsir-panel';
 
 /**
  * Read / Tafsir / Notes panels.
@@ -62,6 +63,8 @@ export type AyahPanelSheetProps = {
     namespace: string;
     ayah: NoteAyah | null;
   };
+  /** Canonical selected ayah for content sources (P6.3). */
+  ayah?: NoteAyah | null;
   onDismiss: () => void;
 };
 
@@ -72,6 +75,7 @@ export function AyahPanelSheet({
   ayahKey,
   content,
   notes = { namespace: 'guest', ayah: null },
+  ayah = null,
   onDismiss,
 }: AyahPanelSheetProps) {
   const { t } = useTranslation();
@@ -119,11 +123,7 @@ export function AyahPanelSheet({
                 />
               ) : null}
 
-              {panel === 'tafsir' ? (
-                <Text variant="body" testID="ayah-panel-pending">
-                  {t('reader.panelTafsirPending')}
-                </Text>
-              ) : null}
+              {panel === 'tafsir' ? <TafsirPanel ayah={ayah} /> : null}
             </>
           ) : (
             <Text variant="body" tone="muted" testID="ayah-panel-empty">

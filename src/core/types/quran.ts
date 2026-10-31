@@ -97,6 +97,44 @@ export type EditionBboxes = {
   byPage: PageBboxTable;
 };
 
+/**
+ * Content categories preserved from the reference panel.
+ *
+ * `surah` is surah-level information, not a book, so it has no source picker.
+ */
+export type ContentType = 'surah' | 'tafsir' | 'e3rab' | 'translation';
+
+/** The types that resolve through a book/source id. */
+export type BookContentType = Exclude<ContentType, 'surah'>;
+
+/** One tafsir/e3rab/translation book offered for an ayah. */
+export type ContentSource = {
+  id: number;
+  name: string;
+  author: string | null;
+  category: string | null;
+};
+
+export type ContentDirection = 'rtl' | 'ltr';
+
+/**
+ * One source's text for an ayah.
+ *
+ * `empty` is a distinct state, not `text: ''`: a source may legitimately have
+ * no entry for an ayah, and showing an empty paragraph would claim a successful
+ * result where none exists.
+ */
+export type ContentBody =
+  | { status: 'ready'; text: string; direction: ContentDirection }
+  | { status: 'empty'; direction: ContentDirection };
+
+/** One titled section of surah information. */
+export type SurahInfoSection = {
+  key: string;
+  title: string;
+  text: string;
+};
+
 /** One ayah's text, from the alquran.cloud API. */
 export type AyahContent = {
   absoluteNumber: number;

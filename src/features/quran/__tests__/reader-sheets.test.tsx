@@ -24,6 +24,20 @@ jest.mock('@expo/ui', () => ({
   }) => (isPresented ? children : null),
 }));
 
+// The panel has its own suite and needs a QueryClient; this sheet test only
+// owns the panel surface and the canonical identity it forwards.
+jest.mock('../components/tafsir-panel', () => ({
+  TafsirPanel: ({ ayah }: { ayah: { absoluteNumber?: number } | null }) => {
+    const { Text } = require('react-native');
+
+    return (
+      <Text testID="tafsir-panel-stub">
+        {ayah ? String(ayah.absoluteNumber) : 'none'}
+      </Text>
+    );
+  },
+}));
+
 const SURAHS: Record<string, SurahMetadata> = {
   '2': {
     number: 2,
@@ -239,7 +253,7 @@ describe('AyahPanelSheet', () => {
     expect(screen.queryByTestId('ayah-panel-pending')).toBeNull();
   });
 
-  it('keeps Tafsir honest until its own package lands', async () => {
+  it('mounts the content panel with the selected canonical ayah', async () => {
     await render(
       <AyahPanelSheet
         panel="tafsir"
@@ -247,6 +261,7 @@ describe('AyahPanelSheet', () => {
         surahName="Al-Baqarah"
         ayahKey="255"
         content={ready}
+        ayah={{ surah: 2, ayah: 255, absoluteNumber: 262 }}
         onDismiss={jest.fn()}
       />,
     );
@@ -255,7 +270,7 @@ describe('AyahPanelSheet', () => {
     expect(screen.getByTestId('ayah-panel-identity').props.children).toContain(
       'Al-Baqarah',
     );
-    expect(screen.getByTestId('ayah-panel-pending')).toBeTruthy();
+    expect(screen.getByTestId('tafsir-panel-stub').props.children).toBe('262');
     expect(screen.queryByTestId('ayah-content')).toBeNull();
   });
 

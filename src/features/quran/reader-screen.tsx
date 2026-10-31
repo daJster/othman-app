@@ -439,6 +439,7 @@ export function ReaderScreen({
         ayahKey={selectedAyah ? String(selectedAyah.ayah) : null}
         content={ayahContent}
         notes={{ namespace: notesNamespace, ayah: selectedAyah }}
+        ayah={selectedAyah}
         onDismiss={() => setPanel(null)}
       />
     </ScreenView>

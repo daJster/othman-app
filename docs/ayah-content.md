@@ -61,9 +61,9 @@ prepared before their repositories land.
 | error        | `ErrorState` with a retry that re-runs  |
 | ready        | scrollable `AyahDisplayer`              |
 
-Notes are implemented in P6.2 (see [`docs/notes.md`](notes.md)); they never
-render the Read result as their own. Tafsir keeps its honest "not in this
-package yet" copy until P6.3 supplies real content.
+Notes are implemented in P6.2 (see [`docs/notes.md`](notes.md)) and Tafsir in
+P6.3 (see [`docs/tafsir.md`](tafsir.md)); neither renders the Read result as its
+own.
 
 ## Verification
 

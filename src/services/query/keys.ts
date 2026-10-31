@@ -82,4 +82,27 @@ export const queryKeys = {
     byAyah: (namespace: string, absoluteNumber: number) =>
       ['othman', 'notes', namespace, absoluteNumber] as const,
   },
+
+  tafsir: {
+    /** Every content-source read for an ayah. */
+    root: ['othman', 'tafsir'] as const,
+    /**
+     * The books offered for one content type on one ayah.
+     *
+     * Type is in the key because switching type must fetch that type's own
+     * list — the reference panel reused one list for every type.
+     */
+    sources: (type: string, absoluteNumber: number) =>
+      ['othman', 'tafsir', 'sources', type, absoluteNumber] as const,
+    /**
+     * One source's body for one ayah.
+     *
+     * Type and source id are both present: the same book id under another type
+     * is a different result, and a type change must not reuse stale text.
+     */
+    content: (type: string, absoluteNumber: number, sourceId: number) =>
+      ['othman', 'tafsir', 'content', type, absoluteNumber, sourceId] as const,
+    /** Surah-level information, keyed by surah not ayah. */
+    surah: (surah: number) => ['othman', 'tafsir', 'surah', surah] as const,
+  },
 } as const;

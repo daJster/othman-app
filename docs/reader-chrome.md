@@ -100,11 +100,10 @@ and footer expose the two most-used ones directly.
 ### Read / Tafsir / Notes panels
 
 P5.4 owns the surface only. Each panel states which ayah it is about (surah name
-+ ayah number, assembled from the selected row). P5.5 fills Read and P6.2 fills
-Notes (see [`docs/notes.md`](notes.md)); Tafsir still shows an honest "not part
-of this package yet" message until P6.3 supplies its content. With no selection,
-the panel asks for one instead of rendering an empty box or a spinner that never
-resolves.
++ ayah number, assembled from the selected row). P5.5 fills Read, P6.2 fills
+Notes (see [`docs/notes.md`](notes.md)) and P6.3 fills Tafsir with live source
+content (see [`docs/tafsir.md`](tafsir.md)). With no selection, the panel asks
+for one instead of rendering an empty box or a spinner that never resolves.
 
 ## Accessibility and RTL
 
