@@ -403,9 +403,10 @@ async function main() {
     check('localhost responds', response?.status() === 200);
     check('title is the app title', (await page.title()) === 'Othman');
     check(
-      'signed-out top nav exposes public tabs',
+      'development mode exposes every tab',
       JSON.stringify((await navInfo(page)).hrefs) ===
-        JSON.stringify(['/', '/quran']),
+        JSON.stringify(['/', '/quran', '/meetings', '/account']),
+      JSON.stringify((await navInfo(page)).hrefs),
     );
     check('active tab is announced', (await navInfo(page)).current === 1);
     check('no runtime errors', errors.length === 0, errors.join(' | '));
@@ -485,7 +486,7 @@ async function main() {
     await context.close();
   });
 
-  await scenario('protected routes', async () => {
+  await scenario('development access', async () => {
     for (const path of [
       '/account',
       '/meetings',
@@ -498,14 +499,9 @@ async function main() {
       await goto(page, path);
       const url = new URL(page.url());
       check(
-        `${path} redirects to sign-in`,
-        url.pathname === '/auth/sign-in',
+        `${path} opens without a session`,
+        url.pathname === path,
         url.pathname,
-      );
-      check(
-        `${path} keeps an internal return destination`,
-        url.searchParams.get('returnTo') === path,
-        url.search,
       );
       check(
         `${path} has no runtime errors`,
@@ -514,6 +510,23 @@ async function main() {
       );
       await context.close();
     }
+
+    const context = await makeContext(browser, { width: 768, height: 900 });
+    const page = await context.newPage();
+    const errors = track(page);
+    await goto(page, '/');
+    await page.locator('[data-testid="home-sign-in"]').click();
+    await page.waitForURL(/\/auth\/sign-in/, { timeout: 10000 });
+    check(
+      'Home sign-in button opens sign-in',
+      /\/auth\/sign-in/.test(page.url()),
+    );
+    check(
+      'sign-in page has no runtime errors',
+      errors.length === 0,
+      errors.join(' | '),
+    );
+    await context.close();
   });
 
   await scenario('sign-in form', () => signInForm(browser));

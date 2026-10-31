@@ -1,7 +1,9 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 import HomeScreen from '@/app/(tabs)/index';
 import { HOME_LINKS } from '@/features/home/feature-links';
+
+const mockPush = jest.fn();
 
 /**
  * `Link` needs a mounted Expo Router container, and `Head` needs a navigation
@@ -17,10 +19,15 @@ jest.mock('expo-router', () => {
   return {
     Link: ({ href, children }: { href: string; children: ReactNode }) =>
       React.createElement(View, { testID: `link:${href}` }, children),
+    useRouter: () => ({ push: mockPush }),
   };
 });
 
 jest.mock('expo-router/head', () => () => null);
+
+jest.mock('@/providers/auth-provider', () => ({
+  useAuth: () => ({ user: null }),
+}));
 
 describe('HomeScreen', () => {
   it('opens with the app identity', async () => {
@@ -28,6 +35,14 @@ describe('HomeScreen', () => {
 
     expect(screen.getByText('Othman')).toBeTruthy();
     expect(screen.getByText('Contemplate the Book of Allah')).toBeTruthy();
+  });
+
+  it('opens the sign-in page from Home while signed out', async () => {
+    await render(<HomeScreen />);
+
+    await fireEvent.press(screen.getByTestId('home-sign-in'));
+
+    expect(mockPush).toHaveBeenCalledWith('/auth/sign-in');
   });
 
   it('shows the basmalah in the hero', async () => {

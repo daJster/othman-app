@@ -12,6 +12,7 @@ import {
 import { LayoutDirection, Uniwind, useResolveClassNames } from 'uniwind';
 import { useDirection } from '@/i18n';
 import { isPrivateAppPath } from '@/features/navigation/private-path';
+import { AUTH_GATING_ENABLED } from '@/features/auth/auth-policy';
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
 import { BootProvider } from '@/providers/boot-provider';
 import { LanguageProvider } from '@/providers/language-provider';
@@ -134,6 +135,7 @@ function RootNavigator() {
   // returning a root-level `<Redirect>` replaces the navigator, which web
   // tolerates but Android needs in order to present the sign-in modal.
   useEffect(() => {
+    if (!AUTH_GATING_ENABLED) return;
     if (status === 'restoring' || user || !isPrivateAppPath(pathname)) return;
 
     router.replace({

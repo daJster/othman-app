@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { AUTH_GATING_ENABLED } from '@/features/auth/auth-policy';
 import { useAuth } from '@/providers/auth-provider';
 import { TABS } from './route-registry';
 import { visibleTabs } from './visible-tabs';
@@ -17,7 +18,10 @@ import { visibleTabs } from './visible-tabs';
 export function useVisibleTabs() {
   const { user } = useAuth();
 
-  return useMemo(() => visibleTabs(TABS, user !== null), [user]);
+  return useMemo(
+    () => (AUTH_GATING_ENABLED ? visibleTabs(TABS, user !== null) : TABS),
+    [user],
+  );
 }
 
 export { visibleTabs };

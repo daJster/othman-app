@@ -1,10 +1,13 @@
 import Head from 'expo-router/head';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { FeatureCard } from '@/features/home/feature-card';
 import { HOME_LINKS } from '@/features/home/feature-links';
 import { Hero } from '@/features/home/hero';
 import { VerseCard } from '@/features/home/verse-card';
+import { useAuth } from '@/providers/auth-provider';
+import { Button } from '@/ui/button';
 import { Screen } from '@/ui/screen';
 import { Text } from '@/ui/text';
 
@@ -27,6 +30,8 @@ import { Text } from '@/ui/text';
  */
 export default function HomeScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
+  const { user } = useAuth();
 
   return (
     <Screen contentContainerClassName="gap-0 p-0">
@@ -49,6 +54,15 @@ export default function HomeScreen() {
 
         <View className="gap-3">
           <Text variant="heading">{t('home.explore.title')}</Text>
+          {!user ? (
+            <Button
+              variant="secondary"
+              size="lg"
+              label={t('action.signIn')}
+              onPress={() => router.push('/auth/sign-in')}
+              testID="home-sign-in"
+            />
+          ) : null}
           {HOME_LINKS.map((route) => (
             <FeatureCard
               key={route.href}

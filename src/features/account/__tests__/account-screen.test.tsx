@@ -166,7 +166,7 @@ describe('AccountScreen', () => {
     );
   });
 
-  it('asks before signing out, then leaves the private route', async () => {
+  it('asks before signing out, then shows the signed-out account state', async () => {
     const alert = jest
       .spyOn(Alert, 'alert')
       .mockImplementation(() => undefined);
@@ -193,21 +193,17 @@ describe('AccountScreen', () => {
 
     expect(auth.signOutCalls).toHaveBeenCalledTimes(1);
     await waitFor(() =>
-      expect(mockRedirect).toHaveBeenCalledWith({
-        pathname: '/auth/sign-in',
-        params: { returnTo: '/account' },
-      }),
+      expect(screen.getByText('You are signed out')).toBeTruthy(),
     );
     expect(screen.queryByText('Othman Al-Farsi')).toBeNull();
   });
 
-  it('redirects a signed-out visitor to sign-in with a return destination', async () => {
+  it('offers sign-in while gating is disabled', async () => {
     await renderScreen(null);
 
-    expect(mockRedirect).toHaveBeenCalledWith({
-      pathname: '/auth/sign-in',
-      params: { returnTo: '/account' },
-    });
-    expect(service.getAccount).not.toHaveBeenCalled();
+    expect(screen.getByText('You are signed out')).toBeTruthy();
+    await fireEvent.press(screen.getByText('Sign in'));
+
+    expect(mockPush).toHaveBeenCalledWith('/auth/sign-in');
   });
 });

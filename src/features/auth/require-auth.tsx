@@ -1,5 +1,6 @@
 import { Redirect, usePathname } from 'expo-router';
 import type { ReactNode } from 'react';
+import { AUTH_GATING_ENABLED } from '@/features/auth/auth-policy';
 import { useAuth } from '@/providers/auth-provider';
 
 /**
@@ -21,6 +22,9 @@ import { useAuth } from '@/providers/auth-provider';
 export function RequireAuth({ children }: { children: ReactNode }) {
   const { user, status } = useAuth();
   const pathname = usePathname();
+
+  // Development mode: screens stay reachable while the app is being built.
+  if (!AUTH_GATING_ENABLED) return children;
 
   if (status === 'restoring') return null;
 
