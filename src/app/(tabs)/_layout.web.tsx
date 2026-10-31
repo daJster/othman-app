@@ -40,7 +40,7 @@ export default function WebTabsLayout() {
 
   return (
     <Tabs className="flex-1 bg-background">
-      <TabList className="flex-row flex-wrap items-center gap-1 border-b border-border bg-card px-2 py-2 sm:px-3">
+      <TabList className="flex-row flex-nowrap items-center gap-0 border-b border-border bg-card px-1 py-1 sm:gap-1 sm:px-3 sm:py-2">
         {/*
          * Every registry tab is a trigger, even while signed out. A trigger is
          * what registers the route with the navigator; rendering only the
@@ -81,6 +81,7 @@ function TabLink({
     {
       href,
       role: hidden ? undefined : 'tab',
+      'aria-label': hidden ? undefined : label,
       'aria-selected': hidden ? undefined : isFocused ? 'true' : 'false',
       'aria-current': isFocused && !hidden ? 'page' : undefined,
       'aria-hidden': hidden ? 'true' : undefined,
@@ -101,7 +102,7 @@ function TabLink({
     },
     <View
       className={cn(
-        'flex-row items-center gap-2 rounded-md px-3 py-2 active:opacity-80',
+        'min-h-11 flex-row items-center justify-center gap-1 rounded-md px-1 py-2 active:opacity-80 sm:justify-start sm:gap-2 sm:px-3',
         isFocused ? 'bg-muted' : 'bg-transparent',
         className,
       )}

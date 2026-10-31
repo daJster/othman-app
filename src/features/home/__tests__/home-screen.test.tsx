@@ -68,10 +68,12 @@ describe('HomeScreen', () => {
   it('links to every destination in the registry list', async () => {
     await render(<HomeScreen />);
 
-    expect(screen.getAllByTestId(/^link:/)).toHaveLength(HOME_LINKS.length);
+    expect(screen.getAllByTestId(/^link:/)).toHaveLength(HOME_LINKS.length + 1);
 
     for (const route of HOME_LINKS) {
-      expect(screen.getByTestId(`link:${route.href}`)).toBeTruthy();
+      expect(
+        screen.getAllByTestId(`link:${route.href}`).length,
+      ).toBeGreaterThan(0);
     }
   });
 

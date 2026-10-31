@@ -2,25 +2,25 @@ import { Link } from 'expo-router';
 import { Pressable, View } from 'react-native';
 import type { IconName } from '@/core/config';
 import type { AppHref } from '@/features/navigation/route-registry';
+import { useDirection } from '@/i18n';
+import { cn } from '@/ui/cn';
 import { Icon } from '@/ui/icon';
 import { Text } from '@/ui/text';
 
 /**
- * Destination row on Home.
+ * One station on the circle line.
  *
- * `Link asChild` rather than `router.push` so the destination is a real anchor
- * on web (middle-click, open in new tab) and a normal Expo Router transition on
- * native. The child is a plain `Pressable`, which keeps the 44 pt target and
- * the pressed state on a React Native component instead of a router wrapper.
- *
- * The icon sits in a 44 pt tile so the whole row keeps the platform's minimum
- * touch size even when the description wraps to two lines.
+ * The four destinations are a path, not four equal cards: a brass node, a
+ * hairline connector and a single reading row. The line continues through the
+ * group on every width, which is the phone translation of the hero ring. The
+ * chevron mirrors with the interface direction; the row keeps a 44 pt target.
  */
 export type FeatureCardProps = {
   href: AppHref;
   icon: IconName;
   title: string;
   description: string;
+  isLast?: boolean;
 };
 
 export function FeatureCard({
@@ -28,18 +28,42 @@ export function FeatureCard({
   icon,
   title,
   description,
+  isLast = false,
 }: FeatureCardProps) {
+  const { isRTL } = useDirection();
+  const chevron = isRTL ? 'chevron-left' : 'chevron-right';
+
   return (
     <Link href={href} asChild>
-      <Pressable className="flex-row items-center gap-3 rounded-xl border border-border bg-card p-4 active:bg-accent">
-        <View className="h-11 w-11 items-center justify-center rounded-lg bg-secondary">
-          <Icon name={icon} size={22} tone="primary" />
+      <Pressable
+        className={cn(
+          'flex-row gap-4 active:opacity-70',
+          isRTL && 'flex-row-reverse',
+        )}
+      >
+        <View className="w-10 items-center self-stretch">
+          <View className="h-10 w-10 items-center justify-center rounded-full border border-brass/50 bg-background">
+            <Icon name={icon} size={18} tone="primary" />
+          </View>
+          {!isLast ? <View className="w-px flex-1 bg-border" /> : null}
         </View>
-        <View className="flex-1 gap-0.5">
-          <Text variant="subtitle">{title}</Text>
-          <Text variant="caption" tone="muted">
-            {description}
-          </Text>
+
+        <View
+          className={cn(
+            'flex-1 flex-row items-start justify-between gap-4 pb-7',
+            isRTL && 'flex-row-reverse',
+            isLast && 'pb-0',
+          )}
+        >
+          <View className="flex-1 gap-1">
+            <Text variant="subtitle">{title}</Text>
+            <Text variant="caption" tone="muted">
+              {description}
+            </Text>
+          </View>
+          <View className="pt-1">
+            <Icon name={chevron} size={18} tone="muted" />
+          </View>
         </View>
       </Pressable>
     </Link>

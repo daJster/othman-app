@@ -14,6 +14,15 @@
     },
     "explore": {
       "title": "Explore"
+    },
+    "halqa": {
+      "cohort": "Learn with your shaykh and classmates, ayah by ayah.",
+      "continue": "Continue reading",
+      "ring": "حلقة"
+    },
+    "circle": {
+      "title": "Your circle",
+      "description": "Four ways back into the circle."
     }
   },
   "action": {

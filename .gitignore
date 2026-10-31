@@ -11,6 +11,9 @@ dist-android/
 web-build/
 expo-env.d.ts
 
+# Impeccable local decision state (seeds/rolls are not product artifacts)
+.impeccable/questions/
+
 # Native
 .kotlin/
 *.orig.*
