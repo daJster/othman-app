@@ -36,7 +36,7 @@ export function Screen({
 }: ScreenProps) {
   return (
     <ScrollView
-      className={cn('flex-1 bg-background', className)}
+      className={cn('bg-background flex-1', className)}
       contentContainerClassName={cn(
         'grow gap-4 p-4 pb-8',
         contentContainerClassName,
@@ -58,7 +58,7 @@ export type ScreenViewProps = ViewProps & {
 
 export function ScreenView({ children, className, ...props }: ScreenViewProps) {
   return (
-    <View className={cn('flex-1 bg-background', className)} {...props}>
+    <View className={cn('bg-background flex-1', className)} {...props}>
       {children}
     </View>
   );

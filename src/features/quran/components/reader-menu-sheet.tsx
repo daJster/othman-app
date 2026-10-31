@@ -79,7 +79,7 @@ export function ReaderMenuSheet({
         {ACTIONS.map((action) => (
           <Pressable
             key={action.id}
-            className="flex-row items-center gap-3 rounded-lg px-3 py-3 active:bg-muted"
+            className="active:bg-muted flex-row items-center gap-3 rounded-lg px-3 py-3"
             accessibilityRole="button"
             accessibilityLabel={t(action.labelKey)}
             onPress={() => onSelect(action.id)}

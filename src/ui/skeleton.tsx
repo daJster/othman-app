@@ -18,7 +18,7 @@ export function Skeleton({ className, ...props }: ViewProps) {
     <View
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
-      className={cn('rounded-md bg-muted', className)}
+      className={cn('bg-muted rounded-md', className)}
       {...props}
     />
   );

@@ -48,7 +48,7 @@ export function ReaderFooter({
 
   return (
     <View
-      className="flex-row items-center justify-between gap-2 border-t border-border bg-background px-2 pt-2 pb-safe"
+      className="border-border bg-background flex-row items-center justify-between gap-2 border-t px-2 pt-2 pb-safe"
       testID="reader-footer"
     >
       <Button

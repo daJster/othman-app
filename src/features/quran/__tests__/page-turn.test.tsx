@@ -1,11 +1,11 @@
-import { render, screen } from '@testing-library/react-native';
+import { screen } from '@testing-library/react-native';
+import { render } from '@/test-utils/render';
 import { Text } from 'react-native';
 import { State } from 'react-native-gesture-handler';
 import {
   fireGestureHandler,
   getByGestureTestId,
 } from 'react-native-gesture-handler/jest-utils';
-import type { PanGesture } from 'react-native-gesture-handler';
 import { PageTurn } from '../components/page-turn';
 
 /**
@@ -38,7 +38,7 @@ async function renderTurn(props: Partial<Parameters<typeof PageTurn>[0]> = {}) {
 }
 
 function swipe(translationX: number, velocityX = 0) {
-  fireGestureHandler<PanGesture>(getByGestureTestId('page-turn'), [
+  fireGestureHandler(getByGestureTestId('page-turn'), [
     { state: State.BEGAN, translationX: 0 },
     { state: State.ACTIVE, translationX },
     { state: State.END, translationX, velocityX },

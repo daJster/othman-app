@@ -44,7 +44,7 @@ export function SegmentedControl<Value extends string>({
       accessibilityRole="radiogroup"
       accessibilityLabel={label}
       className={cn(
-        'flex-row gap-1 self-start rounded-lg border border-border bg-muted p-1',
+        'border-border bg-muted flex-row gap-1 self-start rounded-lg border p-1',
         className,
       )}
       {...props}

@@ -1,9 +1,5 @@
-import {
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from '@testing-library/react-native';
+import { fireEvent, screen, waitFor } from '@testing-library/react-native';
+import { render } from '@/test-utils/render';
 import { Share } from 'react-native';
 import type { EditionBboxes, QuranEdition } from '@/core/types';
 import { readerStore } from '../store/reader-store.instance';
@@ -635,9 +631,10 @@ describe('ReaderScreen chrome', () => {
   });
 
   it('shares the canonical position through the menu', async () => {
-    const share = jest
-      .spyOn(Share, 'share')
-      .mockResolvedValue({ action: Share.sharedAction });
+    const share = jest.spyOn(Share, 'share').mockResolvedValue({
+      action: Share.sharedAction,
+      activityType: undefined,
+    });
 
     await render(<ReaderScreen />);
 

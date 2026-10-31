@@ -44,7 +44,7 @@ export function ProgressLegend({
         <View
           key={stop}
           testID={`heatmap-legend:${stop}`}
-          className="h-4 w-4 rounded-sm border border-border"
+          className="border-border h-4 w-4 rounded-sm border"
           style={{ backgroundColor: getHeatmapColor(stop, isDark) }}
         />
       ))}

@@ -15,7 +15,7 @@ export function Card({ className, ...props }: ViewProps) {
   return (
     <View
       className={cn(
-        'gap-3 rounded-xl border border-border bg-card p-4',
+        'border-border bg-card gap-3 rounded-xl border p-4',
         className,
       )}
       {...props}

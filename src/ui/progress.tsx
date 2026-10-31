@@ -27,14 +27,14 @@ export function Progress({ value, className, ...props }: ProgressProps) {
       accessibilityRole="progressbar"
       accessibilityValue={{ min: 0, max: 100, now: Math.round(clamped) }}
       className={cn(
-        'h-2 w-full overflow-hidden rounded-full bg-muted',
+        'bg-muted h-2 w-full overflow-hidden rounded-full',
         className,
       )}
       {...props}
     >
       <View
         testID="progress-fill"
-        className="h-full rounded-full bg-primary"
+        className="bg-primary h-full rounded-full"
         style={{ width: `${clamped}%` }}
       />
     </View>

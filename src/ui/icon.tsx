@@ -171,6 +171,7 @@ export function Icon({ name, size = 20, tone = 'foreground' }: IconProps) {
       name={icon.md}
       size={size}
       colorClassName={colorClassName}
+      allowFontScaling={false}
       accessibilityElementsHidden
     />
   );

@@ -87,7 +87,7 @@ export function MeetingCalendar({
   }
 
   return (
-    <View className="gap-3 rounded-xl border border-border bg-card p-3">
+    <View className="border-border bg-card gap-3 rounded-xl border p-3">
       <View className="flex-row items-center justify-between gap-2">
         <MonthButton
           direction={isRTL ? 'right' : 'left'}
@@ -202,7 +202,7 @@ function MonthButton({
       disabled={disabled}
       onPress={onPress}
       className={cn(
-        'h-11 w-11 items-center justify-center rounded-full active:bg-muted',
+        'active:bg-muted h-11 w-11 items-center justify-center rounded-full',
         disabled && 'opacity-40',
       )}
     >

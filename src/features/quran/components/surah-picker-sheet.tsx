@@ -106,7 +106,7 @@ export function SurahPickerSheet({
                 <Pressable
                   className={
                     selected
-                      ? 'flex-row items-center gap-3 rounded-lg bg-muted px-3 py-2'
+                      ? 'bg-muted flex-row items-center gap-3 rounded-lg px-3 py-2'
                       : 'flex-row items-center gap-3 rounded-lg px-3 py-2'
                   }
                   accessibilityRole="button"

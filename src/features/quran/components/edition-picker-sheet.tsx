@@ -71,7 +71,7 @@ export function EditionPickerSheet({
               key={edition.key}
               className={
                 selected
-                  ? 'flex-row items-center gap-3 rounded-lg bg-muted px-3 py-3'
+                  ? 'bg-muted flex-row items-center gap-3 rounded-lg px-3 py-3'
                   : 'flex-row items-center gap-3 rounded-lg px-3 py-3'
               }
               accessibilityRole="button"

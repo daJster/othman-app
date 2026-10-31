@@ -13,6 +13,9 @@ module.exports = {
   ],
   // Uniwind compiles `className` in Metro, so in Jest it is an inert prop. Tests
   // therefore assert structure, text and behaviour — never computed styles.
+  setupFiles: [
+    '<rootDir>/node_modules/react-native-gesture-handler/jestSetup.js',
+  ],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.ts'],
   // `jest-expo` whitelists Expo/React Native packages for Babel but not Uniwind,
   // whose entry point is untranspiled ESM (`export * from …`). Adding it here

@@ -21,11 +21,11 @@ const badge = tv({
   variants: {
     variant: {
       default: {
-        root: 'border-transparent bg-primary',
+        root: 'bg-primary border-transparent',
         label: 'text-primary-foreground',
       },
       secondary: {
-        root: 'border-transparent bg-secondary',
+        root: 'bg-secondary border-transparent',
         label: 'text-secondary-foreground',
       },
       outline: {
@@ -33,7 +33,7 @@ const badge = tv({
         label: 'text-foreground',
       },
       destructive: {
-        root: 'border-transparent bg-destructive',
+        root: 'bg-destructive border-transparent',
         label: 'text-destructive-foreground',
       },
       positive: {

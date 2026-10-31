@@ -97,7 +97,7 @@ function ProgressContent() {
         <title>{`${title} · ${t('app.name')}`}</title>
       </Head>
 
-      <View className="flex-row items-center gap-2 border-b border-border px-2 py-2">
+      <View className="border-border flex-row items-center gap-2 border-b px-2 py-2">
         <Button
           variant="ghost"
           accessibilityLabel={t('action.back')}

@@ -14,6 +14,18 @@ jest.mock('@react-native-async-storage/async-storage', () =>
 );
 
 /**
+ * SDK 58's vector icons call `expo-font.loadAsync` on mount. Under Jest the
+ * font asset is not in the registry, which throws an unhandled rejection even
+ * when the component under test is not about fonts. Font-gate behavior is
+ * covered by `boot-provider.test.tsx` with an injected hook.
+ */
+jest.mock('expo-font', () => ({
+  ...jest.requireActual('expo-font'),
+  isLoaded: jest.fn(() => true),
+  loadAsync: jest.fn(async () => undefined),
+}));
+
+/**
  * Warnings that are expected in Jest and carry no signal here.
  *
  * Uniwind's styling is a Metro transform: Metro emits the stylesheet and Jest

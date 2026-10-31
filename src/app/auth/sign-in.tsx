@@ -195,11 +195,11 @@ export default function SignInScreen() {
           />
 
           <View className="flex-row items-center gap-3">
-            <View className="h-px flex-1 bg-border" />
+            <View className="bg-border h-px flex-1" />
             <Text variant="caption" tone="muted">
               {t('auth.signIn.or')}
             </Text>
-            <View className="h-px flex-1 bg-border" />
+            <View className="bg-border h-px flex-1" />
           </View>
 
           {step === 'email' ? (
@@ -281,7 +281,7 @@ export default function SignInScreen() {
 
           {errorCode ? (
             <View
-              className="gap-2 rounded-lg border border-destructive p-3"
+              className="border-destructive gap-2 rounded-lg border p-3"
               accessibilityRole="alert"
               testID="auth-error"
             >

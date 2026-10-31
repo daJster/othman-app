@@ -63,7 +63,7 @@ function MeetingsContent() {
         data={meetings}
         keyExtractor={(meeting) => String(meeting.id)}
         renderItem={({ item }) => <MeetingCard meeting={item} />}
-        className="flex-1 bg-background"
+        className="bg-background flex-1"
         contentContainerClassName="gap-3 p-4 pb-10"
         contentInsetAdjustmentBehavior="automatic"
         refreshControl={

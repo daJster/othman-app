@@ -1,6 +1,7 @@
 # Othman
 
-Quran learning platform — Expo + React Native, with a static web target.
+Quran learning platform — Expo SDK 58 + React Native, with a static web target.
+SDK 58 is required by the current Expo Go app.
 
 ## Run it
 

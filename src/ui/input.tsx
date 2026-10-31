@@ -17,7 +17,7 @@ import { useUiFontClass } from './font';
  * Height is 44px, not the web's 32px — same tap-target reasoning as `Button`.
  */
 const input = tv({
-  base: 'w-full rounded-lg border bg-transparent px-3 text-base text-foreground',
+  base: 'text-foreground w-full rounded-lg border bg-transparent px-3 text-base',
   variants: {
     size: {
       md: 'h-11',
