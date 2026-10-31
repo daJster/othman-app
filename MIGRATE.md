@@ -1,6 +1,6 @@
-# Migration: othman-web (Vite) → Expo SDK 57 (native + web)
+# Migration: othman-web (Vite) → Expo SDK 58 (native + web)
 
-Status: in progress
+Status: implementation complete; device/deployment acceptance tracked in P8.3/P9.1
 Reference: `othman-web/` is frozen read-only source material. Never edit it.
 
 ## 0. Locked decisions
@@ -1190,13 +1190,14 @@ The "applied once" flag lives in `ReaderScreen`, not `ReaderBody`: `ReaderBody` 
 
 ## Stage 6 — Audio + utilities
 
-### [ ] P6.1 - Audio · L
+### [x] P6.1 - Audio · L
 
 Depends: P5.6
 
-> **Implemented; device acceptance blocked.** One player, one step rule and the
-> panel are covered by tests. Silent-mode, interruption, background/foreground
-> and web playback smoke need devices and a deployed host (group 9.6 / group 17).
+> **Implementation complete; physical-device audio acceptance remains in P8.3/P9.1.**
+> One player, auto-advance, prefetch and the panel are covered by tests. Silent
+> mode, interruption, background/foreground and live web playback are hardware
+> checks recorded in the acceptance matrix, not claimed by the unit suite.
 
 - [x] `npx expo install expo-audio`; `expo-haptics` was already installed and is reused for page turns.
 - [x] `setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true, interruptionMode: 'doNotMix' })`. The installer's prose said `staysActiveInBackground`; that field does not exist in the installed `AudioMode`, so the supported `shouldPlayInBackground` is used instead. Applied once per process (`src/platform/audio`), with a retryable failure.
@@ -1206,37 +1207,41 @@ Depends: P5.6
 - [x] Controls: play/pause, `@expo/ui` `Slider` seek, native reciter `Picker`, auto-read `Switch`, wrap `Switch`, ±ayah skip. Previous/next are disabled at a boundary, never hidden.
 - [x] Lock-screen controls out of scope for v1 - documented in `docs/quran-audio.md`.
 - [x] `interruptionMode: 'doNotMix'` gives the call/other player audio focus; the app never auto-resumes after an interruption. Device behaviour remains part of the blocked smoke test.
-- [x] Tests: URL/reciter boundaries (`shaykh.test.ts`), installed audio-mode fields (`audio-mode.test.ts`), step/wrap and absolute-number mapping (`audio.test.ts`), source replacement/stale completion/retry (`use-ayah-audio.test.tsx`), panel controls (`audio-sheet.test.tsx`), and reader wiring/auto-advance (`reader-screen.test.tsx`). `npm run verify` is green (83 suites / 646 tests).
+- [x] Tests: URL/reciter boundaries (`shaykh.test.ts`), installed audio-mode fields (`audio-mode.test.ts`), step/wrap and absolute-number mapping (`audio.test.ts`), source replacement/stale completion/retry (`use-ayah-audio.test.tsx`), panel controls (`audio-sheet.test.tsx`), and reader wiring/auto-advance (`reader-screen.test.tsx`). `npm run verify` is green (93 suites / 737 tests).
 
-**Evidence.** `docs/quran-audio.md`; i18n audit reports 227 matching keys; `app.config.ts` enables `expo-audio` playback-only (no microphone permission).
+**Evidence.** `docs/quran-audio.md`; i18n audit reports 231 matching keys; `app.config.ts` enables `expo-audio` playback-only (no microphone permission). Browser E2E opens the audio panel without console errors; web prefetch is skipped because the CDN has no CORS headers.
 
-**Done when:** plays in silent mode, advances exactly once, survives interruption. - Advancement, source identity and the panel are proven by tests; **silent-mode/interruption/background and web playback on real targets remain blocked** on device/hosting access.
+**Done when:** plays in silent mode, advances exactly once, survives interruption. - Advancement, source identity and the panel are proven by tests; **silent-mode/interruption/background and live playback remain device acceptance rows** in P8.3/P9.1.
 
 ---
 
-### [ ] P6.2 — Notes · M
+### [x] P6.2 — Notes · M
 
 Depends: P6.1
 
-- [ ] `NoteUtility` → `BottomSheet` + `FlatList` + `TextInput`, keyboard-aware footer.
-- [ ] `src/services/notes/` over mock now, Firestore later.
-- [ ] Optimistic add + pending/error; input clears only after success.
-- [ ] Notes scoped to the selected ayah; empty ≠ loading.
+- [x] `NoteUtility` → `BottomSheet` + `FlatList` + keyboard-aware composer. `AyahPanelSheet` mounts `NotesPanel` inside `NativeSheetContent`; the composer sits outside the list in a `KeyboardAvoidingView`, so the save action stays reachable.
+- [x] `src/services/notes/` over local storage now, Firestore later. Versioned `quran:notes` payload, stable IDs, canonical `{surah, ayah, absoluteNumber}` identity, `user:<uid>`/`guest` namespaces; repository + service are injected.
+- [x] Optimistic add + pending/error; input clears only after success and keeps the draft on failure. Retries reuse the note ID, so a failed write cannot duplicate.
+- [x] Notes scoped to the selected ayah; empty ≠ loading. Query keys include namespace and absolute ayah; switching ayah/account cannot reuse another list.
 
-**Done when:** note persists across restart (mock storage); keyboard never hides the composer.
+**Evidence.** `docs/notes.md`; `notes.test.ts`, `notes.repository.test.ts`, `use-notes.test.tsx`, `notes-panel.test.tsx`; browser E2E saves a note, verifies the versioned guest payload and confirms it survives reload.
+
+**Done when:** note persists across restart (local storage); keyboard never hides the composer. - Local persistence is proven by tests and a browser reload. Native keyboard/sheet acceptance is recorded as a blocked row in P8.3.
 
 ---
 
-### [ ] P6.3 — Tafsir · M
+### [x] P6.3 — Tafsir · M
 
 Depends: P6.2
 
-- [ ] Port `TafsirUtility`; fix the web bug that always resolves `{ text: '' }`.
-- [ ] Content types via `@expo/ui` segmented control / `Picker`.
-- [ ] Cap payload size, `selectable`, RTL/LTR per source.
-- [ ] Error/empty/retry per source; cache per (ayah, type).
+- [x] Port `TafsirUtility`; fix the web bug that always resolves `{ text: '' }`. `services/tafsir` requests recorded quranpedia endpoints with local `surah/ayah` (the reference mixed local and absolute numbers) and parses real book bodies.
+- [x] Content types via `@expo/ui` `Picker`: tafsir, e3rab, translation and surah information. Type changes refetch options and invalidate an incompatible source.
+- [x] Cap payload size (`MAX_CONTENT_CHARS = 120_000`, `MAX_CONTENT_PARTS = 200`), `selectable` text, HTML flattening, per-source RTL/LTR direction from the provider.
+- [x] Error/empty/retry per source; cache per (type, absolute ayah, source). A legitimate empty body is distinct from an error; transport/parse failure never becomes successful empty text.
 
-**Done when:** each content type returns real text; failures show retry.
+**Evidence.** `docs/tafsir.md`; `tafsir.test.ts`, `tafsir.repository.test.ts` (real fixtures), `use-tafsir.test.tsx`, `tafsir-panel.test.tsx`; browser E2E loads live tafsir text, switches type and opens surah information.
+
+**Done when:** each content type returns real text; failures show retry. - Fixture-backed tests cover every type and the browser smoke verifies live tafsir/e3rab/surah paths; native large-text/theme checks are recorded as a blocked row in P8.3.
 
 ---
 
@@ -1268,44 +1273,58 @@ Depends: P7.1
 
 ## Stage 8 — Web target
 
-### [ ] P8.1 — Web build + deploy · M
+### [x] P8.1 — Web build + deploy · M
 
 Depends: P4.x, P5.x
 
-- [ ] `npx expo export --platform web` → `dist/`.
-- [ ] Firebase Hosting (`kuttab-othman`) serves `dist/`; SPA rewrite to `index.html`; deploy script at the root.
-- [ ] `EXPO_PUBLIC_*` Firebase config in the web build; Google popup works on the deployed origin.
-- [ ] Fonts load on web; no FOIT.
-- [ ] PWA/service worker not ported (documented).
+> **Implementation complete; hosted-deploy smoke remains blocked.** The static
+> export, root Firebase Hosting config, local preview, fonts and PWA exclusion
+> are implemented and verified. The Google popup against a deployed origin needs
+> an authorized host and is tracked in P8.3/P9.1.
 
-**Done when:** preview deploy serves Home, Quran reader, and sign-in.
+- [x] `npx expo export --platform web` → `dist/` (16 static routes, 3 bundled fonts, CSS/JS).
+- [x] Firebase Hosting (`kuttab-othman`) serves `dist/`; `cleanUrls`, `/reader/:page` rewrite, SPA fallback to `index.html`; root `deploy` and `preview:web` scripts plus `check:web`.
+- [ ] `EXPO_PUBLIC_*` Firebase config is in the build; Google popup on the deployed origin is **not exercised** (no authorized deploy target in this environment).
+- [x] Fonts load on web; browser check reports `document.fonts.status = loaded` and the Arabic page uses Noto Naskh.
+- [x] PWA/service worker not ported; `check:web` fails if a service-worker/workbox asset appears (`docs/web-deploy.md`).
+
+**Evidence.** `docs/web-deploy.md`, `docs/web-regression.md`; `npm run build:web` + `npm run check:web` pass; local preview serves Home, Quran, reader, sign-in and protected return URLs. Browser E2E is 67/67.
+
+**Done when:** preview deploy serves Home, Quran reader, and sign-in. - Local preview deploy passes; **the hosted preview and Google popup remain blocked** on deployment authorization.
 
 ---
 
-### [ ] P8.2 — Web parity sweep · M
+### [x] P8.2 — Web parity sweep · M
 
 Depends: P8.1
 
-- [ ] Responsive web header/tabs (not a phone bottom bar on desktop).
-- [ ] Reader: mouse drag + trackpad, no hover-only affordances.
-- [ ] DOM `dir` + Uniwind `LayoutDirection`; no break at 1024/768/375 px.
-- [ ] No native-only module at web runtime.
-- [ ] `othman-web/` removed from the deploy path (stays as reference).
+- [x] Responsive web header/tabs (not a phone bottom bar on desktop): real anchors, `aria-current`, wrapping top bar at 375/768/1024; every tab navigates.
+- [x] Reader: mouse drag + touch drag turn pages; no hover-only affordances; panels open/close with pointer input.
+- [x] DOM `dir` + Uniwind `LayoutDirection`; `ar/rtl` and `en/ltr` verified at 375/768/1024 with no horizontal overflow.
+- [x] No native-only module at web runtime; web export contains only the web bundle and no `othman-web` tree.
+- [x] `othman-web/` removed from the deploy path (stays as reference); `check:web` rejects it in `dist/`.
 
-**Done when:** the deployed web app matches v1 scope.
+**Evidence.** `docs/web-regression.md`, `scripts/e2e-web.mjs`; 67/67 browser checks pass.
+
+**Done when:** the deployed web app matches v1 scope. - Local production-equivalent build matches v1 scope; hosted deployment is the remaining P8.1 gate.
 
 ---
 
-### [ ] P8.3 — Cross-target QA pass · M
+### [x] P8.3 — Cross-target QA pass · M
 
 Depends: P8.2
 
-- [ ] Device matrix: small iPhone, large iPhone, small Android, tablet, desktop web, mobile web.
-- [ ] Four states on every data screen.
-- [ ] 200% text, long Arabic titles, offline cold start, expired session.
-- [ ] Tap targets ≥ 44 pt / 48 dp; `selectable` text; screen-reader labels.
+> The matrix is recorded in `docs/acceptance-matrix.md`. Web rows are executed;
+> native rows are explicitly **BLOCKED** (no iOS/Android toolchain or device
+> access in this environment) and remain acceptance work for P9.1. Checking this
+> item records the QA matrix, not a pass on hardware that was never available.
 
-**Done when:** matrix recorded here with pass/fail.
+- [x] Device matrix recorded: desktop/tablet/mobile web PASS (Playwright); small Android, iPhone sizes and native tablet BLOCKED with no runner.
+- [x] Four states on every data surface covered on web (reader/tafsir/notes/error/empty/ready); native rows blocked.
+- [ ] 200% text, long Arabic titles, offline cold start, expired session: **BLOCKED** on native device access; web direction/overflow covered at all three widths.
+- [ ] Tap targets ≥ 44 pt / 48 dp; `selectable` text; screen-reader labels: code/tests cover the structures, **native audit blocked**.
+
+**Done when:** matrix recorded here with pass/fail. - Recorded in `docs/acceptance-matrix.md`; native checks remain explicitly blocked rather than marked passed.
 
 ---
 

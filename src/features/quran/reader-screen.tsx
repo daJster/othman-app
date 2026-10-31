@@ -205,7 +205,7 @@ export function ReaderScreen({
     }
 
     if (linkTarget.kind === 'page') goToPage(linkTarget.page);
-  }, [goToAyah, goToPage, linkTarget]);
+  }, [goToAyah, goToPage, linkTarget, page]);
 
   // Keep the route segment equal to the page the reader is actually on.
   //
@@ -248,7 +248,7 @@ export function ReaderScreen({
       surah: undefined,
       ayah: undefined,
     });
-  }, [initialAyah, initialPage, initialSurah, page, router]);
+  }, [hasInitialLink, initialAyah, initialPage, initialSurah, page, router]);
 
   let body: ReactNode;
   let edition: QuranEdition | null = null;
