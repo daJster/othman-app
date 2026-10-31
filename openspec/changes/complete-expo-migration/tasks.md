@@ -190,7 +190,7 @@ Approach: D10/D12. These are acceptance tasks for existing screens, not rebuilds
 - [ ] 14.3 Complete P4.3 Account checks after real auth integration; verify: hosted list measurements, formSheet detents/grabber, back/swipe guard during save, draft preservation, RTL input, photo permission, and large text work on both native targets and web equivalents.
 - [ ] 14.4 Complete P4.4 Progress checks; verify: mid-tier Android scrolling reaches the documented 60-fps target, RTL order and selected-sheet behavior work, and demo progress is not presented as live account data.
 - [ ] 14.5 Complete P4.5 About checks; verify: native list chrome, hosted Arabic prose, directional chevrons, website browser presentation, and registered quick links work in both schemes on all targets.
-- [ ] 14.6 Record the combined P4 acceptance outcomes and any scoped fixes with their owning tests/docs; verify: linked evidence distinguishes pass/fail/blocked and no earlier manual checkbox is silently discarded.
+- [x] 14.6 Record the combined P4 acceptance outcomes and any scoped fixes with their owning tests/docs; verify: linked evidence distinguishes pass/fail/blocked and no earlier manual checkbox is silently discarded. Evidence: `docs/acceptance-matrix.md`; web rows have browser evidence, native rows remain blocked, and no earlier unchecked manual task is marked done.
 
 ## 15. Implement P8.1 web build and deployment
 
@@ -216,7 +216,7 @@ Approach: D9. Depends on P8.1; retain the existing desktop top-navigation direct
 
 Approach: D12. Depends on P8.2. Cover every activated v1 feature, including auth and any included utility/native-reader packages; do not describe an incomplete feature matrix as final acceptance.
 
-- [ ] 17.1 Record small/large iPhone, small Android, tablet, desktop web, and mobile web matrix ownership and build identifiers; verify: each target has an actual evidence runner or an explicit blocking gap.
+- [x] 17.1 Record small/large iPhone, small Android, tablet, desktop web, and mobile web matrix ownership and build identifiers; verify: each target has an actual evidence runner or an explicit blocking gap. Evidence: `docs/acceptance-matrix.md` records Playwright as the web runner (1024/768/375), the web export SHA, and explicit no-device gaps for every native target.
 - [ ] 17.2 Exercise applicable pending/error/empty/ready states on each data surface; verify: failures retain navigation and retry, and invalid empty/loading states are not conflated.
 - [ ] 17.3 Exercise both languages/themes, long Arabic labels, and 200-percent text; verify: matrix evidence has no clipping, hidden actions, or overlapping text at supported sizes.
 - [ ] 17.4 Exercise offline cold start, saved-state restoration, expired sessions, and account changes; verify: recovery is honest, prior-account private data is not exposed, and unsupported offline media is not promised.
