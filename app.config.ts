@@ -53,6 +53,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     'expo-router',
+    // Re-exported by expo-audio as a required native peer; without the plugin,
+    // release builds can fail to resolve bundled audio assets.
+    'expo-asset',
     [
       'expo-splash-screen',
       {
