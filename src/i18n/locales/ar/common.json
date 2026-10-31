@@ -1,131 +1,342 @@
 {
-    "app": {
-        "name": "كُتَّاب عُثمَانُ",
-        "tagline": "تأملوا كتاب الله تعالى مع كتَّاب"
+  "app": {
+    "name": "كُتَّاب عُثمَانُ",
+    "tagline": "تأمّلوا كتاب الله تعالى"
+  },
+  "home": {
+    "hero": {
+      "opening": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
     },
-    "auth": {
-        "login": {
-            "title": "تسجيل الدخول",
-            "subtitle": "مرحباً! يرجى تسجيل الدخول للمتابعة",
-            "noAccount": "لا يوجد حساب",
-            "createAccountPrompt": "لا يوجد حساب مرتبط بهذا البريد الإلكتروني. هل تريد ",
-            "registerLink": "إنشاء حساب جديد",
-            "error": "خطأ"
-        },
-        "logout": {
-            "loading": "جاري تسجيل الخروج...",
-            "success": "تم تسجيل الخروج بنجاح",
-            "redirect": "سيتم توجيهك للصفحة الرئيسية خلال {{countdown}}..."
-        }
+    "verse": {
+      "title": "آية اليوم",
+      "text": "إِنَّ هَٰذَا الۡقُرۡآنَ يَهۡدِي لِلَّتِّي هِيَ أَقۡوَمُ",
+      "reference": "الإسراء 9"
     },
-    "label": {
-        "email": "البريد الإلكتروني",
-        "password": "كلمة المرور"
-    },
-    "action": {
-        "auth": {
-            "continue": "متابعة",
-            "login": "تسجيل الدخول",
-            "google": "متابعة عبر Google",
-            "facebook": "متابعة عبر Facebook"
-        },
-        "back": "رجوع",
-        "loading": "جاري التحميل..."
-    },
-    "nav": {
-        "home": "الرئيسية",
-        "quran": "القرآن",
-        "books": "الكتب",
-        "allBooks": "جميع الكتب",
-        "booksDesc": "تصفح مجموعة كتبنا",
-        "favorites": "المفضلة",
-        "favoritesDesc": "عناصرك المحفوظة",
-        "profile": "الملف الشخصي",
-        "admin": "الإدارة",
-        "dashboard": "لوحة التحكم",
-        "dashboardDesc": "لوحة تحكم الإدارة",
-        "users": "المستخدمون",
-        "usersDesc": "إدارة المستخدمين",
-        "content": "المحتوى",
-        "contentDesc": "إدارة المحتوى",
-        "superAdmin": "مدير عام",
-        "settings": "الإعدادات",
-        "settingsDesc": "إعدادات النظام",
-        "analytics": "التحليلات",
-        "analyticsDesc": "عرض التحليلات",
-        "toggleLanguage": "تغيير اللغة",
-        "toggleTheme": "تغيير السمة",
-        "login": "تسجيل الدخول",
-        "register": "إنشاء حساب",
-        "logout": "تسجيل الخروج",
-        "user": "مستخدم",
-        "adminPanel": "لوحة الإدارة",
-        "superAdminPanel": "لوحة المدير العام"
-    },
-    "appName": "مركز القرآن الكريم",
-    "tagline": "تأملوا كتاب الله تعالى مع كتَّاب",
-    "heroTitle": "عُثمَان إبن عَفَّان",
-    "heroSubtitle": "لِحفظِ القرآن",
-    "heroDescription": "تلاوة · تفهم · تدبر",
-    "verseOfTheDay": "آية اليوم",
-    "chapter": "السورة",
-    "verses": "الآيات",
-    "miracles": "معجزات القرآن",
-    "miraclesDesc": "القرآن الكريم معجزة خالدة إلى يوم القيامة",
-    "scientific": "الإعجاز العلمي",
-    "scientificDesc": "حقائق علمية أكدها العلم الحديث",
-    "linguistic": "الإعجاز اللغوي",
-    "linguisticDesc": "بلاغة وبيان عجز العرب عن معارضته",
-    "prophecy": "النبوءات",
-    "prophecyDesc": "أحداث مستقبلية تحققت وتتحقق",
-    "features": "المميزات",
-    "readQuran": "تلاوة القرآن",
-    "readQuranDesc": "اقرأ القرآن بخط واضح وإمكانية الاستماع",
-    "tafsir": "التفسير",
-    "tafsirDesc": "فهم معاني الآيات وتفسيرها",
-    "bookmarks": "المفضلة",
-    "bookmarksDesc": "احفظ آياتك المفضلة للرجوع إليها",
-    "search": "البحث",
-    "searchDesc": "ابحث في نصوص القرآن بسهولة",
-    "cta": "ابدأ الآن",
-    "ctaDesc": "شارك في حفظ كتاب الله وتلاوته",
-    "copyright": "جميع الحقوق محفوظة",
-    "verse1": "الٓمٓ",
-    "verse1Ref": "البقرة 1",
-    "verse2": "كَذَٰلِكَ يُنۢبِئُكَ بِمَا كَانَتۡ آيَٰتُكَ وَمَا يَتَلَقَّىٰ",
-    "verse2Ref": "طه 128",
-    "verse3": "إِنَّ هَٰذَا الۡقُرۡآنَ يَهۡدِي لِلَّتِّي هِيَ أَقۡوَمُ",
-    "verse3Ref": "الإسراء 9",
-    "verse4": "وَنَزَّلۡنَا عَلَيۡكَ الۡكِتَٰبَ تِبۡيَٰنٗا لِّلنَّاسِ",
-    "verse4Ref": "النحل 89",
-    "footer": {
-        "about": "عن المنصة",
-        "aboutDesc": "منصة تعليمية",
-        "quickLinks": "روابط سريعة",
-        "home": "الرئيسية",
-        "quran": "القرآن الكريم",
-        "tafsir": "التفسير",
-        "features": "المميزات",
-        "contact": "اتصل بنا",
-        "resources": "الموارد",
-        "resourcesDesc": "",
-        "mobileApp": "تطبيق الهاتف",
-        "download": "تحميل",
-        "desktopApp": "تطبيق سطح المكتب",
-        "install": "تثبيت",
-        "legal": "قانوني",
-        "legalDesc": "",
-        "terms": "الشروط والأحكام",
-        "privacy": "الخصوصية",
-        "cookies": "سياسة ملفات تعريف الارتباط",
-        "faq": "الأسئلة الشائعة",
-        "subscribe": "اشترك في النشرة البريدية",
-        "subscribeDesc": "احصل على آخر التحديثات والمقالات",
-        "email": "البريد الإلكتروني",
-        "subscribeBtn": "اشترك",
-        "social": "تابعنا",
-        "madeWith": "صنع بـ",
-        "love": "حب",
-        "for": "لله"
+    "explore": {
+      "title": "استكشف"
     }
+  },
+  "action": {
+    "back": "رجوع",
+    "cancel": "إلغاء",
+    "close": "إغلاق",
+    "continue": "متابعة",
+    "edit": "تعديل",
+    "goBackHome": "العودة إلى الرئيسية",
+    "join": "انضم",
+    "loading": "جارٍ التحميل…",
+    "retry": "إعادة المحاولة",
+    "save": "حفظ",
+    "signIn": "تسجيل الدخول",
+    "signOut": "تسجيل الخروج"
+  },
+  "label": {
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور"
+  },
+  "nav": {
+    "home": "الرئيسية",
+    "quran": "القرآن",
+    "quranFull": "ٱلْقُرْآنُ ٱلْكَرِيمُ",
+    "meetings": "الحلقات",
+    "account": "حسابي",
+    "profile": "الملف الشخصي",
+    "quranDesc": "اقرأ المصحف صفحة بصفحة",
+    "meetingsDesc": "حلقاتك القادمة",
+    "accountDesc": "ملفك وتقدّمك وتفضيلاتك",
+    "about": "حول التطبيق",
+    "aboutDesc": "معلومات التطبيق وروابطه",
+    "toggleLanguage": "تغيير اللغة",
+    "toggleTheme": "تغيير السمة",
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج"
+  },
+  "language": {
+    "title": "اللغة",
+    "arabic": "العربية",
+    "english": "English",
+    "restartTitle": "يلزم إعادة التشغيل",
+    "restartMessage": "يتغيّر اتجاه النص الآن. بعض العناصر الأصلية، مثل حقول الإدخال والتنبيهات، تتّبع الاتجاه الجديد بعد إعادة تشغيل التطبيق."
+  },
+  "theme": {
+    "title": "السمة",
+    "light": "فاتحة",
+    "dark": "داكنة",
+    "system": "النظام"
+  },
+  "reader": {
+    "pageImage": "صفحة {{page}} من المصحف",
+    "ayahLabel": "الآية {{ayah}} من سورة {{surah}}",
+    "clearSelection": "إلغاء تحديد الآية",
+    "continueTitle": "متابعة القراءة",
+    "continueDescription": "صفحة {{page}}",
+    "open": "افتح المصحف",
+    "entryHint": "يُفتح المصحف بملء الشاشة، ويمكنك قلب الصفحات بالسحب.",
+    "imageFailed": "تعذّر تحميل صورة الصفحة.",
+    "exit": "الخروج من المصحف",
+    "openSurahPicker": "اختر السورة",
+    "openEditionPicker": "اختر النسخة",
+    "openMenu": "قائمة المصحف",
+    "pageIndicator": "صفحة {{page}}",
+    "ayahIndicator": "الآية {{ayah}}",
+    "previousPage": "الصفحة السابقة",
+    "nextPage": "الصفحة التالية",
+    "surahPickerTitle": "السور",
+    "searchSurahs": "ابحث في السور",
+    "noSurahsFound": "لا توجد سورة تطابق بحثك.",
+    "editionPickerTitle": "النسخ",
+    "editionSelected": "محددة",
+    "menuTitle": "قائمة المصحف",
+    "menuSurah": "السور",
+    "menuEdition": "النسخ",
+    "menuRead": "القراءة",
+    "menuTafsir": "التفسير",
+    "menuNotes": "الملاحظات",
+    "panelReadTitle": "القراءة",
+    "panelTafsirTitle": "التفسير",
+    "panelNotesTitle": "الملاحظات",
+    "panelNeedsSelection": "اختر آية من الصفحة أولًا.",
+    "contentTypeSurah": "السورة",
+    "contentTypeTafsir": "التفسير",
+    "contentTypeE3rab": "الإعراب",
+    "contentTypeTranslation": "الترجمة",
+    "contentSourcesEmpty": "لا توجد مصادر متاحة لهذه الآية وهذا النوع.",
+    "contentEmptyTitle": "لا يوجد نص لهذه الآية",
+    "contentEmptyDescription": "لا يوجد لهذا المصدر نص للآية المحددة. اختر مصدرًا أو نوعًا آخر.",
+    "pageOf": "{{page}} / {{total}}",
+    "ayahCount": "{{count}} آية",
+    "editionPages": "الصفحات {{first}}–{{last}}",
+    "selectedAyah": "الآية {{ayah}} · {{surah}}",
+    "toggleChrome": "إظهار أدوات المصحف أو إخفاؤها",
+    "sourceTranslation": "الترجمة",
+    "sourceE3rab": "الإعراب",
+    "menuShare": "مشاركة",
+    "linkInvalidTitle": "هذا الرابط غير صالح",
+    "linkInvalidDescription": "الرابط ناقص أو يشير إلى سورة أو آية غير موجودة. افتح تبويب المصحف للمتابعة.",
+    "shareFailed": "تعذّر فتح نافذة المشاركة.",
+    "menuAudio": "الاستماع",
+    "panelAudioTitle": "التلاوة",
+    "audioPlay": "تشغيل",
+    "audioPause": "إيقاف مؤقت",
+    "audioPreviousAyah": "الآية السابقة",
+    "audioNextAyah": "الآية التالية",
+    "audioReciter": "القارئ",
+    "audioAutoRead": "القراءة التلقائية",
+    "audioWrap": "المتابعة بعد السورة",
+    "audioBuffering": "جارٍ التحميل…",
+    "audioError": "تعذّر تحميل هذه التلاوة.",
+    "audioBackgroundNote": "يستمر التشغيل عند إطفاء الشاشة، ولا تتضمن هذه النسخة أدوات التحكم من شاشة القفل.",
+    "notesEmptyTitle": "لا توجد ملاحظات بعد",
+    "notesEmptyDescription": "ستظهر ملاحظاتك لهذه الآية هنا.",
+    "notesPlaceholder": "اكتب ملاحظة لهذه الآية",
+    "notesSave": "حفظ الملاحظة",
+    "notesSaving": "جارٍ الحفظ…",
+    "notesSaveError": "تعذّر حفظ الملاحظة. ما زالت مسودتك محفوظة."
+  },
+  "state": {
+    "loading": "جارٍ التحميل…",
+    "errorTitle": "حدث خطأ",
+    "errorDescription": "تعذّر تحميل هذا المحتوى. تحقّق من اتصالك وحاول مرة أخرى.",
+    "emptyTitle": "لا يوجد شيء بعد",
+    "emptyDescription": "لا يوجد ما يمكن عرضه الآن.",
+    "offline": "لا يوجد اتصال"
+  },
+  "error": {
+    "400": {
+      "title": "طلب غير صالح",
+      "description": "تعذّر فهم الطلب. حاول مرة أخرى."
+    },
+    "401": {
+      "title": "يلزم تسجيل الدخول",
+      "description": "انتهت جلستك. سجّل الدخول للمتابعة."
+    },
+    "403": {
+      "title": "لا تملك صلاحية",
+      "description": "حسابك لا يملك صلاحية الوصول إلى هذه الصفحة."
+    },
+    "404": {
+      "title": "الصفحة غير موجودة",
+      "description": "الصفحة التي تبحث عنها غير موجودة أو نُقلت."
+    },
+    "500": {
+      "title": "خطأ في الخادم",
+      "description": "حدث خلل من طرفنا. يرجى المحاولة لاحقًا."
+    }
+  },
+  "auth": {
+    "signIn": {
+      "title": "تسجيل الدخول",
+      "subtitle": "احفظ موضعك، والتقِ بشيخك، وتابع تقدّمك.",
+      "google": "المتابعة باستخدام Google",
+      "or": "أو",
+      "emailTitle": "تسجيل الدخول بالبريد الإلكتروني",
+      "emailHint": "سنطلب كلمة المرور في الخطوة التالية.",
+      "passwordTitle": "أدخل كلمة المرور",
+      "passwordHint": "تسجيل الدخول باسم {{email}}.",
+      "emailInvalid": "أدخل بريدًا إلكترونيًا صالحًا.",
+      "passwordRequired": "أدخل كلمة المرور.",
+      "accountExistsTitle": "هذا البريد يستخدم طريقة دخول أخرى",
+      "accountExistsDescription": "سجّل الدخول بالطريقة التي أنشأت بها الحساب. لا نربط الحسابات تلقائيًا.",
+      "tryAgain": "إعادة المحاولة",
+      "back": "استخدام بريد آخر"
+    },
+    "error": {
+      "invalid-credential": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+      "email-already-in-use": "يوجد حساب بهذا البريد الإلكتروني.",
+      "weak-password": "اختر كلمة مرور أقوى.",
+      "user-disabled": "تم تعطيل هذا الحساب.",
+      "network": "لا يوجد اتصال. تحقّق من الشبكة وحاول مرة أخرى.",
+      "cancelled": "تم إلغاء تسجيل الدخول.",
+      "operation-not-allowed": "طريقة تسجيل الدخول هذه غير مفعّلة.",
+      "too-many-requests": "محاولات كثيرة. انتظر قليلًا ثم حاول مرة أخرى.",
+      "account-exists-with-different-credential": "هذا البريد يستخدم طريقة دخول أخرى.",
+      "configuration": "تسجيل الدخول غير مهيأ في هذا الإصدار.",
+      "not-implemented": "طريقة تسجيل الدخول هذه غير متاحة بعد.",
+      "unknown": "حدث خطأ. حاول مرة أخرى."
+    }
+  },
+  "account": {
+    "sections": {
+      "settings": "الإعدادات",
+      "session": "الجلسة"
+    },
+    "profile": {
+      "anonymous": "بلا اسم بعد",
+      "noEmail": "لا يوجد بريد إلكتروني"
+    },
+    "role": {
+      "guest": "زائر",
+      "user": "طالب",
+      "admin": "مشرف",
+      "superadmin": "مشرف عام"
+    },
+    "signedOut": {
+      "title": "جلستك منتهية",
+      "description": "سجّل الدخول لعرض ملفك وتقدّمك.",
+      "action": "تسجيل الدخول"
+    },
+    "signOut": {
+      "title": "تسجيل الخروج؟",
+      "message": "يمكنك تسجيل الدخول مرة أخرى في أي وقت.",
+      "confirm": "تسجيل الخروج",
+      "cancel": "البقاء في الحساب"
+    },
+    "edit": {
+      "title": "تعديل الملف",
+      "photo": "تغيير الصورة",
+      "photoHint": "اختر صورة من مكتبتك.",
+      "photoFailed": "تعذّر فتح مكتبة الصور.",
+      "displayName": "الاسم الظاهر",
+      "displayNamePlaceholder": "اسمك",
+      "email": "البريد الإلكتروني",
+      "emailHint": "لا يمكن تغيير البريد الإلكتروني.",
+      "phone": "رقم الهاتف",
+      "phonePlaceholder": "+212 6 12 34 56 78",
+      "phoneHint": "أدخل رمز الدولة مع الرقم، بدءًا بـ +.",
+      "role": "الدور",
+      "roleHint": "لا يغيّر الدور إلا مشرف.",
+      "saved": "تم الحفظ",
+      "saving": "جارٍ الحفظ…",
+      "saveFailed": "تعذّر حفظ التغييرات. حاول مرة أخرى."
+    },
+    "validation": {
+      "displayNameRequired": "أدخل اسمًا.",
+      "displayNameLength": "استخدم من 2 إلى 60 حرفًا.",
+      "phone": "استخدم رمز الدولة والأرقام فقط، مثل +212612345678."
+    },
+    "a11y": {
+      "profilePhoto": "صورة الملف",
+      "edit": "تعديل الملف"
+    }
+  },
+  "meeting": {
+    "status": {
+      "soon": "تبدأ قريبًا",
+      "upcoming": "اليوم",
+      "scheduled": "مجدولة"
+    },
+    "attendees_zero": "لا حاضرين",
+    "attendees_one": "حاضر واحد",
+    "attendees_two": "حاضران",
+    "attendees_few": "{{count}} حاضرين",
+    "attendees_many": "{{count}} حاضرًا",
+    "attendees_other": "{{count}} حاضر",
+    "found_zero": "لا حلقات",
+    "found_one": "حلقة واحدة",
+    "found_two": "حلقتان",
+    "found_few": "{{count}} حلقات",
+    "found_many": "{{count}} حلقة",
+    "found_other": "{{count}} حلقة",
+    "calendar": {
+      "system": "نظام التقويم",
+      "gregorian": "ميلادي",
+      "hijri": "هجري",
+      "previous": "الشهر السابق",
+      "next": "الشهر التالي",
+      "today": "اليوم"
+    },
+    "details": "التفاصيل",
+    "less": "أقل",
+    "organizedBy": "بإشراف {{name}}"
+  },
+  "page": {
+    "meetings": {
+      "header": {
+        "title": "الحلقات",
+        "description": "حلقاتك مع شيخك وزملائك"
+      },
+      "list": {
+        "empty": "لا توجد حلقات في هذا اليوم."
+      }
+    }
+  },
+  "pages": {
+    "about": {
+      "description": "منصة تعليمية لحفظ القرآن الكريم وتلاوته وتدبّره.",
+      "version": "الإصدار {{version}}",
+      "sections": {
+        "explore": "استكشف",
+        "resources": "روابط",
+        "legal": "قانوني"
+      },
+      "website": "الموقع الإلكتروني",
+      "websiteDesc": "افتح موقع كُتَّاب عُثمَان",
+      "copyright": "© {{year}} {{name}}. جميع الحقوق محفوظة."
+    },
+    "account": {
+      "progress": {
+        "title": "التقدّم",
+        "subtitle": "حفظك عبر الوقت",
+        "gridTitle": "السور",
+        "legend": {
+          "less": "أقل",
+          "more": "أكثر"
+        },
+        "empty": "لا يوجد تقدّم مسجّل بعد.",
+        "summary": {
+          "average": "الحفظ الإجمالي",
+          "memorised": "محفوظة",
+          "started": "بدأت",
+          "surahs": "السور"
+        },
+        "surah": "سورة {{number}}",
+        "band": {
+          "notStarted": "لم تبدأ",
+          "inProgress": "قيد الحفظ",
+          "memorised": "محفوظة"
+        },
+        "cell": {
+          "a11y": "سورة {{number}}: {{percent}} محفوظة"
+        },
+        "detail": {
+          "memorised": "محفوظة",
+          "lastReviewed": "آخر مراجعة {{date}}",
+          "neverReviewed": "لم تُراجع بعد"
+        },
+        "recentTasks": {
+          "title": "المهام الأخيرة"
+        }
+      }
+    }
+  }
 }

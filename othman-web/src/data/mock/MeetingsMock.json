@@ -1,0 +1,110 @@
+{
+    "meetings": [
+        {
+            "id": 1,
+            "title": "Q2 Product Roadmap Review",
+            "description": "Quarterly alignment session to review OKRs, discuss upcoming feature launches, and prioritize the backlog for the next sprint cycle.",
+            "date": "2026-04-02",
+            "time": "2:00 PM",
+            "duration": "60 min",
+            "status": "soon",
+            "meetLink": "https://meet.google.com/abc-defg-hij",
+            "attendees": [
+                {
+                    "name": "Sara K.",
+                    "avatar": "https://i.pravatar.cc/32?img=1"
+                },
+                {
+                    "name": "Tom R.",
+                    "avatar": "https://i.pravatar.cc/32?img=2"
+                },
+                {
+                    "name": "Lena P.",
+                    "avatar": "https://i.pravatar.cc/32?img=3"
+                },
+                {
+                    "name": "James W.",
+                    "avatar": "https://i.pravatar.cc/32?img=4"
+                }
+            ],
+            "organizer": "Sara K.",
+            "location": "Remote"
+        },
+        {
+            "id": 2,
+            "title": "Design System Sync",
+            "description": "Weekly design-engineering sync to align on component specs, review Figma handoffs, and address any open design debt items.",
+            "date": "2026-04-02",
+            "time": "4:30 PM",
+            "duration": "30 min",
+            "status": "upcoming",
+            "meetLink": "https://meet.google.com/klm-nopq-rst",
+            "attendees": [
+                {
+                    "name": "Ana M.",
+                    "avatar": "https://i.pravatar.cc/32?img=5"
+                },
+                { "name": "Dev S.", "avatar": "https://i.pravatar.cc/32?img=6" }
+            ],
+            "organizer": "Ana M.",
+            "location": "Remote"
+        },
+        {
+            "id": 3,
+            "title": "Onboarding: New Engineer",
+            "description": "First-day introduction covering team norms, tooling setup, codebase overview, and a walk-through of current sprint goals.",
+            "date": "2026-04-03",
+            "time": "10:00 AM",
+            "duration": "90 min",
+            "status": "upcoming",
+            "meetLink": "https://meet.google.com/uvw-xyza-bcd",
+            "attendees": [
+                {
+                    "name": "Chris B.",
+                    "avatar": "https://i.pravatar.cc/32?img=7"
+                },
+                {
+                    "name": "Mia F.",
+                    "avatar": "https://i.pravatar.cc/32?img=8"
+                },
+                { "name": "Ryo T.", "avatar": "https://i.pravatar.cc/32?img=9" }
+            ],
+            "organizer": "Mia F.",
+            "location": "Remote"
+        },
+        {
+            "id": 4,
+            "title": "Investor Update — Seed Round",
+            "description": "Monthly progress update for seed investors. Covers MRR growth, key metrics, product milestones, and the path to Series A.",
+            "date": "2026-04-02",
+            "time": "3:00 PM",
+            "duration": "45 min",
+            "status": "scheduled",
+            "meetLink": "https://meet.google.com/efg-hijk-lmn",
+            "attendees": [
+                {
+                    "name": "Oliver Q.",
+                    "avatar": "https://i.pravatar.cc/32?img=10"
+                },
+                {
+                    "name": "Priya N.",
+                    "avatar": "https://i.pravatar.cc/32?img=11"
+                },
+                {
+                    "name": "Leo C.",
+                    "avatar": "https://i.pravatar.cc/32?img=12"
+                },
+                {
+                    "name": "Zoe A.",
+                    "avatar": "https://i.pravatar.cc/32?img=13"
+                },
+                {
+                    "name": "Ben H.",
+                    "avatar": "https://i.pravatar.cc/32?img=14"
+                }
+            ],
+            "organizer": "Oliver Q.",
+            "location": "Remote"
+        }
+    ]
+}

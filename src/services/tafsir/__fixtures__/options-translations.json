@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1947,
+    "has_image": 0,
+    "name": "الترجمة الإنجليزية - صحيح انترناشونال",
+    "parts": 1,
+    "fundamental": 0,
+    "author": "المنتدى الإسلامي",
+    "year": null,
+    "images": [],
+    "category": {
+      "id": 22,
+      "name": "ترجمات القرآن"
+    }
+  },
+  {
+    "id": 1948,
+    "has_image": 0,
+    "name": "الترجمة الإنجليزية",
+    "parts": 1,
+    "fundamental": 0,
+    "author": null,
+    "year": null,
+    "images": [],
+    "category": {
+      "id": 22,
+      "name": "ترجمات القرآن"
+    }
+  },
+  {
+    "id": 1949,
+    "has_image": 0,
+    "name": "الترجمة الفرنسية - المنتدى الإسلامي",
+    "parts": 1,
+    "fundamental": 0,
+    "author": "نبيل رضوان",
+    "year": null,
+    "images": [],
+    "category": {
+      "id": 22,
+      "name": "ترجمات القرآن"
+    }
+  }
+]

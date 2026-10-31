@@ -1,15 +1,23 @@
 # AGENTS.md
 
+## Contributor & Git policy
+
+Read `CONTRIBUTING.md` before starting work. It defines assignment records,
+one-branch/one-worktree isolation, shared-file ownership, commit/push/merge/
+deploy permissions, PR evidence fields, cleanup rules, and the scope boundaries
+(demo meetings/progress, local photos, deferred Stage 9). The full P9.3 rewrite
+of this file remains deferred.
+
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Dev server on **port 8080** |
-| `npm run build` | Vite build (outputs to `dist/`) |
-| `npm run deploy` | Firebase hosting deploy (`dist/` → `kuttab-othman`) |
-| `npm run lint` | ESLint |
-| `npm run format` | Prettier format |
-| `npm run format:check` | Check formatting |
+| Command                | Description                                         |
+| ---------------------- | --------------------------------------------------- |
+| `npm run dev`          | Dev server on **port 8080**                         |
+| `npm run build`        | Vite build (outputs to `dist/`)                     |
+| `npm run deploy`       | Firebase hosting deploy (`dist/` → `kuttab-othman`) |
+| `npm run lint`         | ESLint                                              |
+| `npm run format`       | Prettier format                                     |
+| `npm run format:check` | Check formatting                                    |
 
 **No test framework is configured.**
 

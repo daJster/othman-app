@@ -1,59 +1,57 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
+import { getLocales } from 'expo-localization';
+import ar from './locales/ar/common.json';
+import en from './locales/en/common.json';
+import { DEFAULT_LANGUAGE, isLanguage, type Language } from './languages';
 
-import enCommon from './locales/en/common.json';
-import arCommon from './locales/ar/common.json';
-import { getItem, setItem, STORAGE_KEYS } from '@/lib/localStorage';
+/**
+ * Device language, narrowed to the supported set.
+ *
+ * `expo-localization` is used for detection only. It is not the source of
+ * truth: the stored preference wins, and this is just what the very first
+ * frame uses before storage answers. Reading a locale can throw on some web
+ * runtimes (and during static rendering there is no locale at all), so the
+ * fallback is unconditional rather than optimistic.
+ */
+export function detectDeviceLanguage(): Language {
+  try {
+    const code = getLocales()[0]?.languageCode;
+    return isLanguage(code) ? code : DEFAULT_LANGUAGE;
+  } catch {
+    return DEFAULT_LANGUAGE;
+  }
+}
 
-export const LANGUAGES = [
-    { code: 'ar', label: 'عربية' },
-    { code: 'en', label: 'English' },
-];
-const DEFAULT_LANG = 'en';
+export const resources = {
+  ar: { common: ar },
+  en: { common: en },
+} as const;
 
-const getInitialLanguage = (): string => {
-    const stored = getItem<string>(STORAGE_KEYS.LANGUAGE, '');
-    if (stored && LANGUAGES.some((l) => l.code === stored)) {
-        return stored;
-    }
-    return DEFAULT_LANG;
-};
-
-const setLanguage = (lang: string): void => {
-    setItem(STORAGE_KEYS.LANGUAGE, lang);
-};
-
-i18n.use(initReactI18next).init({
-    resources: {
-        en: { common: enCommon },
-        ar: { common: arCommon },
-    },
-    lng: getInitialLanguage(),
-    fallbackLng: DEFAULT_LANG, //
-    ns: ['common'],
-    defaultNS: 'common',
-    interpolation: {
-        escapeValue: false,
-    },
-    detection: {
-        order: ['localStorage', 'navigator'],
-        caches: ['localStorage'],
-        lookupLocalStorage: STORAGE_KEYS.LANGUAGE,
-    },
-});
-
-// Set initial direction on page load
-const initialLang = getInitialLanguage();
-const initialDir = initialLang === DEFAULT_LANG ? 'ltr' : 'rtl';
-document.documentElement.dir = initialDir;
-document.documentElement.lang = initialLang;
-
-// Listen for language changes to update the document direction (RTL/LTR)
-i18n.on('languageChanged', (lng) => {
-    setLanguage(lng);
-    const dir = lng === DEFAULT_LANG ? 'ltr' : 'rtl';
-    document.documentElement.dir = dir;
-    document.documentElement.lang = lng;
+/**
+ * A single instance, initialised at module scope.
+ *
+ * Locales are bundled, so `initAsync: false` makes initialisation synchronous —
+ * no render ever happens against an empty resource store, which would flash raw
+ * keys. The language here is the *device* guess; the provider re-applies the
+ * stored preference during boot, before the splash lifts.
+ */
+// `.use()` is i18next's plugin registration. `use` is also a standalone named
+// export, which is exactly what the rule warns about — not a mistake here.
+// eslint-disable-next-line import/no-named-as-default-member
+void i18n.use(initReactI18next).init({
+  resources,
+  lng: detectDeviceLanguage(),
+  fallbackLng: DEFAULT_LANGUAGE,
+  supportedLngs: ['ar', 'en'],
+  initAsync: false,
+  ns: ['common'],
+  defaultNS: 'common',
+  interpolation: {
+    // React escapes on render; escaping here would print `&amp;`.
+    escapeValue: false,
+  },
+  returnNull: false,
 });
 
 export default i18n;

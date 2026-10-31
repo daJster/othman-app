@@ -1,130 +1,335 @@
 {
-    "app": {
-        "name": "Othman",
-        "tagline": "Contemplate the Book of Allah"
+  "app": {
+    "name": "Othman",
+    "tagline": "Contemplate the Book of Allah"
+  },
+  "home": {
+    "hero": {
+      "opening": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
     },
-    "auth": {
-        "login": {
-            "title": "Sign In",
-            "subtitle": "Welcome back! Please sign in to continue",
-            "noAccount": "No account found",
-            "createAccountPrompt": "No account exists with this email.",
-            "error": "Error"
-        },
-        "logout": {
-            "loading": "Logging you out...",
-            "success": "You have been logged out",
-            "redirect": "Redirecting to homepage in {{countdown}}..."
-        }
+    "verse": {
+      "title": "Verse of the Day",
+      "text": "Indeed, this Quran guides to that which is most upright",
+      "reference": "Al-Isra 9"
     },
-    "label": {
-        "email": "Email",
-        "password": "Password"
-    },
-    "action": {
-        "auth": {
-            "continue": "Continue",
-            "login": "Login",
-            "google": "Continue with Google",
-            "facebook": "Continue with Facebook"
-        },
-        "back": "Back",
-        "loading": "Loading..."
-    },
-    "nav": {
-        "home": "Home",
-        "quran": "Quran",
-        "books": "Books",
-        "allBooks": "All Books",
-        "booksDesc": "Browse our collection of Islamic books",
-        "favorites": "Favorites",
-        "favoritesDesc": "Your saved items",
-        "profile": "Profile",
-        "admin": "Admin",
-        "dashboard": "Dashboard",
-        "dashboardDesc": "Admin dashboard",
-        "users": "Users",
-        "usersDesc": "Manage users",
-        "content": "Content",
-        "contentDesc": "Manage content",
-        "superAdmin": "Super Admin",
-        "settings": "Settings",
-        "settingsDesc": "System settings",
-        "analytics": "Analytics",
-        "analyticsDesc": "View analytics",
-        "toggleLanguage": "Toggle Language",
-        "toggleTheme": "Toggle Theme",
-        "login": "Login",
-        "register": "Register",
-        "logout": "Logout",
-        "user": "User",
-        "adminPanel": "Admin Panel",
-        "superAdminPanel": "Super Admin Panel"
-    },
-    "appName": "Quran Center",
-    "tagline": "Contemplate the Book of Allah",
-    "heroTitle": "The Holy Quran",
-    "heroSubtitle": "Read · Understand · Reflect",
-    "heroDescription": "A collection of verses inviting you to contemplate the greatness of the Quran and its miracles",
-    "verseOfTheDay": "Verse of the Day",
-    "chapter": "Chapter",
-    "verses": "Verses",
-    "miracles": "Quran Miracles",
-    "miraclesDesc": "The Quran is an eternal miracle until the Day of Judgment",
-    "scientific": "Scientific Miracles",
-    "scientificDesc": "Scientific facts confirmed by modern science",
-    "linguistic": "Linguistic Miracle",
-    "linguisticDesc": "eloquence that Arabs could not rival",
-    "prophecy": "Prophecies",
-    "prophecyDesc": "Future events that have and will come true",
-    "features": "Features",
-    "readQuran": "Read Quran",
-    "readQuranDesc": "Read the Quran with clear typography and audio",
-    "tafsir": "Tafsir",
-    "tafsirDesc": "Understand the meanings and interpretations",
-    "bookmarks": "Bookmarks",
-    "bookmarksDesc": "Save your favorite verses for later",
-    "search": "Search",
-    "searchDesc": "Search the Quran easily",
-    "cta": "Get Started",
-    "ctaDesc": "Join in preserving and reciting the Book of Allah",
-    "copyright": "All rights reserved",
-    "verse1": "Alif Lam Mim",
-    "verse1Ref": "Al-Baqarah 1",
-    "verse2": "Thus He informs you of what you used to recite",
-    "verse2Ref": "Ta-Ha 128",
-    "verse3": "Indeed, this Quran guides to that which is most upright",
-    "verse3Ref": "Al-Isra 9",
-    "verse4": "And We have revealed to you the Book as a clarification for mankind",
-    "verse4Ref": "An-Nahl 89",
-    "footer": {
-        "about": "About",
-        "aboutDesc": "An educational platform dedicated to learning the Quran, providing tools for reading, understanding, and contemplation.",
-        "quickLinks": "Quick Links",
-        "home": "Home",
-        "quran": "Quran",
-        "tafsir": "Tafsir",
-        "features": "Features",
-        "contact": "Contact",
-        "resources": "Resources",
-        "resourcesDesc": "Resources for learning the Quran",
-        "mobileApp": "Mobile App",
-        "download": "Download",
-        "desktopApp": "Desktop App",
-        "install": "Install",
-        "legal": "Legal",
-        "legalDesc": "Legal information",
-        "terms": "Terms & Conditions",
-        "privacy": "Privacy Policy",
-        "cookies": "Cookie Policy",
-        "faq": "FAQ",
-        "subscribe": "Subscribe to Newsletter",
-        "subscribeDesc": "Get the latest updates and articles",
-        "email": "Email",
-        "subscribeBtn": "Subscribe",
-        "social": "Follow Us",
-        "madeWith": "Made with",
-        "love": "love",
-        "for": "for Allah"
+    "explore": {
+      "title": "Explore"
     }
+  },
+  "action": {
+    "back": "Back",
+    "cancel": "Cancel",
+    "close": "Close",
+    "continue": "Continue",
+    "edit": "Edit",
+    "goBackHome": "Back to home",
+    "join": "Join",
+    "loading": "Loading…",
+    "retry": "Try again",
+    "save": "Save",
+    "signIn": "Sign in",
+    "signOut": "Sign out"
+  },
+  "label": {
+    "email": "Email",
+    "password": "Password"
+  },
+  "nav": {
+    "home": "Home",
+    "quran": "Quran",
+    "quranFull": "The Holy Quran",
+    "meetings": "Meetings",
+    "account": "Account",
+    "profile": "Profile",
+    "quranDesc": "Read the mushaf page by page",
+    "meetingsDesc": "Your upcoming sessions",
+    "accountDesc": "Profile, progress and preferences",
+    "about": "About",
+    "aboutDesc": "App information and links",
+    "toggleLanguage": "Change language",
+    "toggleTheme": "Change theme",
+    "login": "Sign in",
+    "logout": "Sign out"
+  },
+  "language": {
+    "title": "Language",
+    "arabic": "العربية",
+    "english": "English",
+    "restartTitle": "Restart needed",
+    "restartMessage": "The text direction changes now. A few native controls, such as text fields and alerts, follow it after the app restarts."
+  },
+  "theme": {
+    "title": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "reader": {
+    "pageImage": "Page {{page}} of the mushaf",
+    "ayahLabel": "Ayah {{ayah}} of surah {{surah}}",
+    "clearSelection": "Clear the selected ayah",
+    "continueTitle": "Continue reading",
+    "continueDescription": "Page {{page}}",
+    "open": "Open the mushaf",
+    "entryHint": "The mushaf opens full screen; swipe to turn the page.",
+    "imageFailed": "Could not load this page image.",
+    "exit": "Exit reader",
+    "openSurahPicker": "Choose surah",
+    "openEditionPicker": "Choose edition",
+    "openMenu": "Reader menu",
+    "pageIndicator": "Page {{page}}",
+    "ayahIndicator": "Ayah {{ayah}}",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "surahPickerTitle": "Surahs",
+    "searchSurahs": "Search surahs",
+    "noSurahsFound": "No surah matches your search.",
+    "editionPickerTitle": "Editions",
+    "editionSelected": "Selected",
+    "menuTitle": "Reader menu",
+    "menuSurah": "Surahs",
+    "menuEdition": "Editions",
+    "menuRead": "Read",
+    "menuTafsir": "Tafsir",
+    "menuNotes": "Notes",
+    "panelReadTitle": "Read",
+    "panelTafsirTitle": "Tafsir",
+    "panelNotesTitle": "Notes",
+    "panelNeedsSelection": "Select an ayah on the page first.",
+    "contentTypeSurah": "Surah",
+    "contentTypeTafsir": "Tafsir",
+    "contentTypeE3rab": "E3rab",
+    "contentTypeTranslation": "Translation",
+    "contentSourcesEmpty": "No sources are available for this ayah and type.",
+    "contentEmptyTitle": "No text for this ayah",
+    "contentEmptyDescription": "This source has no entry for the selected ayah. Choose another source or type.",
+    "pageOf": "{{page}} / {{total}}",
+    "ayahCount": "{{count}} ayahs",
+    "editionPages": "Pages {{first}}–{{last}}",
+    "selectedAyah": "Ayah {{ayah}} · {{surah}}",
+    "toggleChrome": "Show or hide reader controls",
+    "sourceTranslation": "Translation",
+    "sourceE3rab": "E3rab",
+    "menuShare": "Share",
+    "linkInvalidTitle": "This link is not valid",
+    "linkInvalidDescription": "The link is missing, or it points to a surah or ayah that does not exist. Open the Quran tab to continue.",
+    "shareFailed": "Could not open the share sheet.",
+    "menuAudio": "Audio",
+    "panelAudioTitle": "Recitation",
+    "audioPlay": "Play",
+    "audioPause": "Pause",
+    "audioPreviousAyah": "Previous ayah",
+    "audioNextAyah": "Next ayah",
+    "audioReciter": "Reciter",
+    "audioAutoRead": "Auto-read",
+    "audioWrap": "Continue after surah",
+    "audioBuffering": "Buffering…",
+    "audioError": "This recitation could not be loaded.",
+    "audioBackgroundNote": "Playback continues with the screen off. Lock-screen controls are not included.",
+    "notesEmptyTitle": "No notes yet",
+    "notesEmptyDescription": "Your notes for this ayah will appear here.",
+    "notesPlaceholder": "Write a note for this ayah",
+    "notesSave": "Save note",
+    "notesSaving": "Saving…",
+    "notesSaveError": "The note could not be saved. Your draft is still here."
+  },
+  "state": {
+    "loading": "Loading…",
+    "errorTitle": "Something went wrong",
+    "errorDescription": "We could not load this. Check your connection and try again.",
+    "emptyTitle": "Nothing here yet",
+    "emptyDescription": "There is nothing to show right now.",
+    "offline": "No connection"
+  },
+  "error": {
+    "400": {
+      "title": "Bad request",
+      "description": "The request could not be understood. Try again."
+    },
+    "401": {
+      "title": "Sign in required",
+      "description": "Your session has ended. Sign in to continue."
+    },
+    "403": {
+      "title": "Access denied",
+      "description": "Your account does not have access to this page."
+    },
+    "404": {
+      "title": "Page not found",
+      "description": "The page you are looking for does not exist or has moved."
+    },
+    "500": {
+      "title": "Server error",
+      "description": "Something failed on our side. Please try again later."
+    }
+  },
+  "auth": {
+    "signIn": {
+      "title": "Sign in",
+      "subtitle": "Save your place, meet your teacher, and keep your progress.",
+      "google": "Continue with Google",
+      "or": "or",
+      "emailTitle": "Sign in with email",
+      "emailHint": "We will ask for your password next.",
+      "passwordTitle": "Enter your password",
+      "passwordHint": "Signing in as {{email}}.",
+      "emailInvalid": "Enter a valid email address.",
+      "passwordRequired": "Enter your password.",
+      "accountExistsTitle": "This email uses another sign-in method",
+      "accountExistsDescription": "Sign in with the method you used when you created the account. We do not link accounts automatically.",
+      "tryAgain": "Try again",
+      "back": "Use a different email"
+    },
+    "error": {
+      "invalid-credential": "Email or password is incorrect.",
+      "email-already-in-use": "An account already exists with this email.",
+      "weak-password": "Choose a stronger password.",
+      "user-disabled": "This account has been disabled.",
+      "network": "Network unavailable. Check your connection and try again.",
+      "cancelled": "Sign-in was cancelled.",
+      "operation-not-allowed": "This sign-in method is not enabled.",
+      "too-many-requests": "Too many attempts. Wait a moment and try again.",
+      "account-exists-with-different-credential": "This email uses another sign-in method.",
+      "configuration": "Sign-in is not configured for this build.",
+      "not-implemented": "This sign-in method is not available yet.",
+      "unknown": "Something went wrong. Try again."
+    }
+  },
+  "account": {
+    "sections": {
+      "settings": "Settings",
+      "session": "Session"
+    },
+    "profile": {
+      "anonymous": "No name yet",
+      "noEmail": "No email on file"
+    },
+    "role": {
+      "guest": "Guest",
+      "user": "Student",
+      "admin": "Administrator",
+      "superadmin": "Super administrator"
+    },
+    "signedOut": {
+      "title": "You are signed out",
+      "description": "Sign in to see your profile and progress.",
+      "action": "Sign in"
+    },
+    "signOut": {
+      "title": "Sign out?",
+      "message": "You can sign back in at any time.",
+      "confirm": "Sign out",
+      "cancel": "Keep signed in"
+    },
+    "edit": {
+      "title": "Edit profile",
+      "photo": "Change photo",
+      "photoHint": "Choose an image from your library.",
+      "photoFailed": "Could not open your photo library.",
+      "displayName": "Display name",
+      "displayNamePlaceholder": "Your name",
+      "email": "Email",
+      "emailHint": "Email cannot be changed.",
+      "phone": "Phone number",
+      "phonePlaceholder": "+212 6 12 34 56 78",
+      "phoneHint": "Include the country code, starting with +.",
+      "role": "Role",
+      "roleHint": "Only an administrator can change a role.",
+      "saved": "Saved",
+      "saving": "Saving…",
+      "saveFailed": "Could not save your changes. Try again."
+    },
+    "validation": {
+      "displayNameRequired": "Enter a name.",
+      "displayNameLength": "Use between 2 and 60 characters.",
+      "phone": "Use a country code and digits only, like +212612345678."
+    },
+    "a11y": {
+      "profilePhoto": "Profile photo",
+      "edit": "Edit profile"
+    }
+  },
+  "meeting": {
+    "status": {
+      "soon": "Starting soon",
+      "upcoming": "Today",
+      "scheduled": "Scheduled"
+    },
+    "attendees_one": "{{count}} attendee",
+    "attendees_other": "{{count}} attendees",
+    "found_zero": "No meetings",
+    "found_one": "1 meeting",
+    "found_other": "{{count}} meetings",
+    "calendar": {
+      "system": "Calendar system",
+      "gregorian": "Gregorian",
+      "hijri": "Hijri",
+      "previous": "Previous month",
+      "next": "Next month",
+      "today": "Today"
+    },
+    "details": "Details",
+    "less": "Less",
+    "organizedBy": "Organized by {{name}}"
+  },
+  "page": {
+    "meetings": {
+      "header": {
+        "title": "Meetings",
+        "description": "Sessions with your shaykh and classmates"
+      },
+      "list": {
+        "empty": "No meetings on this day."
+      }
+    }
+  },
+  "pages": {
+    "about": {
+      "description": "An educational platform dedicated to learning the Quran, with tools for reading, understanding and contemplation.",
+      "version": "Version {{version}}",
+      "sections": {
+        "explore": "Explore",
+        "resources": "Resources",
+        "legal": "Legal"
+      },
+      "website": "Website",
+      "websiteDesc": "Open the Kuttab Othman website",
+      "copyright": "© {{year}} {{name}}. All rights reserved."
+    },
+    "account": {
+      "progress": {
+        "title": "Progress",
+        "subtitle": "Your memorisation over time",
+        "gridTitle": "Surahs",
+        "legend": {
+          "less": "Less",
+          "more": "More"
+        },
+        "empty": "No progress recorded yet.",
+        "summary": {
+          "average": "Overall memorisation",
+          "memorised": "Memorised",
+          "started": "Started",
+          "surahs": "Surahs"
+        },
+        "surah": "Surah {{number}}",
+        "band": {
+          "notStarted": "Not started",
+          "inProgress": "In progress",
+          "memorised": "Memorised"
+        },
+        "cell": {
+          "a11y": "Surah {{number}}: {{percent}} memorised"
+        },
+        "detail": {
+          "memorised": "memorised",
+          "lastReviewed": "Last reviewed {{date}}",
+          "neverReviewed": "Not reviewed yet"
+        },
+        "recentTasks": {
+          "title": "Recent tasks"
+        }
+      }
+    }
+  }
 }
