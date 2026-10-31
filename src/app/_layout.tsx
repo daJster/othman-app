@@ -1,8 +1,9 @@
 import '@/global.css';
 
 import { QueryClientProvider } from '@tanstack/react-query';
-import { Redirect, Stack, usePathname } from 'expo-router';
+import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   SafeAreaListener,
@@ -124,21 +125,22 @@ function RootNavigator() {
   const contentStyle = useResolveClassNames('bg-background');
   const { user, status } = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
 
   // Signed-out private paths must be redirected above the tab navigator.
   // On native, hidden tabs are removed from the navigator's route table, so a
   // link to `/meetings` can otherwise fall back to Home before that screen's
-  // own `RequireAuth` mounts. The screen-level gate remains as defence in depth.
-  if (status !== 'restoring' && !user && isPrivateAppPath(pathname)) {
-    return (
-      <Redirect
-        href={{
-          pathname: '/auth/sign-in',
-          params: { returnTo: pathname },
-        }}
-      />
-    );
-  }
+  // own `RequireAuth` mounts. Keep the Stack mounted and navigate imperatively:
+  // returning a root-level `<Redirect>` replaces the navigator, which web
+  // tolerates but Android needs in order to present the sign-in modal.
+  useEffect(() => {
+    if (status === 'restoring' || user || !isPrivateAppPath(pathname)) return;
+
+    router.replace({
+      pathname: '/auth/sign-in',
+      params: { returnTo: pathname },
+    });
+  }, [pathname, router, status, user]);
 
   return (
     <Stack
