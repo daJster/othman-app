@@ -41,7 +41,14 @@ export function usePagePrefetch(
         }
       }
 
-      if (urls.length > 0) void Image.prefetch(urls, 'memory-disk');
+      if (urls.length > 0) {
+        // A failed neighbour is not a reader failure: the current page is
+        // already on screen and the next one will request its own image. Swallow
+        // the rejection so it cannot surface as an unhandled promise.
+        void Promise.resolve(Image.prefetch(urls, 'memory-disk')).catch(
+          () => {},
+        );
+      }
     }, PREFETCH_DELAY);
 
     return () => clearTimeout(timer);

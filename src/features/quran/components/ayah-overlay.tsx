@@ -31,14 +31,19 @@ export type AyahOverlayProps = {
   ayat: Readonly<Record<string, PageAyahBboxes>>;
   selectedAyahKey: string | null;
   onSelectAyah: (ayahKey: string) => void;
-  onClearSelection: () => void;
+  /**
+   * A tap on the margin. The reader decides what that means — clear a
+   * selection, or toggle chrome when nothing is selected — so one tap can never
+   * do both. The label follows the same rule.
+   */
+  onBackdropPress: () => void;
 };
 
 export function AyahOverlay({
   ayat,
   selectedAyahKey,
   onSelectAyah,
-  onClearSelection,
+  onBackdropPress,
 }: AyahOverlayProps) {
   const { t } = useTranslation();
 
@@ -47,8 +52,12 @@ export function AyahOverlay({
       <Pressable
         className="absolute inset-0"
         accessibilityRole="button"
-        accessibilityLabel={t('reader.clearSelection')}
-        onPress={onClearSelection}
+        accessibilityLabel={
+          selectedAyahKey
+            ? t('reader.clearSelection')
+            : t('reader.toggleChrome')
+        }
+        onPress={onBackdropPress}
         testID="ayah-overlay-backdrop"
       />
 

@@ -724,3 +724,30 @@ describe('selection', () => {
     expect(store.getState().direction).toBeNull();
   });
 });
+
+describe('reset', () => {
+  it('clears the selection and the pending turn but keeps display preferences', async () => {
+    const { store } = await mountedReader();
+
+    store.getState().goToPage(3);
+    store.getState().selectAyah('6');
+
+    expect(store.getState()).toMatchObject({
+      page: 3,
+      ayahKey: '6',
+      direction: 'forward',
+    });
+
+    store.getState().reset();
+
+    // A sign-out must not send the reader back to page 1 or forget the chosen
+    // edition: those are display preferences, not session data.
+    expect(store.getState()).toMatchObject({
+      page: 3,
+      editionKey: '1',
+      status: 'ready',
+      ayahKey: null,
+      direction: null,
+    });
+  });
+});

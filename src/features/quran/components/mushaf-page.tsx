@@ -9,7 +9,10 @@ import { useCSSVariable } from 'uniwind';
 import { getEditionPageSize } from '@/core/config';
 import { quranPageImageUrl } from '@/core/domain/quran/page';
 import type { PageAyahBboxes, QuranEdition } from '@/core/types';
+import { Button } from '@/ui/button';
 import { Image } from '@/ui/image';
+import { Loading } from '@/ui/states';
+import { Text } from '@/ui/text';
 import { fitBox, type Size } from '../bbox-geometry';
 import { cssNumber } from '../css-value';
 import { AyahOverlay } from './ayah-overlay';
@@ -34,6 +37,12 @@ import { AyahOverlay } from './ayah-overlay';
  * `backgroundColor` is the edition's own `themeColor`, the tint printed around
  * the scan. That is data, not a design token, so it travels through `style` like
  * the heatmap ramp.
+ *
+ * Image failure is a state of *this* page, not of the query that supplied the
+ * boxes. A slow or broken CDN must not leave a blank "ready" page, and it must
+ * not make the reader believe the catalog failed. Retry remounts only the image
+ * (a new `key`), so the rest of the reader — position, selection, exit — stays
+ * untouched.
  */
 export type MushafPageProps = {
   edition: QuranEdition;
@@ -42,7 +51,7 @@ export type MushafPageProps = {
   ayat: Readonly<Record<string, PageAyahBboxes>> | undefined;
   selectedAyahKey: string | null;
   onSelectAyah: (ayahKey: string) => void;
-  onClearSelection: () => void;
+  onBackdropPress: () => void;
 };
 
 export function MushafPage({
@@ -51,7 +60,7 @@ export function MushafPage({
   ayat,
   selectedAyahKey,
   onSelectAyah,
-  onClearSelection,
+  onBackdropPress,
 }: MushafPageProps) {
   const { t } = useTranslation();
   const window = useWindowDimensions();
@@ -59,6 +68,10 @@ export function MushafPage({
     width: window.width,
     height: window.height,
   });
+  const [imageStatus, setImageStatus] = useState<'loading' | 'ready' | 'error'>(
+    'loading',
+  );
+  const [imageAttempt, setImageAttempt] = useState(0);
 
   const [tokenWidth, tokenHeight, tokenMaxWidth] = useCSSVariable([
     '--reader-page-width',
@@ -87,6 +100,11 @@ export function MushafPage({
     );
   }, []);
 
+  const retryImage = useCallback(() => {
+    setImageStatus('loading');
+    setImageAttempt((attempt) => attempt + 1);
+  }, []);
+
   return (
     <View
       className="flex-1 items-center justify-center"
@@ -104,6 +122,7 @@ export function MushafPage({
           testID={`mushaf-page:${page}`}
         >
           <Image
+            key={imageAttempt}
             source={{ uri: quranPageImageUrl(edition, page) }}
             className="h-full w-full"
             contentFit="contain"
@@ -111,6 +130,8 @@ export function MushafPage({
             transition={120}
             accessibilityLabel={t('reader.pageImage', { page })}
             testID="mushaf-image"
+            onLoad={() => setImageStatus('ready')}
+            onError={() => setImageStatus('error')}
           />
 
           {ayat ? (
@@ -118,8 +139,36 @@ export function MushafPage({
               ayat={ayat}
               selectedAyahKey={selectedAyahKey}
               onSelectAyah={onSelectAyah}
-              onClearSelection={onClearSelection}
+              onBackdropPress={onBackdropPress}
             />
+          ) : null}
+
+          {imageStatus === 'loading' ? (
+            <View
+              className="absolute inset-0 bg-background/70"
+              testID="mushaf-image-loading"
+              pointerEvents="none"
+            >
+              <Loading label={t('action.loading')} />
+            </View>
+          ) : null}
+
+          {imageStatus === 'error' ? (
+            <View
+              className="absolute inset-0 items-center justify-center gap-3 bg-background p-4"
+              testID="mushaf-image-error"
+            >
+              <Text variant="label" tone="destructive" className="text-center">
+                {t('reader.imageFailed')}
+              </Text>
+              <Button
+                variant="outline"
+                size="sm"
+                label={t('action.retry')}
+                onPress={retryImage}
+                testID="mushaf-image-retry"
+              />
+            </View>
           ) : null}
         </View>
       ) : null}

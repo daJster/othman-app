@@ -1,7 +1,11 @@
 import { useLocalSearchParams } from 'expo-router';
 import Head from 'expo-router/head';
 import { useTranslation } from 'react-i18next';
+import { notesNamespace } from '@/core/domain/notes/notes';
+import { ReaderLinkError } from '@/features/quran/components/reader-link-error';
+import { parseQuranLink } from '@/features/quran/links';
 import { ReaderScreen } from '@/features/quran/reader-screen';
+import { useAuth } from '@/providers/auth-provider';
 
 /**
  * Reader route.
@@ -12,24 +16,51 @@ import { ReaderScreen } from '@/features/quran/reader-screen';
  * That presentation is declared once in the root layout (`src/app/_layout.tsx`),
  * not here, so the route's chrome cannot drift from the navigator that owns it.
  *
- * The segment is parsed here and nowhere else: a deep link can carry anything,
- * and the reader store expects a number. Non-integers fall back to the stored
- * page; a number outside the edition is clamped by `goToPage`, which is what
- * makes `/reader/9999` land on the last page instead of a 404 from the CDN.
+ * `page`, `surah` and `ayah` all go through `parseQuranLink`, the same parser
+ * the `/quran` tab uses. Malformed or contradictory parameters render a
+ * recoverable error rather than a fabricated position; a valid link is handed
+ * to the screen, which applies it once the edition's geometry is attached (so
+ * the ayah mapping can win over a contradictory page).
+ *
+ * The numeric page is still the route segment, which keeps `/reader/9999`
+ * shareable: `goToPage` clamps it when it is the only parameter.
  */
 export default function ReaderRoute() {
   const { t } = useTranslation();
-  const { page } = useLocalSearchParams<{ page?: string }>();
+  const { user } = useAuth();
+  const params = useLocalSearchParams<{
+    page?: string;
+    surah?: string;
+    ayah?: string;
+  }>();
 
-  const parsed = Number(page);
-  const initialPage = Number.isInteger(parsed) ? parsed : null;
+  const link = parseQuranLink(params);
+
+  if (link.kind === 'invalid') {
+    return (
+      <>
+        <Head>
+          <title>{t('reader.linkInvalidTitle')}</title>
+        </Head>
+        <ReaderLinkError />
+      </>
+    );
+  }
+
+  const position =
+    link.kind === 'link' ? link : { page: null, surah: null, ayah: null };
 
   return (
     <>
       <Head>
-        <title>{`${t('nav.quran')} — ${initialPage ?? ''}`}</title>
+        <title>{`${t('nav.quran')} — ${position.page ?? ''}`}</title>
       </Head>
-      <ReaderScreen initialPage={initialPage} />
+      <ReaderScreen
+        initialPage={position.page}
+        initialSurah={position.surah}
+        initialAyah={position.ayah}
+        notesNamespace={notesNamespace(user?.uid)}
+      />
     </>
   );
 }

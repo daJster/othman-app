@@ -4,8 +4,8 @@ import Head from 'expo-router/head';
 import { useTranslation } from 'react-i18next';
 import { Alert, useColorScheme } from 'react-native';
 import { useDirection } from '@/i18n';
+import { RequireAuth } from '@/features/auth/require-auth';
 import { ProfileHeader } from '@/features/account/profile-header';
-import { signInDemoSession } from '@/features/account/demo-session';
 import {
   useCurrentAccount,
   useSignOut,
@@ -27,11 +27,21 @@ import { ScreenView } from '@/ui/screen';
  *    rows bring the platform's own pressed state, separators and accessibility,
  *    which is exactly what a settings screen should look like.
  *
- * The session is a demo store until P3.3 (`features/account/demo-session.ts`),
- * so the signed-out state is reachable and the sign-out row is real rather than
- * decorative. Swapping in `AuthProvider` does not touch this file.
+ * The session comes from `AuthProvider`. This route is private: `RequireAuth`
+ * (driven by the route registry's `access`) sends a signed-out visitor to the
+ * sign-in modal and returns them here afterwards. The signed-out branch below
+ * is therefore defensive, not the normal path — it still renders a real action
+ * instead of a dead end.
  */
 export default function AccountScreen() {
+  return (
+    <RequireAuth>
+      <AccountContent />
+    </RequireAuth>
+  );
+}
+
+function AccountContent() {
   const { t } = useTranslation();
   const router = useRouter();
   const { isRTL } = useDirection();
@@ -63,7 +73,7 @@ export default function AccountScreen() {
           title={t('account.signedOut.title')}
           description={t('account.signedOut.description')}
           actionLabel={t('account.signedOut.action')}
-          onAction={signInDemoSession}
+          onAction={() => router.push('/auth/sign-in')}
         />
       </ScreenView>
     );

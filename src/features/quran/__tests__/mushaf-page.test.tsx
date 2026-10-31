@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react-native';
+import { fireEvent, render, screen } from '@testing-library/react-native';
 import '@/i18n';
 import type { PageAyahBboxes, QuranEdition } from '@/core/types';
 import { MushafPage } from '../components/mushaf-page';
@@ -45,7 +45,7 @@ describe('MushafPage', () => {
         ayat={AYAT}
         selectedAyahKey={null}
         onSelectAyah={jest.fn()}
-        onClearSelection={jest.fn()}
+        onBackdropPress={jest.fn()}
       />,
     );
 
@@ -64,7 +64,7 @@ describe('MushafPage', () => {
         ayat={AYAT}
         selectedAyahKey={null}
         onSelectAyah={jest.fn()}
-        onClearSelection={jest.fn()}
+        onBackdropPress={jest.fn()}
       />,
     );
 
@@ -82,7 +82,7 @@ describe('MushafPage', () => {
         ayat={AYAT}
         selectedAyahKey={null}
         onSelectAyah={jest.fn()}
-        onClearSelection={jest.fn()}
+        onBackdropPress={jest.fn()}
       />,
     );
 
@@ -97,7 +97,7 @@ describe('MushafPage', () => {
         ayat={undefined}
         selectedAyahKey={null}
         onSelectAyah={jest.fn()}
-        onClearSelection={jest.fn()}
+        onBackdropPress={jest.fn()}
       />,
     );
 
@@ -113,12 +113,63 @@ describe('MushafPage', () => {
         ayat={AYAT}
         selectedAyahKey={null}
         onSelectAyah={jest.fn()}
-        onClearSelection={jest.fn()}
+        onBackdropPress={jest.fn()}
       />,
     );
 
     expect(screen.getByTestId('mushaf-image').props.accessibilityLabel).toBe(
       'Page 7 of the mushaf',
     );
+  });
+
+  it('shows a loading state until the scan reports that it loaded', async () => {
+    await render(
+      <MushafPage
+        edition={EDITION}
+        page={7}
+        ayat={AYAT}
+        selectedAyahKey={null}
+        onSelectAyah={jest.fn()}
+        onBackdropPress={jest.fn()}
+      />,
+    );
+
+    expect(screen.getByTestId('mushaf-image-loading')).toBeTruthy();
+
+    await fireEvent(screen.getByTestId('mushaf-image'), 'load', {
+      nativeEvent: {},
+    });
+
+    expect(screen.queryByTestId('mushaf-image-loading')).toBeNull();
+    expect(screen.queryByTestId('mushaf-image-error')).toBeNull();
+  });
+
+  it('replaces a failed scan with a retry, not a blank ready page', async () => {
+    await render(
+      <MushafPage
+        edition={EDITION}
+        page={7}
+        ayat={AYAT}
+        selectedAyahKey={null}
+        onSelectAyah={jest.fn()}
+        onBackdropPress={jest.fn()}
+      />,
+    );
+
+    await fireEvent(screen.getByTestId('mushaf-image'), 'error', {
+      nativeEvent: { error: 'offline' },
+    });
+
+    expect(screen.getByTestId('mushaf-image-error')).toBeTruthy();
+    expect(screen.getByText('Could not load this page image.')).toBeTruthy();
+
+    // The retry remounts the image at the same URL and returns to loading.
+    await fireEvent.press(screen.getByTestId('mushaf-image-retry'));
+
+    expect(screen.queryByTestId('mushaf-image-error')).toBeNull();
+    expect(screen.getByTestId('mushaf-image-loading')).toBeTruthy();
+    expect(screen.getByTestId('mushaf-image').props.source).toEqual([
+      { uri: 'https://cdn.test/1/pages/007.png' },
+    ]);
   });
 });

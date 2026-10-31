@@ -76,7 +76,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         ],
       },
     ],
-    // expo-audio (P6.1) adds its plugin when the package is installed.
+    // Playback only: the reader never records, so the microphone permission
+    // and Android `RECORD_AUDIO` are explicitly off. Background playback is
+    // what the audio session promises when the screen turns off.
+    [
+      'expo-audio',
+      {
+        microphonePermission: false,
+        recordAudioAndroid: false,
+        enableBackgroundPlayback: true,
+      },
+    ],
     [
       'expo-image-picker',
       {

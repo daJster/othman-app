@@ -29,6 +29,39 @@ Reference: `othman-web/` is frozen read-only source material. Never edit it.
 - Uniwind ≥ 1.13.0 (CSS cascade), `withUniwindConfig` outermost in Metro.
 - Delete, don't leave behind: template screens, `src/theme/*`, `src/constants/theme.ts`, `src/hooks/use-theme.ts`, `src/platform/logic/config/tokens.ts`.
 
+## Recovery baseline (OS-001 group 1, 2026-10-30)
+
+Merge `ba1ed9a` was compared with both parents: `9c452a3` (reader branch) and
+`e649a74` (mobile support). It introduced three integration defects:
+
+| File                  | Defect                                                               | Resolution                                                                                                                                                           |
+| --------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `package.json`        | 26 duplicated dependency/script lines, so the file is not valid JSON | Restored the `9c452a3` manifest; it is the union of both parents (`zustand`, `expo-haptics`, `expo-image-picker` included) and has one authoritative value per entry |
+| `package-lock.json`   | Duplicated root dependency entries and a merge-mangled tree          | Restored the `9c452a3` lockfile; `npm install` leaves it byte-identical, so it is coherent with the recovered manifest                                               |
+| `src/app/_layout.tsx` | ~80 lines of the root layout pasted inside `AppShell`                | Restored the `9c452a3` layout, which keeps provider order and registers `(tabs)`, `account/edit`, `account/progress`, `about`, and `reader/[page]`                   |
+
+`.prettierrc` now sets `endOfLine: "auto"`: this Windows checkout has
+`core.autocrlf=true`, so the committed LF files arrive as CRLF and the previous
+configuration (implicit `lf`) failed `format:check` on 131 untouched files.
+
+Evidence on base `18dbd83` with recovered tree `c7b1a49`:
+
+- `npm install` succeeds and leaves `package-lock.json` unchanged.
+- `npm ci --dry-run` reports `up to date`. A full `npm ci` could not unlink
+  `node_modules/uniwind/node_modules/lightningcss...node` because an Expo dev
+  server (`expo start --port 8099`) holds it; that is an environment lock, not a
+  lockfile defect.
+- `npm run verify` passes: 65 suites, 479 tests.
+- `npx expo config --type public` resolves, and `npx expo-doctor` passes 21/21.
+- `npm run build:web`, `npm run build:ios`, and `npm run build:android` all
+  export to `dist/` when run sequentially (parallel runs contend for `dist/`).
+- No P5.3 type/lint defect surfaced after parsing was repaired; no reader source
+  change was needed beyond the layout fix.
+
+Device boot and other native/manual evidence remain outstanding; they are
+tracked as unchecked in the ledger and are not implied by the green checks
+above.
+
 ## 2. PR graph
 
 ```
@@ -578,23 +611,37 @@ Depends: P3.1
 
 Depends: P3.2
 
-> **Not built in this pass — deliberately skipped.** The consequence is tracked
-> in P3.4 and P3.5: nothing is auth-gated, `meetings` and `account` are public,
-> and the query hooks take an `AuthUser` argument instead of reading a context.
-> The registry already declares `access`, so wiring this PR is
-> `Stack.Protected` + `AuthProvider` + the sign-in screen, not a refactor.
+> **Implemented; stage acceptance blocked on a device.** This pass replaced the
+> skipped version: `AuthProvider` now owns session observation and the account
+> query, private routes are gated, and native Google uses an authorization code
+>
+> - PKCE exchange before `signInWithCredential`. The registry's `access` field is
+>   the single source for tab filtering and route guards, so `Stack.Protected`
+>   was not needed.
+>
+> The demo session (`features/account/demo-session.ts`) is deleted and the
+> profile barrel points at Firestore. `demo-profile.repository.ts` survives only
+> as an injectable test fixture. Sign-in is a modal so a protected deep link can
+> resume its destination after authentication.
+>
+> Not verifiable on this machine: Google client IDs are absent from `.env`, so
+> the provider-console contract and the sign-in flow need a development build;
+> Firestore rules need console/emulator access; there is no iOS/Android
+> toolchain. Those are tasks 4.2, 4.10 and 4.11 in the OpenSpec ledger.
+> Setup steps for the next operator are in `docs/auth-setup.md`.
 
-- [ ] Port `AuthProvider` (`onAuthStateChanged` → profile → `mergeAuthWithProfile`); `loading` never stuck on profile failure.
-- [ ] `npx expo install expo-auth-session expo-crypto`.
-- [ ] Native Google: id_token flow → `GoogleAuthProvider.credential` → `signInWithCredential`; verify provider API against the installed version.
-- [ ] Web Google: keep `signInWithPopup` in `authService.web.ts`.
-- [ ] Client IDs via `EXPO_PUBLIC_GOOGLE_*`; redirect URI `makeRedirectUri({ scheme: 'othman' })`; document console setup.
-- [ ] Sign-in screen (`auth/sign-in.tsx`, modal): Google + email→password two-step, loading/error states, no `checkAccountExists`.
-- [ ] `Stack.Protected`: meetings + account private; home + quran public.
-- [ ] Sign-out clears query cache + reader store, keeps theme/language.
-- [ ] Handle `auth/account-exists-with-different-credential`.
+- [x] Port `AuthProvider` (`onAuthStateChanged` → profile → `mergeAuthWithProfile`); `loading` never stuck on profile failure. Profile errors settle into `ErrorState` with a retry; the account query is keyed by uid and disabled while signed out.
+- [x] `npx expo install expo-auth-session expo-crypto` (`expo-auth-session@~57.0.16`, `expo-crypto@~57.0.4`).
+- [x] Native Google: authorization code + PKCE → `AccessTokenRequest` → `GoogleAuthProvider.credential` + `signInWithCredential` in `platform/auth/google.ts` and `authService.ts`. Implicit `id_token` is not used because Google no longer supports it on installed apps.
+- [x] Web Google: `signInWithPopup` kept in `authService.web.ts`; the native module refuses to run on web.
+- [x] Client IDs via `EXPO_PUBLIC_GOOGLE_*` with a platform-bound selection (no web fallback), redirect URI `othman://auth`/`EXPO_PUBLIC_GOOGLE_REDIRECT_URI`, and console setup documented in `docs/auth-setup.md`.
+- [x] Sign-in screen (`auth/sign-in.tsx`, modal): Google + email→password two-step, loading/error/retry, no `checkAccountExists`, no enumeration through profile lookup.
+- [x] Registry-derived tab filtering + `RequireAuth` on `meetings`, `account`, `account/edit` and `account/progress`: signed-out access redirects to sign-in with a sanitized internal `returnTo`; home, quran and the reader stay public.
+- [x] Sign-out cancels and removes account/progress/meetings query data, resets the reader's transient selection/direction, and keeps theme, language, edition and last page.
+- [x] Handle `auth/account-exists-with-different-credential` with a recovery message and no silent linking.
+- [x] Focused tests: `auth-provider` (8), Google boundary (18), sign-in screen (11), return-to (7), visible tabs (4), reader reset, plus the migrated account/edit suites.
 
-**Done when:** Google works on iOS/Android/web; session restores; protected routes redirect and return.
+**Done when:** Google works on iOS/Android/web; session restores; protected routes redirect and return. — **Code and tests are green (`npm run verify`); the device/web smoke run and the provider-console contract are blocked** (no Google client IDs, no device toolchains, no rules access). Session restoration is covered by the persistence unit contract only, not by a relaunch on hardware.
 
 ---
 
@@ -1060,76 +1107,110 @@ Depends: P5.1
 
 Depends: P5.2
 
-- [ ] `mushaf-page.tsx`: `withUniwind(expo-image)`, `contentFit="contain"`, `cachePolicy="memory-disk"`, `aspect-[412/600]`.
-- [ ] `ayah-overlay.tsx`: one `Pressable` per bbox, geometry in `style`, highlight via `data-selected`.
-- [ ] Group bboxes per ayah; tap outside clears.
-- [ ] `ScopedTheme theme="light"` only if the art requires it.
-- [ ] Page turn: gesture-handler swipe + Reanimated, `expo-haptics`, `--motion-page-turn`.
-- [ ] Prefetch ±2 pages; skip on fast swipes.
-- [ ] Spike: confirm `useCSSVariable` values are animatable (else use `@theme static` hex). Record result here.
-- [ ] Profile: 20 page turns, JS frame < 16 ms, flat memory.
+> **Implemented; runtime acceptance blocked.** Rendering, hit-testing, turns and
+> prefetch are covered by tests. The 20-turn frame/memory profile needs a device
+> and is tracked as group 12; correctness on real scans needs a device too.
 
-**Done when:** correct ayah on both editions; 55+ fps.
+- [x] `mushaf-page.tsx`: `withUniwind(expo-image)` via `@/ui/image`, `contentFit="contain"`, `cachePolicy="memory-disk"`. The aspect box is **measured**, not a class: the page is fitted to its container with the edition's own ratio (`getEditionPageSize(edition.name)`, falling back to the `--reader-page-*` tokens). A fixed `aspect-[412/600]` letterboxes any edition whose scan is not 412×600, and `contain` would then put every bbox off the text by the letterbox.
+- [x] `ayah-overlay.tsx`: one `Pressable` per bbox, geometry in `style` (percentages from `bboxToRect`), highlight through the shared `Pressable` state rather than `data-selected` (Uniwind resolves the class on the native side; there is no `data-*` attribute outside the DOM).
+- [x] Bboxes are grouped per ayah; every line of a wrapped ayah is its own pressable (a union rectangle would cover the text between lines). A full-page clear button sits first in hit-test order so tapping a margin clears without swallowing an ayah tap.
+- [x] **No `ScopedTheme`/light scope.** See the contrast decision below.
+- [x] Page turn: gesture-handler pan + Reanimated entrance, `expo-haptics` through `usePageTurn`, `--motion-page-turn`.
+- [x] Prefetch ±2 pages after a 250 ms settle timer; every turn cancels the previous timer. Failures are contained (`Promise.resolve(...).catch`), and page/hit-testing are unaffected.
+- [x] **Spike result.** `useCSSVariable` returns a `string` on web, a `number` on native, and `undefined` when the stylesheet has not loaded (Jest, first frame). `--motion-page-turn` is a **duration in milliseconds**, not a value Reanimated animates: it is read once, coerced by `cssNumber` to a number (`FALLBACK_DURATION = 260` when absent), and passed as `withTiming`'s `duration`. That path is supported on both platforms, so no hex/`@theme` fallback and no separate static class is needed. Geometry tokens (`--reader-page-width/height/max-width`) take the same route. The one thing that is _not_ supported is using a CSS variable directly as an animated style value, which is why it is converted at the boundary rather than referenced inside `useAnimatedStyle`.
+- [ ] Profile: 20 page turns, JS frame < 16 ms, flat memory. **Blocked:** no device or profiling session; group 12.
+
+**Contrast decision (5.9).** The reader keeps the app's ambient theme and does **not** apply a local light scope. The page is a scan (an image), so text contrast is a property of the artwork, not of our tokens; the only surfaces we paint are the edition's own `themeColor` surround (data, passed through `style`) and the selection highlight, which is a translucent token that reads on both the cream scan and the dark surround. A forced-light reader would break the rest of the chrome (header/footer in P5.4) and is not justified by the art. If a scan is ever unreadable in dark mode, the fix belongs in the edition data (a light `themeColor` surround), not a global reader theme.
+
+**Done when:** correct ayah on both editions; 55+ fps. — Hit-testing is proven by geometry/overlay tests for every box and boundary pages; **fps and real-scan correctness remain blocked** on device profiling (group 12).
 
 ---
 
-### [ ] P5.4 — Reader chrome · L
+### [x] P5.4 — Reader chrome · L
 
 Depends: P5.3
 
-- [ ] Header: surah/ayah label, page indicator, `Menu`, back/exit.
-- [ ] Footer: next/prev with RTL semantics, `tabular-nums`.
-- [ ] Surah picker `BottomSheet` with `FlatList` (114 rows — not `@expo/ui` `List`) + search.
-- [ ] Edition picker + summary.
-- [ ] Utilities bar (Read / Tafsir / Notes) with `BottomSheet` panels.
-- [ ] Auto-hide chrome on tap.
+- [x] Header: surah/ayah label, page indicator, `Menu`, back/exit.
+- [x] Footer: next/prev with RTL semantics, `tabular-nums`.
+- [x] Surah picker `BottomSheet` with `FlatList` (114 rows — not `@expo/ui` `List`) + search.
+- [x] Edition picker + summary.
+- [x] Utilities bar (Read / Tafsir / Notes) with `BottomSheet` panels.
+- [x] Auto-hide chrome on tap.
 
-**Done when:** jump/switch/navigate preserve selection rules; chrome never covers text.
+**Implementation.** `ReaderScreen` is a column — `ReaderHeader`, the fitted page, `ReaderFooter` — so the chrome can never overlay the scan; hiding it makes `MushafPage` refit rather than reveal hidden text. Header shows the surah (Arabic/Latin by UI language), the page number, `· Ayah N` while selected, edition name, menu and a labelled exit that stays mounted through load/failure. Footer owns reading-order previous/next: chevrons mirror with direction, labels are translated, boundaries are disabled (not hidden) and the store makes the turn a no-op anyway.
+
+Sheets are `@expo/ui` `BottomSheet` throughout. The native `MenuView` was deliberately rejected: its own source says the trigger renders but actions never fire on web, and the reader ships on web too. The surah picker is a virtualized `FlatList` with diacritic-insensitive Arabic, Latin-transliteration and number matching, and clears its query on close. The edition picker only _requests_ an edition: `ReaderBody` is keyed by edition, fetches that edition's geometry first, and attaches it in one store write (`attachEdition` for boot/same edition, `switchEdition` which clamps the page and clears selection), so a superseded request can never attach stale boxes. The Read/Tafsir/Notes panels are honest surfaces: they name the selected ayah and state that content arrives with P5.5/P6.3/P6.2 instead of rendering a blank or endless spinner.
+
+Auto-hide is one tap, one outcome: a margin tap clears a selection if one exists, otherwise it toggles the chrome. Panel buttons are in the chrome, so the gesture that hides the chrome can never also drop the selection the panel needs.
+
+**Evidence.** `reader-chrome.test.tsx` (header labels/actions/RTL, footer order/boundaries/`tabular-nums`), `reader-sheets.test.tsx` (surah search/jump/reopen, edition range+select, menu destinations, panel states), `surah-search.test.ts` and `format.test.ts`; the reader-screen integration covers exit, chrome toggle, margin-clears-selection, footer turn, surah jump, edition switch with clamping and a stale-response race. `docs/reader-chrome.md` records the interaction contracts. i18n audit reports 209 matching keys; `npm run verify` is green.
+
+**Done when:** jump/switch/navigate preserve selection rules; chrome never covers text. — Selection/store rules and structure (chrome is a column, not an overlay) are proven by tests; **real-device acceptance (sheet drag, native back dismissal, "no chrome covers text" at device sizes) remains blocked** on device access (group 12/17).
 
 ---
 
-### [ ] P5.5 — Ayah content rendering · M
+### [x] P5.5 — Ayah content rendering · M
 
 Depends: P5.4
 
-- [ ] Port `AyahDisplayer`: icon + RTL text, `selectable`, `--font-quran`, loose leading.
-- [ ] Translation/e3rab direction handling via `LayoutDirection rtl={false}` per block.
-- [ ] 200% text scaling without clipping; tablet max width.
+- [x] Port `AyahDisplayer`: icon + RTL text, `selectable`, `--font-quran`, loose leading.
+- [x] Translation/e3rab direction handling via per-block explicit direction.
+- [x] 200% text scaling without clipping; tablet max width.
 
-**Done when:** correct in both themes; no clipping at large text.
+**Implementation.** The Read panel resolves the selected ayah through its bbox row (`resolveSelectedAyah`) and fetches it by **absolute** ayah number (1–6236), so a page that crosses a surah boundary cannot show another surah's ayah with the same in-surah key. `useAyahContent` is disabled until a selection exists, and a superseded response is isolated by its query key.
+
+`AyahDisplayer` renders a block list: Quran text first, always RTL, `font-quran`, centered, `selectable`, with a typographic ayah marker (`۝`) replacing the web's PNG ornaments. Translation/e3rab blocks carry their own explicit `writingDirection`/`textAlign` instead of relying on `LayoutDirection`, which avoids flipping the surrounding reader when the UI language differs from the source language. There is no `numberOfLines` and no fixed `lineHeight`: the column grows and scrolls, and the quran block uses `leading-loose` so leading follows the OS text scale. The column is capped at `max-w-2xl` for tablet measure.
+
+**Evidence.** `ayah-content.test.ts` (cross-surah identity, stale key, block direction), `ayah-displayer.test.tsx` (selectable, per-block direction, no clipping, tablet width), `quran-queries.test.tsx` (`useAyahContent`: disabled before selection, absolute key, late response, retry) and Read-panel cases in `reader-sheets.test.tsx` / `reader-screen.test.tsx`. `docs/ayah-content.md` records the contract.
+
+**Done when:** correct in both themes; no clipping at large text. — Direction, selection identity and the no-clipping structure are proven by tests; **the 200%-text and both-theme visual check remains blocked** on a device (group 12/17), and no translation/e3rab repository is wired yet (only the block contract exists).
 
 ---
 
-### [ ] P5.6 — Deep links + restore · S
+### [x] P5.6 — Deep links + restore · S
 
 Depends: P5.5
 
-- [ ] `othman://quran?page=…&surah=…&ayah=…`; web `/quran?page=…`.
-- [ ] Typed params + validation (invalid page clamps, invalid surah shows retry).
-- [ ] Cold start into a deep link skips the last-visited restore.
-- [ ] Share action using the same URL builder.
+- [x] `othman://quran?page=…&surah=…&ayah=…`; web `/quran?page=…`.
+- [x] Typed params + validation (invalid page clamps, invalid surah shows retry).
+- [x] Cold start into a deep link skips the last-visited restore.
+- [x] Share action using the same URL builder.
 
-**Done when:** every link shape opens the right page; invalid params degrade gracefully.
+**Implementation.** `src/features/quran/links.ts` is the single parser/builder/resolver for three parameters on both routes. Parsing rejects duplicates, malformed numbers and an ayah without a surah instead of coercing them; a link that cannot be read renders `ReaderLinkError`, whose action opens the Quran tab. The `/quran` tab forwards valid links to `/reader/[page]` with the same parameters.
+
+Resolution runs after the edition's geometry attaches: a surah/ayah link maps through `bySurah` and therefore wins over a contradictory `page`; a page-only link clamps into the edition's own range (Warsh 4–605). An ayah the edition does not contain is a recoverable invalid state, not page 1.
+
+The "applied once" flag lives in `ReaderScreen`, not `ReaderBody`: `ReaderBody` remounts on an edition switch, so a per-body flag would re-apply the link and undo the reader's new position. A cold-start link is applied after the saved page restore, so it wins; a later page turn or edition switch is never overwritten. The menu's Share action builds the public web URL from the same builder (`page` plus `surah`/`ayah` when selected).
+
+**Evidence.** `links.test.ts` (parse/builder round trips, duplicates, malformed, conflict, ayah precedence, clamping, nonstandard ranges, unknown ayah), `reader-screen.test.tsx` (link beats stored page, ayah beats contradictory page, invalid-ayah recovery, applied-once, no re-apply on edition switch, share payload) and `quran-screen.test.tsx` (forwarding and malformed-link recovery). `docs/quran-links.md` records the formats and invalid-input behavior.
+
+**Done when:** every link shape opens the right page; invalid params degrade gracefully. — Parser, resolver, restore precedence and share are proven by tests; **cold/warm-link smoke on real iOS/Android devices and a deployed web host remains blocked** on device/hosting access (groups 12/17).
 
 ---
 
 ## Stage 6 — Audio + utilities
 
-### [ ] P6.1 — Audio · L
+### [ ] P6.1 - Audio · L
 
 Depends: P5.6
 
-- [ ] `npx expo install expo-audio`, `expo-haptics`.
-- [ ] `setAudioModeAsync({ playsInSilentMode: true, staysActiveInBackground: true, shouldPlayInBackground: true })`.
-- [ ] `useAudioPlayer` + `useAudioPlayerStatus`; remove `HTMLAudioElement`.
-- [ ] Auto-advance on end via `adjacentAyahNumbers`; stop at surah end unless wrap enabled.
-- [ ] Prefetch next ayah; buffering state.
-- [ ] Controls: play/pause, `@expo/ui` `Slider` seek, reader `Picker`, auto-read `Switch`, ±ayah skip.
-- [ ] Lock-screen controls out of scope for v1 — documented.
-- [ ] Interruptions pause and do not auto-resume.
-- [ ] Tests: URL building per shaykh, auto-advance boundaries.
+> **Implemented; device acceptance blocked.** One player, one step rule and the
+> panel are covered by tests. Silent-mode, interruption, background/foreground
+> and web playback smoke need devices and a deployed host (group 9.6 / group 17).
 
-**Done when:** plays in silent mode, advances exactly once, survives interruption.
+- [x] `npx expo install expo-audio`; `expo-haptics` was already installed and is reused for page turns.
+- [x] `setAudioModeAsync({ playsInSilentMode: true, shouldPlayInBackground: true, interruptionMode: 'doNotMix' })`. The installer's prose said `staysActiveInBackground`; that field does not exist in the installed `AudioMode`, so the supported `shouldPlayInBackground` is used instead. Applied once per process (`src/platform/audio`), with a retryable failure.
+- [x] `useAudioPlayer(null)` + `useAudioPlayerStatus`; no `HTMLAudioElement` in active `src`. One player is created per reader and `player.replace({ uri })` changes ayah/reciter, so a closed sheet or a re-render cannot create a second player.
+- [x] Auto-advance uses `stepAyah` with surah metadata, not `adjacentAyahNumbers` (which returns the previous ayah and three forward neighbours for prefetch). Stop at surah end unless wrap is enabled; wrap crosses surahs and 114:last ↔ 1:1. Completion is guarded by `armed` + `finishedFor` so repeated frames advance once and a late completion from a replaced source is ignored.
+- [x] Prefetch exactly one next item (`useAudioPrefetch`); buffering and transport errors are separate states, and a failed source offers a retry that replaces the same source.
+- [x] Controls: play/pause, `@expo/ui` `Slider` seek, native reciter `Picker`, auto-read `Switch`, wrap `Switch`, ±ayah skip. Previous/next are disabled at a boundary, never hidden.
+- [x] Lock-screen controls out of scope for v1 - documented in `docs/quran-audio.md`.
+- [x] `interruptionMode: 'doNotMix'` gives the call/other player audio focus; the app never auto-resumes after an interruption. Device behaviour remains part of the blocked smoke test.
+- [x] Tests: URL/reciter boundaries (`shaykh.test.ts`), installed audio-mode fields (`audio-mode.test.ts`), step/wrap and absolute-number mapping (`audio.test.ts`), source replacement/stale completion/retry (`use-ayah-audio.test.tsx`), panel controls (`audio-sheet.test.tsx`), and reader wiring/auto-advance (`reader-screen.test.tsx`). `npm run verify` is green (83 suites / 646 tests).
+
+**Evidence.** `docs/quran-audio.md`; i18n audit reports 227 matching keys; `app.config.ts` enables `expo-audio` playback-only (no microphone permission).
+
+**Done when:** plays in silent mode, advances exactly once, survives interruption. - Advancement, source identity and the panel are proven by tests; **silent-mode/interruption/background and web playback on real targets remain blocked** on device/hosting access.
 
 ---
 

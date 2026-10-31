@@ -62,10 +62,6 @@ export function ProfileHeader({ account, onEdit }: ProfileHeaderProps) {
           testID="account-edit-button"
         />
       </Card>
-
-      <Text variant="caption" tone="muted">
-        {t('account.demoNote')}
-      </Text>
     </View>
   );
 }

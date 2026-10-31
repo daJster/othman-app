@@ -125,6 +125,20 @@ describe('usePagePrefetch', () => {
     expect(prefetch).not.toHaveBeenCalled();
   });
 
+  it('contains a failed prefetch instead of surfacing it', async () => {
+    prefetch.mockRejectedValueOnce(new Error('offline'));
+
+    await renderHook(() => usePagePrefetch(EDITION, 100));
+
+    await act(async () => {
+      jest.advanceTimersByTime(PREFETCH_DELAY);
+    });
+
+    // The call was attempted and its rejection was swallowed: the reader keeps
+    // working, and the next page issues its own request on mount.
+    expect(prefetch).toHaveBeenCalledTimes(1);
+  });
+
   it('covers as many pages as it promises', async () => {
     await renderHook(() => usePagePrefetch(EDITION, 300));
 

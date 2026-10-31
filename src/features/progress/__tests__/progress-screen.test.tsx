@@ -29,9 +29,18 @@ jest.mock('@/features/progress/use-surah-progress', () => ({
 
 jest.mock('expo-router', () => ({
   useRouter: () => mockRouter,
+  usePathname: () => '/account/progress',
+  Redirect: () => null,
 }));
 
 jest.mock('expo-router/head', () => () => null);
+
+jest.mock('@/providers/auth-provider', () => ({
+  useAuth: () => ({
+    user: { uid: 'uid-1' },
+    status: 'signed-in',
+  }),
+}));
 
 const ROWS: SurahProgress[] = [
   { surahNumber: 1, percent: 100, lastReviewed: '2026-10-01' },

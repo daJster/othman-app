@@ -59,5 +59,27 @@ export const queryKeys = {
     /** Both bbox tables of one edition, keyed by the catalog's `key`. */
     bboxes: (editionKey: string) =>
       ['othman', 'quran', 'bboxes', editionKey] as const,
+    /**
+     * One ayah's text, keyed by the *absolute* ayah number (1–6236).
+     *
+     * Not by the reader's `ayahKey`: that is ayah-in-surah and repeats on a
+     * page that crosses a surah boundary, so two different ayat could share a
+     * cache entry.
+     */
+    ayah: (absoluteNumber: number) =>
+      ['othman', 'quran', 'ayah', absoluteNumber] as const,
+  },
+
+  notes: {
+    /** Every local notes read. Sign-out clears this, unlike public Quran data. */
+    root: ['othman', 'notes'] as const,
+    /**
+     * One ayah's notes *for one namespace*.
+     *
+     * The namespace is part of the key, not a filter applied after the cache:
+     * account A's cached list must not be readable under account B's key.
+     */
+    byAyah: (namespace: string, absoluteNumber: number) =>
+      ['othman', 'notes', namespace, absoluteNumber] as const,
   },
 } as const;

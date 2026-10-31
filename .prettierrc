@@ -3,6 +3,7 @@
   "singleQuote": true,
   "semi": true,
   "printWidth": 80,
+  "endOfLine": "auto",
   "trailingComma": "all",
   "arrowParens": "always",
   "plugins": ["prettier-plugin-tailwindcss"],

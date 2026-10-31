@@ -11,6 +11,7 @@ export const STORAGE_KEYS = {
   theme: 'theme',
   quranEdition: 'quranreader:edition',
   lastVisitedPage: 'lastVisitedPage',
+  quranNotes: 'quran:notes',
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

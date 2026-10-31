@@ -1,4 +1,3 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
   act,
   fireEvent,
@@ -6,35 +5,46 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react-native';
-import type { ReactNode } from 'react';
+import type { QueryClient } from '@tanstack/react-query';
 import { Alert } from 'react-native';
-import type { AccountData } from '@/core/types';
+import type { AccountData, AuthUser } from '@/core/types';
 import AccountScreen from '@/app/(tabs)/account';
-import {
-  resetDemoSession,
-  signOutDemoSession,
-} from '@/features/account/demo-session';
 import { profileService } from '@/services/profile';
+import {
+  createFakeAuthService,
+  makeTestQueryClient,
+  TestProviders,
+} from '@/test-utils/auth';
 
 /**
  * The screen is tested end-to-end through the real `useCurrentAccount` query and
- * the demo session store; only the backend repository is faked. That is
- * deliberate: the signed-out branch is the one thing a screen test is most
- * likely to get wrong (a disabled query is `pending`, not `empty`), and faking
- * the hook would hide exactly that.
+ * a real `AuthProvider` backed by a fake service; only the backend repository is
+ * faked. That is deliberate: the signed-out branch and the post-sign-out
+ * redirect are the two things a screen test is most likely to get wrong (a
+ * disabled query is `pending`, not `empty`), and faking the hook would hide
+ * exactly that.
  */
 const mockPush = jest.fn();
 const mockBack = jest.fn();
+const mockRedirect = jest.fn();
 
 jest.mock('expo-router', () => ({
-  useRouter: () => ({ push: mockPush, back: mockBack }),
+  useRouter: () => ({
+    push: mockPush,
+    back: mockBack,
+    replace: jest.fn(),
+    canGoBack: () => true,
+  }),
+  usePathname: () => '/account',
+  Redirect: (props: { href: unknown }) => {
+    mockRedirect(props.href);
+    return null;
+  },
 }));
 
 jest.mock('expo-router/head', () => () => null);
 
 jest.mock('@/services/profile', () => ({
-  DEMO_ACCOUNT_UID: 'demo-account',
-  DEMO_ACCOUNT_EMAIL: 'othman@kuttab.test',
   profileService: {
     getAccount: jest.fn(),
     update: jest.fn(),
@@ -42,9 +52,21 @@ jest.mock('@/services/profile', () => ({
   },
 }));
 
+// `AuthProvider` imports the platform barrel, which boots Firebase on import.
+// The provider receives a fake service in these tests, so the real one is never
+// used; stubbing the barrel keeps the SDK out of the process.
+jest.mock('@/platform/auth', () => ({ authService: {} }));
+
 const service = profileService as unknown as {
   getAccount: jest.Mock;
   update: jest.Mock;
+};
+
+const USER: AuthUser = {
+  uid: 'demo-account',
+  email: 'othman@kuttab.test',
+  displayName: 'Othman Al-Farsi',
+  photoURL: null,
 };
 
 const ACCOUNT: AccountData = {
@@ -56,41 +78,35 @@ const ACCOUNT: AccountData = {
   phoneNumber: '+212612345678',
 };
 
-function makeClient(): QueryClient {
-  return new QueryClient({
-    defaultOptions: {
-      queries: { retry: false, gcTime: Infinity },
-      mutations: { retry: false, gcTime: 0 },
-    },
-  });
-}
-
-function makeWrapper(client: QueryClient) {
-  return function Wrapper({ children }: { children: ReactNode }) {
-    return (
-      <QueryClientProvider client={client}>{children}</QueryClientProvider>
-    );
-  };
-}
-
 let client: QueryClient;
+
+async function renderScreen(authUser: AuthUser | null = USER) {
+  const auth = createFakeAuthService(authUser);
+  client = makeTestQueryClient();
+
+  await render(
+    <TestProviders client={client} service={auth}>
+      <AccountScreen />
+    </TestProviders>,
+  );
+
+  return auth;
+}
 
 beforeEach(() => {
   jest.clearAllMocks();
-  resetDemoSession();
   service.getAccount.mockResolvedValue(ACCOUNT);
-  client = makeClient();
 });
 
 afterEach(() => {
-  client.clear();
+  client?.clear();
 });
 
 describe('AccountScreen', () => {
   it('shows the loading state while the profile read is in flight', async () => {
     service.getAccount.mockReturnValue(new Promise(() => undefined));
 
-    await render(<AccountScreen />, { wrapper: makeWrapper(client) });
+    await renderScreen();
 
     expect(screen.getByText('Loading…')).toBeTruthy();
     // Signed out is a *different* state; it must not flash while loading.
@@ -98,7 +114,7 @@ describe('AccountScreen', () => {
   });
 
   it('renders the profile header and the settings rows once loaded', async () => {
-    await render(<AccountScreen />, { wrapper: makeWrapper(client) });
+    await renderScreen();
 
     await waitFor(() =>
       expect(screen.getByText('Othman Al-Farsi')).toBeTruthy(),
@@ -109,13 +125,16 @@ describe('AccountScreen', () => {
     expect(screen.getByText('Progress')).toBeTruthy();
     expect(screen.getByText('Your memorisation over time')).toBeTruthy();
     expect(screen.getByText('Sign out')).toBeTruthy();
+    // The demo affordance is gone from the production screen.
     expect(
-      screen.getByText('Demo account — replaced by sign-in in a later update.'),
-    ).toBeTruthy();
+      screen.queryByText(
+        'Demo account — replaced by sign-in in a later update.',
+      ),
+    ).toBeNull();
   });
 
   it('opens the edit sheet, the progress screen and about', async () => {
-    await render(<AccountScreen />, { wrapper: makeWrapper(client) });
+    await renderScreen();
     await waitFor(() =>
       expect(screen.getByText('Othman Al-Farsi')).toBeTruthy(),
     );
@@ -134,7 +153,7 @@ describe('AccountScreen', () => {
     service.getAccount.mockRejectedValueOnce(new Error('offline'));
     service.getAccount.mockResolvedValueOnce(ACCOUNT);
 
-    await render(<AccountScreen />, { wrapper: makeWrapper(client) });
+    await renderScreen();
 
     await waitFor(() =>
       expect(screen.getByText('Something went wrong')).toBeTruthy(),
@@ -147,12 +166,12 @@ describe('AccountScreen', () => {
     );
   });
 
-  it('asks before signing out and then shows the signed-out state', async () => {
+  it('asks before signing out, then leaves the private route', async () => {
     const alert = jest
       .spyOn(Alert, 'alert')
       .mockImplementation(() => undefined);
 
-    await render(<AccountScreen />, { wrapper: makeWrapper(client) });
+    const auth = await renderScreen();
     await waitFor(() =>
       expect(screen.getByText('Othman Al-Farsi')).toBeTruthy(),
     );
@@ -169,27 +188,26 @@ describe('AccountScreen', () => {
     expect(confirm?.style).toBe('destructive');
 
     await act(async () => {
-      confirm?.onPress?.();
+      await confirm?.onPress?.();
     });
 
+    expect(auth.signOutCalls).toHaveBeenCalledTimes(1);
     await waitFor(() =>
-      expect(screen.getByText('You are signed out')).toBeTruthy(),
+      expect(mockRedirect).toHaveBeenCalledWith({
+        pathname: '/auth/sign-in',
+        params: { returnTo: '/account' },
+      }),
     );
     expect(screen.queryByText('Othman Al-Farsi')).toBeNull();
   });
 
-  it('can sign back in with the demo account', async () => {
-    signOutDemoSession();
-    service.getAccount.mockResolvedValue(ACCOUNT);
+  it('redirects a signed-out visitor to sign-in with a return destination', async () => {
+    await renderScreen(null);
 
-    await render(<AccountScreen />, { wrapper: makeWrapper(client) });
-
-    expect(screen.getByText('You are signed out')).toBeTruthy();
-
-    await fireEvent.press(screen.getByText('Use the demo account'));
-
-    await waitFor(() =>
-      expect(screen.getByText('Othman Al-Farsi')).toBeTruthy(),
-    );
+    expect(mockRedirect).toHaveBeenCalledWith({
+      pathname: '/auth/sign-in',
+      params: { returnTo: '/account' },
+    });
+    expect(service.getAccount).not.toHaveBeenCalled();
   });
 });

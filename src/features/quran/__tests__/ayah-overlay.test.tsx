@@ -28,19 +28,19 @@ async function renderOverlay(
   props: Partial<Parameters<typeof AyahOverlay>[0]> = {},
 ) {
   const onSelectAyah = jest.fn();
-  const onClearSelection = jest.fn();
+  const onBackdropPress = jest.fn();
 
   await render(
     <AyahOverlay
       ayat={AYAT}
       selectedAyahKey={null}
       onSelectAyah={onSelectAyah}
-      onClearSelection={onClearSelection}
+      onBackdropPress={onBackdropPress}
       {...props}
     />,
   );
 
-  return { onSelectAyah, onClearSelection };
+  return { onSelectAyah, onBackdropPress };
 }
 
 describe('AyahOverlay', () => {
@@ -61,11 +61,11 @@ describe('AyahOverlay', () => {
   });
 
   it('clears the selection when the margin is pressed', async () => {
-    const { onClearSelection, onSelectAyah } = await renderOverlay();
+    const { onBackdropPress, onSelectAyah } = await renderOverlay();
 
     await fireEvent.press(screen.getByTestId('ayah-overlay-backdrop'));
 
-    expect(onClearSelection).toHaveBeenCalledTimes(1);
+    expect(onBackdropPress).toHaveBeenCalledTimes(1);
     expect(onSelectAyah).not.toHaveBeenCalled();
   });
 

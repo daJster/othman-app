@@ -17,6 +17,7 @@ export type AuthErrorCode =
   | 'operation-not-allowed'
   | 'too-many-requests'
   | 'account-exists-with-different-credential'
+  | 'configuration'
   | 'not-implemented'
   | 'unknown';
 

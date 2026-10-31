@@ -28,7 +28,7 @@ export const QURAN_EDITIONS_URL = `${CDN_BASE_URL}/editions.json`;
 export const MAX_ABSOLUTE_AYAH_NUMBER = 6236;
 
 export const isAyahNumberValid = (n: number): boolean =>
-  n >= 1 && n <= MAX_ABSOLUTE_AYAH_NUMBER;
+  Number.isInteger(n) && n >= 1 && n <= MAX_ABSOLUTE_AYAH_NUMBER;
 
 function requireAyahNumber(absoluteAyah: number): number {
   if (!isAyahNumberValid(absoluteAyah)) {

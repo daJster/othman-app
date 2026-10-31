@@ -1,4 +1,4 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import type { QueryClient } from '@tanstack/react-query';
 import {
   act,
   fireEvent,
@@ -6,11 +6,14 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react-native';
-import type { ReactNode } from 'react';
-import type { AccountData } from '@/core/types';
+import type { AccountData, AuthUser } from '@/core/types';
 import EditAccountScreen from '@/app/account/edit';
-import { resetDemoSession } from '@/features/account/demo-session';
 import { profileService } from '@/services/profile';
+import {
+  createFakeAuthService,
+  makeTestQueryClient,
+  TestProviders,
+} from '@/test-utils/auth';
 
 /**
  * The edit sheet is tested through the route, not the form in isolation: the
@@ -29,6 +32,8 @@ const mockRouter = { push: jest.fn(), back: mockBack };
 
 jest.mock('expo-router', () => ({
   useRouter: () => mockRouter,
+  usePathname: () => '/account/edit',
+  Redirect: () => null,
 }));
 
 jest.mock('expo-router/head', () => () => null);
@@ -52,6 +57,9 @@ jest.mock('@/services/profile', () => ({
   },
 }));
 
+// The real platform barrel boots Firebase; these tests inject a fake service.
+jest.mock('@/platform/auth', () => ({ authService: {} }));
+
 const service = profileService as unknown as {
   getAccount: jest.Mock;
   update: jest.Mock;
@@ -68,28 +76,23 @@ const ACCOUNT: AccountData = {
 
 const ADMIN: AccountData = { ...ACCOUNT, role: 'superadmin' };
 
-function makeClient(): QueryClient {
-  return new QueryClient({
-    defaultOptions: {
-      queries: { retry: false, gcTime: Infinity },
-      mutations: { retry: false, gcTime: 0 },
-    },
-  });
-}
-
-function makeWrapper(client: QueryClient) {
-  return function Wrapper({ children }: { children: ReactNode }) {
-    return (
-      <QueryClientProvider client={client}>{children}</QueryClientProvider>
-    );
-  };
-}
+const USER: AuthUser = {
+  uid: 'demo-account',
+  email: 'othman@kuttab.test',
+  displayName: 'Othman Al-Farsi',
+  photoURL: null,
+};
 
 async function renderSheet(account: AccountData = ACCOUNT) {
   service.getAccount.mockResolvedValue(account);
 
-  const client = makeClient();
-  await render(<EditAccountScreen />, { wrapper: makeWrapper(client) });
+  const client = makeTestQueryClient();
+  const auth = createFakeAuthService(USER);
+  await render(
+    <TestProviders client={client} service={auth}>
+      <EditAccountScreen />
+    </TestProviders>,
+  );
 
   await waitFor(() =>
     expect(screen.getByTestId('account-name-input')).toBeTruthy(),
@@ -102,7 +105,6 @@ let client: QueryClient | undefined;
 
 beforeEach(() => {
   jest.clearAllMocks();
-  resetDemoSession();
   service.update.mockResolvedValue(undefined);
   mockLaunchImageLibrary.mockResolvedValue({ canceled: true });
   client = undefined;

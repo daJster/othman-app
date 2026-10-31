@@ -1,4 +1,4 @@
-import { type ReactNode, useLayoutEffect, useMemo } from 'react';
+import { type ReactNode, useLayoutEffect } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {

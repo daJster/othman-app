@@ -51,7 +51,16 @@ export type IconName =
   // Added with the account screens (P4.3).
   | 'camera'
   | 'info'
-  | 'logout';
+  | 'logout'
+  // Added with the reader chrome (P5.4): menu, search, editions, notes.
+  | 'menu'
+  | 'search'
+  | 'layers'
+  | 'pencil'
+  // Added with audio playback (P6.1): open the panel and control the player.
+  | 'volume'
+  | 'play'
+  | 'pause';
 
 /** Component type for an icon registry, kept platform-agnostic. */
 export type IconRegistry<Component> = Readonly<Record<IconName, Component>>;

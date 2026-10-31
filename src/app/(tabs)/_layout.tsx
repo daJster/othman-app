@@ -1,7 +1,7 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useTranslation } from 'react-i18next';
 import { useResolveClassNames } from 'uniwind';
-import { TABS } from '@/features/navigation/route-registry';
+import { useVisibleTabs } from '@/features/navigation/use-visible-tabs';
 import { getIconGlyph } from '@/ui/icon';
 
 /**
@@ -22,6 +22,7 @@ import { getIconGlyph } from '@/ui/icon';
  */
 export default function NativeTabsLayout() {
   const { t } = useTranslation();
+  const tabs = useVisibleTabs();
   const bar = useResolveClassNames('bg-background');
   const idleIcon = useResolveClassNames('text-muted-foreground');
   const activeIcon = useResolveClassNames('text-primary');
@@ -31,7 +32,7 @@ export default function NativeTabsLayout() {
       backgroundColor={bar.backgroundColor}
       iconColor={{ default: idleIcon.color, selected: activeIcon.color }}
     >
-      {TABS.map((tab) => {
+      {tabs.map((tab) => {
         const glyph = getIconGlyph(tab.icon);
 
         return (

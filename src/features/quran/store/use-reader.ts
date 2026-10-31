@@ -100,6 +100,7 @@ export function useReaderActions(
       selectAyah: state.selectAyah,
       clearSelection: state.clearSelection,
       clearDirection: state.clearDirection,
+      reset: state.reset,
     };
   }, [store]);
 }

@@ -2,17 +2,20 @@ import type { AuthResult, AuthUser, Unsubscribe } from '@/core/types';
 import { firebaseApp } from '@/platform/firebase/firebase';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
+  GoogleAuthProvider,
   createUserWithEmailAndPassword,
   getAuth,
   getReactNativePersistence,
   initializeAuth,
   onAuthStateChanged as firebaseOnAuthStateChanged,
+  signInWithCredential,
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   updateProfile as firebaseUpdateProfile,
   type Auth,
 } from 'firebase/auth';
 import { toAuthError, toAuthUser } from './auth.mappers';
+import { requestGoogleIdToken } from './google';
 import type { AuthService } from './auth.types';
 
 /**
@@ -83,17 +86,36 @@ export const authService: AuthService = {
   },
 
   /**
-   * Implemented in P3.3: the id_token flow needs `expo-auth-session`, a
-   * redirect URI and per-platform Google client IDs. Returning a typed
-   * `not-implemented` keeps the interface honest until then instead of failing
-   * at an opaque place.
+   * Native Google sign-in: Google issues an ID token, Firebase turns it into a
+   * session. The token is never stored — `signInWithCredential` consumes it and
+   * Firebase owns the session from here on.
    */
   async signInWithGoogle(): Promise<AuthResult> {
-    return {
-      status: 'error',
-      code: 'not-implemented',
-      message: 'Google sign-in is not implemented for native yet',
-    };
+    const google = await requestGoogleIdToken();
+
+    if (google.status === 'cancelled') {
+      return {
+        status: 'error',
+        code: 'cancelled',
+        message: google.message,
+      };
+    }
+
+    if (google.status === 'error') {
+      return {
+        status: 'error',
+        code: google.code,
+        message: google.message,
+      };
+    }
+
+    try {
+      const credential = GoogleAuthProvider.credential(google.idToken);
+      const res = await signInWithCredential(auth, credential);
+      return { status: 'success', user: toAuthUser(res.user) };
+    } catch (error) {
+      return toAuthError(error, 'Failed to sign in with Google');
+    }
   },
 
   async signOut(): Promise<void> {

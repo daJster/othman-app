@@ -129,6 +129,15 @@ export type ReaderActions = {
   clearSelection: () => void;
   /** Let the page-turn animation mark itself finished. */
   clearDirection: () => void;
+  /**
+   * Drop session-scoped reader state on sign-out or account switch.
+   *
+   * Only transient state is cleared. The edition and page are display
+   * preferences that survive a session (`storageService` persists them), so a
+   * sign-out must not send the reader back to page 1. Query data is owned by
+   * TanStack Query and is handled by `AuthProvider`, not here.
+   */
+  reset: () => void;
 };
 
 export type ReaderState = ReaderFields & ReaderActions;
@@ -360,6 +369,13 @@ export function createReaderStore(storage: StorageService): ReaderStore {
       if (get().direction === null) return;
 
       set({ direction: null });
+    },
+
+    reset() {
+      const state = get();
+      if (state.ayahKey === null && state.direction === null) return;
+
+      set({ ayahKey: null, direction: null });
     },
   }));
 }

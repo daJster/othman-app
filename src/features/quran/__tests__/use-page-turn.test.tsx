@@ -105,6 +105,19 @@ describe('usePageTurn', () => {
     expect(haptics.impactAsync).not.toHaveBeenCalled();
   });
 
+  it('keeps up with rapid turns', async () => {
+    const store = readyStore(1);
+    const { result } = await renderHook(() => usePageTurn(store));
+
+    await act(async () => {
+      result.current.turnForward();
+      result.current.turnForward();
+    });
+
+    expect(store.getState().page).toBe(3);
+    expect(haptics.impactAsync).toHaveBeenCalledTimes(2);
+  });
+
   it('survives a device without a taptic engine', async () => {
     haptics.impactAsync.mockRejectedValueOnce(new Error('unsupported'));
     const store = readyStore(1);

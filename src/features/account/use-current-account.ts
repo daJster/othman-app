@@ -1,35 +1,16 @@
-import { useCallback, useSyncExternalStore } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
 import type { AuthUser } from '@/core/types';
-import { queryKeys } from '@/services/query';
-import {
-  DEMO_AUTH_USER,
-  getDemoSessionSnapshot,
-  signOutDemoSession,
-  subscribeDemoSession,
-} from './demo-session';
-import { useAccount } from './use-account';
+import { useAuth } from '@/providers/auth-provider';
 
 /**
- * The current session, as the account screens see it.
+ * The current session, as the account feature sees it.
  *
- * This is the **P3.3 seam**. When `AuthProvider` lands, `useCurrentAuthUser`
- * reads its context and `useSignOut` calls `authService.signOut`; nothing else
- * in the account feature has to change, because the screens only ask for "the
- * signed-in user or null".
- *
- * `useSyncExternalStore` rather than context: the demo session is a module
- * store, and the third argument keeps static web rendering from reading a value
- * the server cannot know.
+ * A thin projection of `AuthProvider`: the screens ask for "the signed-in user
+ * or null" and for the merged account, and nothing here owns state. The
+ * profile is the provider's `useAccount` query, so there is exactly one cached
+ * account per uid.
  */
 export function useCurrentAuthUser(): AuthUser | null {
-  const signedIn = useSyncExternalStore(
-    subscribeDemoSession,
-    getDemoSessionSnapshot,
-    getDemoSessionSnapshot,
-  );
-
-  return signedIn ? DEMO_AUTH_USER : null;
+  return useAuth().user;
 }
 
 /**
@@ -39,24 +20,17 @@ export function useCurrentAuthUser(): AuthUser | null {
  * forever — the screen must branch on `authUser` first, not on the query state.
  */
 export function useCurrentAccount() {
-  const authUser = useCurrentAuthUser();
-  const account = useAccount(authUser);
+  const { user, account, sessionError } = useAuth();
 
-  return { authUser, ...account };
+  return { authUser: user, ...account, sessionError };
 }
 
 /**
- * Ends the demo session and drops the cached account.
+ * Ends the session.
  *
- * Only the account namespace is cleared: meetings are not private yet (P3.3
- * gates them), so clearing them would be a side effect with no purpose. The
- * real sign-out in P3.3 clears the whole cache.
+ * All cleanup (query cancellation, private-cache removal, reader reset) lives in
+ * `AuthProvider.signOut`; the screen only decides *when* to ask.
  */
-export function useSignOut(): () => void {
-  const client = useQueryClient();
-
-  return useCallback(() => {
-    signOutDemoSession();
-    client.removeQueries({ queryKey: queryKeys.account.root });
-  }, [client]);
+export function useSignOut(): () => Promise<void> {
+  return useAuth().signOut;
 }

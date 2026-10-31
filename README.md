@@ -43,6 +43,9 @@ This command will move the starter code to the **app-example** directory and cre
 
 ## Learn more
 
+Authentication (Firebase, Google client IDs, redirect URIs, recovery) is
+documented in [`docs/auth-setup.md`](docs/auth-setup.md).
+
 To learn more about developing your project with Expo, look at the following resources:
 
 - [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).

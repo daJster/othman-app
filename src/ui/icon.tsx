@@ -106,6 +106,18 @@ const ICONS = {
     md: 'logout',
     mdSymbol: 'logout',
   },
+  // Added with the reader chrome (P5.4).
+  menu: { ios: 'line.3.horizontal', md: 'menu', mdSymbol: 'menu' },
+  search: { ios: 'magnifyingglass', md: 'search', mdSymbol: 'search' },
+  layers: { ios: 'square.stack', md: 'layers', mdSymbol: 'layers' },
+  pencil: { ios: 'pencil', md: 'edit', mdSymbol: 'edit' },
+  volume: {
+    ios: 'speaker.wave.2',
+    md: 'volume-up',
+    mdSymbol: 'volume_up',
+  },
+  play: { ios: 'play.fill', md: 'play-arrow', mdSymbol: 'play_arrow' },
+  pause: { ios: 'pause.fill', md: 'pause', mdSymbol: 'pause' },
 } satisfies IconRegistry<IconSet>;
 
 const StyledSymbol = withUniwind(SymbolView);

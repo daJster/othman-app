@@ -23,6 +23,18 @@ jest.mock('@/features/meetings/use-meetings', () => ({
 
 jest.mock('expo-router/head', () => () => null);
 
+jest.mock('@/providers/auth-provider', () => ({
+  useAuth: () => ({
+    user: { uid: 'uid-1' },
+    status: 'signed-in',
+  }),
+}));
+
+jest.mock('expo-router', () => ({
+  usePathname: () => '/meetings',
+  Redirect: () => null,
+}));
+
 const MEETING: Meeting = {
   id: 1,
   title: 'Tafsir circle',

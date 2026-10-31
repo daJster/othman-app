@@ -4,6 +4,7 @@ import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { ProgressSummary } from '@/features/progress/progress-summary';
+import { RequireAuth } from '@/features/auth/require-auth';
 import { SurahDetailSheet } from '@/features/progress/surah-detail-sheet';
 import { SurahHeatmap } from '@/features/progress/surah-heatmap';
 import { useSurahProgress } from '@/features/progress/use-surah-progress';
@@ -27,6 +28,14 @@ import { Text } from '@/ui/text';
  * grid no longer displays.
  */
 export default function ProgressScreen() {
+  return (
+    <RequireAuth>
+      <ProgressContent />
+    </RequireAuth>
+  );
+}
+
+function ProgressContent() {
   const { t } = useTranslation();
   const router = useRouter();
   const { isRTL } = useDirection();

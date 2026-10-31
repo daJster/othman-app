@@ -7,7 +7,7 @@ import {
 } from 'expo-router/ui';
 import { useTranslation } from 'react-i18next';
 import { Pressable } from 'react-native';
-import { TABS } from '@/features/navigation/route-registry';
+import { useVisibleTabs } from '@/features/navigation/use-visible-tabs';
 import type { IconName } from '@/core/config';
 import { cn } from '@/ui/cn';
 import { Icon } from '@/ui/icon';
@@ -27,11 +27,12 @@ import { Text } from '@/ui/text';
  */
 export default function WebTabsLayout() {
   const { t } = useTranslation();
+  const tabs = useVisibleTabs();
 
   return (
     <Tabs className="flex-1 bg-background">
       <TabList className="flex-row items-center gap-1 border-b border-border bg-card px-3 py-2">
-        {TABS.map((tab) => (
+        {tabs.map((tab) => (
           <TabTrigger key={tab.tab} name={tab.tab} href={tab.href} asChild>
             <TabButton label={t(tab.titleKey)} icon={tab.icon} />
           </TabTrigger>

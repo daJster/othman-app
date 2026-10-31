@@ -6,6 +6,7 @@ import { formatDateKey } from '@/core/domain/meetings/date-key';
 import { MeetingCalendar } from '@/features/meetings/meeting-calendar';
 import { MeetingCard } from '@/features/meetings/meeting-card';
 import { MeetingCardSkeleton } from '@/features/meetings/meeting-card-skeleton';
+import { RequireAuth } from '@/features/auth/require-auth';
 import {
   useMeetingsByDate,
   useRefreshMeetings,
@@ -34,6 +35,14 @@ import { Text } from '@/ui/text';
  * the selected day changes the key and fetches that day exactly once.
  */
 export default function MeetingsScreen() {
+  return (
+    <RequireAuth>
+      <MeetingsContent />
+    </RequireAuth>
+  );
+}
+
+function MeetingsContent() {
   const { t } = useTranslation();
   const { language } = useDirection();
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());

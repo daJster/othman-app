@@ -1,8 +1,9 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { renderHook, waitFor } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
-import type { EditionBboxes, QuranEdition } from '@/core/types';
+import type { AyahContent, EditionBboxes, QuranEdition } from '@/core/types';
 import { quranService } from '@/services/quran';
+import { useAyahContent } from '../use-ayah-content';
 import { useEditionBboxes } from '../use-edition-bboxes';
 import { useQuranCatalog } from '../use-quran-catalog';
 
@@ -20,12 +21,14 @@ jest.mock('@/services/quran', () => ({
   quranService: {
     loadCatalog: jest.fn(),
     loadBboxes: jest.fn(),
+    loadAyah: jest.fn(),
   },
 }));
 
 const service = quranService as unknown as {
   loadCatalog: jest.Mock;
   loadBboxes: jest.Mock;
+  loadAyah: jest.Mock;
 };
 
 const EDITION: QuranEdition = {
@@ -66,6 +69,7 @@ function wrapper(client: QueryClient) {
 beforeEach(() => {
   service.loadCatalog.mockReset();
   service.loadBboxes.mockReset();
+  service.loadAyah.mockReset();
 });
 
 describe('useQuranCatalog', () => {
@@ -183,5 +187,92 @@ describe('useEditionBboxes', () => {
 
     await waitFor(() => expect(result.current.state.status).toBe('error'));
     expect(result.current.state).toMatchObject({ error: new Error('offline') });
+  });
+});
+
+function ayahContent(absoluteNumber: number, text: string): AyahContent {
+  return {
+    absoluteNumber,
+    text,
+    numberInSurah: 1,
+    juz: 1,
+    manzil: 1,
+    page: 1,
+    ruku: 1,
+    hizbQuarter: 1,
+    sajda: false,
+  };
+}
+
+describe('useAyahContent', () => {
+  it('does not fetch before an ayah is selected', async () => {
+    const { result } = await renderHook(() => useAyahContent(null), {
+      wrapper: wrapper(makeClient()),
+    });
+
+    expect(result.current.state.status).toBe('pending');
+    expect(service.loadAyah).not.toHaveBeenCalled();
+  });
+
+  it('fetches by absolute number, so a boundary page cannot collide', async () => {
+    service.loadAyah.mockResolvedValue(ayahContent(8, 'الم'));
+
+    const { result } = await renderHook(() => useAyahContent(8), {
+      wrapper: wrapper(makeClient()),
+    });
+
+    await waitFor(() => expect(result.current.state.status).toBe('ready'));
+
+    expect(service.loadAyah).toHaveBeenCalledWith(8);
+    expect(result.current.state).toMatchObject({ data: { text: 'الم' } });
+  });
+
+  it('keeps the new selection when the old request resolves late', async () => {
+    let resolveFirst!: (content: AyahContent) => void;
+
+    service.loadAyah.mockImplementation((absoluteNumber: number) =>
+      absoluteNumber === 8
+        ? new Promise<AyahContent>((resolve) => {
+            resolveFirst = resolve;
+          })
+        : Promise.resolve(ayahContent(9, 'هدى')),
+    );
+
+    const { result, rerender } = await renderHook(
+      ({ absoluteNumber }: { absoluteNumber: number }) =>
+        useAyahContent(absoluteNumber),
+      { wrapper: wrapper(makeClient()), initialProps: { absoluteNumber: 8 } },
+    );
+
+    expect(result.current.state.status).toBe('pending');
+
+    await rerender({ absoluteNumber: 9 });
+    await waitFor(() => expect(result.current.state.status).toBe('ready'));
+
+    // The first request answering afterwards belongs to a superseded selection
+    // and must not replace the text on screen.
+    resolveFirst(ayahContent(8, 'الم'));
+    await waitFor(() =>
+      expect(result.current.state).toMatchObject({ data: { text: 'هدى' } }),
+    );
+  });
+
+  it('surfaces a failure with a retry that re-runs the request', async () => {
+    service.loadAyah
+      .mockRejectedValueOnce(new Error('offline'))
+      .mockResolvedValueOnce(ayahContent(8, 'الم'));
+
+    const { result } = await renderHook(() => useAyahContent(8), {
+      wrapper: wrapper(makeClient()),
+    });
+
+    await waitFor(() => expect(result.current.state.status).toBe('error'));
+
+    const state = result.current.state;
+    if (state.status !== 'error') throw new Error('expected an error state');
+    state.retry();
+
+    await waitFor(() => expect(result.current.state.status).toBe('ready'));
+    expect(service.loadAyah).toHaveBeenCalledTimes(2);
   });
 });

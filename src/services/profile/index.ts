@@ -1,8 +1,4 @@
-import {
-  DEMO_ACCOUNT_EMAIL,
-  DEMO_ACCOUNT_UID,
-  demoProfileRepository,
-} from './demo-profile.repository';
+import { firestoreProfileRepository } from './firestore-profile.repository';
 import { createProfileService } from './profile.service';
 
 /**
@@ -12,17 +8,16 @@ import { createProfileService } from './profile.service';
  * repository directly, which is what keeps `firebase/*` out of the presentation
  * layer (enforced in `eslint.config.js`).
  *
- * TODO(P3.3): swap `demoProfileRepository` for `firestoreProfileRepository`
- * once sign-in exists. The demo repository and the demo session in
- * `features/account/demo-session.ts` are the only pieces that know the account
- * is fake; the screens and hooks already speak `ProfileService`.
+ * The repository is Firestore now that sign-in exists. The in-memory
+ * `demo-profile.repository.ts` is retained only as an injectable fixture for
+ * tests of the `ProfileRepository` contract; nothing in the app imports it.
+ *
+ * Reading a missing document is not an error (`mergeAuthWithProfile` supplies
+ * the auth-only fallback), and a failed read propagates so the UI can show a
+ * retry instead of inventing a role.
  */
-export const profileService = createProfileService(demoProfileRepository);
+export const profileService = createProfileService(firestoreProfileRepository);
 
-export {
-  DEMO_ACCOUNT_EMAIL,
-  DEMO_ACCOUNT_UID,
-} from './demo-profile.repository';
 export { createProfileService } from './profile.service';
 export type { ProfileService } from './profile.service';
 export type { ProfileRepository } from './profile.types';
