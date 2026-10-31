@@ -1,7 +1,7 @@
 import '@/global.css';
 
 import { QueryClientProvider } from '@tanstack/react-query';
-import { Stack } from 'expo-router';
+import { Redirect, Stack, usePathname } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
@@ -10,7 +10,8 @@ import {
 } from 'react-native-safe-area-context';
 import { LayoutDirection, Uniwind, useResolveClassNames } from 'uniwind';
 import { useDirection } from '@/i18n';
-import { AuthProvider } from '@/providers/auth-provider';
+import { isPrivateAppPath } from '@/features/navigation/private-path';
+import { AuthProvider, useAuth } from '@/providers/auth-provider';
 import { BootProvider } from '@/providers/boot-provider';
 import { LanguageProvider } from '@/providers/language-provider';
 import { ThemeProvider } from '@/providers/theme-provider';
@@ -121,6 +122,23 @@ function AppShell() {
  */
 function RootNavigator() {
   const contentStyle = useResolveClassNames('bg-background');
+  const { user, status } = useAuth();
+  const pathname = usePathname();
+
+  // Signed-out private paths must be redirected above the tab navigator.
+  // On native, hidden tabs are removed from the navigator's route table, so a
+  // link to `/meetings` can otherwise fall back to Home before that screen's
+  // own `RequireAuth` mounts. The screen-level gate remains as defence in depth.
+  if (status !== 'restoring' && !user && isPrivateAppPath(pathname)) {
+    return (
+      <Redirect
+        href={{
+          pathname: '/auth/sign-in',
+          params: { returnTo: pathname },
+        }}
+      />
+    );
+  }
 
   return (
     <Stack
