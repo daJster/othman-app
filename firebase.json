@@ -1,0 +1,18 @@
+{
+  "hosting": {
+    "site": "kuttab-othman",
+    "public": "dist",
+    "cleanUrls": true,
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "/reader/:page",
+        "destination": "/reader/[page].html"
+      },
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

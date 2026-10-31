@@ -70,7 +70,11 @@ export function AyahOverlay({
               // Ayah keys are unique per page; the index only disambiguates the
               // several boxes of an ayah that wraps onto another line.
               key={`${ayahKey}:${index}`}
-              style={bboxToRect(bbox)}
+              // `userSelect: none` is web-only but typed on RN 0.86: without
+              // it, dragging across text starts a native text selection and
+              // cancels the page-turn pan, so mouse/trackpad drags only worked
+              // in the page margins.
+              style={[bboxToRect(bbox), { userSelect: 'none' }]}
               className={cn(
                 'absolute rounded-sm border',
                 selected

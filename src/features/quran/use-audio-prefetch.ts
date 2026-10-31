@@ -1,5 +1,6 @@
 import { clearPreloadedSource, preload } from 'expo-audio';
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 
 /**
  * Prefetch exactly the next audio item, never a neighbourhood.
@@ -17,7 +18,11 @@ import { useEffect } from 'react';
  */
 export function useAudioPrefetch(source: string | null): void {
   useEffect(() => {
-    if (!source) return;
+    // `expo-audio`'s web preload uses fetch, and the audio CDN does not send
+    // CORS headers; the browser blocks it. The audio element itself still
+    // plays, so skipping prefetch on web avoids a guaranteed console error and
+    // a wasted request.
+    if (Platform.OS === 'web' || !source) return;
 
     void Promise.resolve(preload(source)).catch(() => undefined);
 
