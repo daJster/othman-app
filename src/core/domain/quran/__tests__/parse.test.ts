@@ -292,11 +292,30 @@ describe('parseSurahBboxes', () => {
     expectRejection(() => parseSurahBboxes(payload, EDITION), 'surah-bboxes');
   });
 
-  it('rejects a rectangle with no height', () => {
+  it('drops a degenerate rectangle instead of failing the edition', () => {
     const payload = surahBboxesPayload();
-    payload.surahs['1'].ayat['1'].bboxes[0].bottom = 0.2;
+    payload.surahs['1'].ayat['1'].bboxes[0].right = payload.surahs['1'].ayat['1']
+      .bboxes[0].left;
 
-    expectRejection(() => parseSurahBboxes(payload, EDITION), 'surah-bboxes');
+    const table = parseSurahBboxes(payload, EDITION);
+
+    // The CDN's live Tajweed payload contains one such box (8:52). Dropping it
+    // keeps every other ayah usable; clamping would select the wrong words.
+    expect(table['1']['1'].bboxes).toEqual([]);
+  });
+
+  it('keeps valid rectangles when a sibling is degenerate', () => {
+    const payload = surahBboxesPayload();
+    payload.surahs['1'].ayat['1'].bboxes = [
+      { top: 0.2, left: 0.1, bottom: 0.3, right: 0.9 },
+      { top: 0.4, left: 0.1, bottom: 0.4, right: 0.9 },
+    ];
+
+    const table = parseSurahBboxes(payload, EDITION);
+
+    expect(table['1']['1'].bboxes).toEqual([
+      { top: 0.2, left: 0.1, bottom: 0.3, right: 0.9 },
+    ]);
   });
 
   it('rejects a surah key outside 1-114', () => {

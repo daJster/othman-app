@@ -169,29 +169,25 @@ function fraction(
 }
 
 /**
- * One normalised rectangle.
+ * One normalised rectangle, or `null` when it has no area.
  *
- * `bottom > top` and `right > left` are enforced: a zero-height box is not
- * tappable, and the reader would render an invisible target over the text.
+ * `bottom > top` and `right > left` are required for a tappable target. The CDN
+ * ships one zero-width box (surah 8, ayah 52) in the current Tajweed payload;
+ * rejecting the whole edition for it left the reader unusable, so a degenerate
+ * box is dropped instead. It is never clamped or moved onto neighbouring text.
  */
 function parseBbox(
   value: unknown,
   source: QuranDataSource,
   path: string,
-): Bbox {
+): Bbox | null {
   const box = object(value, source, path);
   const top = fraction(box, 'top', source, path);
   const left = fraction(box, 'left', source, path);
   const bottom = fraction(box, 'bottom', source, path);
   const right = fraction(box, 'right', source, path);
 
-  if (top >= bottom) {
-    throw new QuranDataError(source, `${path} has no height`);
-  }
-
-  if (left >= right) {
-    throw new QuranDataError(source, `${path} has no width`);
-  }
+  if (top >= bottom || left >= right) return null;
 
   return { top, left, bottom, right };
 }
@@ -205,7 +201,9 @@ function parseBboxList(
     throw new QuranDataError(source, `${path} must be a non-empty array`);
   }
 
-  return value.map((box, index) => parseBbox(box, source, `${path}[${index}]`));
+  return value
+    .map((box, index) => parseBbox(box, source, `${path}[${index}]`))
+    .filter((box): box is Bbox => box !== null);
 }
 
 /**
