@@ -58,7 +58,10 @@ if (!existsSync(dist)) {
 
   const files = walk(dist);
   const relative = files.map((path) =>
-    path.slice(root.length + 1).split(sep).join('/'),
+    path
+      .slice(root.length + 1)
+      .split(sep)
+      .join('/'),
   );
 
   const js = relative.filter((path) => path.includes('_expo/static/js/web/'));
@@ -101,15 +104,17 @@ if (!existsSync(dist)) {
     }
 
     const rewrites = hosting.rewrites ?? [];
-    const reader = rewrites.find(
-      (rule) => rule.source === '/reader/:page',
-    );
+    const reader = rewrites.find((rule) => rule.source === '/reader/:page');
     if (!reader || reader.destination !== '/reader/[page].html') {
       fail('missing /reader/:page → reader/[page].html rewrite');
     }
 
     const fallback = rewrites.at(-1);
-    if (!fallback || fallback.source !== '**' || fallback.destination !== '/index.html') {
+    if (
+      !fallback ||
+      fallback.source !== '**' ||
+      fallback.destination !== '/index.html'
+    ) {
       fail('catch-all rewrite to /index.html must be last');
     }
     ok(`hosting: ${hosting.public}, cleanUrls, ${rewrites.length} rewrites`);

@@ -294,8 +294,8 @@ describe('parseSurahBboxes', () => {
 
   it('drops a degenerate rectangle instead of failing the edition', () => {
     const payload = surahBboxesPayload();
-    payload.surahs['1'].ayat['1'].bboxes[0].right = payload.surahs['1'].ayat['1']
-      .bboxes[0].left;
+    payload.surahs['1'].ayat['1'].bboxes[0].right =
+      payload.surahs['1'].ayat['1'].bboxes[0].left;
 
     const table = parseSurahBboxes(payload, EDITION);
 

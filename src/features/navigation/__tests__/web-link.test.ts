@@ -21,7 +21,10 @@ describe('shouldHandleWebLink', () => {
 
   it('does not re-handle an already-prevented click', () => {
     expect(
-      shouldHandleWebLink({ button: 0, defaultPrevented: true } as WebLinkClick),
+      shouldHandleWebLink({
+        button: 0,
+        defaultPrevented: true,
+      } as WebLinkClick),
     ).toBe(false);
   });
 });
