@@ -5,8 +5,8 @@ import type { NoteAyah } from '@/core/domain/notes/notes';
 import type { AyahContent } from '@/core/types';
 import type { AsyncPresentResult } from '@/features/query/async-state';
 import { useDirection } from '@/i18n';
-import { Button } from '@/ui/button';
 import { NativeSheetContent } from '@/ui/native-sheet-content';
+import { SheetHeader } from '@/ui/sheet-header';
 import { ErrorState, Loading } from '@/ui/states';
 import { Text } from '@/ui/text';
 import { buildAyahBlocks } from '../ayah-content';
@@ -93,16 +93,11 @@ export function AyahPanelSheet({
       {copy ? (
         <NativeSheetContent>
           <View className="gap-3">
-            <View className="flex-row items-center justify-between gap-2">
-              <Text variant="subtitle">{t(copy.titleKey)}</Text>
-              <Button
-                variant="ghost"
-                size="sm"
-                label={t('action.close')}
-                onPress={onDismiss}
-                testID="ayah-panel-close"
-              />
-            </View>
+            <SheetHeader
+              title={t(copy.titleKey)}
+              onClose={onDismiss}
+              closeTestID="ayah-panel-close"
+            />
 
             {selected ? (
               <>

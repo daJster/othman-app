@@ -9,7 +9,7 @@ import Animated, {
 import { getMeetingStatusConfig } from '@/core/config';
 import type { Meeting } from '@/core/types';
 import { Badge } from '@/ui/badge';
-import { Button } from '@/ui/button';
+import { Button, ButtonText } from '@/ui/button';
 import { Card } from '@/ui/card';
 import { Icon } from '@/ui/icon';
 import { Separator } from '@/ui/separator';
@@ -115,9 +115,11 @@ export function MeetingCard({ meeting }: MeetingCardProps) {
 
         <Button
           className="self-start"
-          label={t('action.join')}
           onPress={() => void openMeetLink(meeting.meetLink)}
-        />
+        >
+          <Icon name="video" size={16} tone="primary-foreground" />
+          <ButtonText>{t('action.join')}</ButtonText>
+        </Button>
       </Card>
     </Animated.View>
   );

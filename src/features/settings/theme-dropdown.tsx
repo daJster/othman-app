@@ -35,6 +35,7 @@ export function ThemeDropdown({
       }))}
       onChange={setMode}
       variant={variant}
+      icon="palette"
       className={className}
       testID={testID}
     />

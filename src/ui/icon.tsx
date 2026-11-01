@@ -15,13 +15,16 @@ import ExternalLink from 'lucide-react-native/icons/external-link';
 import Eye from 'lucide-react-native/icons/eye';
 import EyeOff from 'lucide-react-native/icons/eye-off';
 import FileText from 'lucide-react-native/icons/file-text';
+import Globe from 'lucide-react-native/icons/globe';
 import House from 'lucide-react-native/icons/house';
 import Inbox from 'lucide-react-native/icons/inbox';
 import Info from 'lucide-react-native/icons/info';
+import Languages from 'lucide-react-native/icons/languages';
 import Layers from 'lucide-react-native/icons/layers';
 import LogOut from 'lucide-react-native/icons/log-out';
 import MapPin from 'lucide-react-native/icons/map-pin';
 import Menu from 'lucide-react-native/icons/menu';
+import Palette from 'lucide-react-native/icons/palette';
 import Pause from 'lucide-react-native/icons/pause';
 import Pencil from 'lucide-react-native/icons/pencil';
 import Play from 'lucide-react-native/icons/play';
@@ -73,6 +76,9 @@ const ICON_COMPONENTS = {
   clock: Clock,
   'map-pin': MapPin,
   users: Users,
+  palette: Palette,
+  languages: Languages,
+  globe: Globe,
   camera: Camera,
   info: Info,
   logout: LogOut,
@@ -93,6 +99,7 @@ const TONE_CLASS = {
   foreground: 'text-foreground',
   muted: 'text-muted-foreground',
   primary: 'text-primary',
+  'primary-foreground': 'text-primary-foreground',
   destructive: 'text-destructive',
 } as const;
 

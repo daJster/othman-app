@@ -19,7 +19,8 @@ import {
 import type { AccountData, UserRole } from '@/core/types';
 import { Avatar } from '@/ui/avatar';
 import { Badge } from '@/ui/badge';
-import { Button } from '@/ui/button';
+import { Button, ButtonText } from '@/ui/button';
+import { Icon } from '@/ui/icon';
 import { Input } from '@/ui/input';
 import { PageHeader } from '@/ui/page-header';
 import { Text } from '@/ui/text';
@@ -209,11 +210,15 @@ export function EditProfileForm({
           <Button
             variant="ghost"
             size="sm"
-            label={t('account.edit.photo')}
             onPress={() => void pickPhoto()}
             disabled={update.isPending}
             testID="account-change-photo"
-          />
+          >
+            <Icon name="camera" size={18} tone="muted" />
+            <ButtonText variant="ghost" size="sm">
+              {t('account.edit.photo')}
+            </ButtonText>
+          </Button>
           <Text
             variant="caption"
             tone={photoError ? 'destructive' : 'muted'}

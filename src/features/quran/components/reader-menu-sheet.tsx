@@ -2,10 +2,10 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import type { IconName } from '@/core/config';
 import { ThemeDropdown } from '@/features/settings/theme-dropdown';
-import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
 import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { Pressable } from '@/ui/pressable';
+import { SheetHeader } from '@/ui/sheet-header';
 import { Text } from '@/ui/text';
 import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
 
@@ -81,16 +81,11 @@ export function ReaderMenuSheet({
     >
       <NativeSheetContent>
         <View className="gap-2">
-          <View className="flex-row items-center justify-between gap-2">
-            <Text variant="subtitle">{t('reader.menuTitle')}</Text>
-            <Button
-              variant="ghost"
-              size="sm"
-              label={t('action.close')}
-              onPress={onDismiss}
-              testID="reader-menu-close"
-            />
-          </View>
+          <SheetHeader
+            title={t('reader.menuTitle')}
+            onClose={onDismiss}
+            closeTestID="reader-menu-close"
+          />
 
           <View className="border-t border-border pt-2">
             <ThemeDropdown testID="reader-theme-dropdown" />

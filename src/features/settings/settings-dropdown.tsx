@@ -23,6 +23,7 @@ export function SettingsDropdown<T extends string>({
   options,
   onChange,
   variant = 'row',
+  icon,
   testID,
   className,
 }: SettingsDropdownProps<T>) {
@@ -62,7 +63,10 @@ export function SettingsDropdown<T extends string>({
           </>
         ) : (
           <>
-            <Text variant="label">{label}</Text>
+            <View className="min-w-0 flex-1 flex-row items-center gap-3">
+              {icon ? <Icon name={icon} tone="muted" /> : null}
+              <Text variant="label">{label}</Text>
+            </View>
             <View className="flex-row items-center gap-2">
               <Text variant="label" tone="muted">
                 {current.label}

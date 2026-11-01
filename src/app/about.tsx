@@ -105,7 +105,7 @@ export default function AboutScreen() {
 
           <ListItem
             testID="about-website"
-            leading={<Icon name="external-link" />}
+            leading={<Icon name="globe" />}
             trailing={<Icon name="external-link" tone="muted" />}
             supportingText={t('pages.about.websiteDesc')}
             onPress={() => void openHttpsLink(WEBSITE_URL)}

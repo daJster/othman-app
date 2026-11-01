@@ -38,6 +38,10 @@ export const ICON_NAMES = [
   'clock',
   'map-pin',
   'users',
+  // Settings rows.
+  'palette',
+  'languages',
+  'globe',
   // Account.
   'camera',
   'info',

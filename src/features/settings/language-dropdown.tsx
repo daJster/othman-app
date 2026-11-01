@@ -47,6 +47,7 @@ export function LanguageDropdown({
       }))}
       onChange={(next) => void handleChange(next)}
       variant={variant}
+      icon="languages"
       className={className}
       testID={testID}
     />

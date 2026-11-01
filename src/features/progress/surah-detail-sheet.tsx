@@ -7,9 +7,9 @@ import {
 } from '@/core/domain/progress/surah-progress';
 import { useDirection } from '@/i18n';
 import { Badge } from '@/ui/badge';
-import { Button } from '@/ui/button';
 import { Progress } from '@/ui/progress';
 import { NativeSheetContent } from '@/ui/native-sheet-content';
+import { SheetHeader } from '@/ui/sheet-header';
 import { Text } from '@/ui/text';
 import { bandBadgeVariant, bandLabelKey } from './surah-band';
 import {
@@ -48,17 +48,19 @@ export function SurahDetailSheet({ row, onClose }: SurahDetailSheetProps) {
       {row ? (
         <NativeSheetContent>
           <View className="gap-4 p-4">
-            <View className="flex-row items-center justify-between gap-2">
-              <Text variant="title">
-                {t('pages.account.progress.surah', {
-                  number: formatNumber(row.surahNumber, language),
-                })}
-              </Text>
-              <Badge
-                variant={bandBadgeVariant(bandOf(row.percent))}
-                label={t(bandLabelKey(bandOf(row.percent)))}
-              />
-            </View>
+            <SheetHeader
+              title={t('pages.account.progress.surah', {
+                number: formatNumber(row.surahNumber, language),
+              })}
+              onClose={onClose}
+              closeTestID="surah-detail-close"
+              end={
+                <Badge
+                  variant={bandBadgeVariant(bandOf(row.percent))}
+                  label={t(bandLabelKey(bandOf(row.percent)))}
+                />
+              }
+            />
 
             <View className="gap-1.5">
               <View className="flex-row items-baseline justify-between gap-2">
@@ -85,12 +87,6 @@ export function SurahDetailSheet({ row, onClose }: SurahDetailSheetProps) {
                   })
                 : t('pages.account.progress.detail.neverReviewed')}
             </Text>
-
-            <Button
-              label={t('action.close')}
-              onPress={onClose}
-              testID="surah-detail-close"
-            />
           </View>
         </NativeSheetContent>
       ) : null}
