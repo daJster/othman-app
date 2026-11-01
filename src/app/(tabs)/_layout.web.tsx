@@ -42,6 +42,8 @@ export default function WebTabsLayout() {
   const { width } = useWindowDimensions();
   const visible = useVisibleTabs();
   const visibleNames = new Set(visible.map((tab) => tab.tab));
+  // Same scale as PAGE_GUTTER in src/ui/page.tsx: 16 below 640, 20 above.
+  // Keep the two in sync: the nav and the page column must share one edge.
   // The compact controls need the narrower gutter at 375; the page grid keeps
   // 20 from `sm` up.
   const gutter = width < 640 ? 16 : 20;

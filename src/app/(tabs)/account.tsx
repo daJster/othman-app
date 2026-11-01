@@ -122,15 +122,18 @@ function AccountContent() {
 
       {Platform.OS === 'web' ? (
         <Screen contentContainerClassName="gap-0 p-0">
-          <Page width="default" className="px-0 pb-10">
-            <Section title={t('nav.account')} className="px-4 pt-6 pb-2" />
+          <Page width="default" className="pb-10">
+            <Section title={t('nav.account')} className="pt-6 pb-2" />
 
             <ProfileHeader
               account={state.data}
               onEdit={() => router.push('/account/edit')}
             />
 
-            <ListSectionHeader label={t('account.sections.preferences')} />
+            <ListSectionHeader
+              label={t('account.sections.preferences')}
+              inset={false}
+            />
             <PreferencesSection />
 
             <AccountSettingsWeb

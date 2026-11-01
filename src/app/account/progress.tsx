@@ -63,7 +63,7 @@ function ProgressContent() {
   } else {
     body = (
       <Screen contentContainerClassName="gap-0 p-0">
-        <Page width="default" className="gap-6 p-4 pb-8 lg:max-w-4xl">
+        <Page width="default" className="gap-6 py-4 pb-8">
           <ProgressSummary rows={state.data} />
 
           <View className="gap-3">

@@ -51,7 +51,7 @@ function SettingsRow({
       accessibilityRole="button"
       onPress={onPress}
       className={cn(
-        'min-h-14 w-full flex-row items-center gap-3 border-b border-border px-4 py-3 active:opacity-70',
+        'min-h-14 w-full flex-row items-center gap-3 border-b border-border py-3 active:opacity-70',
         FOCUS_RING,
         isRTL && 'flex-row-reverse',
       )}
@@ -104,7 +104,7 @@ export function AccountSettingsWeb({
 
   return (
     <View>
-      <ListSectionHeader label={t('account.sections.settings')} />
+      <ListSectionHeader label={t('account.sections.settings')} inset={false} />
 
       <SettingsRow
         testID="account-progress-row"
@@ -124,7 +124,7 @@ export function AccountSettingsWeb({
         isRTL={isRTL}
       />
 
-      <ListSectionHeader label={t('account.sections.session')} />
+      <ListSectionHeader label={t('account.sections.session')} inset={false} />
 
       <SettingsRow
         testID="account-sign-out-row"

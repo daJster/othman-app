@@ -110,7 +110,7 @@ export default function QuranScreen() {
 
   return (
     <Screen contentContainerClassName="gap-0 p-0">
-      <Page width="default" className="pt-8 pb-10 md:px-8 md:pt-12">
+      <Page width="default" className="pt-8 pb-10 md:pt-12">
         <Head>
           <title>{`${t('nav.quran')} · ${t('app.name')}`}</title>
         </Head>

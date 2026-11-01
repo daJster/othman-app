@@ -19,7 +19,7 @@ declares it before any icon work.
 | 005 | Focus visibility, 44pt targets and input labels | P1 | S-M | — | DONE |
 | 006 | Compose both error routes through one state | P3 | S | 002 | DONE |
 | 007 | Bring status colours back to tokens | P2 | M | — | DONE |
-| 008 | Make Page own the column | P2 | M | — | TODO |
+| 008 | Make Page own the column | P2 | M | — | DONE |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with reason) | REJECTED (with rationale).
 

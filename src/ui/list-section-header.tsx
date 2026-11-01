@@ -17,9 +17,16 @@ import { Text } from './text';
  * The label is a quiet brass overline. `brass-ink` is the token for small brass
  * text on a background surface — `brass` itself is line work on canopy.
  */
-export function ListSectionHeader({ label }: { label: string }) {
+export function ListSectionHeader({
+  label,
+  inset = true,
+}: {
+  label: string;
+  /** False when the parent `Page` already owns the horizontal gutter. */
+  inset?: boolean;
+}) {
   const content = (
-    <View className="px-4 pt-6 pb-2">
+    <View className={inset ? 'px-4 pt-6 pb-2' : 'pt-6 pb-2'}>
       <Text variant="overline" className="text-brass-ink">
         {label}
       </Text>

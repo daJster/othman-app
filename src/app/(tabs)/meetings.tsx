@@ -13,7 +13,7 @@ import {
 } from '@/features/meetings/use-meetings';
 import { formatLongDate } from '@/features/meetings/calendar-format';
 import { useDirection } from '@/i18n';
-import { Page } from '@/ui/page';
+import { Page, PAGE_GUTTER } from '@/ui/page';
 import { Section } from '@/ui/section';
 import { ErrorState } from '@/ui/states';
 import { Text } from '@/ui/text';
@@ -67,13 +67,13 @@ function MeetingsContent() {
        * instead of a calendar. The single FlatList (with the calendar in its
        * header) keeps pull-to-refresh and virtualisation intact.
        */}
-      <Page width="default" className="flex-1 px-0">
+      <Page width="default" className="flex-1">
         <FlatList
           data={meetings}
           keyExtractor={(meeting) => String(meeting.id)}
           renderItem={({ item }) => <MeetingCard meeting={item} />}
           className="flex-1 bg-background"
-          contentContainerClassName="gap-3 p-4 pb-10"
+          contentContainerClassName={`${PAGE_GUTTER} gap-3 py-4 pb-10`}
           contentInsetAdjustmentBehavior="automatic"
           refreshControl={
             <RefreshControl
