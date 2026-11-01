@@ -1,48 +1,44 @@
 import type { ReactNode } from 'react';
-import {
-  Pressable,
-  Text as RNText,
-  type PressableProps,
-  type TextProps as RNTextProps,
-} from 'react-native';
+import { type TextProps as RNTextProps } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
+import {
+  Button as RNRButton,
+  type ButtonProps as RNRButtonProps,
+} from '@/components/ui/button';
+import { Text as RNRText } from '@/components/ui/text';
 import { cn } from './cn';
-import { FOCUS_RING } from './focus';
 
 /**
- * Button primitive — the CVA button from the web app, ported to `tv()`.
+ * Button primitive, backed by react-native-reusables.
  *
- * Differences from the web version, all deliberate:
- *  - `hover:` is dropped; touch has none. `focus-visible:` is kept for the web
- *    build through `FOCUS_RING`.
- *  - `active:opacity-80` replaces the 1px translate, which reads as jitter on a
- *    touch screen.
- *  - Every size is at least 44px: the 44pt tap target rule is a platform
- *    guideline, not a browser suggestion. `sm` differs in type size and
- *    padding, not in height.
- *  - `link` has no `underline-offset`; RN's `underline` is all-or-nothing.
+ * The RNR button owns the variants, pressed states and web focus ring. This
+ * wrapper keeps the app's `label` convenience and its 44pt floor:
+ *
+ *  - `sm`/`md` are 44px, `lg` is 48px, `icon` is 44×44. RNR's native defaults
+ *    (40/36) would regress the platform tap-target rule.
+ *  - `ButtonText` keeps the app's token-based label colours. RNR's
+ *    `TextClassContext` is still active, so a raw RNR `Text` inside a RNR
+ *    button inherits the correct colour too.
  *
  * Two ways to put content in: `label` for the common text button, or `children`
- * for composed content (icon + text). When composing, use `ButtonText` so the
- * label colour matches the variant — RN does not inherit text colour from a
- * parent view.
+ * for composed content (icon + text). When composing, use `ButtonText`.
  */
 const button = tv({
-  base: 'flex-row items-center justify-center rounded-lg border border-transparent active:opacity-80 disabled:opacity-50',
+  base: '',
   variants: {
     variant: {
-      default: 'bg-primary',
-      secondary: 'bg-secondary',
-      outline: 'border-border bg-background',
-      ghost: 'bg-transparent',
-      destructive: 'bg-destructive',
-      link: 'bg-transparent',
+      default: '',
+      secondary: '',
+      outline: '',
+      ghost: '',
+      destructive: '',
+      link: '',
     },
     size: {
-      sm: 'h-11 gap-1.5 px-3',
-      md: 'h-11 gap-2 px-4',
-      lg: 'h-12 gap-2 px-6',
-      icon: 'h-11 w-11',
+      sm: 'h-11 gap-1.5 px-3 sm:h-11',
+      md: 'h-11 gap-2 px-4 sm:h-11',
+      lg: 'h-12 gap-2 px-6 sm:h-12',
+      icon: 'h-11 w-11 sm:h-11 sm:w-11',
     },
   },
   defaultVariants: {
@@ -75,10 +71,20 @@ const buttonLabel = tv({
   },
 });
 
+const RNR_SIZE = {
+  sm: 'sm',
+  md: 'default',
+  lg: 'lg',
+  icon: 'icon',
+} as const;
+
 export type ButtonVariant = NonNullable<VariantProps<typeof button>['variant']>;
 export type ButtonSize = NonNullable<VariantProps<typeof button>['size']>;
 
-export type ButtonProps = Omit<PressableProps, 'children'> &
+export type ButtonProps = Omit<
+  RNRButtonProps,
+  'children' | 'variant' | 'size'
+> &
   VariantProps<typeof button> & {
     label?: string;
     children?: ReactNode;
@@ -95,19 +101,20 @@ export function Button({
   ...props
 }: ButtonProps) {
   return (
-    <Pressable
-      accessibilityRole={accessibilityRole}
-      accessibilityState={{ disabled: Boolean(disabled) }}
+    <RNRButton
+      variant={variant}
+      size={RNR_SIZE[size ?? 'md']}
       disabled={disabled}
-      className={cn(button({ variant, size, className }), FOCUS_RING)}
+      accessibilityRole={accessibilityRole}
+      className={cn(button({ variant, size, className }))}
       {...props}
     >
       {label ? (
-        <RNText className={buttonLabel({ variant, size })}>{label}</RNText>
+        <RNRText className={buttonLabel({ variant, size })}>{label}</RNRText>
       ) : (
         children
       )}
-    </Pressable>
+    </RNRButton>
   );
 }
 
@@ -121,6 +128,6 @@ export function ButtonText({
   ...props
 }: ButtonTextProps) {
   return (
-    <RNText className={buttonLabel({ variant, size, className })} {...props} />
+    <RNRText className={buttonLabel({ variant, size, className })} {...props} />
   );
 }

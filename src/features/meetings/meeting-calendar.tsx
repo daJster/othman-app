@@ -15,7 +15,7 @@ import { Button } from '@/ui/button';
 import { cn } from '@/ui/cn';
 import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
-import { SegmentedControl } from '@/ui/segmented-control';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Text } from '@/ui/text';
 import {
   formatDayNumber,
@@ -166,18 +166,34 @@ export function MeetingCalendar({
       </View>
 
       <View className="flex-row flex-wrap items-center justify-between gap-2">
-        <SegmentedControl
-          label={t('meeting.calendar.system')}
+        <ToggleGroup
+          type="single"
           value={system}
-          onChange={changeSystem}
-          options={[
-            {
-              value: 'gregorian',
-              label: t('meeting.calendar.gregorian'),
-            },
-            { value: 'hijri', label: t('meeting.calendar.hijri') },
-          ]}
-        />
+          onValueChange={(next) => {
+            if (next === 'gregorian' || next === 'hijri') changeSystem(next);
+          }}
+          accessibilityLabel={t('meeting.calendar.system')}
+          variant="outline"
+          size="sm"
+          className="h-11"
+        >
+          <ToggleGroupItem value="gregorian" isFirst className="h-11 px-3">
+            <Text
+              variant="label"
+              tone={system === 'gregorian' ? 'default' : 'muted'}
+            >
+              {t('meeting.calendar.gregorian')}
+            </Text>
+          </ToggleGroupItem>
+          <ToggleGroupItem value="hijri" isLast className="h-11 px-3">
+            <Text
+              variant="label"
+              tone={system === 'hijri' ? 'default' : 'muted'}
+            >
+              {t('meeting.calendar.hijri')}
+            </Text>
+          </ToggleGroupItem>
+        </ToggleGroup>
         <Button
           variant="ghost"
           label={t('meeting.calendar.today')}

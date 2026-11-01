@@ -15,6 +15,7 @@ import type { IconName } from '@/core/config';
 import { BrandMark } from '@/features/brand/brand-mark';
 import { LanguageDropdown } from '@/features/settings/language-dropdown';
 import { ThemeDropdown } from '@/features/settings/theme-dropdown';
+import { UserMenu } from '@/components/blocks/user-menu';
 import { cn } from '@/ui/cn';
 import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
@@ -93,6 +94,9 @@ export default function WebTabsLayout() {
         <View className="ms-auto flex-row items-center gap-1">
           <ThemeDropdown variant="compact" />
           <LanguageDropdown variant="compact" />
+          <View className="hidden sm:flex">
+            <UserMenu />
+          </View>
         </View>
       </TabList>
       <TabSlot />

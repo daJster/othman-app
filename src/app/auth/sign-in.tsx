@@ -20,13 +20,18 @@ import { sanitizeReturnTo } from '@/features/auth/return-to';
 import { GOOGLE_MARK } from '@/features/brand/assets';
 import { BrandMark } from '@/features/brand/brand-mark';
 import { useAuth } from '@/providers/auth-provider';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
 import { Button, ButtonText } from '@/ui/button';
 import { Icon } from '@/ui/icon';
 import { Image } from '@/ui/image';
 import { Input } from '@/ui/input';
 import { ScreenView } from '@/ui/screen';
+import { Separator } from '@/ui/separator';
 import { Loading } from '@/ui/states';
 import { Text } from '@/ui/text';
+import CircleAlert from 'lucide-react-native/icons/circle-alert';
 
 /**
  * Sign-in screen — a modal with two credential paths.
@@ -199,21 +204,16 @@ export default function SignInScreen() {
     errorCode === 'account-exists-with-different-credential';
 
   const errorNotice = errorCode ? (
-    <View
-      className="gap-2 rounded-md bg-destructive/10 p-3"
-      accessibilityRole="alert"
-      accessibilityLiveRegion="polite"
-      testID="auth-error"
-    >
-      <Text variant="label" tone="destructive">
+    <Alert variant="destructive" icon={CircleAlert} testID="auth-error">
+      <AlertTitle>
         {accountExists
           ? t('auth.signIn.accountExistsTitle')
           : t(errorKey(errorCode))}
-      </Text>
+      </AlertTitle>
       {accountExists ? (
-        <Text variant="caption" tone="muted">
+        <AlertDescription>
           {t('auth.signIn.accountExistsDescription')}
-        </Text>
+        </AlertDescription>
       ) : null}
       {!accountExists ? (
         <Button
@@ -223,9 +223,10 @@ export default function SignInScreen() {
           onPress={retry}
           disabled={busy}
           testID="auth-retry"
+          className="mt-2 self-start"
         />
       ) : null}
-    </View>
+    </Alert>
   ) : null;
 
   return (
@@ -257,174 +258,177 @@ export default function SignInScreen() {
               </Button>
             </View>
 
-            <View className="gap-2">
-              <Text accessibilityRole="header" variant="title">
-                {t('auth.signIn.title')}
-              </Text>
-              <Text tone="muted">{t('auth.signIn.subtitle')}</Text>
-            </View>
-
-            <View className="gap-5">
-              <Button
-                size="lg"
-                variant="outline"
-                className="gap-2"
-                accessibilityLabel={t('auth.signIn.google')}
-                onPress={() => void handleGoogle()}
-                disabled={busy}
-                testID="auth-google"
-              >
-                <Image
-                  source={GOOGLE_MARK}
-                  className="h-5 w-5"
-                  contentFit="contain"
-                  accessibilityElementsHidden
-                  importantForAccessibility="no-hide-descendants"
-                />
-                <ButtonText size="lg" variant="outline">
-                  {pending ? t('action.loading') : t('auth.signIn.google')}
-                </ButtonText>
-              </Button>
-
-              {step === 'email' ? errorNotice : null}
-
-              <View className="flex-row items-center gap-3">
-                <View className="h-px flex-1 bg-border" />
-                <Text variant="caption" tone="muted">
-                  {t('auth.signIn.or')}
+            <Card>
+              <CardHeader className="gap-2">
+                <Text accessibilityRole="header" variant="title">
+                  {t('auth.signIn.title')}
                 </Text>
-                <View className="h-px flex-1 bg-border" />
-              </View>
+                <Text tone="muted">{t('auth.signIn.subtitle')}</Text>
+              </CardHeader>
 
-              {step === 'email' ? (
-                <View className="gap-3">
-                  <View className="flex-row items-baseline justify-between gap-2">
-                    <Text variant="subtitle">
-                      {t('auth.signIn.emailTitle')}
-                    </Text>
-                    <Text variant="caption" tone="muted">
-                      1 / 2
-                    </Text>
-                  </View>
+              <CardContent className="gap-5">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="gap-2"
+                  accessibilityLabel={t('auth.signIn.google')}
+                  onPress={() => void handleGoogle()}
+                  disabled={busy}
+                  testID="auth-google"
+                >
+                  <Image
+                    source={GOOGLE_MARK}
+                    className="h-5 w-5"
+                    contentFit="contain"
+                    accessibilityElementsHidden
+                    importantForAccessibility="no-hide-descendants"
+                  />
+                  <ButtonText size="lg" variant="outline">
+                    {pending ? t('action.loading') : t('auth.signIn.google')}
+                  </ButtonText>
+                </Button>
+
+                {step === 'email' ? errorNotice : null}
+
+                <View className="flex-row items-center gap-3">
+                  <Separator className="flex-1" />
                   <Text variant="caption" tone="muted">
-                    {t('auth.signIn.emailHint')}
+                    {t('auth.signIn.or')}
                   </Text>
-                  <Text variant="label">{t('label.email')}</Text>
-                  <Input
-                    testID="auth-email"
-                    value={email}
-                    onChangeText={setEmail}
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    autoFocus={Platform.OS === 'web'}
-                    keyboardType="email-address"
-                    returnKeyType="next"
-                    textContentType="emailAddress"
-                    editable={!busy}
-                    invalid={fieldError !== null}
-                    accessibilityLabel={t('label.email')}
-                    onSubmitEditing={continueWithEmail}
-                    className="bg-secondary"
-                  />
-                  {fieldError ? (
-                    <Text
-                      variant="caption"
-                      tone="destructive"
-                      accessibilityRole="alert"
-                      accessibilityLiveRegion="polite"
-                    >
-                      {fieldError}
-                    </Text>
-                  ) : null}
-                  <Button
-                    label={t('action.continue')}
-                    onPress={continueWithEmail}
-                    disabled={busy}
-                    testID="auth-continue"
-                  />
+                  <Separator className="flex-1" />
                 </View>
-              ) : (
-                <View className="gap-3">
-                  <View className="flex-row items-baseline justify-between gap-2">
-                    <Text variant="subtitle">
-                      {t('auth.signIn.passwordTitle')}
-                    </Text>
+
+                {step === 'email' ? (
+                  <View className="gap-3">
+                    <View className="flex-row items-baseline justify-between gap-2">
+                      <Text variant="subtitle">
+                        {t('auth.signIn.emailTitle')}
+                      </Text>
+                      <Text variant="caption" tone="muted">
+                        1 / 2
+                      </Text>
+                    </View>
                     <Text variant="caption" tone="muted">
-                      2 / 2
+                      {t('auth.signIn.emailHint')}
                     </Text>
-                  </View>
-                  <Text variant="caption" tone="muted">
-                    {t('auth.signIn.passwordHint', { email })}
-                  </Text>
-                  <Text variant="label">{t('label.password')}</Text>
-                  <View className="flex-row items-center gap-2">
+                    <Label htmlFor="auth-email">{t('label.email')}</Label>
                     <Input
-                      ref={passwordRef}
-                      testID="auth-password"
-                      value={password}
-                      onChangeText={setPassword}
-                      secureTextEntry={!revealPassword}
+                      id="auth-email"
+                      testID="auth-email"
+                      value={email}
+                      onChangeText={setEmail}
                       autoCapitalize="none"
-                      autoComplete="current-password"
-                      textContentType="password"
+                      autoComplete="email"
+                      autoFocus={Platform.OS === 'web'}
+                      keyboardType="email-address"
+                      returnKeyType="next"
+                      textContentType="emailAddress"
                       editable={!busy}
                       invalid={fieldError !== null}
-                      accessibilityLabel={t('label.password')}
-                      onSubmitEditing={() => void handleEmailSignIn()}
-                      className="flex-1 bg-secondary"
+                      accessibilityLabel={t('label.email')}
+                      onSubmitEditing={continueWithEmail}
+                    />
+                    {fieldError ? (
+                      <Text
+                        variant="caption"
+                        tone="destructive"
+                        accessibilityRole="alert"
+                        accessibilityLiveRegion="polite"
+                      >
+                        {fieldError}
+                      </Text>
+                    ) : null}
+                    <Button
+                      label={t('action.continue')}
+                      onPress={continueWithEmail}
+                      disabled={busy}
+                      testID="auth-continue"
+                    />
+                  </View>
+                ) : (
+                  <View className="gap-3">
+                    <View className="flex-row items-baseline justify-between gap-2">
+                      <Text variant="subtitle">
+                        {t('auth.signIn.passwordTitle')}
+                      </Text>
+                      <Text variant="caption" tone="muted">
+                        2 / 2
+                      </Text>
+                    </View>
+                    <Text variant="caption" tone="muted">
+                      {t('auth.signIn.passwordHint', { email })}
+                    </Text>
+                    <Label htmlFor="auth-password">{t('label.password')}</Label>
+                    <View className="flex-row items-center gap-2">
+                      <Input
+                        id="auth-password"
+                        ref={passwordRef}
+                        testID="auth-password"
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry={!revealPassword}
+                        autoCapitalize="none"
+                        autoComplete="current-password"
+                        textContentType="password"
+                        editable={!busy}
+                        invalid={fieldError !== null}
+                        accessibilityLabel={t('label.password')}
+                        onSubmitEditing={() => void handleEmailSignIn()}
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        accessibilityLabel={
+                          revealPassword
+                            ? t('label.hidePassword')
+                            : t('label.showPassword')
+                        }
+                        onPress={() => setRevealPassword((value) => !value)}
+                        disabled={busy}
+                        testID="auth-reveal-password"
+                      >
+                        <Icon
+                          name={revealPassword ? 'eye-off' : 'eye'}
+                          size={20}
+                          tone="muted"
+                        />
+                      </Button>
+                    </View>
+                    {fieldError ? (
+                      <Text
+                        variant="caption"
+                        tone="destructive"
+                        accessibilityRole="alert"
+                        accessibilityLiveRegion="polite"
+                      >
+                        {fieldError}
+                      </Text>
+                    ) : null}
+                    {errorNotice}
+                    <Button
+                      label={pending ? t('action.loading') : t('action.signIn')}
+                      onPress={() => void handleEmailSignIn()}
+                      disabled={busy}
+                      testID="auth-submit"
                     />
                     <Button
                       variant="ghost"
-                      size="icon"
-                      accessibilityLabel={
-                        revealPassword
-                          ? t('label.hidePassword')
-                          : t('label.showPassword')
-                      }
-                      onPress={() => setRevealPassword((value) => !value)}
+                      label={t('auth.signIn.back')}
+                      onPress={() => {
+                        setStep('email');
+                        setPassword('');
+                        setRevealPassword(false);
+                        setErrorCode(null);
+                        setFieldError(null);
+                      }}
                       disabled={busy}
-                      testID="auth-reveal-password"
-                    >
-                      <Icon
-                        name={revealPassword ? 'eye-off' : 'eye'}
-                        size={20}
-                        tone="muted"
-                      />
-                    </Button>
+                      testID="auth-back-to-email"
+                    />
                   </View>
-                  {fieldError ? (
-                    <Text
-                      variant="caption"
-                      tone="destructive"
-                      accessibilityRole="alert"
-                      accessibilityLiveRegion="polite"
-                    >
-                      {fieldError}
-                    </Text>
-                  ) : null}
-                  {errorNotice}
-                  <Button
-                    label={pending ? t('action.loading') : t('action.signIn')}
-                    onPress={() => void handleEmailSignIn()}
-                    disabled={busy}
-                    testID="auth-submit"
-                  />
-                  <Button
-                    variant="ghost"
-                    label={t('auth.signIn.back')}
-                    onPress={() => {
-                      setStep('email');
-                      setPassword('');
-                      setRevealPassword(false);
-                      setErrorCode(null);
-                      setFieldError(null);
-                    }}
-                    disabled={busy}
-                    testID="auth-back-to-email"
-                  />
-                </View>
-              )}
-            </View>
+                )}
+              </CardContent>
+            </Card>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

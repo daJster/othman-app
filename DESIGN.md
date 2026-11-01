@@ -15,25 +15,25 @@ Mode: **Persuade** on the home surface; **Operate** inside the app.
 All roles are OKLCH tokens in `src/global.css`; no hex or rgb values in
 components.
 
-| Token        | Light                 | Dark                  | Job |
-| ------------ | --------------------- | --------------------- | --- |
-| `background` | white                 | `#040906` near-black green | App ground |
-| `foreground` | near-black            | warm ivory            | Text |
-| `canopy`     | `#003b24` (deep green) | `#082b1b` lifted green | Hero field |
-| `parchment`  | `#f8f1e3`             | `#f8f1e3`             | Hero text and primary capsule |
-| `brass`      | `#c79e4d`             | `#d7b16a`             | Rings, hairlines, station nodes |
-| `brass-ink`  | `#7a5d28` (text-safe) | `#e5be77`             | Brass-coloured **text** on a page ground |
-| `clay`       | `#b25b40`             | `#c97055`             | One accent dot / quiet alert |
-| `primary`    | `#007948`             | `#009962`             | In-app action green |
-| `card`       | white                 | `#0a1710` soft green  | Grouped surfaces (calendar) |
-| `secondary`  | pale green            | `#0d1c14`             | Supporting surfaces |
-| `border`     | warm neutral          | 10% ivory             | Hairlines |
-| `success`    | deep green text-safe  | light green text-safe | Positive status text |
-| `success-soft` | pale green          | deep green            | Positive status surface |
-| `success-line` | green hairline      | green hairline        | Positive status border |
-| `info`       | deep blue text-safe   | light blue text-safe  | Informational status text |
-| `info-soft`  | pale blue             | deep blue             | Informational status surface |
-| `info-line`  | blue hairline         | blue hairline         | Informational status border |
+| Token          | Light                  | Dark                       | Job                                      |
+| -------------- | ---------------------- | -------------------------- | ---------------------------------------- |
+| `background`   | white                  | `#040906` near-black green | App ground                               |
+| `foreground`   | near-black             | warm ivory                 | Text                                     |
+| `canopy`       | `#003b24` (deep green) | `#082b1b` lifted green     | Hero field                               |
+| `parchment`    | `#f8f1e3`              | `#f8f1e3`                  | Hero text and primary capsule            |
+| `brass`        | `#c79e4d`              | `#d7b16a`                  | Rings, hairlines, station nodes          |
+| `brass-ink`    | `#7a5d28` (text-safe)  | `#e5be77`                  | Brass-coloured **text** on a page ground |
+| `clay`         | `#b25b40`              | `#c97055`                  | One accent dot / quiet alert             |
+| `primary`      | `#007948`              | `#009962`                  | In-app action green                      |
+| `card`         | white                  | `#0a1710` soft green       | Grouped surfaces (calendar)              |
+| `secondary`    | pale green             | `#0d1c14`                  | Supporting surfaces                      |
+| `border`       | warm neutral           | 10% ivory                  | Hairlines                                |
+| `success`      | deep green text-safe   | light green text-safe      | Positive status text                     |
+| `success-soft` | pale green             | deep green                 | Positive status surface                  |
+| `success-line` | green hairline         | green hairline             | Positive status border                   |
+| `info`         | deep blue text-safe    | light blue text-safe       | Informational status text                |
+| `info-soft`    | pale blue              | deep blue                  | Informational status surface             |
+| `info-line`    | blue hairline          | blue hairline              | Informational status border              |
 
 Use colour as a field, not a sprinkle: the hero owns canopy; sections own
 background; brass is line work; clay appears once per composition. `brass` is
@@ -110,10 +110,19 @@ are semantic roles: a new status uses a role, never a raw Tailwind palette name.
   leaving the page.
 - **Overline labels** — quiet, uppercase in Latin, letter-spaced; never a kicker
   above a heading.
-- **Page / Section** — `Page` owns the measured column and gutter (`default`
+- **Page / Section** - `Page` owns the measured column and gutter (`default`
   48rem, `wide` 72rem); `Section` owns a heading plus its supporting line, at
   page level (h1) or group level (`level={2}`). Screens pass only their vertical
   rhythm; About keeps its full-width list shell.
+- **Primitive layer** - generic controls are React Native Reusables components
+  (Uniwind target) under `src/components/ui`, not the legacy hand-rolled set.
+  `src/ui` keeps the app wrappers: Arabic fonts, semantic text tones, the 44pt
+  control floor, Lucide `IconName` resolution and the page/state vocabulary.
+- **Settings and overlays** - `Select` is the one settings dropdown; the
+  `AlertDialog` confirms sign-out; `Collapsible` carries meeting details;
+  `ToggleGroup` switches Gregorian/Hijri; `Popover` powers the web user menu.
+  Keep `@expo/ui` for native tabs, native list rows, the native picker and the
+  reader bottom sheets.
 
 ## Brand assets
 

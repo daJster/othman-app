@@ -91,7 +91,7 @@ describe('Separator', () => {
   it('is decorative and horizontal by default', async () => {
     await render(<Separator testID="line" />);
 
-    const line = screen.getByTestId('line');
+    const line = screen.getByTestId('line', { includeHiddenElements: true });
     expect(line.props.role).toBe('none');
     expect(line.props.className).toContain('h-px');
   });
@@ -105,9 +105,10 @@ describe('Separator', () => {
   it('stretches vertically', async () => {
     await render(<Separator orientation="vertical" testID="line" />);
 
-    expect(screen.getByTestId('line').props.className).toContain(
-      'self-stretch',
-    );
+    expect(
+      screen.getByTestId('line', { includeHiddenElements: true }).props
+        .className,
+    ).toContain('self-stretch');
   });
 });
 

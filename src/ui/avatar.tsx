@@ -1,17 +1,20 @@
-import { View, type ViewProps } from 'react-native';
+import type { ViewProps } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
-import { Image } from './image';
+import {
+  Avatar as RNRAvatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/components/ui/avatar';
+import { cn } from './cn';
 import { Text } from './text';
 
 /**
- * Avatar.
+ * Avatar, backed by react-native-reusables.
  *
- * Sizes are expressed in pixels (20/24/32/40) rather than the web's `h-6 w-6`
- * rem scale so a 24px attendee stack stays 24px regardless of the device's
- * text-size setting; the initials inside scale with the avatar, not the OS.
- *
- * Falls back to initials when there is no image — an empty circle reads as a
- * loading state, and a broken-image icon reads as a bug.
+ * Sizes stay expressed in pixels (20/24/32/40/64) rather than RNR's `size-8`
+ * default, so an attendee stack keeps its measure regardless of the device's
+ * text-size setting. The primitive supplies the image/fallback state machine;
+ * the fallback keeps the app's initials treatment.
  */
 const avatar = tv({
   slots: {
@@ -57,22 +60,16 @@ export function Avatar({ src, name, size, className, ...props }: AvatarProps) {
   const slots = avatar({ size });
 
   return (
-    <View
+    <RNRAvatar
+      alt={name ?? ''}
       accessibilityLabel={name ?? undefined}
-      className={slots.root({ className })}
+      className={cn(slots.root(), className)}
       {...props}
     >
-      {src ? (
-        <Image
-          source={{ uri: src }}
-          contentFit="cover"
-          transition={150}
-          className="h-full w-full"
-          accessibilityIgnoresInvertColors
-        />
-      ) : (
+      {src ? <AvatarImage source={{ uri: src }} /> : null}
+      <AvatarFallback className="items-center justify-center bg-muted">
         <Text className={slots.initials()}>{initials}</Text>
-      )}
-    </View>
+      </AvatarFallback>
+    </RNRAvatar>
   );
 }

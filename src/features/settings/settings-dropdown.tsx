@@ -1,22 +1,25 @@
-import { MenuView } from '@expo/ui/community/menu';
-import { Pressable, useColorScheme, View } from 'react-native';
+import { View } from 'react-native';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from '@/components/ui/select';
 import { cn } from '@/ui/cn';
-import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
 import { Text } from '@/ui/text';
 import type { SettingsDropdownProps } from './settings-dropdown.types';
 
 /**
- * Native settings dropdown.
+ * Settings dropdown, built on the react-native-reusables Select.
  *
- * `MenuView` is the platform menu: SwiftUI `Menu` on iOS, Compose
- * `DropdownMenu` on Android. It is native-only (actions are inert on web,
- * which is why `settings-dropdown.web.tsx` exists), and it gives the control
- * the platform's own popup, checkmarks and dismissal behaviour.
+ * One control now serves web, iOS and Android: the trigger is the row the user
+ * sees, and the content is the RNR listbox with keyboard, option semantics and
+ * the platform's own popover behaviour. The previous split (`MenuView` on
+ * native, a raw `<select>` on web) is gone.
  *
- * The trigger is the row the user sees: label on the inline start, current
- * value and chevron on the inline end. The compact form is only used if a
- * native navbar ever appears; the web navbar uses the compact variant.
+ * The compact form is the navbar trigger; the row form is the labelled setting
+ * on Account and in the reader menu.
  */
 export function SettingsDropdown<T extends string>({
   label,
@@ -28,56 +31,56 @@ export function SettingsDropdown<T extends string>({
   testID,
   className,
 }: SettingsDropdownProps<T>) {
-  const scheme = useColorScheme();
   const current =
     options.find((option) => option.value === value) ?? options[0];
   const compact = variant === 'compact';
+  const selected = current
+    ? { value: current.value, label: current.label }
+    : undefined;
 
   return (
-    <MenuView
-      actions={options.map((option) => ({
-        id: option.value,
-        title: option.label,
-        state: option.value === value ? 'on' : 'off',
-      }))}
-      onPressAction={({ nativeEvent }) => onChange(nativeEvent.event as T)}
-      colorScheme={scheme ?? 'dark'}
-      testID={testID}
+    <Select
+      value={selected}
+      onValueChange={(next) => {
+        if (next) onChange(next.value as T);
+      }}
     >
-      <Pressable
-        accessibilityRole="button"
+      <SelectTrigger
         accessibilityLabel={`${label}: ${current.label}`}
+        testID={testID}
         className={cn(
-          FOCUS_RING,
-          'active:opacity-70',
           compact
-            ? 'h-11 min-w-11 flex-row items-center justify-center gap-1 rounded-md px-2'
-            : 'min-h-14 w-full flex-row items-center justify-between gap-3 border-b border-border px-4 py-3',
+            ? 'h-11 w-auto min-w-11 justify-center gap-1 rounded-md px-2 sm:h-11'
+            : 'h-auto min-h-14 w-full justify-between gap-3 rounded-none border-0 border-b border-border bg-transparent px-4 py-3',
           className,
         )}
       >
         {compact ? (
-          <>
-            <Text variant="label" tone="muted">
-              {current.shortLabel ?? current.label}
-            </Text>
-            <Icon name="chevron-down" size={14} tone="muted" />
-          </>
+          <Text variant="label" tone="muted">
+            {current.shortLabel ?? current.label}
+          </Text>
         ) : (
           <>
             <View className="min-w-0 flex-1 flex-row items-center gap-3">
               {icon ? <Icon name={icon} tone="muted" /> : null}
               <Text variant="label">{label}</Text>
             </View>
-            <View className="flex-row items-center gap-2">
-              <Text variant="label" tone="muted">
-                {current.label}
-              </Text>
-              <Icon name="chevron-down" size={16} tone="muted" />
-            </View>
+            <Text variant="label" tone="muted">
+              {current.label}
+            </Text>
           </>
         )}
-      </Pressable>
-    </MenuView>
+      </SelectTrigger>
+
+      <SelectContent>
+        {options.map((option) => (
+          <SelectItem
+            key={option.value}
+            value={option.value}
+            label={option.label}
+          />
+        ))}
+      </SelectContent>
+    </Select>
   );
 }

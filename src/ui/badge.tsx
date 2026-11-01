@@ -1,7 +1,10 @@
 import type { ReactNode } from 'react';
-import { Text, View, type ViewProps } from 'react-native';
+import type { ViewProps } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
+import { Badge as RNRBadge } from '@/components/ui/badge';
+import { Text as RNRText } from '@/components/ui/text';
 import type { StatusTone } from '@/core/config';
+import { cn } from './cn';
 
 /**
  * Colour intent for the three meeting statuses.
@@ -24,7 +27,7 @@ const TONE_TEXT = {
 } satisfies Readonly<Record<StatusTone, string>>;
 
 /**
- * Badge primitive.
+ * Badge primitive, backed by react-native-reusables.
  *
  * The `positive | info | neutral` variants are the meeting-status tones; the
  * remaining four are the shadcn set. Both live in one `variant` prop so a
@@ -84,6 +87,16 @@ export type BadgeProps = Omit<ViewProps, 'children'> &
     children?: ReactNode;
   };
 
+const RNR_VARIANT = {
+  default: 'default',
+  secondary: 'secondary',
+  outline: 'outline',
+  destructive: 'destructive',
+  positive: 'outline',
+  info: 'outline',
+  neutral: 'outline',
+} as const;
+
 export function Badge({
   variant,
   label,
@@ -94,14 +107,18 @@ export function Badge({
   const slots = badge({ variant });
 
   return (
-    <View className={slots.root({ className })} {...props}>
+    <RNRBadge
+      variant={RNR_VARIANT[variant ?? 'default']}
+      className={cn(slots.root(), className)}
+      {...props}
+    >
       {label ? (
-        <Text className={slots.label()}>{label}</Text>
+        <RNRText className={slots.label()}>{label}</RNRText>
       ) : typeof children === 'string' ? (
-        <Text className={slots.label()}>{children}</Text>
+        <RNRText className={slots.label()}>{children}</RNRText>
       ) : (
         children
       )}
-    </View>
+    </RNRBadge>
   );
 }

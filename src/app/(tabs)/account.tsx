@@ -1,8 +1,9 @@
 import { Host, List, ListItem, RNHostView } from '@expo/ui';
 import { useRouter } from 'expo-router';
 import Head from 'expo-router/head';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Platform, useColorScheme, View } from 'react-native';
+import { Platform, useColorScheme, View } from 'react-native';
 import { useDirection } from '@/i18n';
 import { RequireAuth } from '@/features/auth/require-auth';
 import { AccountSettingsWeb } from '@/features/account/account-settings-web';
@@ -12,12 +13,23 @@ import {
   useCurrentAccount,
   useSignOut,
 } from '@/features/account/use-current-account';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Icon } from '@/ui/icon';
 import { ListSectionHeader } from '@/ui/list-section-header';
 import { Page } from '@/ui/page';
 import { Screen, ScreenView } from '@/ui/screen';
 import { Section } from '@/ui/section';
 import { Loading, ErrorState, EmptyState } from '@/ui/states';
+import { Text } from '@/ui/text';
 
 /**
  * Account tab.
@@ -39,7 +51,7 @@ import { Loading, ErrorState, EmptyState } from '@/ui/states';
  * The session comes from `AuthProvider`. This route is private: `RequireAuth`
  * (driven by the route registry's `access`) sends a signed-out visitor to the
  * sign-in modal and returns them here afterwards. The signed-out branch below
- * is therefore defensive, not the normal path — it still renders a real action
+ * is therefore defensive, not the normal path â€” it still renders a real action
  * instead of a dead end.
  */
 export default function AccountScreen() {
@@ -57,20 +69,11 @@ function AccountContent() {
   const scheme = useColorScheme();
   const { authUser, state } = useCurrentAccount();
   const signOut = useSignOut();
+  const [signOutOpen, setSignOutOpen] = useState(false);
 
-  const title = `${t('nav.account')} · ${t('app.name')}`;
+  const title = `${t('nav.account')} Â· ${t('app.name')}`;
   const chevron = isRTL ? 'chevron-left' : 'chevron-right';
-
-  const confirmSignOut = () => {
-    Alert.alert(t('account.signOut.title'), t('account.signOut.message'), [
-      { text: t('account.signOut.cancel'), style: 'cancel' },
-      {
-        text: t('account.signOut.confirm'),
-        style: 'destructive',
-        onPress: signOut,
-      },
-    ]);
-  };
+  const openSignOut = () => setSignOutOpen(true);
 
   if (!authUser) {
     return (
@@ -140,7 +143,7 @@ function AccountContent() {
               isRTL={isRTL}
               onProgress={() => router.push('/account/progress')}
               onAbout={() => router.push('/about')}
-              onSignOut={confirmSignOut}
+              onSignOut={openSignOut}
             />
           </Page>
         </Screen>
@@ -197,13 +200,41 @@ function AccountContent() {
             <ListItem
               testID="account-sign-out-row"
               leading={<Icon name="logout" tone="destructive" />}
-              onPress={confirmSignOut}
+              onPress={openSignOut}
             >
               {t('account.signOut.confirm')}
             </ListItem>
           </List>
         </Host>
       )}
+
+      <AlertDialog open={signOutOpen} onOpenChange={setSignOutOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('account.signOut.title')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('account.signOut.message')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              className="h-11"
+              onPress={() => setSignOutOpen(false)}
+            >
+              <Text>{t('account.signOut.cancel')}</Text>
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className="h-11 bg-destructive"
+              testID="account-sign-out-confirm"
+              onPress={signOut}
+            >
+              <Text className="text-destructive-foreground">
+                {t('account.signOut.confirm')}
+              </Text>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </ScreenView>
   );
 }

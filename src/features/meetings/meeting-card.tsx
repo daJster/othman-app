@@ -12,6 +12,11 @@ import { Badge } from '@/ui/badge';
 import { Button, ButtonText } from '@/ui/button';
 import { Card } from '@/ui/card';
 import { cn } from '@/ui/cn';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
 import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
 import { Separator } from '@/ui/separator';
@@ -69,54 +74,56 @@ export function MeetingCard({ meeting }: MeetingCardProps) {
 
         <Separator />
 
-        <View className="flex-row items-center justify-between gap-2">
-          <View className="flex-1 flex-row items-center gap-2">
-            <Icon name="users" size={16} tone="muted" />
-            <AttendeeStack attendees={meeting.attendees} />
-            <Text variant="caption" tone="muted">
-              {t('meeting.attendees', { count: meeting.attendees.length })}
-            </Text>
+        <Collapsible open={expanded} onOpenChange={setExpanded}>
+          <View className="flex-row items-center justify-between gap-2">
+            <View className="flex-1 flex-row items-center gap-2">
+              <Icon name="users" size={16} tone="muted" />
+              <AttendeeStack attendees={meeting.attendees} />
+              <Text variant="caption" tone="muted">
+                {t('meeting.attendees', { count: meeting.attendees.length })}
+              </Text>
+            </View>
+
+            <CollapsibleTrigger asChild>
+              <Pressable
+                accessibilityRole="button"
+                className={cn(
+                  'min-h-11 flex-row items-center gap-1 rounded-md px-1 active:opacity-70',
+                  FOCUS_RING,
+                )}
+              >
+                <Text variant="label" tone="muted">
+                  {expanded ? t('meeting.less') : t('meeting.details')}
+                </Text>
+                <Icon
+                  name={expanded ? 'chevron-up' : 'chevron-down'}
+                  size={16}
+                  tone="muted"
+                />
+              </Pressable>
+            </CollapsibleTrigger>
           </View>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityState={{ expanded }}
-            onPress={() => setExpanded((previous) => !previous)}
-            className={cn(
-              'min-h-11 flex-row items-center gap-1 rounded-md px-1 active:opacity-70',
-              FOCUS_RING,
-            )}
-          >
-            <Text variant="label" tone="muted">
-              {expanded ? t('meeting.less') : t('meeting.details')}
-            </Text>
-            <Icon
-              name={expanded ? 'chevron-up' : 'chevron-down'}
-              size={16}
-              tone="muted"
-            />
-          </Pressable>
-        </View>
-
-        {expanded ? (
-          <Animated.View
-            entering={FadeIn.duration(160)}
-            exiting={FadeOut.duration(120)}
-            className="gap-2"
-          >
-            <Text variant="caption" className="leading-relaxed">
-              {meeting.description}
-            </Text>
-            <Text variant="caption" tone="muted">
-              {t('meeting.organizedBy', { name: meeting.organizer })}
-            </Text>
-            {attendeeNames ? (
-              <Text variant="caption" tone="muted">
-                {attendeeNames}
+          <CollapsibleContent>
+            <Animated.View
+              entering={FadeIn.duration(160)}
+              exiting={FadeOut.duration(120)}
+              className="gap-2 pt-2"
+            >
+              <Text variant="caption" className="leading-relaxed">
+                {meeting.description}
               </Text>
-            ) : null}
-          </Animated.View>
-        ) : null}
+              <Text variant="caption" tone="muted">
+                {t('meeting.organizedBy', { name: meeting.organizer })}
+              </Text>
+              {attendeeNames ? (
+                <Text variant="caption" tone="muted">
+                  {attendeeNames}
+                </Text>
+              ) : null}
+            </Animated.View>
+          </CollapsibleContent>
+        </Collapsible>
 
         <Button
           className="self-start"
