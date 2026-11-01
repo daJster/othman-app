@@ -1,3 +1,4 @@
+import type { ComponentRef, Ref } from 'react';
 import {
   TextInput,
   type TextInputProps as RNTextInputProps,
@@ -15,6 +16,10 @@ import { useUiFontClass } from './font';
  * without reading CSS variables and converting `oklch` by hand.
  *
  * Height is 44px, not the web's 32px — same tap-target reasoning as `Button`.
+ *
+ * `invalid` is both a visual state and a web semantics contract: it paints the
+ * destructive border and emits `aria-invalid`, so a screen reader can tie the
+ * error text to the field instead of announcing two unrelated nodes.
  */
 const input = tv({
   base: 'w-full rounded-lg border bg-transparent px-3 text-base text-foreground',
@@ -38,12 +43,14 @@ export type InputProps = RNTextInputProps &
   VariantProps<typeof input> & {
     /** Red border + `aria-invalid` semantics (validation failed). */
     invalid?: boolean;
+    ref?: Ref<ComponentRef<typeof TextInput>>;
   };
 
 export function Input({
   size,
   invalid,
   className,
+  ref,
   placeholderTextColorClassName = 'accent-muted-foreground',
   selectionColorClassName = 'accent-primary',
   cursorColorClassName = 'accent-primary',
@@ -54,11 +61,13 @@ export function Input({
 
   return (
     <TextInput
+      ref={ref}
       className={cn(input({ size, invalid }), fontClass, className)}
       placeholderTextColorClassName={placeholderTextColorClassName}
       selectionColorClassName={selectionColorClassName}
       cursorColorClassName={cursorColorClassName}
       {...props}
+      {...({ 'aria-invalid': invalid || undefined } as Record<string, unknown>)}
     />
   );
 }

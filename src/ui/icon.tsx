@@ -118,6 +118,14 @@ const ICONS = {
   },
   play: { ios: 'play.fill', md: 'play-arrow', mdSymbol: 'play_arrow' },
   pause: { ios: 'pause.fill', md: 'pause', mdSymbol: 'pause' },
+  // Auth + password surfaces.
+  close: { ios: 'xmark', md: 'close', mdSymbol: 'close' },
+  eye: { ios: 'eye', md: 'visibility', mdSymbol: 'visibility' },
+  'eye-off': {
+    ios: 'eye.slash',
+    md: 'visibility-off',
+    mdSymbol: 'visibility_off',
+  },
 } satisfies IconRegistry<IconSet>;
 
 const StyledSymbol = withUniwind(SymbolView);

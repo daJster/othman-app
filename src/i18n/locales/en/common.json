@@ -41,7 +41,9 @@
   },
   "label": {
     "email": "Email",
-    "password": "Password"
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "nav": {
     "home": "Home",

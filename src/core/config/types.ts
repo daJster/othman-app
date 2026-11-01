@@ -60,7 +60,11 @@ export type IconName =
   // Added with audio playback (P6.1): open the panel and control the player.
   | 'volume'
   | 'play'
-  | 'pause';
+  | 'pause'
+  // Added with the auth + password surfaces: dismiss and reveal.
+  | 'close'
+  | 'eye'
+  | 'eye-off';
 
 /** Component type for an icon registry, kept platform-agnostic. */
 export type IconRegistry<Component> = Readonly<Record<IconName, Component>>;
