@@ -29,8 +29,9 @@ reader. A generic Quran app could copy the reader but not the class relationship
 
 ## Operating Context
 
-- Arabic-first interface with English fully supported; RTL is the default reading
-  direction, LTR must remain coherent.
+- Arabic is the default interface on first launch; English is the fully
+  supported second language, selected explicitly. Once a preference exists it
+  wins on every launch.
 - Used on phones and the web; the same product adapts to both native and web
   conventions rather than shrinking a desktop site.
 - Sessions are scheduled by day; progress is a memorisation heatmap; reading is

@@ -7,6 +7,7 @@ import { useDirection } from '@/i18n';
 import { RequireAuth } from '@/features/auth/require-auth';
 import { AccountSettingsWeb } from '@/features/account/account-settings-web';
 import { ProfileHeader } from '@/features/account/profile-header';
+import { PreferencesSection } from '@/features/settings/preferences-section';
 import {
   useCurrentAccount,
   useSignOut,
@@ -129,6 +130,9 @@ function AccountContent() {
               onEdit={() => router.push('/account/edit')}
             />
 
+            <ListSectionHeader label={t('account.sections.preferences')} />
+            <PreferencesSection />
+
             <AccountSettingsWeb
               isRTL={isRTL}
               onProgress={() => router.push('/account/progress')}
@@ -156,6 +160,11 @@ function AccountContent() {
                   onEdit={() => router.push('/account/edit')}
                 />
               </View>
+            </RNHostView>
+
+            <ListSectionHeader label={t('account.sections.preferences')} />
+            <RNHostView matchContents={{ vertical: true }}>
+              <PreferencesSection />
             </RNHostView>
 
             <ListSectionHeader label={t('account.sections.settings')} />

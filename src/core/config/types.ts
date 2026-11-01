@@ -59,6 +59,10 @@ export const ICON_NAMES = [
   'close',
   'eye',
   'eye-off',
+  // Settings: theme and language controls.
+  'sun',
+  'moon',
+  'monitor',
 ] as const;
 
 export type IconName = (typeof ICON_NAMES)[number];

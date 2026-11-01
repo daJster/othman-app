@@ -208,6 +208,7 @@
   },
   "account": {
     "sections": {
+      "preferences": "التفضيلات",
       "settings": "الإعدادات",
       "session": "الجلسة"
     },

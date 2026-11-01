@@ -126,6 +126,14 @@ const ICONS = {
     md: 'visibility-off',
     mdSymbol: 'visibility_off',
   },
+  // Settings: theme control.
+  sun: { ios: 'sun.max', md: 'light-mode', mdSymbol: 'light_mode' },
+  moon: { ios: 'moon', md: 'dark-mode', mdSymbol: 'dark_mode' },
+  monitor: {
+    ios: 'display',
+    md: 'desktop-windows',
+    mdSymbol: 'desktop_windows',
+  },
 } satisfies IconRegistry<IconSet>;
 
 const StyledSymbol = withUniwind(SymbolView);

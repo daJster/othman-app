@@ -84,14 +84,21 @@ reserved for line work and for text **on canopy**; on a page ground use
 - **Web navbar** — page-ground bar, tabs packed at the inline start inside
   `max-w-6xl`. Active tab: 2px brass underline plus `text-foreground`; no filled
   pill, no layout shift. Every tab stays a real `<a href>`. The wordmark sits at
-  the start from `sm` up; below that the Home hero carries the brand so the four
-  labels keep their width.
+  the start from `sm` up; below that the Home hero carries the brand. Two 44px
+  settings buttons sit at the trailing edge: the theme button shows the current
+  mode (system/light/dark) and advances on tap, the language button shows the
+  current code (`ع`/`EN`) and switches. Tab labels hide below `sm` so the four
+  destinations and both settings fit at 390; their `aria-label`s remain.
 - **Quran position band** — hairline section with the real page number, surah
   number and `page / 604` progress hairline; the page scan becomes a preview
   when an edition is attached. No card.
 - **Account web rows** — app-owned `Text`/`Icon` rows on web (native keeps
   `@expo/ui` List). 56px tall, hairline separated, leading icon at the inline
   start, chevron at the inline end, sign-out destructive.
+- **Preferences** — a shared section on Account for every platform: theme
+  (System / Light / Dark) and language (Arabic / English) as labelled segmented
+  controls. The web navbar exposes the same two settings as compact buttons; on
+  native, a language change tells the user when `I18nManager` needs a relaunch.
 - **Overline labels** — quiet, uppercase in Latin, letter-spaced; never a kicker
   above a heading.
 - **Page / Section** — `Page` owns the measured column and gutter (`default`

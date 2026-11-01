@@ -44,6 +44,13 @@ jest.mock('expo-router', () => ({
 
 jest.mock('expo-router/head', () => () => null);
 
+// The preferences block needs the theme and language providers, which this
+// screen test does not mount. It has its own suite; here it is a stub so the
+// account screen's own states stay the subject.
+jest.mock('@/features/settings/preferences-section', () => ({
+  PreferencesSection: () => null,
+}));
+
 jest.mock('@/services/profile', () => ({
   profileService: {
     getAccount: jest.fn(),

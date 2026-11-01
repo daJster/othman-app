@@ -208,6 +208,7 @@
   },
   "account": {
     "sections": {
+      "preferences": "Preferences",
       "settings": "Settings",
       "session": "Session"
     },

@@ -13,6 +13,8 @@ import { shouldHandleWebLink } from '@/features/navigation/web-link';
 import { useVisibleTabs } from '@/features/navigation/use-visible-tabs';
 import type { IconName } from '@/core/config';
 import { BrandMark } from '@/features/brand/brand-mark';
+import { LanguageButton } from '@/features/settings/language-button';
+import { ThemeButton } from '@/features/settings/theme-button';
 import { cn } from '@/ui/cn';
 import { Icon } from '@/ui/icon';
 import { Text } from '@/ui/text';
@@ -43,19 +45,17 @@ export default function WebTabsLayout() {
     <Tabs className="flex-1 bg-background">
       {/*
        * The bar is the page grid: one row capped at the same `max-w-6xl`
-       * gutter Home uses, centred, with the tabs packed at the inline start.
+       * gutter Home uses. `TabList` must stay the direct child of `Tabs`;
+       * wrapping it in another row makes Expo Router drop every trigger.
        *
-       * `justifyContent` has to be passed as `style`, not a class: Expo Router's
-       * `TabList` merges `styles.tabList` (which sets `space-between`) into the
-       * `style` array *after* Uniwind's className styles, so a `justify-start`
-       * class would lose to the inline declaration. The style prop is the last
-       * entry, so it wins. Triggers must stay direct children of `TabList` for
-       * Expo Router to discover them, which is why this row itself is the
-       * constrained element rather than wrapping it in another View.
+       * `justifyContent` and the horizontal padding travel in `style`, not a
+       * class: Expo Router merges `styles.tabList` after Uniwind's className
+       * styles, so a `justify-start` class loses. Triggers stay direct children
+       * of `TabList` so the router can discover them.
        */}
       <TabList
-        className="mx-auto w-full max-w-6xl flex-row flex-nowrap items-center gap-1 border-b border-border bg-background px-3 py-1 sm:px-5 sm:py-2"
-        style={{ justifyContent: 'flex-start' }}
+        className="mx-auto w-full max-w-6xl flex-row flex-nowrap items-center gap-1 border-b border-border bg-background py-1 sm:py-2"
+        style={{ justifyContent: 'flex-start', paddingHorizontal: 20 }}
       >
         <View className="hidden pe-2 sm:block">
           <BrandMark className="h-6 w-[42px]" accessible={false} />
@@ -77,6 +77,16 @@ export default function WebTabsLayout() {
             />
           </TabTrigger>
         ))}
+
+        {/*
+         * Two 44px controls plus four labelled tabs do not fit at 390, so the
+         * tab labels hide below `sm` (their aria-labels remain) and return once
+         * there is room.
+         */}
+        <View className="ms-auto flex-row items-center gap-1">
+          <ThemeButton />
+          <LanguageButton />
+        </View>
       </TabList>
       <TabSlot />
     </Tabs>
@@ -124,13 +134,17 @@ function TabLink({
       className={cn(
         // The underline is a real border on both states, so selecting a tab
         // recolours it instead of changing the row's height.
-        'min-h-11 flex-row items-center justify-center gap-1 border-b-2 px-2 py-2 active:opacity-80 sm:justify-start sm:gap-2 sm:px-3',
+        'min-h-11 min-w-11 flex-row items-center justify-center gap-1 border-b-2 px-2 py-2 active:opacity-80 sm:min-w-0 sm:justify-start sm:gap-2 sm:px-3',
         isFocused ? 'border-brass' : 'border-transparent',
         className,
       )}
     >
       <Icon name={icon} size={18} tone={isFocused ? 'foreground' : 'muted'} />
-      <Text variant="label" tone={isFocused ? 'default' : 'muted'}>
+      <Text
+        variant="label"
+        tone={isFocused ? 'default' : 'muted'}
+        className="hidden sm:block"
+      >
         {label}
       </Text>
     </View>,
