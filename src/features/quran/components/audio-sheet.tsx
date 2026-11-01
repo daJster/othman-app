@@ -1,4 +1,4 @@
-import { BottomSheet, Column, Host, Picker, Slider, Switch } from '@expo/ui';
+import { Column, Host, Picker, Slider, Switch } from '@expo/ui';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import type { Shaykh } from '@/core/config';
@@ -7,6 +7,7 @@ import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
 import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { Text } from '@/ui/text';
+import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
 import type { SelectedAyah } from '../ayah-content';
 import { formatAudioTime, formatReaderNumber } from '../format';
 import type { AyahAudioController } from '../use-ayah-audio';
@@ -77,7 +78,7 @@ export function AudioSheet({
     : null;
 
   return (
-    <BottomSheet
+    <ThemedBottomSheet
       isPresented={isPresented}
       onDismiss={onDismiss}
       testID="audio-sheet"
@@ -251,6 +252,6 @@ export function AudioSheet({
           )}
         </View>
       </NativeSheetContent>
-    </BottomSheet>
+    </ThemedBottomSheet>
   );
 }

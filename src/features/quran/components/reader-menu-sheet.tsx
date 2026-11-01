@@ -1,12 +1,13 @@
-import { BottomSheet } from '@expo/ui';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import type { IconName } from '@/core/config';
+import { ThemeDropdown } from '@/features/settings/theme-dropdown';
 import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
 import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { Pressable } from '@/ui/pressable';
 import { Text } from '@/ui/text';
+import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
 
 /**
  * The reader's menu.
@@ -73,7 +74,7 @@ export function ReaderMenuSheet({
     : ACTIONS.filter((action) => !SELECTION_ACTIONS.has(action.id));
 
   return (
-    <BottomSheet
+    <ThemedBottomSheet
       isPresented={isPresented}
       onDismiss={onDismiss}
       testID="reader-menu-sheet"
@@ -91,6 +92,10 @@ export function ReaderMenuSheet({
             />
           </View>
 
+          <View className="border-t border-border pt-2">
+            <ThemeDropdown testID="reader-theme-dropdown" />
+          </View>
+
           {actions.map((action) => (
             <Pressable
               key={action.id}
@@ -106,6 +111,6 @@ export function ReaderMenuSheet({
           ))}
         </View>
       </NativeSheetContent>
-    </BottomSheet>
+    </ThemedBottomSheet>
   );
 }

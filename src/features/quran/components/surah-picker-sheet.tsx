@@ -1,4 +1,4 @@
-import { BottomSheet } from '@expo/ui';
+import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, View } from 'react-native';
@@ -64,7 +64,7 @@ export function SurahPickerSheet({
   const rows = useMemo(() => filterSurahs(all, query), [all, query]);
 
   return (
-    <BottomSheet
+    <ThemedBottomSheet
       isPresented={isPresented}
       onDismiss={dismiss}
       testID="surah-picker-sheet"
@@ -157,6 +157,6 @@ export function SurahPickerSheet({
           )}
         </View>
       </NativeSheetContent>
-    </BottomSheet>
+    </ThemedBottomSheet>
   );
 }

@@ -1,32 +1,32 @@
-import type { IconName } from '@/core/config';
 import type { ThemeMode } from '@/providers/theme-provider';
 
 /**
- * The three theme modes, in cycle order.
+ * The three theme modes.
  *
  * `system` stays first: it is the default and the only mode that follows the
- * OS. The navbar button advances through this list; the Account control renders
- * it as a segmented choice.
+ * OS. `shortKey` is the compact navbar label; the full label is used in the
+ * dropdown menu and the Account/reader rows.
  */
 export type ThemeOption = {
   mode: ThemeMode;
   labelKey: 'theme.system' | 'theme.light' | 'theme.dark';
-  icon: IconName;
+  shortKey: 'theme.autoShort' | 'theme.lightShort' | 'theme.darkShort';
 };
 
 export const THEME_OPTIONS = [
-  { mode: 'system', labelKey: 'theme.system', icon: 'monitor' },
-  { mode: 'light', labelKey: 'theme.light', icon: 'sun' },
-  { mode: 'dark', labelKey: 'theme.dark', icon: 'moon' },
+  {
+    mode: 'system',
+    labelKey: 'theme.system',
+    shortKey: 'theme.autoShort',
+  },
+  {
+    mode: 'light',
+    labelKey: 'theme.light',
+    shortKey: 'theme.lightShort',
+  },
+  {
+    mode: 'dark',
+    labelKey: 'theme.dark',
+    shortKey: 'theme.darkShort',
+  },
 ] as const satisfies readonly ThemeOption[];
-
-export function themeOption(mode: ThemeMode): ThemeOption {
-  return (
-    THEME_OPTIONS.find((option) => option.mode === mode) ?? THEME_OPTIONS[0]
-  );
-}
-
-export function nextThemeMode(mode: ThemeMode): ThemeMode {
-  const index = THEME_OPTIONS.findIndex((option) => option.mode === mode);
-  return THEME_OPTIONS[(index + 1) % THEME_OPTIONS.length].mode;
-}

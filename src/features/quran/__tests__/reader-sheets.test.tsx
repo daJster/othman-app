@@ -39,6 +39,12 @@ jest.mock('../components/tafsir-panel', () => ({
   },
 }));
 
+// The theme row belongs to the settings feature and needs the ThemeProvider;
+// this suite is about the menu's destinations, not the theme control.
+jest.mock('@/features/settings/theme-dropdown', () => ({
+  ThemeDropdown: () => null,
+}));
+
 const SURAHS: Record<string, SurahMetadata> = {
   '2': {
     number: 2,

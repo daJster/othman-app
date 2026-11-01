@@ -1,4 +1,4 @@
-import { BottomSheet } from '@expo/ui';
+import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import {
@@ -40,7 +40,7 @@ export function SurahDetailSheet({ row, onClose }: SurahDetailSheetProps) {
   const { language } = useDirection();
 
   return (
-    <BottomSheet
+    <ThemedBottomSheet
       isPresented={row !== null}
       onDismiss={onClose}
       testID="surah-detail-sheet"
@@ -94,6 +94,6 @@ export function SurahDetailSheet({ row, onClose }: SurahDetailSheetProps) {
           </View>
         </NativeSheetContent>
       ) : null}
-    </BottomSheet>
+    </ThemedBottomSheet>
   );
 }

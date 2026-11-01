@@ -7,14 +7,14 @@ import {
   type TabTriggerSlotProps,
 } from 'expo-router/ui';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 import { TABS } from '@/features/navigation/route-registry';
 import { shouldHandleWebLink } from '@/features/navigation/web-link';
 import { useVisibleTabs } from '@/features/navigation/use-visible-tabs';
 import type { IconName } from '@/core/config';
 import { BrandMark } from '@/features/brand/brand-mark';
-import { LanguageButton } from '@/features/settings/language-button';
-import { ThemeButton } from '@/features/settings/theme-button';
+import { LanguageDropdown } from '@/features/settings/language-dropdown';
+import { ThemeDropdown } from '@/features/settings/theme-dropdown';
 import { cn } from '@/ui/cn';
 import { Icon } from '@/ui/icon';
 import { Text } from '@/ui/text';
@@ -38,8 +38,12 @@ import { Text } from '@/ui/text';
  */
 export default function WebTabsLayout() {
   const { t } = useTranslation();
+  const { width } = useWindowDimensions();
   const visible = useVisibleTabs();
   const visibleNames = new Set(visible.map((tab) => tab.tab));
+  // The compact controls need the narrower gutter at 375; the page grid keeps
+  // 20 from `sm` up.
+  const gutter = width < 640 ? 16 : 20;
 
   return (
     <Tabs className="flex-1 bg-background">
@@ -55,7 +59,7 @@ export default function WebTabsLayout() {
        */}
       <TabList
         className="mx-auto w-full max-w-6xl flex-row flex-nowrap items-center gap-1 border-b border-border bg-background py-1 sm:py-2"
-        style={{ justifyContent: 'flex-start', paddingHorizontal: 20 }}
+        style={{ justifyContent: 'flex-start', paddingHorizontal: gutter }}
       >
         <View className="hidden pe-2 sm:block">
           <BrandMark className="h-6 w-[42px]" accessible={false} />
@@ -84,8 +88,8 @@ export default function WebTabsLayout() {
          * there is room.
          */}
         <View className="ms-auto flex-row items-center gap-1">
-          <ThemeButton />
-          <LanguageButton />
+          <ThemeDropdown variant="compact" />
+          <LanguageDropdown variant="compact" />
         </View>
       </TabList>
       <TabSlot />

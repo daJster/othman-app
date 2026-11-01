@@ -1,16 +1,18 @@
-import { nextThemeMode, themeOption } from '../theme-options';
+import { THEME_OPTIONS } from '../theme-options';
 
 describe('theme options', () => {
-  it('cycles system → light → dark → system', () => {
-    expect(nextThemeMode('system')).toBe('light');
-    expect(nextThemeMode('light')).toBe('dark');
-    expect(nextThemeMode('dark')).toBe('system');
+  it('offers system, light and dark in that order', () => {
+    expect(THEME_OPTIONS.map((option) => option.mode)).toEqual([
+      'system',
+      'light',
+      'dark',
+    ]);
   });
 
-  it('gives each mode an icon and a label key', () => {
-    for (const mode of ['system', 'light', 'dark'] as const) {
-      expect(themeOption(mode).icon).toBeTruthy();
-      expect(themeOption(mode).labelKey).toMatch(/^theme\./);
+  it('gives every mode a full and a compact label key', () => {
+    for (const option of THEME_OPTIONS) {
+      expect(option.labelKey).toMatch(/^theme\./);
+      expect(option.shortKey).toMatch(/^theme\./);
     }
   });
 });

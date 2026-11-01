@@ -66,6 +66,8 @@
     "title": "Language",
     "arabic": "العربية",
     "english": "English",
+    "arShort": "AR",
+    "enShort": "EN",
     "restartTitle": "Restart needed",
     "restartMessage": "The text direction changes now. A few native controls, such as text fields and alerts, follow it after the app restarts."
   },
@@ -73,7 +75,10 @@
     "title": "Theme",
     "light": "Light",
     "dark": "Dark",
-    "system": "System"
+    "system": "System",
+    "autoShort": "Auto",
+    "lightShort": "Light",
+    "darkShort": "Dark"
   },
   "reader": {
     "pageImage": "Page {{page}} of the mushaf",

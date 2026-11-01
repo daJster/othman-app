@@ -1,4 +1,4 @@
-import { BottomSheet } from '@expo/ui';
+import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import type { NoteAyah } from '@/core/domain/notes/notes';
@@ -85,7 +85,7 @@ export function AyahPanelSheet({
   const selected = panel !== null && ayahKey !== null && surah !== null;
 
   return (
-    <BottomSheet
+    <ThemedBottomSheet
       isPresented={panel !== null}
       onDismiss={onDismiss}
       testID="ayah-panel-sheet"
@@ -144,7 +144,7 @@ export function AyahPanelSheet({
           </View>
         </NativeSheetContent>
       ) : null}
-    </BottomSheet>
+    </ThemedBottomSheet>
   );
 }
 

@@ -1,4 +1,4 @@
-import { BottomSheet } from '@expo/ui';
+import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
@@ -47,7 +47,7 @@ export function EditionPickerSheet({
   );
 
   return (
-    <BottomSheet
+    <ThemedBottomSheet
       isPresented={isPresented}
       onDismiss={onDismiss}
       testID="edition-picker-sheet"
@@ -108,6 +108,6 @@ export function EditionPickerSheet({
           })}
         </View>
       </NativeSheetContent>
-    </BottomSheet>
+    </ThemedBottomSheet>
   );
 }
