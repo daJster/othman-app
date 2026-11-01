@@ -5,12 +5,14 @@ import { FlatList, View } from 'react-native';
 import type { SurahMetadata } from '@/core/types';
 import { useDirection } from '@/i18n';
 import { Button } from '@/ui/button';
+import { cn } from '@/ui/cn';
 import { Input } from '@/ui/input';
 import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { Pressable } from '@/ui/pressable';
 import { Text } from '@/ui/text';
 import { formatReaderNumber } from '../format';
 import { filterSurahs, sortSurahs } from '../surah-search';
+import { RevelationMark } from './revelation-mark';
 
 /**
  * Searchable surah picker.
@@ -39,7 +41,7 @@ export function SurahPickerSheet({
   onSelect,
 }: SurahPickerSheetProps) {
   const { t } = useTranslation();
-  const { language } = useDirection();
+  const { language, isRTL } = useDirection();
   const [query, setQuery] = useState('');
 
   // Clearing through the actions (rather than an effect on `isPresented`)
@@ -135,11 +137,19 @@ export function SurahPickerSheet({
                         {item.nameEnglish}
                       </Text>
                     </View>
-                    <Text variant="caption" tone="muted">
-                      {t('reader.ayahCount', {
-                        count: formatReaderNumber(item.ayahCount, language),
-                      })}
-                    </Text>
+                    <View
+                      className={cn(
+                        'flex-row items-center gap-2',
+                        isRTL && 'flex-row-reverse',
+                      )}
+                    >
+                      <RevelationMark location={item.location} />
+                      <Text variant="caption" tone="muted">
+                        {t('reader.ayahCount', {
+                          count: formatReaderNumber(item.ayahCount, language),
+                        })}
+                      </Text>
+                    </View>
                   </Pressable>
                 );
               }}

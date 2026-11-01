@@ -117,7 +117,12 @@ export function AyahPanelSheet({
                   })}
                 </Text>
 
-                {panel === 'read' ? <ReadPanelBody content={content} /> : null}
+                {panel === 'read' ? (
+                  <ReadPanelBody
+                    content={content}
+                    ayahNumber={ayahKey === null ? null : Number(ayahKey)}
+                  />
+                ) : null}
 
                 {panel === 'notes' ? (
                   <NotesPanel
@@ -153,8 +158,10 @@ export function AyahPanelSheet({
  */
 function ReadPanelBody({
   content,
+  ayahNumber,
 }: {
   content: AsyncPresentResult<AyahContent>;
+  ayahNumber: number | null;
 }) {
   const { t } = useTranslation();
 
@@ -180,7 +187,10 @@ function ReadPanelBody({
 
   return (
     <ScrollView className="max-h-96" testID="ayah-panel-content">
-      <AyahDisplayer blocks={buildAyahBlocks(content.state.data)} />
+      <AyahDisplayer
+        blocks={buildAyahBlocks(content.state.data)}
+        ayahNumber={ayahNumber}
+      />
     </ScrollView>
   );
 }

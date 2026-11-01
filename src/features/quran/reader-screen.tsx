@@ -24,7 +24,7 @@ import {
 import { resolveEditionKey } from '@/core/domain/quran/editions';
 import type { EditionBboxes, QuranEdition, SurahMetadata } from '@/core/types';
 import { useDirection } from '@/i18n';
-import { EmptyState, ErrorState, Loading } from '@/ui/states';
+import { EmptyState, ErrorState } from '@/ui/states';
 import { ScreenView } from '@/ui/screen';
 import { resolveSelectedAyah } from './ayah-content';
 import {
@@ -38,6 +38,7 @@ import { PageTurn } from './components/page-turn';
 import { ReaderFooter } from './components/reader-footer';
 import { ReaderHeader } from './components/reader-header';
 import { ReaderLinkError } from './components/reader-link-error';
+import { ReaderLoading } from './components/reader-loading';
 import {
   ReaderMenuSheet,
   type ReaderMenuAction,
@@ -609,14 +610,10 @@ function ReaderBody({ editions, edition, onToggleChrome }: ReaderBodyProps) {
  * error states are separate from the catalog's: the catalog may have resolved
  * long ago, and retrying it would not fix a failed bbox download.
  *
- * One component for every loading frame on this screen (boot, catalog and
- * bboxes), so the `testID` the tests assert cannot drift between branches.
+ * Every loading frame on this screen (boot, catalog and bboxes) uses the same
+ * `ReaderLoading` component, so the `testID` the tests assert cannot drift
+ * between branches.
  */
-function ReaderLoading() {
-  const { t } = useTranslation();
-
-  return <Loading label={t('action.loading')} testID="reader-loading" />;
-}
 
 function QueryError({ onRetry }: { onRetry: () => void }) {
   const { t } = useTranslation();
