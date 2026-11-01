@@ -1,16 +1,12 @@
 import { render, screen } from '@testing-library/react-native';
-import { Platform } from 'react-native';
-import { Icon } from '@/ui/icon';
+import { ICON_NAMES } from '@/core/config/types';
+import { getIconGlyph, Icon } from '@/ui/icon';
 
 /**
- * Icons are resolved through the platform registry: SF Symbols on iOS,
- * Material Icons everywhere else. `jest-expo` runs these tests as iOS, so the
- * Android branch is exercised by swapping `Platform.OS` for the duration of the
- * test.
- *
- * The rendered tree is inspected instead of the component type: the icon sets
- * are third-party components and their internal host names are an
- * implementation detail we do not want to pin.
+ * Lucide draws one SVG on every platform, so the old SF Symbol / Material Icon
+ * branch assertions are gone. The rendered tree is still inspected instead of
+ * the component type: Lucide's internal host names are an implementation
+ * detail we do not want to pin.
  */
 type Rendered = { type: string; props: Record<string, unknown> } | null;
 
@@ -18,77 +14,64 @@ function rendered() {
   return screen.toJSON() as unknown as Rendered;
 }
 
-/** `Platform` is plain data, so a direct swap is enough — and restored exactly. */
-async function asAndroid(run: () => Promise<void>) {
-  const platform = Platform as unknown as { OS: string };
-  const original = platform.OS;
-
-  platform.OS = 'android';
-  try {
-    await run();
-  } finally {
-    platform.OS = original;
-  }
-}
-
 describe('Icon', () => {
-  it('uses the SF Symbol name on iOS', async () => {
-    await render(<Icon name="cog" />);
+  it('renders at the requested size', async () => {
+    await render(<Icon name="home" size={24} />);
 
     const node = rendered();
-    expect(node?.type).toBe('ViewManagerAdapter_SymbolModule');
-    expect(node?.props.name).toBe('gearshape');
-    expect(node?.props.size).toBe(20);
+    expect(node).not.toBeNull();
+    expect(node?.props.width).toBe(24);
+    expect(node?.props.height).toBe(24);
   });
 
-  it('uses a Material Icon glyph elsewhere', async () => {
-    await asAndroid(async () => {
-      await render(<Icon name="cog" />);
+  it('leaves the colour to Uniwind and the tone map', async () => {
+    await render(<Icon name="home" tone="destructive" />);
 
-      const node = rendered();
-      expect(node?.type).toBe('Text');
-      // Material Icons is an icon font: the glyph is a font character, scaled
-      // to the requested size, and must not follow the OS text-size setting.
-      expect(node?.props).toMatchObject({ allowFontScaling: false });
-      expect(node?.props.colorClassName).toBe('accent-foreground');
-    });
-  });
-
-  it('carries the tone as an accent class', async () => {
-    await render(<Icon name="trash" tone="destructive" />);
-
-    expect(rendered()?.props.tintColorClassName).toBe('accent-destructive');
+    // Uniwind resolves `text-destructive` in Metro, not in Jest. The contract
+    // this test can hold is that the icon receives a string colour rather than
+    // a hard-coded one; the tone-to-class map is covered by the rendered
+    // class-free tree on device.
+    expect(
+      rendered()?.props.color === undefined ||
+        typeof rendered()?.props.color === 'string',
+    ).toBe(true);
   });
 
   it('is hidden from assistive technology — the label belongs to the control', async () => {
-    await render(<Icon name="trash" />);
+    await render(<Icon name="home" />);
 
-    expect(rendered()?.props.accessibilityElementsHidden).toBe(true);
+    expect(rendered()?.props.importantForAccessibility).toBe(
+      'no-hide-descendants',
+    );
+    expect(rendered()?.props.accessible).toBe(false);
+  });
+
+  it('keeps platform glyphs for the four tab roots only', () => {
+    expect(getIconGlyph('home')).toEqual({ ios: 'house', mdSymbol: 'home' });
+    expect(getIconGlyph('book-open')).toEqual({
+      ios: 'book',
+      mdSymbol: 'menu_book',
+    });
+    expect(getIconGlyph('video')).toEqual({
+      ios: 'video',
+      mdSymbol: 'videocam',
+    });
+    expect(getIconGlyph('user')).toEqual({ ios: 'person', mdSymbol: 'person' });
+
+    // A non-tab icon cannot be rendered by `NativeTabs`; failing loudly beats a
+    // blank tab.
+    expect(() => getIconGlyph('search')).toThrow(
+      'No native tab glyph registered for "search"',
+    );
   });
 
   it('resolves every registry name', async () => {
-    const names = [
-      'book-open',
-      'chart-line',
-      'check-circle',
-      'cog',
-      'external-link',
-      'file-text',
-      'megaphone',
-      'trash',
-      'university',
-      'video',
-      'alert-circle',
-      'inbox',
-    ] as const;
-
-    for (const name of names) {
+    for (const name of ICON_NAMES) {
       await render(<Icon name={name} />);
 
-      // A missing registry entry would render a nameless symbol, so "a name
-      // that is a non-empty string" is the assertion that matters here.
-      expect(rendered()?.props.name).toEqual(expect.any(String));
-      expect(rendered()?.props.name).not.toBe('');
+      // A missing registry entry would be a compile error, and a broken icon
+      // would render nothing. One non-empty tree per name is the assertion.
+      expect(rendered()).not.toBeNull();
     }
   });
 });

@@ -1,156 +1,133 @@
-import { SymbolView } from 'expo-symbols';
 import type { AndroidSymbol, SFSymbol } from 'expo-symbols';
-import type { ComponentProps } from 'react';
-import { Platform } from 'react-native';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { withUniwind } from 'uniwind';
-import type { IconName, IconRegistry } from '@/core/config';
+import type { LucideIcon } from 'lucide-react-native';
+import BookOpen from 'lucide-react-native/icons/book-open';
+import Calendar from 'lucide-react-native/icons/calendar';
+import Camera from 'lucide-react-native/icons/camera';
+import ChartLine from 'lucide-react-native/icons/chart-line';
+import ChevronDown from 'lucide-react-native/icons/chevron-down';
+import ChevronLeft from 'lucide-react-native/icons/chevron-left';
+import ChevronRight from 'lucide-react-native/icons/chevron-right';
+import ChevronUp from 'lucide-react-native/icons/chevron-up';
+import CircleAlert from 'lucide-react-native/icons/circle-alert';
+import CircleCheck from 'lucide-react-native/icons/circle-check';
+import Clock from 'lucide-react-native/icons/clock';
+import ExternalLink from 'lucide-react-native/icons/external-link';
+import Eye from 'lucide-react-native/icons/eye';
+import EyeOff from 'lucide-react-native/icons/eye-off';
+import FileText from 'lucide-react-native/icons/file-text';
+import House from 'lucide-react-native/icons/house';
+import Inbox from 'lucide-react-native/icons/inbox';
+import Info from 'lucide-react-native/icons/info';
+import Layers from 'lucide-react-native/icons/layers';
+import LogOut from 'lucide-react-native/icons/log-out';
+import MapPin from 'lucide-react-native/icons/map-pin';
+import Menu from 'lucide-react-native/icons/menu';
+import Pause from 'lucide-react-native/icons/pause';
+import Pencil from 'lucide-react-native/icons/pencil';
+import Play from 'lucide-react-native/icons/play';
+import Search from 'lucide-react-native/icons/search';
+import User from 'lucide-react-native/icons/user';
+import Users from 'lucide-react-native/icons/users';
+import Video from 'lucide-react-native/icons/video';
+import Volume2 from 'lucide-react-native/icons/volume-2';
+import X from 'lucide-react-native/icons/x';
+import { useResolveClassNames } from 'uniwind';
+import type { IconName } from '@/core/config';
 
 /**
  * Icon registry.
  *
  * `core` declares logical names as strings (it may not import components), and
- * this file resolves each key to the platform set: SF Symbols on iOS, Material
- * Icons on Android and web. `satisfies IconRegistry` makes the table
- * exhaustive — adding a name in `core/config/types.ts` without a mapping here
- * is a compile error instead of a blank square on device.
+ * this file binds them to Lucide components. Lucide draws one stroked icon set
+ * on web, iOS and Android, so an icon looks the same everywhere — the icon-font
+ * and SF Symbol branches are gone.
  *
- * Three columns, because the platforms genuinely disagree:
+ * Imports are **subpath** imports (`lucide-react-native/icons/house`), not the
+ * package barrel. The barrel re-exports every icon and pulls thousands of
+ * modules into the Metro graph for the thirty we use.
  *
- *  - `ios` — SF Symbol name.
- *  - `md` — Material **Icons** name, used by `@expo/vector-icons` in `<Icon>`.
- *  - `mdSymbol` — Material **Symbols** name, used by `NativeTabs`. They are a
- *    different set with a different spelling convention (`menu-book` vs
- *    `menu_book`), so they cannot share a column without lying to the type
- *    system. Only the tab icons reach this column, but every row has one so a
- *    future tab cannot silently fall back to a blank square.
+ * `satisfies` makes the table exhaustive: adding a name in
+ * `core/config/types.ts` without a mapping here is a compile error instead of a
+ * blank square on device.
  *
- * Both icon components are third-party, so both are wrapped with `withUniwind`
- * once here; their colour is an `accent-` class, which is the only way to make
- * an icon theme-aware (RN has no colour inheritance).
+ * The native tab bar is the one exception. `NativeTabs` renders platform icons
+ * itself and cannot host an arbitrary component, so `TAB_GLYPHS` keeps the SF
+ * Symbol / Material Symbol names for the four tab roots only.
  */
-type IconSet = {
-  ios: SFSymbol;
-  md: ComponentProps<typeof MaterialIcons>['name'];
-  mdSymbol: AndroidSymbol;
-};
+const ICON_COMPONENTS = {
+  'book-open': BookOpen,
+  'chart-line': ChartLine,
+  'check-circle': CircleCheck,
+  'external-link': ExternalLink,
+  'file-text': FileText,
+  video: Video,
+  home: House,
+  user: User,
+  'alert-circle': CircleAlert,
+  inbox: Inbox,
+  calendar: Calendar,
+  'chevron-down': ChevronDown,
+  'chevron-left': ChevronLeft,
+  'chevron-right': ChevronRight,
+  'chevron-up': ChevronUp,
+  clock: Clock,
+  'map-pin': MapPin,
+  users: Users,
+  camera: Camera,
+  info: Info,
+  logout: LogOut,
+  menu: Menu,
+  search: Search,
+  layers: Layers,
+  pencil: Pencil,
+  volume: Volume2,
+  play: Play,
+  pause: Pause,
+  close: X,
+  eye: Eye,
+  'eye-off': EyeOff,
+} satisfies Readonly<Record<IconName, LucideIcon>>;
 
-const ICONS = {
-  home: { ios: 'house', md: 'home', mdSymbol: 'home' },
-  user: { ios: 'person', md: 'person', mdSymbol: 'person' },
-  'book-open': { ios: 'book', md: 'menu-book', mdSymbol: 'menu_book' },
-  'chart-line': {
-    ios: 'chart.line.uptrend.xyaxis',
-    md: 'show-chart',
-    mdSymbol: 'show_chart',
-  },
-  'check-circle': {
-    ios: 'checkmark.circle',
-    md: 'check-circle',
-    mdSymbol: 'check_circle',
-  },
-  cog: { ios: 'gearshape', md: 'settings', mdSymbol: 'settings' },
-  'external-link': {
-    ios: 'arrow.up.right.square',
-    md: 'open-in-new',
-    mdSymbol: 'open_in_new',
-  },
-  'file-text': { ios: 'doc.text', md: 'description', mdSymbol: 'description' },
-  megaphone: { ios: 'megaphone', md: 'campaign', mdSymbol: 'campaign' },
-  trash: { ios: 'trash', md: 'delete', mdSymbol: 'delete' },
-  university: {
-    ios: 'building.columns',
-    md: 'account-balance',
-    mdSymbol: 'account_balance',
-  },
-  video: { ios: 'video', md: 'videocam', mdSymbol: 'videocam' },
-  'alert-circle': {
-    ios: 'exclamationmark.triangle',
-    md: 'error-outline',
-    mdSymbol: 'error_outline',
-  },
-  inbox: { ios: 'tray', md: 'inbox', mdSymbol: 'inbox' },
-  calendar: {
-    ios: 'calendar',
-    md: 'calendar-today',
-    mdSymbol: 'calendar_today',
-  },
-  'chevron-down': {
-    ios: 'chevron.down',
-    md: 'expand-more',
-    mdSymbol: 'expand_more',
-  },
-  'chevron-left': {
-    ios: 'chevron.left',
-    md: 'chevron-left',
-    mdSymbol: 'chevron_left',
-  },
-  'chevron-right': {
-    ios: 'chevron.right',
-    md: 'chevron-right',
-    mdSymbol: 'chevron_right',
-  },
-  'chevron-up': {
-    ios: 'chevron.up',
-    md: 'expand-less',
-    mdSymbol: 'expand_less',
-  },
-  clock: { ios: 'clock', md: 'schedule', mdSymbol: 'schedule' },
-  'map-pin': { ios: 'mappin.and.ellipse', md: 'place', mdSymbol: 'place' },
-  users: { ios: 'person.2', md: 'group', mdSymbol: 'group' },
-  // Added with the account screens (P4.3).
-  camera: { ios: 'camera', md: 'photo-camera', mdSymbol: 'photo_camera' },
-  info: { ios: 'info.circle', md: 'info-outline', mdSymbol: 'info' },
-  logout: {
-    ios: 'rectangle.portrait.and.arrow.right',
-    md: 'logout',
-    mdSymbol: 'logout',
-  },
-  // Added with the reader chrome (P5.4).
-  menu: { ios: 'line.3.horizontal', md: 'menu', mdSymbol: 'menu' },
-  search: { ios: 'magnifyingglass', md: 'search', mdSymbol: 'search' },
-  layers: { ios: 'square.stack', md: 'layers', mdSymbol: 'layers' },
-  pencil: { ios: 'pencil', md: 'edit', mdSymbol: 'edit' },
-  volume: {
-    ios: 'speaker.wave.2',
-    md: 'volume-up',
-    mdSymbol: 'volume_up',
-  },
-  play: { ios: 'play.fill', md: 'play-arrow', mdSymbol: 'play_arrow' },
-  pause: { ios: 'pause.fill', md: 'pause', mdSymbol: 'pause' },
-  // Auth + password surfaces.
-  close: { ios: 'xmark', md: 'close', mdSymbol: 'close' },
-  eye: { ios: 'eye', md: 'visibility', mdSymbol: 'visibility' },
-  'eye-off': {
-    ios: 'eye.slash',
-    md: 'visibility-off',
-    mdSymbol: 'visibility_off',
-  },
-} satisfies IconRegistry<IconSet>;
-
-const StyledSymbol = withUniwind(SymbolView);
-const StyledMaterialIcon = withUniwind(MaterialIcons);
-
-/** `accent-` class per intent, so callers do not have to know the prefix. */
-const TONE_ACCENT = {
-  foreground: 'accent-foreground',
-  muted: 'accent-muted-foreground',
-  primary: 'accent-primary',
-  destructive: 'accent-destructive',
+/** `text-` class per intent, so callers do not have to know the prefix. */
+const TONE_CLASS = {
+  foreground: 'text-foreground',
+  muted: 'text-muted-foreground',
+  primary: 'text-primary',
+  destructive: 'text-destructive',
 } as const;
 
-export type IconTone = keyof typeof TONE_ACCENT;
+export type IconTone = keyof typeof TONE_CLASS;
+
+type TabGlyph = { ios: SFSymbol; mdSymbol: AndroidSymbol };
 
 /**
- * Platform glyph names for a logical icon.
+ * Native tab glyphs.
  *
- * Native tab bars render their own icons — they cannot host an arbitrary
- * component — so `NativeTabs` needs the raw names rather than `<Icon>`. Exposing
- * the same table keeps one source of truth: adding a tab icon cannot drift from
- * the icon set the rest of the app uses.
+ * Only the four tab roots can appear here. Keeping this table separate from
+ * `ICON_COMPONENTS` states the platform constraint instead of pretending Lucide
+ * can render inside `NativeTabs`.
  */
-export function getIconGlyph(name: IconName): IconSet {
-  return ICONS[name];
+const TAB_GLYPHS = {
+  home: { ios: 'house', mdSymbol: 'home' },
+  'book-open': { ios: 'book', mdSymbol: 'menu_book' },
+  video: { ios: 'video', mdSymbol: 'videocam' },
+  user: { ios: 'person', mdSymbol: 'person' },
+} satisfies Partial<Record<IconName, TabGlyph>>;
+
+/**
+ * Platform glyph names for a logical tab icon.
+ *
+ * Throws for a name outside the tab table: a missing native glyph is a
+ * programming error, and failing loudly is better than a blank tab.
+ */
+export function getIconGlyph(name: IconName): TabGlyph {
+  const glyph = (TAB_GLYPHS as Partial<Record<IconName, TabGlyph>>)[name];
+
+  if (!glyph) {
+    throw new Error(`No native tab glyph registered for "${name}"`);
+  }
+
+  return glyph;
 }
 
 export type IconProps = {
@@ -160,27 +137,17 @@ export type IconProps = {
 };
 
 export function Icon({ name, size = 20, tone = 'foreground' }: IconProps) {
-  const icon = ICONS[name];
-  const colorClassName = TONE_ACCENT[tone];
-
-  if (Platform.OS === 'ios') {
-    return (
-      <StyledSymbol
-        name={icon.ios}
-        size={size}
-        tintColorClassName={colorClassName}
-        accessibilityElementsHidden
-      />
-    );
-  }
+  const Component = ICON_COMPONENTS[name];
+  const { color } = useResolveClassNames(TONE_CLASS[tone]);
 
   return (
-    <StyledMaterialIcon
-      name={icon.md}
+    <Component
+      color={color}
       size={size}
-      colorClassName={colorClassName}
-      allowFontScaling={false}
-      accessibilityElementsHidden
+      strokeWidth={1.8}
+      accessible={false}
+      importantForAccessibility="no-hide-descendants"
+      {...({ 'aria-hidden': true } as Record<string, unknown>)}
     />
   );
 }

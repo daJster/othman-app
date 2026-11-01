@@ -20,12 +20,8 @@ export const ICON_NAMES = [
   'book-open',
   'chart-line',
   'check-circle',
-  'cog',
   'external-link',
   'file-text',
-  'megaphone',
-  'trash',
-  'university',
   'video',
   // The four tab roots.
   'home',
