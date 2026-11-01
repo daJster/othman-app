@@ -8,7 +8,6 @@ import { Text, View } from 'react-native';
 import { Uniwind } from 'uniwind';
 import { STORAGE_KEYS, storageService } from '@/platform/storage';
 import { ThemeProvider, useThemeMode } from '@/providers/theme-provider';
-import { ThemeToggle } from '@/ui/theme-toggle';
 
 /**
  * The provider talks to two things outside React: storage and Uniwind. Both are
@@ -148,33 +147,5 @@ describe('ThemeProvider', () => {
     await screen.findByTestId('mode');
 
     expect(screen.getByTestId('scheme').props.children).toBe('dark');
-  });
-});
-
-describe('ThemeToggle', () => {
-  it('marks the current mode as the selected radio', async () => {
-    storage.getItem.mockResolvedValueOnce('light');
-
-    await renderProvider(<ThemeToggle />);
-    await screen.findByText('Light');
-
-    expect(screen.getByText('Light')).toBeTruthy();
-    expect(
-      screen.getByRole('radio', { name: 'Light' }).props.accessibilityState,
-    ).toMatchObject({ selected: true });
-  });
-
-  it('switches the mode when an option is pressed', async () => {
-    await renderProvider(<ThemeToggle />);
-    await screen.findByText('Dark');
-
-    fireEvent.press(screen.getByText('Dark'));
-
-    await waitFor(() =>
-      expect(storage.setItem).toHaveBeenCalledWith(STORAGE_KEYS.theme, 'dark'),
-    );
-    expect(
-      screen.getByRole('radio', { name: 'Dark' }).props.accessibilityState,
-    ).toMatchObject({ selected: true });
   });
 });

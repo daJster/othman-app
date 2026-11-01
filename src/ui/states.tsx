@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, View, type ViewProps } from 'react-native';
 import { Button } from './button';
@@ -18,16 +19,36 @@ import { Text } from './text';
  * `ScreenView`, not in a `ScrollView` with a fixed height.
  */
 
+/**
+ * The shared centred shell. `flex-1` is deliberate: every state fills the space
+ * it is given. The caller keeps ownership of the accessibility role and any
+ * extra classes.
+ */
+function StateShell({
+  className,
+  children,
+  ...props
+}: ViewProps & { children: ReactNode }) {
+  return (
+    <View
+      className={cn('flex-1 items-center justify-center gap-3 p-6', className)}
+      {...props}
+    >
+      {children}
+    </View>
+  );
+}
+
 export type LoadingProps = Omit<ViewProps, 'children'> & {
   label?: string;
 };
 
 export function Loading({ label, className, ...props }: LoadingProps) {
   return (
-    <View
+    <StateShell
       accessibilityRole="progressbar"
       accessibilityLabel={label}
-      className={cn('flex-1 items-center justify-center gap-3 p-6', className)}
+      className={className}
       {...props}
     >
       <ActivityIndicator colorClassName="accent-primary" />
@@ -36,7 +57,7 @@ export function Loading({ label, className, ...props }: LoadingProps) {
           {label}
         </Text>
       ) : null}
-    </View>
+    </StateShell>
   );
 }
 
@@ -60,11 +81,7 @@ export function ErrorState({
   const { t } = useTranslation();
 
   return (
-    <View
-      accessibilityRole="alert"
-      className={cn('flex-1 items-center justify-center gap-3 p-6', className)}
-      {...props}
-    >
+    <StateShell accessibilityRole="alert" className={className} {...props}>
       <Icon name="alert-circle" size={32} tone="destructive" />
       <Text variant="subtitle" className="text-center">
         {title}
@@ -82,7 +99,7 @@ export function ErrorState({
           onPress={onRetry}
         />
       ) : null}
-    </View>
+    </StateShell>
   );
 }
 
@@ -103,10 +120,7 @@ export function EmptyState({
   ...props
 }: EmptyStateProps) {
   return (
-    <View
-      className={cn('flex-1 items-center justify-center gap-3 p-6', className)}
-      {...props}
-    >
+    <StateShell className={className} {...props}>
       <Icon name="inbox" size={32} tone="muted" />
       <Text variant="subtitle" className="text-center">
         {title}
@@ -119,6 +133,6 @@ export function EmptyState({
       {actionLabel && onAction ? (
         <Button size="sm" label={actionLabel} onPress={onAction} />
       ) : null}
-    </View>
+    </StateShell>
   );
 }

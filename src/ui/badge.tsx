@@ -1,7 +1,27 @@
 import type { ReactNode } from 'react';
 import { Text, View, type ViewProps } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
-import { TONE_SURFACE_CLASSES, TONE_TEXT_CLASSES } from './tone';
+import type { StatusTone } from '@/core/config';
+
+/**
+ * Colour intent for the three meeting statuses.
+ *
+ * Badge was the only consumer of the shared tone file, so the tables live here.
+ * React Native has no colour inheritance: the surface and its label need
+ * separate literals.
+ */
+const TONE_SURFACE = {
+  positive:
+    'border-emerald-200 bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950',
+  info: 'border-sky-200 bg-sky-100 dark:border-sky-800 dark:bg-sky-950',
+  neutral: 'border-border bg-muted',
+} satisfies Readonly<Record<StatusTone, string>>;
+
+const TONE_TEXT = {
+  positive: 'text-emerald-700 dark:text-emerald-400',
+  info: 'text-sky-700 dark:text-sky-400',
+  neutral: 'text-muted-foreground',
+} satisfies Readonly<Record<StatusTone, string>>;
 
 /**
  * Badge primitive.
@@ -37,16 +57,16 @@ const badge = tv({
         label: 'text-destructive-foreground',
       },
       positive: {
-        root: TONE_SURFACE_CLASSES.positive,
-        label: TONE_TEXT_CLASSES.positive,
+        root: TONE_SURFACE.positive,
+        label: TONE_TEXT.positive,
       },
       info: {
-        root: TONE_SURFACE_CLASSES.info,
-        label: TONE_TEXT_CLASSES.info,
+        root: TONE_SURFACE.info,
+        label: TONE_TEXT.info,
       },
       neutral: {
-        root: TONE_SURFACE_CLASSES.neutral,
-        label: TONE_TEXT_CLASSES.neutral,
+        root: TONE_SURFACE.neutral,
+        label: TONE_TEXT.neutral,
       },
     },
   },

@@ -5,9 +5,7 @@ import {
 } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { cn } from './cn';
-import { useUiFontClass } from './font';
-
-/**
+import { useUiFontClass } from './font'; /**
  * Text input.
  *
  * Colour props (`placeholderTextColor`, `selectionColor`, `cursorColor`) are
@@ -46,6 +44,9 @@ export type InputProps = RNTextInputProps &
     ref?: Ref<ComponentRef<typeof TextInput>>;
   };
 
+/** The one ARIA state React Native's own props do not declare. */
+type InputAriaProps = { 'aria-invalid'?: boolean };
+
 export function Input({
   size,
   invalid,
@@ -58,6 +59,7 @@ export function Input({
 }: InputProps) {
   // TextEntry does not inherit the Text default, so the family is explicit.
   const fontClass = useUiFontClass();
+  const ariaProps: InputAriaProps = invalid ? { 'aria-invalid': true } : {};
 
   return (
     <TextInput
@@ -67,7 +69,7 @@ export function Input({
       selectionColorClassName={selectionColorClassName}
       cursorColorClassName={cursorColorClassName}
       {...props}
-      {...({ 'aria-invalid': invalid || undefined } as Record<string, unknown>)}
+      {...ariaProps}
     />
   );
 }
