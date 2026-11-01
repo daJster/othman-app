@@ -118,3 +118,14 @@ export function useThemeMode(): ThemeModeContextValue {
 
   return value;
 }
+
+/**
+ * The same context, but nullable.
+ *
+ * Brand artwork and loading frames are rendered in isolation by tests and by
+ * components that can sit above the provider; they need the resolved scheme
+ * without requiring the app shell. Callers fall back to `useColorScheme()`.
+ */
+export function useOptionalThemeMode(): ThemeModeContextValue | null {
+  return useContext(ThemeModeContext);
+}

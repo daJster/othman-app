@@ -19,7 +19,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   scheme: 'othman',
   userInterfaceStyle: 'automatic',
   ios: {
-    icon: './assets/expo.icon',
+    icon: './assets/images/icon.png',
     bundleIdentifier: 'com.kuttab.othman',
     supportsTablet: true,
     // Audio playback with the screen locked (P6.1). Declaring the mode before
@@ -36,10 +36,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     package: 'com.kuttab.othman',
     adaptiveIcon: {
-      backgroundColor: '#E6F4FE',
-      foregroundImage: './assets/images/android-icon-foreground.png',
-      backgroundImage: './assets/images/android-icon-background.png',
-      monochromeImage: './assets/images/android-icon-monochrome.png',
+      backgroundColor: '#FFFFFF',
+      foregroundImage: './assets/images/icon.png',
     },
     // Kept off deliberately: the Quran reader owns horizontal swipe gestures
     // (page turns start at the screen edge), and Android's predictive-back
@@ -59,9 +57,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-splash-screen',
       {
-        backgroundColor: '#208AEF',
-        image: './assets/images/splash-icon.png',
-        imageWidth: 76,
+        backgroundColor: '#003B24',
+        image: './assets/brand/quranReaderLandingLogo-light.png',
+        imageWidth: 120,
       },
     ],
     'expo-localization',
