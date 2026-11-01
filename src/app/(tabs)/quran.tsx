@@ -16,7 +16,9 @@ import { parseQuranLink } from '@/features/quran/links';
 import { useDirection } from '@/i18n';
 import { Button } from '@/ui/button';
 import { cn } from '@/ui/cn';
+import { Page } from '@/ui/page';
 import { Screen, ScreenView } from '@/ui/screen';
+import { Section } from '@/ui/section';
 import { ErrorState } from '@/ui/states';
 import { Text } from '@/ui/text';
 
@@ -107,74 +109,73 @@ export default function QuranScreen() {
   const progress = Math.min(1, Math.max(0, page / QURAN_PAGE_COUNT));
 
   return (
-    <Screen contentContainerClassName="mx-auto w-full max-w-3xl gap-0 px-5 pt-8 pb-10 md:px-8 md:pt-12">
-      <Head>
-        <title>{`${t('nav.quran')} · ${t('app.name')}`}</title>
-      </Head>
+    <Screen contentContainerClassName="gap-0 p-0">
+      <Page width="default" className="pt-8 pb-10 md:px-8 md:pt-12">
+        <Head>
+          <title>{`${t('nav.quran')} · ${t('app.name')}`}</title>
+        </Head>
 
-      <View className="gap-1">
-        <Text accessibilityRole="header" variant="title">
-          {t('nav.quran')}
-        </Text>
-        <Text tone="muted">{t('nav.quranDesc')}</Text>
-      </View>
+        <Section title={t('nav.quran')} description={t('nav.quranDesc')} />
 
-      <View className="mt-8 border-y border-border py-7 md:py-9">
-        <View
-          className={cn(
-            'gap-5 md:gap-7',
-            edition ? cn('flex-row', isRTL && 'flex-row-reverse') : 'flex-col',
-          )}
-        >
-          {edition ? (
-            <MushafPreview edition={edition} page={page} onPress={open} />
-          ) : null}
+        <View className="mt-8 border-y border-border py-7 md:py-9">
+          <View
+            className={cn(
+              'gap-5 md:gap-7',
+              edition
+                ? cn('flex-row', isRTL && 'flex-row-reverse')
+                : 'flex-col',
+            )}
+          >
+            {edition ? (
+              <MushafPreview edition={edition} page={page} onPress={open} />
+            ) : null}
 
-          <View className="flex-1 gap-5">
-            <View className="gap-1">
-              <Text variant="heading" className="tabular-nums">
-                {t('reader.continueDescription', { page: pageLabel })}
-              </Text>
-              <Text variant="caption" tone="muted" className="tabular-nums">
-                {`${surahLabel} · ${t('reader.pageOf', {
-                  page: pageLabel,
-                  total: formatReaderNumber(QURAN_PAGE_COUNT, language),
-                })}`}
-              </Text>
-            </View>
+            <View className="flex-1 gap-5">
+              <View className="gap-1">
+                <Text variant="heading" className="tabular-nums">
+                  {t('reader.continueDescription', { page: pageLabel })}
+                </Text>
+                <Text variant="caption" tone="muted" className="tabular-nums">
+                  {`${surahLabel} · ${t('reader.pageOf', {
+                    page: pageLabel,
+                    total: formatReaderNumber(QURAN_PAGE_COUNT, language),
+                  })}`}
+                </Text>
+              </View>
 
-            <View
-              accessibilityRole="progressbar"
-              accessibilityValue={{
-                min: 1,
-                max: QURAN_PAGE_COUNT,
-                now: page,
-              }}
-              className={cn(
-                'h-0.5 w-full flex-row overflow-hidden bg-border',
-                isRTL && 'flex-row-reverse',
-              )}
-            >
               <View
-                className="h-full bg-brass"
-                style={{ width: `${progress * 100}%` }}
+                accessibilityRole="progressbar"
+                accessibilityValue={{
+                  min: 1,
+                  max: QURAN_PAGE_COUNT,
+                  now: page,
+                }}
+                className={cn(
+                  'h-0.5 w-full flex-row overflow-hidden bg-border',
+                  isRTL && 'flex-row-reverse',
+                )}
+              >
+                <View
+                  className="h-full bg-brass"
+                  style={{ width: `${progress * 100}%` }}
+                />
+              </View>
+
+              <Button
+                size="lg"
+                label={t('reader.open')}
+                onPress={open}
+                testID="quran-open-reader"
+                className={isRTL ? 'self-end' : 'self-start'}
               />
             </View>
-
-            <Button
-              size="lg"
-              label={t('reader.open')}
-              onPress={open}
-              testID="quran-open-reader"
-              className={isRTL ? 'self-end' : 'self-start'}
-            />
           </View>
         </View>
-      </View>
 
-      <Text variant="caption" tone="muted" className="mt-5">
-        {t('reader.entryHint')}
-      </Text>
+        <Text variant="caption" tone="muted" className="mt-5">
+          {t('reader.entryHint')}
+        </Text>
+      </Page>
     </Screen>
   );
 }

@@ -13,9 +13,10 @@ import {
 } from '@/features/account/use-current-account';
 import { Icon } from '@/ui/icon';
 import { ListSectionHeader } from '@/ui/list-section-header';
+import { Page } from '@/ui/page';
 import { Screen, ScreenView } from '@/ui/screen';
+import { Section } from '@/ui/section';
 import { Loading, ErrorState, EmptyState } from '@/ui/states';
-import { Text } from '@/ui/text';
 
 /**
  * Account tab.
@@ -119,26 +120,22 @@ function AccountContent() {
       </Head>
 
       {Platform.OS === 'web' ? (
-        <Screen contentContainerClassName="mx-auto w-full max-w-3xl gap-0 p-0 pb-10">
-          <Text
-            variant="title"
-            accessibilityRole="header"
-            className="px-4 pt-6 pb-2"
-          >
-            {t('nav.account')}
-          </Text>
+        <Screen contentContainerClassName="gap-0 p-0">
+          <Page width="default" className="px-0 pb-10">
+            <Section title={t('nav.account')} className="px-4 pt-6 pb-2" />
 
-          <ProfileHeader
-            account={state.data}
-            onEdit={() => router.push('/account/edit')}
-          />
+            <ProfileHeader
+              account={state.data}
+              onEdit={() => router.push('/account/edit')}
+            />
 
-          <AccountSettingsWeb
-            isRTL={isRTL}
-            onProgress={() => router.push('/account/progress')}
-            onAbout={() => router.push('/about')}
-            onSignOut={confirmSignOut}
-          />
+            <AccountSettingsWeb
+              isRTL={isRTL}
+              onProgress={() => router.push('/account/progress')}
+              onAbout={() => router.push('/about')}
+              onSignOut={confirmSignOut}
+            />
+          </Page>
         </Screen>
       ) : (
         /*
@@ -152,9 +149,7 @@ function AccountContent() {
             <RNHostView matchContents={{ vertical: true }}>
               <View>
                 <View className="px-4 pt-6 pb-2">
-                  <Text variant="title" accessibilityRole="header">
-                    {t('nav.account')}
-                  </Text>
+                  <Section title={t('nav.account')} />
                 </View>
                 <ProfileHeader
                   account={state.data}

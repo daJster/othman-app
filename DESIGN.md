@@ -94,6 +94,10 @@ reserved for line work and for text **on canopy**; on a page ground use
   start, chevron at the inline end, sign-out destructive.
 - **Overline labels** — quiet, uppercase in Latin, letter-spaced; never a kicker
   above a heading.
+- **Page / Section** — `Page` owns the measured column and gutter (`default`
+  48rem, `wide` 72rem); `Section` owns a heading plus its supporting line, at
+  page level (h1) or group level (`level={2}`). Screens pass only their vertical
+  rhythm; About keeps its full-width list shell.
 
 ## Brand assets
 

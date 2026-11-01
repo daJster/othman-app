@@ -12,6 +12,7 @@ import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
 import { ListSectionHeader } from '@/ui/list-section-header';
 import { ScreenView } from '@/ui/screen';
+import { Section } from '@/ui/section';
 import { Text } from '@/ui/text';
 
 /**
@@ -75,12 +76,12 @@ export default function AboutScreen() {
                 <Icon name="book-open" size={28} tone="primary" />
               </View>
 
-              <View className="gap-0.5">
-                <Text variant="title">{t('app.name')}</Text>
-                <Text variant="caption" tone="muted">
-                  {t('app.tagline')}
-                </Text>
-              </View>
+              <Section
+                title={t('app.name')}
+                description={t('app.tagline')}
+                descriptionVariant="caption"
+                className="gap-0.5"
+              />
 
               <Text>{t('pages.about.description')}</Text>
 

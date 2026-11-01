@@ -11,7 +11,9 @@ import { useSurahProgress } from '@/features/progress/use-surah-progress';
 import { useDirection } from '@/i18n';
 import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
+import { Page } from '@/ui/page';
 import { Screen, ScreenView } from '@/ui/screen';
+import { Section } from '@/ui/section';
 import { EmptyState, ErrorState, Loading } from '@/ui/states';
 import { Text } from '@/ui/text';
 
@@ -70,23 +72,24 @@ function ProgressContent() {
     );
   } else {
     body = (
-      <Screen contentContainerClassName="gap-6 md:mx-auto md:max-w-3xl lg:max-w-4xl">
-        <ProgressSummary rows={state.data} />
+      <Screen contentContainerClassName="gap-0 p-0">
+        <Page width="default" className="gap-6 p-4 pb-8 lg:max-w-4xl">
+          <ProgressSummary rows={state.data} />
 
-        <View className="gap-3">
-          <Text
-            variant="label"
-            accessibilityRole="header"
-            testID="progress-grid-title"
-          >
-            {t('pages.account.progress.gridTitle')}
-          </Text>
-          <SurahHeatmap
-            rows={state.data}
-            selectedSurah={selectedSurah}
-            onSelect={setSelectedSurah}
-          />
-        </View>
+          <View className="gap-3">
+            <Section
+              title={t('pages.account.progress.gridTitle')}
+              titleVariant="label"
+              titleTestID="progress-grid-title"
+              className="gap-0"
+            />
+            <SurahHeatmap
+              rows={state.data}
+              selectedSurah={selectedSurah}
+              onSelect={setSelectedSurah}
+            />
+          </View>
+        </Page>
       </Screen>
     );
   }

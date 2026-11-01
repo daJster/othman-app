@@ -10,8 +10,9 @@ import { useAuth } from '@/providers/auth-provider';
 import { useDirection } from '@/i18n';
 import { cn } from '@/ui/cn';
 import { Button } from '@/ui/button';
+import { Page } from '@/ui/page';
 import { Screen } from '@/ui/screen';
-import { Text } from '@/ui/text';
+import { Section } from '@/ui/section';
 
 /**
  * Home: the study circle.
@@ -44,9 +45,10 @@ export default function HomeScreen() {
         ringLabel={t('home.halqa.ring')}
       />
 
-      <View
+      <Page
+        width="wide"
         className={cn(
-          'mx-auto w-full max-w-6xl px-5 pt-10 pb-14 md:items-start md:justify-between md:gap-16 md:pt-16 md:pb-20',
+          'pt-10 pb-14 md:items-start md:justify-between md:gap-16 md:pt-16 md:pb-20',
           isRTL ? 'md:flex-row-reverse' : 'md:flex-row',
         )}
       >
@@ -63,12 +65,14 @@ export default function HomeScreen() {
               isRTL && 'flex-row-reverse',
             )}
           >
-            <View className="flex-1 gap-1">
-              <Text variant="heading">{t('home.circle.title')}</Text>
-              <Text variant="caption" tone="muted">
-                {t('home.circle.description')}
-              </Text>
-            </View>
+            <Section
+              title={t('home.circle.title')}
+              description={t('home.circle.description')}
+              titleVariant="heading"
+              descriptionVariant="caption"
+              level={2}
+              className="flex-1"
+            />
 
             {!user ? (
               <Button
@@ -109,7 +113,7 @@ export default function HomeScreen() {
             reference={t('home.verse.reference')}
           />
         </View>
-      </View>
+      </Page>
     </Screen>
   );
 }
