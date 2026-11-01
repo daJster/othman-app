@@ -122,6 +122,9 @@ describe('EditAccountScreen', () => {
     expect(
       screen.getByRole('heading', { name: 'Edit profile' }),
     ).toHaveTextContent('Edit profile');
+    expect(screen.getByLabelText('Display name')).toBeTruthy();
+    expect(screen.getByLabelText('Email')).toBeTruthy();
+    expect(screen.getByLabelText('Phone number')).toBeTruthy();
     expect(screen.getByTestId('account-name-input')).toHaveDisplayValue(
       'Othman Al-Farsi',
     );

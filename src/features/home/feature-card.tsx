@@ -4,6 +4,7 @@ import type { IconName } from '@/core/config';
 import type { AppHref } from '@/features/navigation/route-registry';
 import { useDirection } from '@/i18n';
 import { cn } from '@/ui/cn';
+import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
 import { Text } from '@/ui/text';
 
@@ -38,6 +39,7 @@ export function FeatureCard({
       <Pressable
         className={cn(
           'flex-row gap-4 active:opacity-70',
+          FOCUS_RING,
           isRTL && 'flex-row-reverse',
         )}
       >

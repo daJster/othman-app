@@ -1,6 +1,7 @@
 import { MenuView } from '@expo/ui/community/menu';
 import { Pressable, useColorScheme, View } from 'react-native';
 import { cn } from '@/ui/cn';
+import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
 import { Text } from '@/ui/text';
 import type { SettingsDropdownProps } from './settings-dropdown.types';
@@ -47,6 +48,7 @@ export function SettingsDropdown<T extends string>({
         accessibilityRole="button"
         accessibilityLabel={`${label}: ${current.label}`}
         className={cn(
+          FOCUS_RING,
           'active:opacity-70',
           compact
             ? 'h-11 min-w-11 flex-row items-center justify-center gap-1 rounded-md px-2'

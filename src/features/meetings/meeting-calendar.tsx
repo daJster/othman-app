@@ -13,6 +13,7 @@ import { tryGregorianDateToHijri } from '@/core/utils/hijri';
 import { useDirection } from '@/i18n';
 import { Button } from '@/ui/button';
 import { cn } from '@/ui/cn';
+import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
 import { SegmentedControl } from '@/ui/segmented-control';
 import { Text } from '@/ui/text';
@@ -138,6 +139,7 @@ export function MeetingCalendar({
                 onPress={() => selectDay(day.date)}
                 className={cn(
                   'h-11 items-center justify-center rounded-md border active:opacity-70',
+                  FOCUS_RING,
                   selected
                     ? 'border-primary bg-primary'
                     : day.isToday
@@ -206,6 +208,7 @@ function MonthButton({
       onPress={onPress}
       className={cn(
         'h-11 w-11 items-center justify-center rounded-full active:bg-muted',
+        FOCUS_RING,
         disabled && 'opacity-40',
       )}
     >

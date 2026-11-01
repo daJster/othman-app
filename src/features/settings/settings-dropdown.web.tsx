@@ -1,6 +1,7 @@
 import { useColorScheme, View } from 'react-native';
 import { useUiFontClass } from '@/ui/font';
 import { cn } from '@/ui/cn';
+import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
 import { Text } from '@/ui/text';
 import type { SettingsDropdownProps } from './settings-dropdown.types';
@@ -40,6 +41,7 @@ export function SettingsDropdown<T extends string>({
       data-testid={testID}
       className={cn(
         'h-11 appearance-none rounded-md border border-border bg-background text-sm text-foreground',
+        FOCUS_RING,
         fontClass,
         compact ? 'w-[4.5rem] ps-1 pe-6 text-xs' : 'w-40 ps-2 pe-7',
         className,

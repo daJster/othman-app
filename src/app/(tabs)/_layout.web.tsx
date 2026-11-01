@@ -16,6 +16,7 @@ import { BrandMark } from '@/features/brand/brand-mark';
 import { LanguageDropdown } from '@/features/settings/language-dropdown';
 import { ThemeDropdown } from '@/features/settings/theme-dropdown';
 import { cn } from '@/ui/cn';
+import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
 import { Text } from '@/ui/text';
 
@@ -125,6 +126,7 @@ function TabLink({
         color: 'inherit',
         display: hidden ? 'none' : undefined,
       },
+      className: FOCUS_RING,
       onClick: (event: MouseEvent<HTMLAnchorElement>) => {
         if (hidden || !shouldHandleWebLink(event)) return;
 

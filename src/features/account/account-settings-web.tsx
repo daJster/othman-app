@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, View } from 'react-native';
 import type { IconName } from '@/core/config';
 import { cn } from '@/ui/cn';
+import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
 import { ListSectionHeader } from '@/ui/list-section-header';
 import { Text } from '@/ui/text';
@@ -51,6 +52,7 @@ function SettingsRow({
       onPress={onPress}
       className={cn(
         'min-h-14 w-full flex-row items-center gap-3 border-b border-border px-4 py-3 active:opacity-70',
+        FOCUS_RING,
         isRTL && 'flex-row-reverse',
       )}
     >

@@ -237,6 +237,7 @@ export function EditProfileForm({
             value={draft.displayName}
             onChangeText={setDisplayName}
             placeholder={t('account.edit.displayNamePlaceholder')}
+            accessibilityLabel={t('account.edit.displayName')}
             invalid={nameError !== null}
             editable={!update.isPending}
             autoCapitalize="words"
@@ -261,6 +262,7 @@ export function EditProfileForm({
           <Input
             value={account.email ?? ''}
             editable={false}
+            accessibilityLabel={t('account.edit.email')}
             className="opacity-70"
             testID="account-email-input"
           />
@@ -275,6 +277,7 @@ export function EditProfileForm({
             value={draft.phoneNumber}
             onChangeText={setPhoneNumber}
             placeholder={t('account.edit.phonePlaceholder')}
+            accessibilityLabel={t('account.edit.phone')}
             invalid={phoneError !== null}
             editable={!update.isPending}
             keyboardType="phone-pad"

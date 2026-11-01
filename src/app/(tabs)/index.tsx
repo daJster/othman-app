@@ -77,7 +77,7 @@ export default function HomeScreen() {
               <Button
                 variant="link"
                 size="sm"
-                className="min-h-11 shrink-0"
+                className="shrink-0"
                 label={t('action.signIn')}
                 onPress={() => router.push('/auth/sign-in')}
                 testID="home-sign-in"

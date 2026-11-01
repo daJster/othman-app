@@ -1,5 +1,6 @@
 import { Pressable, View, type ViewProps } from 'react-native';
 import { cn } from './cn';
+import { FOCUS_RING } from './focus';
 import { Text } from './text';
 
 /**
@@ -44,7 +45,7 @@ export function SegmentedControl<Value extends string>({
       accessibilityRole="radiogroup"
       accessibilityLabel={label}
       className={cn(
-        'flex-row gap-1 self-start rounded-lg border border-border bg-muted p-1',
+        'flex-row gap-1 self-start rounded-lg border border-border bg-muted p-0.5',
         className,
       )}
       {...props}
@@ -59,10 +60,10 @@ export function SegmentedControl<Value extends string>({
             accessibilityState={{ selected }}
             onPress={() => onChange(option.value)}
             className={cn(
-              // 36 pt segments inside 4 pt of padding clear the app's 44 pt
-              // control height without making the two-option case look like a
-              // toolbar.
-              'h-9 items-center justify-center rounded-md px-3 active:opacity-80',
+              // Each segment is itself a 44pt target; the container adds only
+              // 2pt of visual inset so the control does not grow into a bar.
+              'h-11 items-center justify-center rounded-md px-3 active:opacity-80',
+              FOCUS_RING,
               selected ? 'bg-background' : 'bg-transparent',
             )}
           >

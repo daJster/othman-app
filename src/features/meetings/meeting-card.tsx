@@ -11,6 +11,8 @@ import type { Meeting } from '@/core/types';
 import { Badge } from '@/ui/badge';
 import { Button, ButtonText } from '@/ui/button';
 import { Card } from '@/ui/card';
+import { cn } from '@/ui/cn';
+import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
 import { Separator } from '@/ui/separator';
 import { Text } from '@/ui/text';
@@ -80,7 +82,10 @@ export function MeetingCard({ meeting }: MeetingCardProps) {
             accessibilityRole="button"
             accessibilityState={{ expanded }}
             onPress={() => setExpanded((previous) => !previous)}
-            className="min-h-11 flex-row items-center gap-1 rounded-md px-1 active:opacity-70"
+            className={cn(
+              'min-h-11 flex-row items-center gap-1 rounded-md px-1 active:opacity-70',
+              FOCUS_RING,
+            )}
           >
             <Text variant="label" tone="muted">
               {expanded ? t('meeting.less') : t('meeting.details')}

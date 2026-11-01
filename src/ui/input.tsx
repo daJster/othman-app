@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { cn } from './cn';
+import { FOCUS_RING } from './focus';
 import { useUiFontClass } from './font'; /**
  * Text input.
  *
@@ -64,7 +65,7 @@ export function Input({
   return (
     <TextInput
       ref={ref}
-      className={cn(input({ size, invalid }), fontClass, className)}
+      className={cn(input({ size, invalid }), FOCUS_RING, fontClass, className)}
       placeholderTextColorClassName={placeholderTextColorClassName}
       selectionColorClassName={selectionColorClassName}
       cursorColorClassName={cursorColorClassName}
