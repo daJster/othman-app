@@ -8,9 +8,9 @@ import { WEBSITE_URL } from '@/core/config';
 import { TABS } from '@/features/navigation/route-registry';
 import { useDirection } from '@/i18n';
 import { openHttpsLink } from '@/platform/browser';
-import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
 import { ListSectionHeader } from '@/ui/list-section-header';
+import { PageHeader } from '@/ui/page-header';
 import { ScreenView } from '@/ui/screen';
 import { Section } from '@/ui/section';
 import { Text } from '@/ui/text';
@@ -39,7 +39,6 @@ export default function AboutScreen() {
   const scheme = useColorScheme();
 
   const title = t('nav.about');
-  const backIcon = isRTL ? 'chevron-right' : 'chevron-left';
   const chevron = isRTL ? 'chevron-left' : 'chevron-right';
   const version = Constants.expoConfig?.version ?? '1.0.0';
   const year = new Date().getFullYear();
@@ -50,18 +49,11 @@ export default function AboutScreen() {
         <title>{`${title} · ${t('app.name')}`}</title>
       </Head>
 
-      <View className="flex-row items-center gap-2 border-b border-border px-2 py-2">
-        <Button
-          variant="ghost"
-          accessibilityLabel={t('action.back')}
-          onPress={() => router.back()}
-          testID="about-back"
-        >
-          <Icon name={backIcon} />
-          <Text variant="label">{t('action.back')}</Text>
-        </Button>
-        <Text variant="subtitle">{title}</Text>
-      </View>
+      <PageHeader
+        title={title}
+        onBack={() => router.back()}
+        backTestID="about-back"
+      />
 
       {/*
         `colorScheme` follows `Appearance`, which `ThemeProvider` keeps in sync
@@ -80,6 +72,7 @@ export default function AboutScreen() {
                 title={t('app.name')}
                 description={t('app.tagline')}
                 descriptionVariant="caption"
+                level={2}
                 className="gap-0.5"
               />
 

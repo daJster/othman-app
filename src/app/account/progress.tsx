@@ -8,14 +8,11 @@ import { RequireAuth } from '@/features/auth/require-auth';
 import { SurahDetailSheet } from '@/features/progress/surah-detail-sheet';
 import { SurahHeatmap } from '@/features/progress/surah-heatmap';
 import { useSurahProgress } from '@/features/progress/use-surah-progress';
-import { useDirection } from '@/i18n';
-import { Button } from '@/ui/button';
-import { Icon } from '@/ui/icon';
 import { Page } from '@/ui/page';
+import { PageHeader } from '@/ui/page-header';
 import { Screen, ScreenView } from '@/ui/screen';
 import { Section } from '@/ui/section';
 import { EmptyState, ErrorState, Loading } from '@/ui/states';
-import { Text } from '@/ui/text';
 
 /**
  * Memorisation progress.
@@ -40,12 +37,10 @@ export default function ProgressScreen() {
 function ProgressContent() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { isRTL } = useDirection();
   const { state } = useSurahProgress();
   const [selectedSurah, setSelectedSurah] = useState<number | null>(null);
 
   const title = t('pages.account.progress.title');
-  const backIcon = isRTL ? 'chevron-right' : 'chevron-left';
 
   const rows = state.status === 'ready' ? state.data : [];
   const selectedRow =
@@ -64,12 +59,7 @@ function ProgressContent() {
       />
     );
   } else if (state.status === 'empty') {
-    body = (
-      <EmptyState
-        title={title}
-        description={t('pages.account.progress.empty')}
-      />
-    );
+    body = <EmptyState title={t('pages.account.progress.empty')} />;
   } else {
     body = (
       <Screen contentContainerClassName="gap-0 p-0">
@@ -80,6 +70,7 @@ function ProgressContent() {
             <Section
               title={t('pages.account.progress.gridTitle')}
               titleVariant="label"
+              level={2}
               titleTestID="progress-grid-title"
               className="gap-0"
             />
@@ -100,18 +91,11 @@ function ProgressContent() {
         <title>{`${title} · ${t('app.name')}`}</title>
       </Head>
 
-      <View className="flex-row items-center gap-2 border-b border-border px-2 py-2">
-        <Button
-          variant="ghost"
-          accessibilityLabel={t('action.back')}
-          onPress={() => router.back()}
-          testID="progress-back"
-        >
-          <Icon name={backIcon} />
-          <Text variant="label">{t('action.back')}</Text>
-        </Button>
-        <Text variant="subtitle">{title}</Text>
-      </View>
+      <PageHeader
+        title={title}
+        onBack={() => router.back()}
+        backTestID="progress-back"
+      />
 
       {body}
 

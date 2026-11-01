@@ -13,7 +13,7 @@ declares it before any icon work.
 | Plan | Title | Priority | Effort | Depends on | Status |
 |------|-------|----------|--------|------------|--------|
 | 001 | Introduce the Lucide icon foundation | P1 | M | — | DONE |
-| 002 | One page header and one correct h1 per page | P1 | M | 001 | TODO |
+| 002 | One page header and one correct h1 per page | P1 | M | 001 | DONE |
 | 003 | Remove duplicated copy across pages | P2 | S-M | 002 | TODO |
 | 004 | One icon grammar and two dismissal shapes | P2 | M | 001 | TODO |
 | 005 | Focus visibility, 44pt targets and input labels | P1 | S-M | — | TODO |

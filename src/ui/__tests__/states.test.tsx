@@ -28,6 +28,29 @@ describe('ErrorState', () => {
     expect(screen.getByText('Something broke')).toBeTruthy();
   });
 
+  it('is a level-2 heading inline and a level-1 heading on a page', async () => {
+    await render(<ErrorState title="Offline" />);
+    expect(screen.getByText('Offline').props['aria-level']).toBe(2);
+
+    await render(<ErrorState title="Page missing" headingLevel={1} />);
+    expect(screen.getByText('Page missing').props['aria-level']).toBe(1);
+  });
+
+  it('runs a primary action', async () => {
+    const onAction = jest.fn();
+    await render(
+      <ErrorState
+        title="Page missing"
+        actionLabel="Back to home"
+        onAction={onAction}
+      />,
+    );
+
+    await fireEvent.press(screen.getByText('Back to home'));
+
+    expect(onAction).toHaveBeenCalledTimes(1);
+  });
+
   it('surfaces the description', async () => {
     await render(
       <ErrorState title="Offline" description="Check your connection" />,
@@ -69,6 +92,7 @@ describe('EmptyState', () => {
 
     expect(screen.getByText('No meetings')).toBeTruthy();
     expect(screen.getByText('Enjoy the day')).toBeTruthy();
+    expect(screen.getByText('No meetings').props['aria-level']).toBe(2);
   });
 
   it('runs the call to action', async () => {

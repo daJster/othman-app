@@ -119,6 +119,9 @@ describe('EditAccountScreen', () => {
   it('starts from the account and keeps Save disabled until something changes', async () => {
     client = await renderSheet();
 
+    expect(
+      screen.getByRole('heading', { name: 'Edit profile' }),
+    ).toHaveTextContent('Edit profile');
     expect(screen.getByTestId('account-name-input')).toHaveDisplayValue(
       'Othman Al-Farsi',
     );

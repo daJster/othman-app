@@ -39,6 +39,9 @@ describe('AboutScreen', () => {
   it('introduces the app with its version', async () => {
     await render(<AboutScreen />);
 
+    expect(screen.getByRole('heading', { name: 'About' })).toHaveTextContent(
+      'About',
+    );
     expect(screen.getByText('Othman')).toBeTruthy();
     expect(screen.getByText('Contemplate the Book of Allah')).toBeTruthy();
     expect(screen.getByText(/dedicated to learning the Quran/)).toBeTruthy();
