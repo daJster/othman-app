@@ -44,6 +44,27 @@ describe('Badge', () => {
     // The string must land in a `Text`, not in the `View`: RN cannot render a
     // bare string and the tone would not apply.
     expect(screen.getByText('Live')).toBeTruthy();
+    expect(screen.getByText('Live').props.className).toContain('text-success');
+  });
+
+  it('keeps the status tones on the semantic tokens', async () => {
+    await render(
+      <>
+        <Badge variant="positive" label="Starting soon" testID="positive" />
+        <Badge variant="info" label="Today" testID="info" />
+      </>,
+    );
+
+    expect(screen.getByTestId('positive').props.className).toContain(
+      'bg-success-soft',
+    );
+    expect(screen.getByText('Starting soon').props.className).toContain(
+      'text-success',
+    );
+    expect(screen.getByTestId('info').props.className).toContain(
+      'bg-info-soft',
+    );
+    expect(screen.getByText('Today').props.className).toContain('text-info');
   });
 
   it('keeps composed children untouched', async () => {

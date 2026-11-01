@@ -18,7 +18,7 @@ declares it before any icon work.
 | 004 | One icon grammar and two dismissal shapes | P2 | M | 001 | DONE |
 | 005 | Focus visibility, 44pt targets and input labels | P1 | S-M | — | DONE |
 | 006 | Compose both error routes through one state | P3 | S | 002 | DONE |
-| 007 | Bring status colours back to tokens | P2 | M | — | TODO |
+| 007 | Bring status colours back to tokens | P2 | M | — | DONE |
 | 008 | Make Page own the column | P2 | M | — | TODO |
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with reason) | REJECTED (with rationale).

@@ -28,11 +28,18 @@ components.
 | `card`       | white                 | `#0a1710` soft green  | Grouped surfaces (calendar) |
 | `secondary`  | pale green            | `#0d1c14`             | Supporting surfaces |
 | `border`     | warm neutral          | 10% ivory             | Hairlines |
+| `success`    | deep green text-safe  | light green text-safe | Positive status text |
+| `success-soft` | pale green          | deep green            | Positive status surface |
+| `success-line` | green hairline      | green hairline        | Positive status border |
+| `info`       | deep blue text-safe   | light blue text-safe  | Informational status text |
+| `info-soft`  | pale blue             | deep blue             | Informational status surface |
+| `info-line`  | blue hairline         | blue hairline         | Informational status border |
 
 Use colour as a field, not a sprinkle: the hero owns canopy; sections own
 background; brass is line work; clay appears once per composition. `brass` is
 reserved for line work and for text **on canopy**; on a page ground use
-`brass-ink`, which clears 4.5:1 at overline sizes in both themes.
+`brass-ink`, which clears 4.5:1 at overline sizes in both themes. Status colours
+are semantic roles: a new status uses a role, never a raw Tailwind palette name.
 
 ## Type
 

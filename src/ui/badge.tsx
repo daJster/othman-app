@@ -6,20 +6,20 @@ import type { StatusTone } from '@/core/config';
 /**
  * Colour intent for the three meeting statuses.
  *
- * Badge was the only consumer of the shared tone file, so the tables live here.
- * React Native has no colour inheritance: the surface and its label need
- * separate literals.
+ * Each tone is a semantic triple: a text-safe label colour, a soft surface and
+ * a line. The values come from `global.css`; no raw Tailwind palette name is
+ * used here. React Native has no colour inheritance: the surface and its label
+ * need separate literals.
  */
 const TONE_SURFACE = {
-  positive:
-    'border-emerald-200 bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950',
-  info: 'border-sky-200 bg-sky-100 dark:border-sky-800 dark:bg-sky-950',
+  positive: 'border-success-line bg-success-soft',
+  info: 'border-info-line bg-info-soft',
   neutral: 'border-border bg-muted',
 } satisfies Readonly<Record<StatusTone, string>>;
 
 const TONE_TEXT = {
-  positive: 'text-emerald-700 dark:text-emerald-400',
-  info: 'text-sky-700 dark:text-sky-400',
+  positive: 'text-success',
+  info: 'text-info',
   neutral: 'text-muted-foreground',
 } satisfies Readonly<Record<StatusTone, string>>;
 
