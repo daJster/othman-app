@@ -1,10 +1,33 @@
 import type { ReactNode } from 'react';
-import { Text, View, type ViewProps } from 'react-native';
+import type { ViewProps } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
-import { TONE_SURFACE_CLASSES, TONE_TEXT_CLASSES } from './tone';
+import { Badge as RNRBadge } from '@/components/ui/badge';
+import { Text as RNRText } from '@/components/ui/text';
+import type { StatusTone } from '@/core/config';
+import { cn } from './cn';
 
 /**
- * Badge primitive.
+ * Colour intent for the three meeting statuses.
+ *
+ * Each tone is a semantic triple: a text-safe label colour, a soft surface and
+ * a line. The values come from `global.css`; no raw Tailwind palette name is
+ * used here. React Native has no colour inheritance: the surface and its label
+ * need separate literals.
+ */
+const TONE_SURFACE = {
+  positive: 'border-success-line bg-success-soft',
+  info: 'border-info-line bg-info-soft',
+  neutral: 'border-border bg-muted',
+} satisfies Readonly<Record<StatusTone, string>>;
+
+const TONE_TEXT = {
+  positive: 'text-success',
+  info: 'text-info',
+  neutral: 'text-muted-foreground',
+} satisfies Readonly<Record<StatusTone, string>>;
+
+/**
+ * Badge primitive, backed by react-native-reusables.
  *
  * The `positive | info | neutral` variants are the meeting-status tones; the
  * remaining four are the shadcn set. Both live in one `variant` prop so a
@@ -37,16 +60,16 @@ const badge = tv({
         label: 'text-destructive-foreground',
       },
       positive: {
-        root: TONE_SURFACE_CLASSES.positive,
-        label: TONE_TEXT_CLASSES.positive,
+        root: TONE_SURFACE.positive,
+        label: TONE_TEXT.positive,
       },
       info: {
-        root: TONE_SURFACE_CLASSES.info,
-        label: TONE_TEXT_CLASSES.info,
+        root: TONE_SURFACE.info,
+        label: TONE_TEXT.info,
       },
       neutral: {
-        root: TONE_SURFACE_CLASSES.neutral,
-        label: TONE_TEXT_CLASSES.neutral,
+        root: TONE_SURFACE.neutral,
+        label: TONE_TEXT.neutral,
       },
     },
   },
@@ -64,6 +87,16 @@ export type BadgeProps = Omit<ViewProps, 'children'> &
     children?: ReactNode;
   };
 
+const RNR_VARIANT = {
+  default: 'default',
+  secondary: 'secondary',
+  outline: 'outline',
+  destructive: 'destructive',
+  positive: 'outline',
+  info: 'outline',
+  neutral: 'outline',
+} as const;
+
 export function Badge({
   variant,
   label,
@@ -74,14 +107,18 @@ export function Badge({
   const slots = badge({ variant });
 
   return (
-    <View className={slots.root({ className })} {...props}>
+    <RNRBadge
+      variant={RNR_VARIANT[variant ?? 'default']}
+      className={cn(slots.root(), className)}
+      {...props}
+    >
       {label ? (
-        <Text className={slots.label()}>{label}</Text>
+        <RNRText className={slots.label()}>{label}</RNRText>
       ) : typeof children === 'string' ? (
-        <Text className={slots.label()}>{children}</Text>
+        <RNRText className={slots.label()}>{children}</RNRText>
       ) : (
         children
       )}
-    </View>
+    </RNRBadge>
   );
 }

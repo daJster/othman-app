@@ -7,17 +7,21 @@ import Animated, {
   LinearTransition,
 } from 'react-native-reanimated';
 import { getMeetingStatusConfig } from '@/core/config';
-import { parseDateKey } from '@/core/domain/meetings/date-key';
 import type { Meeting } from '@/core/types';
-import { useDirection } from '@/i18n';
 import { Badge } from '@/ui/badge';
-import { Button } from '@/ui/button';
+import { Button, ButtonText } from '@/ui/button';
 import { Card } from '@/ui/card';
+import { cn } from '@/ui/cn';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible';
+import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
 import { Separator } from '@/ui/separator';
 import { Text } from '@/ui/text';
 import { AttendeeStack } from './attendee-stack';
-import { formatLongDate } from './calendar-format';
 import { openMeetLink } from './open-meet-link';
 
 /**
@@ -32,6 +36,9 @@ import { openMeetLink } from './open-meet-link';
  * transition animates the card's height, and the details themselves fade in, so
  * expansion does not jump.
  *
+ * The card omits the date on purpose: the Meetings screen is scoped to one
+ * selected day and prints it once above the list.
+ *
  * Attendee names are in the expanded block rather than a long-press tooltip:
  * there is no hover on a phone, and a hidden gesture is not an accessible way to
  * read four names.
@@ -42,7 +49,6 @@ export type MeetingCardProps = {
 
 export function MeetingCard({ meeting }: MeetingCardProps) {
   const { t } = useTranslation();
-  const { language } = useDirection();
   const [expanded, setExpanded] = useState(false);
 
   const status = getMeetingStatusConfig(meeting.status);
@@ -60,10 +66,6 @@ export function MeetingCard({ meeting }: MeetingCardProps) {
 
         <View className="gap-1.5">
           <MetaRow
-            icon="calendar"
-            label={formatLongDate(parseDateKey(meeting.date), language)}
-          />
-          <MetaRow
             icon="clock"
             label={`${meeting.time} · ${meeting.duration}`}
           />
@@ -72,57 +74,64 @@ export function MeetingCard({ meeting }: MeetingCardProps) {
 
         <Separator />
 
-        <View className="flex-row items-center justify-between gap-2">
-          <View className="flex-1 flex-row items-center gap-2">
-            <Icon name="users" size={16} tone="muted" />
-            <AttendeeStack attendees={meeting.attendees} />
-            <Text variant="caption" tone="muted">
-              {t('meeting.attendees', { count: meeting.attendees.length })}
-            </Text>
+        <Collapsible open={expanded} onOpenChange={setExpanded}>
+          <View className="flex-row items-center justify-between gap-2">
+            <View className="flex-1 flex-row items-center gap-2">
+              <Icon name="users" size={16} tone="muted" />
+              <AttendeeStack attendees={meeting.attendees} />
+              <Text variant="caption" tone="muted">
+                {t('meeting.attendees', { count: meeting.attendees.length })}
+              </Text>
+            </View>
+
+            <CollapsibleTrigger asChild>
+              <Pressable
+                accessibilityRole="button"
+                className={cn(
+                  'min-h-11 flex-row items-center gap-1 rounded-md px-1 active:opacity-70',
+                  FOCUS_RING,
+                )}
+              >
+                <Text variant="label" tone="muted">
+                  {expanded ? t('meeting.less') : t('meeting.details')}
+                </Text>
+                <Icon
+                  name={expanded ? 'chevron-up' : 'chevron-down'}
+                  size={16}
+                  tone="muted"
+                />
+              </Pressable>
+            </CollapsibleTrigger>
           </View>
 
-          <Pressable
-            accessibilityRole="button"
-            accessibilityState={{ expanded }}
-            onPress={() => setExpanded((previous) => !previous)}
-            className="min-h-11 flex-row items-center gap-1 rounded-md px-1 active:opacity-70"
-          >
-            <Text variant="label" tone="muted">
-              {expanded ? t('meeting.less') : t('meeting.details')}
-            </Text>
-            <Icon
-              name={expanded ? 'chevron-up' : 'chevron-down'}
-              size={16}
-              tone="muted"
-            />
-          </Pressable>
-        </View>
-
-        {expanded ? (
-          <Animated.View
-            entering={FadeIn.duration(160)}
-            exiting={FadeOut.duration(120)}
-            className="gap-2"
-          >
-            <Text variant="caption" className="leading-relaxed">
-              {meeting.description}
-            </Text>
-            <Text variant="caption" tone="muted">
-              {t('meeting.organizedBy', { name: meeting.organizer })}
-            </Text>
-            {attendeeNames ? (
-              <Text variant="caption" tone="muted">
-                {attendeeNames}
+          <CollapsibleContent>
+            <Animated.View
+              entering={FadeIn.duration(160)}
+              exiting={FadeOut.duration(120)}
+              className="gap-2 pt-2"
+            >
+              <Text variant="caption" className="leading-relaxed">
+                {meeting.description}
               </Text>
-            ) : null}
-          </Animated.View>
-        ) : null}
+              <Text variant="caption" tone="muted">
+                {t('meeting.organizedBy', { name: meeting.organizer })}
+              </Text>
+              {attendeeNames ? (
+                <Text variant="caption" tone="muted">
+                  {attendeeNames}
+                </Text>
+              ) : null}
+            </Animated.View>
+          </CollapsibleContent>
+        </Collapsible>
 
         <Button
           className="self-start"
-          label={t('action.join')}
           onPress={() => void openMeetLink(meeting.meetLink)}
-        />
+        >
+          <Icon name="video" size={16} tone="primary-foreground" />
+          <ButtonText>{t('action.join')}</ButtonText>
+        </Button>
       </Card>
     </Animated.View>
   );
@@ -132,7 +141,7 @@ function MetaRow({
   icon,
   label,
 }: {
-  icon: 'calendar' | 'clock' | 'map-pin';
+  icon: 'clock' | 'map-pin';
   label: string;
 }) {
   return (

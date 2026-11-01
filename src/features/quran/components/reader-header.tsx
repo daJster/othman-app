@@ -22,10 +22,11 @@ import { formatReaderNumber } from '../format';
  *    visible label change without adding a status bar.
  *  - **The exit control is labelled, not just an icon.** A full-screen modal has
  *    no system back gesture on iOS, so the reader's only way out has to be
- *    discoverable and screen-reader labelled.
+ *    discoverable and screen-reader labelled. It dismisses with an X, the same
+ *    shape as every other modal, rather than a back chevron.
  *
- * Icons mirror in RTL by swapping the chevron, not by reversing the row:
- * `flex-row` already follows the document direction.
+ * Only the footer's previous/next arrows mirror in RTL because they are
+ * reading-order actions; dismissals do not.
  */
 export type ReaderHeaderProps = {
   surah: SurahMetadata | null;
@@ -49,7 +50,7 @@ export function ReaderHeader({
   onOpenMenu,
 }: ReaderHeaderProps) {
   const { t } = useTranslation();
-  const { language, isRTL } = useDirection();
+  const { language } = useDirection();
 
   const surahName = surah
     ? language === 'ar'
@@ -78,7 +79,7 @@ export function ReaderHeader({
         onPress={onExit}
         testID="reader-back"
       >
-        <Icon name={isRTL ? 'chevron-right' : 'chevron-left'} size={20} />
+        <Icon name="close" size={20} />
       </Button>
 
       <Pressable

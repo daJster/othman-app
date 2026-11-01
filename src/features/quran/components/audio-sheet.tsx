@@ -1,4 +1,4 @@
-import { BottomSheet, Column, Host, Picker, Slider, Switch } from '@expo/ui';
+import { Column, Host, Picker, Slider, Switch } from '@expo/ui';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import type { Shaykh } from '@/core/config';
@@ -6,7 +6,9 @@ import { useDirection } from '@/i18n';
 import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
 import { NativeSheetContent } from '@/ui/native-sheet-content';
+import { SheetHeader } from '@/ui/sheet-header';
 import { Text } from '@/ui/text';
+import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
 import type { SelectedAyah } from '../ayah-content';
 import { formatAudioTime, formatReaderNumber } from '../format';
 import type { AyahAudioController } from '../use-ayah-audio';
@@ -77,23 +79,18 @@ export function AudioSheet({
     : null;
 
   return (
-    <BottomSheet
+    <ThemedBottomSheet
       isPresented={isPresented}
       onDismiss={onDismiss}
       testID="audio-sheet"
     >
       <NativeSheetContent>
         <View className="gap-3">
-          <View className="flex-row items-center justify-between gap-2">
-            <Text variant="subtitle">{t('reader.panelAudioTitle')}</Text>
-            <Button
-              variant="ghost"
-              size="sm"
-              label={t('action.close')}
-              onPress={onDismiss}
-              testID="audio-close"
-            />
-          </View>
+          <SheetHeader
+            title={t('reader.panelAudioTitle')}
+            onClose={onDismiss}
+            closeTestID="audio-close"
+          />
 
           {selected ? (
             <>
@@ -251,6 +248,6 @@ export function AudioSheet({
           )}
         </View>
       </NativeSheetContent>
-    </BottomSheet>
+    </ThemedBottomSheet>
   );
 }

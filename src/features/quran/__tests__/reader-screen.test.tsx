@@ -33,6 +33,12 @@ jest.mock('expo-haptics', () => ({
   ImpactFeedbackStyle: { Light: 'light' },
 }));
 
+// The menu's theme row belongs to the settings feature and needs the
+// ThemeProvider; this suite is about the reader, so the row is stubbed.
+jest.mock('@/features/settings/theme-dropdown', () => ({
+  ThemeDropdown: () => null,
+}));
+
 // The sheets are native presentations; the interaction tests need their rows.
 // The audio controls are reduced to pressables that report their next value.
 jest.mock('@expo/ui', () => {

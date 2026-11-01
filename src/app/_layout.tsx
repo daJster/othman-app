@@ -1,6 +1,7 @@
 import '@/global.css';
 
 import { QueryClientProvider } from '@tanstack/react-query';
+import { PortalHost } from '@rn-primitives/portal';
 import { Stack, usePathname, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -99,6 +100,7 @@ function AppShell() {
           <AuthProvider>
             <BootProvider>
               <RootNavigator />
+              <PortalHost />
             </BootProvider>
           </AuthProvider>
         </QueryClientProvider>

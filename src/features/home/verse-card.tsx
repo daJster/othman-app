@@ -1,13 +1,13 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/ui/card';
+import { View } from 'react-native';
 import { Text } from '@/ui/text';
 
 /**
- * Featured verse.
+ * Featured verse as a quiet reading band, not a card.
  *
- * The text uses `family="auto"`, not the mushaf face: `en` shows an English
- * translation, and Amiri Quran has no Latin glyphs, so forcing it would hand
- * the string to a fallback family the app does not control. In Arabic the auto
- * family is Noto Naskh, which renders the diacritics correctly.
+ * The home page's one piece of scripture should feel like a page margin, not a
+ * product tile. A pair of hairlines, a brass label and a generous reading
+ * measure do the work; the text uses `family="auto"` so Arabic gets Naskh and
+ * English gets the UI face rather than a Quran face with no Latin glyphs.
  */
 export type VerseCardProps = {
   title: string;
@@ -17,16 +17,19 @@ export type VerseCardProps = {
 
 export function VerseCard({ title, text, reference }: VerseCardProps) {
   return (
-    <Card className="border-primary/20">
-      <CardHeader>
-        <CardTitle className="text-primary">{title}</CardTitle>
-      </CardHeader>
-      <CardContent className="gap-2">
-        <Text className="text-center text-xl leading-relaxed">{text}</Text>
-        <Text variant="caption" tone="muted" className="text-center">
-          {reference}
-        </Text>
-      </CardContent>
-    </Card>
+    <View className="border-y border-border py-8 md:py-10">
+      <Text
+        variant="overline"
+        className="text-center tracking-[0.3em] text-brass-ink"
+      >
+        {title}
+      </Text>
+      <Text className="mt-4 text-center text-2xl leading-relaxed md:text-3xl">
+        {text}
+      </Text>
+      <Text variant="caption" tone="muted" className="mt-3 text-center">
+        {reference}
+      </Text>
+    </View>
   );
 }

@@ -1,7 +1,6 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import Head from 'expo-router/head';
 import { useTranslation } from 'react-i18next';
-import { Button } from '@/ui/button';
 import { ScreenView } from '@/ui/screen';
 import { ErrorState } from '@/ui/states';
 
@@ -44,18 +43,16 @@ export default function ErrorScreen() {
   const keys = ERROR_KEYS[resolved];
 
   return (
-    <ScreenView className="items-center justify-center gap-4 p-6">
+    <ScreenView>
       <Head>
         <title>{`${t(keys.title)} · ${t('app.name')}`}</title>
       </Head>
       <ErrorState
-        className="flex-none p-0"
+        headingLevel={1}
         title={t(keys.title)}
         description={t(keys.description)}
-      />
-      <Button
-        label={t('action.goBackHome')}
-        onPress={() => router.replace('/')}
+        actionLabel={t('action.goBackHome')}
+        onAction={() => router.replace('/')}
       />
     </ScreenView>
   );

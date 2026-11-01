@@ -1,13 +1,13 @@
-import { BottomSheet } from '@expo/ui';
+import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import type { QuranEdition } from '@/core/types';
 import { useDirection } from '@/i18n';
-import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
 import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { Pressable } from '@/ui/pressable';
+import { SheetHeader } from '@/ui/sheet-header';
 import { Text } from '@/ui/text';
 import { formatReaderNumber } from '../format';
 
@@ -47,23 +47,18 @@ export function EditionPickerSheet({
   );
 
   return (
-    <BottomSheet
+    <ThemedBottomSheet
       isPresented={isPresented}
       onDismiss={onDismiss}
       testID="edition-picker-sheet"
     >
       <NativeSheetContent>
         <View className="gap-3">
-          <View className="flex-row items-center justify-between gap-2">
-            <Text variant="subtitle">{t('reader.editionPickerTitle')}</Text>
-            <Button
-              variant="ghost"
-              size="sm"
-              label={t('action.close')}
-              onPress={onDismiss}
-              testID="edition-picker-close"
-            />
-          </View>
+          <SheetHeader
+            title={t('reader.editionPickerTitle')}
+            onClose={onDismiss}
+            closeTestID="edition-picker-close"
+          />
 
           {rows.map((edition) => {
             const selected = edition.key === currentKey;
@@ -96,18 +91,13 @@ export function EditionPickerSheet({
                 </View>
 
                 {selected ? (
-                  <>
-                    <Text variant="caption" tone="muted">
-                      {t('reader.editionSelected')}
-                    </Text>
-                    <Icon name="check-circle" size={18} tone="primary" />
-                  </>
+                  <Icon name="check-circle" size={18} tone="primary" />
                 ) : null}
               </Pressable>
             );
           })}
         </View>
       </NativeSheetContent>
-    </BottomSheet>
+    </ThemedBottomSheet>
   );
 }

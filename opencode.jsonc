@@ -5,6 +5,39 @@
         "url": "https://mcp.expo.dev/mcp",
         "type": "remote",
         "enabled": true
+    },
+    "ui-skills": {
+        "url": "https://www.ui-skills.com/mcp",
+        "type": "remote",
+        "enabled": true
+    },
+    "microsoft/playwright-mcp": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@playwright/mcp@latest"
+      ],
+      "enabled": true
     }
   },
+  "compaction": {
+    "auto": true,
+    "keep": {
+      "tokens": 10000
+    },
+    "buffer": "15%"
+  },
+  "watcher": {
+    "ignore": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/.expo/**",
+      "**/coverage/**",
+      "**/.git/**",
+      "**/.gradle/**",
+      "**/build/**",
+      "**/Pods/**"
+    ]
+  }
 }

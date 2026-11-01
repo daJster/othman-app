@@ -1,5 +1,5 @@
 import { RNHostView } from '@expo/ui';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { Text } from './text';
 
 /**
@@ -10,17 +10,30 @@ import { Text } from './text';
  * `matchContents={{ vertical: true }}` takes the width from the list and the
  * height from the text, which keeps Arabic's taller line box from being clipped.
  *
- * Shared by Account and About so the two lists keep the same rhythm; every row
- * in them is hosted the same way.
+ * On web the same label is returned without the host wrapper: `@expo/ui`'s web
+ * fallback is not used there (see the Account web rows), so the plain RN view
+ * is already inside an RN layout.
+ *
+ * The label is a quiet brass overline. `brass-ink` is the token for small brass
+ * text on a background surface — `brass` itself is line work on canopy.
  */
-export function ListSectionHeader({ label }: { label: string }) {
-  return (
-    <RNHostView matchContents={{ vertical: true }}>
-      <View className="px-4 pt-6 pb-2">
-        <Text variant="overline" tone="muted">
-          {label}
-        </Text>
-      </View>
-    </RNHostView>
+export function ListSectionHeader({
+  label,
+  inset = true,
+}: {
+  label: string;
+  /** False when the parent `Page` already owns the horizontal gutter. */
+  inset?: boolean;
+}) {
+  const content = (
+    <View className={inset ? 'px-4 pt-6 pb-2' : 'pt-6 pb-2'}>
+      <Text variant="overline" className="text-brass-ink">
+        {label}
+      </Text>
+    </View>
   );
+
+  if (Platform.OS === 'web') return content;
+
+  return <RNHostView matchContents={{ vertical: true }}>{content}</RNHostView>;
 }

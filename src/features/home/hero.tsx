@@ -1,44 +1,157 @@
-import { View } from 'react-native';
+import { Link } from 'expo-router';
+import { Pressable, View } from 'react-native';
+import type { AppHref } from '@/features/navigation/route-registry';
+import { BrandMark } from '@/features/brand/brand-mark';
+import { useDirection } from '@/i18n';
+import { cn } from '@/ui/cn';
 import { Text } from '@/ui/text';
 
 /**
- * Home hero.
+ * Visually hidden but still in the accessibility tree. The hero's wordmark is
+ * artwork, so the h1 text lives here instead.
+ */
+const visuallyHidden = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  overflow: 'hidden',
+  opacity: 0,
+} as const;
+
+/**
+ * Home hero: the study circle.
  *
- * Full-bleed gradient rather than a photograph: the web hero leaned on a
- * mosque image with a viewport-height overlay, which on a phone would either
- * crop the calligraphy or push every real action below the fold. A gradient
- * keeps the same "opening page" feel, stays legible in both schemes because it
- * is built from the `primary` token, and needs no image asset.
+ * The landing page is a halqa, not a feature catalogue. A deep canopy field
+ * holds the basmalah, the wordmark and the cohort promise; a brass ring at the
+ * right is the community diagram, with the Arabic word for "circle" at its
+ * centre. On a phone the ring sits below the copy at a smaller size, so the
+ * first viewport still reads as one composition rather than a cropped desktop
+ * banner.
  *
- * The gradient runs *lighter at the top*, so the closing line sits on solid
- * `primary`: white-on-`primary` is the only pairing in this block that clears
- * WCAG AA at body size. No fixed height — the Arabic opening and the app name
- * both wrap instead of clipping when the OS text size is raised.
+ * The primary action is a parchment capsule, the only high-contrast control in
+ * the block. No photograph: there is no real cohort imagery, and a stock image
+ * would lie about the people in this kuttab.
  */
 export type HeroProps = {
   /** The basmalah, in Arabic, in both languages. */
   opening: string;
   title: string;
   tagline: string;
+  /** One line naming the people around the reader. */
+  cohort: string;
+  ctaLabel: string;
+  ctaHref: AppHref;
+  /** Arabic word at the centre of the study ring. */
+  ringLabel: string;
 };
 
-export function Hero({ opening, title, tagline }: HeroProps) {
+export function Hero({
+  opening,
+  title,
+  tagline,
+  cohort,
+  ctaLabel,
+  ctaHref,
+  ringLabel,
+}: HeroProps) {
+  const { isRTL } = useDirection();
+
   return (
-    <View className="items-center gap-3 rounded-b-3xl bg-gradient-to-b from-primary/85 to-primary px-6 pt-12 pb-10">
-      <Text
-        family="quran"
-        className="text-center text-2xl leading-relaxed text-primary-foreground"
-      >
-        {opening}
-      </Text>
-      <Text
-        accessibilityRole="header"
-        variant="title"
-        className="text-center text-3xl text-primary-foreground"
-      >
-        {title}
-      </Text>
-      <Text className="text-center text-primary-foreground">{tagline}</Text>
+    <View className="relative overflow-hidden rounded-b-[2.5rem] bg-canopy px-5 pt-12 pb-14 md:px-10 md:pt-20 md:pb-20">
+      <View
+        className="absolute -top-28 -right-24 h-72 w-72 rounded-full border border-parchment/10"
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      />
+      <View
+        className="absolute -bottom-20 -left-32 h-64 w-64 rounded-full border border-parchment/10"
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+      />
+
+      <View className="mx-auto w-full max-w-6xl gap-8 md:gap-10">
+        <Text
+          family="quran"
+          className="text-center text-2xl leading-relaxed text-brass md:text-3xl"
+        >
+          {opening}
+        </Text>
+
+        <View
+          className={cn(
+            'flex-col gap-10 md:items-center md:gap-16',
+            isRTL ? 'md:flex-row-reverse' : 'md:flex-row',
+          )}
+        >
+          <View className="flex-1 gap-5">
+            <View className="gap-2">
+              {/*
+               * The visible mark is artwork, so the heading stays in the tree
+               * as visually hidden text: screen readers still get a real h1
+               * with the product name, and the image never has to carry the
+               * heading role.
+               */}
+              <Text accessibilityRole="header" style={visuallyHidden}>
+                {title}
+              </Text>
+              <View
+                className={cn(
+                  'flex-row',
+                  isRTL ? 'justify-end' : 'justify-start',
+                )}
+              >
+                <BrandMark
+                  className="h-16 w-28 md:h-20 md:w-36"
+                  surface="onDark"
+                  accessible={false}
+                />
+              </View>
+              <Text className="max-w-xl text-lg text-parchment/80 md:text-xl">
+                {tagline}
+              </Text>
+            </View>
+
+            <Text className="max-w-md text-sm leading-relaxed text-parchment/65">
+              {cohort}
+            </Text>
+
+            <View className={isRTL ? 'flex-row-reverse' : 'flex-row'}>
+              <Link href={ctaHref} asChild>
+                <Pressable className="rounded-full bg-parchment px-6 py-3 active:opacity-80">
+                  <Text className="font-semibold text-canopy">{ctaLabel}</Text>
+                </Pressable>
+              </Link>
+            </View>
+          </View>
+
+          <View
+            className="relative aspect-square w-full max-w-[20rem] self-center md:max-w-[24rem]"
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+          >
+            <View className="absolute inset-0 rounded-full border border-brass/35" />
+            <View className="absolute inset-6 rounded-full border border-parchment/15" />
+            <View className="absolute inset-14 rounded-full border border-brass/20" />
+
+            <View className="flex-1 items-center justify-center gap-1">
+              <Text family="quran" className="text-4xl text-brass">
+                {ringLabel}
+              </Text>
+              <Text
+                variant="overline"
+                className="tracking-[0.35em] text-parchment/70"
+              >
+                HALQA
+              </Text>
+            </View>
+
+            <View className="absolute top-0 left-1/2 -ml-1.5 h-3 w-3 rounded-full bg-brass" />
+            <View className="absolute bottom-0 left-1/2 -ml-1.5 h-3 w-3 rounded-full bg-clay" />
+            <View className="absolute top-1/2 left-0 -mt-1.5 h-3 w-3 rounded-full bg-brass" />
+            <View className="absolute top-1/2 right-0 -mt-1.5 h-3 w-3 rounded-full bg-brass" />
+          </View>
+        </View>
+      </View>
     </View>
   );
 }

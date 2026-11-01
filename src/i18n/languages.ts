@@ -18,13 +18,11 @@ export type Language = (typeof LANGUAGES)[number]['code'];
 export type Direction = (typeof LANGUAGES)[number]['dir'];
 
 /**
- * English, matching the legacy web app.
- *
- * Not the device language and not Arabic: a device in a third language has no
- * reason to be served Arabic. Arabic devices still get Arabic, because
- * `detectDeviceLanguage` reads the locale first — this is only the fallback.
+ * Arabic is the product default on first launch. English is the second
+ * language and is only ever used after an explicit choice; the stored
+ * preference always wins once it exists.
  */
-export const DEFAULT_LANGUAGE: Language = 'en';
+export const DEFAULT_LANGUAGE: Language = 'ar';
 
 const LANGUAGE_CODES = LANGUAGES.map(
   (language) => language.code,

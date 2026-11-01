@@ -1,12 +1,11 @@
 import {
-  act,
   fireEvent,
   render,
   screen,
   waitFor,
 } from '@testing-library/react-native';
+import { PortalHost } from '@rn-primitives/portal';
 import type { QueryClient } from '@tanstack/react-query';
-import { Alert } from 'react-native';
 import type { AccountData, AuthUser } from '@/core/types';
 import AccountScreen from '@/app/(tabs)/account';
 import { profileService } from '@/services/profile';
@@ -43,6 +42,13 @@ jest.mock('expo-router', () => ({
 }));
 
 jest.mock('expo-router/head', () => () => null);
+
+// The preferences block needs the theme and language providers, which this
+// screen test does not mount. It has its own suite; here it is a stub so the
+// account screen's own states stay the subject.
+jest.mock('@/features/settings/preferences-section', () => ({
+  PreferencesSection: () => null,
+}));
 
 jest.mock('@/services/profile', () => ({
   profileService: {
@@ -87,6 +93,7 @@ async function renderScreen(authUser: AuthUser | null = USER) {
   await render(
     <TestProviders client={client} service={auth}>
       <AccountScreen />
+      <PortalHost />
     </TestProviders>,
   );
 
@@ -167,10 +174,6 @@ describe('AccountScreen', () => {
   });
 
   it('asks before signing out, then shows the signed-out account state', async () => {
-    const alert = jest
-      .spyOn(Alert, 'alert')
-      .mockImplementation(() => undefined);
-
     const auth = await renderScreen();
     await waitFor(() =>
       expect(screen.getByText('Othman Al-Farsi')).toBeTruthy(),
@@ -178,18 +181,10 @@ describe('AccountScreen', () => {
 
     await fireEvent.press(screen.getByTestId('account-sign-out-row'));
 
-    expect(alert).toHaveBeenCalledTimes(1);
-    const [title, message, buttons] = alert.mock.calls[0];
-    expect(title).toBe('Sign out?');
-    expect(message).toBe('You can sign back in at any time.');
+    expect(screen.getByText('Sign out?')).toBeTruthy();
+    expect(screen.getByText('You can sign back in at any time.')).toBeTruthy();
 
-    // The destructive action is the second button; the first keeps the session.
-    const confirm = buttons?.[1];
-    expect(confirm?.style).toBe('destructive');
-
-    await act(async () => {
-      await confirm?.onPress?.();
-    });
+    await fireEvent.press(screen.getByTestId('account-sign-out-confirm'));
 
     expect(auth.signOutCalls).toHaveBeenCalledTimes(1);
     // Development mode keeps the mock profile available after sign-out.

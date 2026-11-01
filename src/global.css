@@ -74,7 +74,7 @@
       --color-secondary: oklch(0.96 0.04 160);
       --color-secondary-foreground: oklch(0.205 0 0);
       --color-muted: oklch(0.97 0 0);
-      --color-muted-foreground: oklch(0.556 0 0);
+      --color-muted-foreground: oklch(0.52 0 0);
       --color-accent: oklch(0.95 0.06 160);
       --color-accent-foreground: oklch(0.205 0 0);
       --color-destructive: oklch(0.577 0.245 27.325);
@@ -82,26 +82,56 @@
       --color-border: oklch(0.922 0 0);
       --color-input: oklch(0.922 0 0);
       --color-ring: oklch(0.708 0 0);
+      --color-canopy: oklch(0.31 0.07 160);
+      --color-sand: oklch(0.96 0.02 85);
+      --color-brass: oklch(0.72 0.11 82);
+      --color-brass-ink: oklch(0.51 0.09 82);
+      --color-clay: oklch(0.57 0.12 38);
+      --color-parchment: oklch(0.96 0.02 85);
+      --color-success: oklch(0.47 0.11 155);
+      --color-success-soft: oklch(0.96 0.03 155);
+      --color-success-line: oklch(0.87 0.06 155);
+      --color-info: oklch(0.47 0.1 245);
+      --color-info-soft: oklch(0.96 0.02 245);
+      --color-info-line: oklch(0.88 0.05 245);
     }
 
     @variant dark {
-      --color-background: oklch(0.2 0.1 160);
+      /* Page ground is a near-black green with little chroma; canopy is a
+         lifted green field. The old pair (0.18 vs 0.2, both chroma 0.04/0.1)
+         left the hero's rounded edge at ~1.09:1, so the two fields merged.
+         This pair measures ~1.32:1 — the same separation the card already
+         has from the ground (1.34:1) — while body text stays at 17.6:1 on
+         background and 13.4:1 on canopy. */
+      --color-background: oklch(0.13 0.015 160);
       --color-foreground: oklch(0.95 0.04 160);
-      --color-card: oklch(0.25 0.1 160);
+      --color-card: oklch(0.18 0.03 160);
       --color-card-foreground: oklch(0.95 0.04 160);
       --color-primary: oklch(0.6 0.15 160);
       --color-primary-foreground: oklch(0.2 0.1 160);
-      --color-secondary: oklch(0.3 0.1 160);
+      --color-secondary: oklch(0.21 0.035 160);
       --color-secondary-foreground: oklch(0.95 0.04 160);
-      --color-muted: oklch(0.3 0.1 160);
-      --color-muted-foreground: oklch(0.7 0.1 160);
-      --color-accent: oklch(0.3 0.1 160);
+      --color-muted: oklch(0.21 0.035 160);
+      --color-muted-foreground: oklch(0.68 0.05 160);
+      --color-accent: oklch(0.22 0.04 160);
       --color-accent-foreground: oklch(0.95 0.04 160);
       --color-destructive: oklch(0.704 0.191 22.216);
       --color-destructive-foreground: oklch(0.2 0.1 160);
       --color-border: oklch(1 0 0 / 10%);
       --color-input: oklch(1 0 0 / 15%);
       --color-ring: oklch(0.45 0.15 160);
+      --color-canopy: oklch(0.26 0.05 160);
+      --color-sand: oklch(0.25 0.02 85);
+      --color-brass: oklch(0.78 0.1 82);
+      --color-brass-ink: oklch(0.82 0.1 82);
+      --color-clay: oklch(0.64 0.12 38);
+      --color-parchment: oklch(0.96 0.02 85);
+      --color-success: oklch(0.79 0.13 155);
+      --color-success-soft: oklch(0.22 0.045 155);
+      --color-success-line: oklch(0.36 0.07 155);
+      --color-info: oklch(0.8 0.09 245);
+      --color-info-soft: oklch(0.22 0.04 245);
+      --color-info-line: oklch(0.36 0.06 245);
     }
   }
 }

@@ -1,16 +1,17 @@
-import { BottomSheet } from '@expo/ui';
+import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, View } from 'react-native';
 import type { SurahMetadata } from '@/core/types';
 import { useDirection } from '@/i18n';
-import { Button } from '@/ui/button';
 import { Input } from '@/ui/input';
 import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { Pressable } from '@/ui/pressable';
+import { SheetHeader } from '@/ui/sheet-header';
 import { Text } from '@/ui/text';
 import { formatReaderNumber } from '../format';
 import { filterSurahs, sortSurahs } from '../surah-search';
+import { RevelationMark } from './revelation-mark';
 
 /**
  * Searchable surah picker.
@@ -62,23 +63,18 @@ export function SurahPickerSheet({
   const rows = useMemo(() => filterSurahs(all, query), [all, query]);
 
   return (
-    <BottomSheet
+    <ThemedBottomSheet
       isPresented={isPresented}
       onDismiss={dismiss}
       testID="surah-picker-sheet"
     >
       <NativeSheetContent>
         <View className="gap-3">
-          <View className="flex-row items-center justify-between gap-2">
-            <Text variant="subtitle">{t('reader.surahPickerTitle')}</Text>
-            <Button
-              variant="ghost"
-              size="sm"
-              label={t('action.close')}
-              onPress={dismiss}
-              testID="surah-picker-close"
-            />
-          </View>
+          <SheetHeader
+            title={t('reader.surahPickerTitle')}
+            onClose={dismiss}
+            closeTestID="surah-picker-close"
+          />
 
           <Input
             value={query}
@@ -135,11 +131,14 @@ export function SurahPickerSheet({
                         {item.nameEnglish}
                       </Text>
                     </View>
-                    <Text variant="caption" tone="muted">
-                      {t('reader.ayahCount', {
-                        count: formatReaderNumber(item.ayahCount, language),
-                      })}
-                    </Text>
+                    <View className="flex-row items-center gap-2">
+                      <RevelationMark location={item.location} />
+                      <Text variant="caption" tone="muted">
+                        {t('reader.ayahCount', {
+                          count: formatReaderNumber(item.ayahCount, language),
+                        })}
+                      </Text>
+                    </View>
                   </Pressable>
                 );
               }}
@@ -147,6 +146,6 @@ export function SurahPickerSheet({
           )}
         </View>
       </NativeSheetContent>
-    </BottomSheet>
+    </ThemedBottomSheet>
   );
 }

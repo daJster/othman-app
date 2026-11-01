@@ -14,6 +14,14 @@
     },
     "explore": {
       "title": "Explore"
+    },
+    "halqa": {
+      "cohort": "Learn with your shaykh and classmates, ayah by ayah.",
+      "continue": "Continue reading",
+      "ring": "حلقة"
+    },
+    "circle": {
+      "title": "Your circle"
     }
   },
   "action": {
@@ -32,7 +40,9 @@
   },
   "label": {
     "email": "Email",
-    "password": "Password"
+    "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "nav": {
     "home": "Home",
@@ -55,6 +65,8 @@
     "title": "Language",
     "arabic": "العربية",
     "english": "English",
+    "arShort": "AR",
+    "enShort": "EN",
     "restartTitle": "Restart needed",
     "restartMessage": "The text direction changes now. A few native controls, such as text fields and alerts, follow it after the app restarts."
   },
@@ -62,14 +74,16 @@
     "title": "Theme",
     "light": "Light",
     "dark": "Dark",
-    "system": "System"
+    "system": "System",
+    "autoShort": "Auto",
+    "lightShort": "Light",
+    "darkShort": "Dark"
   },
   "reader": {
     "pageImage": "Page {{page}} of the mushaf",
     "ayahLabel": "Ayah {{ayah}} of surah {{surah}}",
     "clearSelection": "Clear the selected ayah",
     "continueTitle": "Continue reading",
-    "continueDescription": "Page {{page}}",
     "open": "Open the mushaf",
     "entryHint": "The mushaf opens full screen; swipe to turn the page.",
     "imageFailed": "Could not load this page image.",
@@ -85,7 +99,6 @@
     "searchSurahs": "Search surahs",
     "noSurahsFound": "No surah matches your search.",
     "editionPickerTitle": "Editions",
-    "editionSelected": "Selected",
     "menuTitle": "Reader menu",
     "menuSurah": "Surahs",
     "menuEdition": "Editions",
@@ -197,6 +210,7 @@
   },
   "account": {
     "sections": {
+      "preferences": "Preferences",
       "settings": "Settings",
       "session": "Session"
     },

@@ -1,5 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native';
 import QuranScreen from '@/app/(tabs)/quran';
+import type { QuranEdition } from '@/core/types';
 
 /**
  * The tab is a launch surface, not a second reader: it must open the existing
@@ -10,6 +11,8 @@ import QuranScreen from '@/app/(tabs)/quran';
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
 const mockPage = jest.fn(() => 12);
+const mockSurah = jest.fn(() => 2);
+const mockEdition = jest.fn<QuranEdition | null, []>(() => null);
 const mockRestore = jest.fn();
 const mockParams = jest.fn<Record<string, string | string[] | undefined>, []>(
   () => ({}),
@@ -25,11 +28,15 @@ jest.mock('expo-router/head', () => () => null);
 jest.mock('@/features/quran/store/use-reader', () => ({
   useRestoreReader: () => mockRestore(),
   useReaderPage: () => mockPage(),
+  useReaderSurah: () => mockSurah(),
+  useReaderEdition: () => mockEdition(),
 }));
 
 beforeEach(() => {
   jest.clearAllMocks();
   mockPage.mockReturnValue(12);
+  mockSurah.mockReturnValue(2);
+  mockEdition.mockReturnValue(null);
   mockParams.mockReturnValue({});
 });
 
@@ -37,7 +44,7 @@ describe('QuranScreen', () => {
   it('shows the restored page and opens the reader route from it', async () => {
     await render(<QuranScreen />);
 
-    expect(screen.getByText('Page 12')).toBeTruthy();
+    expect(screen.getByText('Continue reading')).toBeTruthy();
     expect(mockRestore).toHaveBeenCalledTimes(1);
 
     await fireEvent.press(screen.getByTestId('quran-open-reader'));
@@ -79,6 +86,33 @@ describe('QuranScreen', () => {
     expect(mockReplace).toHaveBeenCalledWith({
       pathname: '/reader/[page]',
       params: { page: '42' },
+    });
+  });
+
+  it('shows the real position and a preview of the stored page', async () => {
+    mockEdition.mockReturnValue({
+      key: '1',
+      name: 'Madani',
+      riwaya: 'Hafs',
+      baseUrl: 'https://example.test',
+      bboxUrl: '',
+      bboxReversedUrl: '',
+      bboxNormUrl: '',
+      bboxReversedNormUrl: '',
+      firstPage: 1,
+      lastPage: 604,
+      themeColor: '#ffffff',
+    });
+
+    await render(<QuranScreen />);
+
+    expect(screen.getByText('Surah 2 · 12 / 604')).toBeTruthy();
+
+    await fireEvent.press(screen.getByTestId('quran-preview-open'));
+
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: '/reader/[page]',
+      params: { page: '12' },
     });
   });
 

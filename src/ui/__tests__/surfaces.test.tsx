@@ -1,10 +1,9 @@
 import { render, screen } from '@testing-library/react-native';
 import { Text } from 'react-native';
 import { Badge } from '@/ui/badge';
-import { Card, CardDescription, CardTitle } from '@/ui/card';
+import { Card } from '@/ui/card';
 import { Separator } from '@/ui/separator';
 import { Skeleton } from '@/ui/skeleton';
-import { TONE_SURFACE_CLASSES, TONE_TEXT_CLASSES } from '@/ui/tone';
 
 // RNTL 14 removes a render when the test that created it ends; calling
 // `unmount()` mid-test instead leaves an act scope open and every later render
@@ -12,27 +11,17 @@ import { TONE_SURFACE_CLASSES, TONE_TEXT_CLASSES } from '@/ui/tone';
 // they either render one subject per test or render several at once.
 
 describe('Card', () => {
-  it('renders its sections in order', async () => {
+  it('renders content blocks in order', async () => {
     await render(
       <Card testID="card">
-        <CardTitle>Weekly halaqa</CardTitle>
-        <CardDescription>Every Tuesday</CardDescription>
+        <Text>Weekly halaqa</Text>
+        <Text>Every Tuesday</Text>
       </Card>,
     );
 
     expect(screen.getByTestId('card')).toBeTruthy();
     expect(screen.getByText('Weekly halaqa')).toBeTruthy();
     expect(screen.getByText('Every Tuesday')).toBeTruthy();
-  });
-
-  it('styles the title with the card foreground, not the page one', async () => {
-    await render(<CardTitle>Title</CardTitle>);
-
-    // A card sits on `bg-card`; the default `text-foreground` would be wrong on
-    // a theme where the two differ.
-    expect(screen.getByText('Title').props.className).toContain(
-      'text-card-foreground',
-    );
   });
 
   it('lets the caller override the card surface', async () => {
@@ -55,6 +44,27 @@ describe('Badge', () => {
     // The string must land in a `Text`, not in the `View`: RN cannot render a
     // bare string and the tone would not apply.
     expect(screen.getByText('Live')).toBeTruthy();
+    expect(screen.getByText('Live').props.className).toContain('text-success');
+  });
+
+  it('keeps the status tones on the semantic tokens', async () => {
+    await render(
+      <>
+        <Badge variant="positive" label="Starting soon" testID="positive" />
+        <Badge variant="info" label="Today" testID="info" />
+      </>,
+    );
+
+    expect(screen.getByTestId('positive').props.className).toContain(
+      'bg-success-soft',
+    );
+    expect(screen.getByText('Starting soon').props.className).toContain(
+      'text-success',
+    );
+    expect(screen.getByTestId('info').props.className).toContain(
+      'bg-info-soft',
+    );
+    expect(screen.getByText('Today').props.className).toContain('text-info');
   });
 
   it('keeps composed children untouched', async () => {
@@ -66,27 +76,6 @@ describe('Badge', () => {
 
     expect(screen.getByTestId('composed')).toBeTruthy();
     expect(screen.getByTestId('badge')).toBeTruthy();
-  });
-
-  it('binds each status tone to the shared tone tables', async () => {
-    await render(
-      <>
-        <Badge variant="positive" label="positive" testID="positive" />
-        <Badge variant="info" label="info" testID="info" />
-        <Badge variant="neutral" label="neutral" testID="neutral" />
-      </>,
-    );
-
-    // Asserting the shared literals keeps `tone.ts` the single source of truth:
-    // changing a class there must not require editing this test.
-    for (const tone of ['positive', 'info', 'neutral'] as const) {
-      expect(screen.getByTestId(tone).props.className).toContain(
-        TONE_SURFACE_CLASSES[tone].split(' ')[0],
-      );
-      expect(screen.getByText(tone).props.className).toContain(
-        TONE_TEXT_CLASSES[tone].split(' ')[0],
-      );
-    }
   });
 
   it('keeps the destructive variant on the app palette', async () => {
@@ -102,7 +91,7 @@ describe('Separator', () => {
   it('is decorative and horizontal by default', async () => {
     await render(<Separator testID="line" />);
 
-    const line = screen.getByTestId('line');
+    const line = screen.getByTestId('line', { includeHiddenElements: true });
     expect(line.props.role).toBe('none');
     expect(line.props.className).toContain('h-px');
   });
@@ -116,9 +105,10 @@ describe('Separator', () => {
   it('stretches vertically', async () => {
     await render(<Separator orientation="vertical" testID="line" />);
 
-    expect(screen.getByTestId('line').props.className).toContain(
-      'self-stretch',
-    );
+    expect(
+      screen.getByTestId('line', { includeHiddenElements: true }).props
+        .className,
+    ).toContain('self-stretch');
   });
 });
 

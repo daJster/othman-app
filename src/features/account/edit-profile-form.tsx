@@ -19,8 +19,10 @@ import {
 import type { AccountData, UserRole } from '@/core/types';
 import { Avatar } from '@/ui/avatar';
 import { Badge } from '@/ui/badge';
-import { Button } from '@/ui/button';
+import { Button, ButtonText } from '@/ui/button';
+import { Icon } from '@/ui/icon';
 import { Input } from '@/ui/input';
+import { PageHeader } from '@/ui/page-header';
 import { Text } from '@/ui/text';
 import { ASSIGNABLE_ROLES, canEditRoles, roleLabelKey } from './role-label';
 import { useUpdateAccount } from './use-account';
@@ -180,8 +182,9 @@ export function EditProfileForm({
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       className="flex-1 bg-background"
     >
-      <View className="flex-row items-center gap-2 border-b border-border px-4 py-2">
-        <View className="flex-1 items-start">
+      <PageHeader
+        title={t('account.edit.title')}
+        start={
           <Button
             variant="ghost"
             label={t('action.cancel')}
@@ -189,13 +192,8 @@ export function EditProfileForm({
             disabled={update.isPending}
             testID="account-edit-cancel"
           />
-        </View>
-        <Text variant="subtitle" numberOfLines={1}>
-          {t('account.edit.title')}
-        </Text>
-        {/* Balances the cancel button so the title stays centred. */}
-        <View className="flex-1" />
-      </View>
+        }
+      />
 
       <ScrollView
         className="flex-1"
@@ -212,11 +210,15 @@ export function EditProfileForm({
           <Button
             variant="ghost"
             size="sm"
-            label={t('account.edit.photo')}
             onPress={() => void pickPhoto()}
             disabled={update.isPending}
             testID="account-change-photo"
-          />
+          >
+            <Icon name="camera" size={18} tone="muted" />
+            <ButtonText variant="ghost" size="sm">
+              {t('account.edit.photo')}
+            </ButtonText>
+          </Button>
           <Text
             variant="caption"
             tone={photoError ? 'destructive' : 'muted'}
@@ -235,6 +237,7 @@ export function EditProfileForm({
             value={draft.displayName}
             onChangeText={setDisplayName}
             placeholder={t('account.edit.displayNamePlaceholder')}
+            accessibilityLabel={t('account.edit.displayName')}
             invalid={nameError !== null}
             editable={!update.isPending}
             autoCapitalize="words"
@@ -259,6 +262,7 @@ export function EditProfileForm({
           <Input
             value={account.email ?? ''}
             editable={false}
+            accessibilityLabel={t('account.edit.email')}
             className="opacity-70"
             testID="account-email-input"
           />
@@ -273,6 +277,7 @@ export function EditProfileForm({
             value={draft.phoneNumber}
             onChangeText={setPhoneNumber}
             placeholder={t('account.edit.phonePlaceholder')}
+            accessibilityLabel={t('account.edit.phone')}
             invalid={phoneError !== null}
             editable={!update.isPending}
             keyboardType="phone-pad"

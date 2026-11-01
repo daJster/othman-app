@@ -11,56 +11,57 @@
 /**
  * Logical icon names used across config data.
  *
- * A UI layer supplies the implementation once:
- *
- *   const icons = {
- *     'book-open': BookOpen,
- *     chart: ChartLine,
- *     ...
- *   } satisfies IconRegistry<LucideIcon>;
- *
- * `IconRegistry` makes that object exhaustively checked: renaming a key here
- * breaks the registry at compile time instead of rendering a blank icon.
+ * The list is the single source of the name type; the presentation layer maps
+ * each name to a platform glyph and `IconRegistry` proves the map is exhaustive.
+ * It lives here as data because `core/` cannot import expo or react-native to
+ * describe the glyph types themselves.
  */
-export type IconName =
-  | 'book-open'
-  | 'chart-line'
-  | 'check-circle'
-  | 'cog'
-  | 'external-link'
-  | 'file-text'
-  | 'megaphone'
-  | 'trash'
-  | 'university'
-  | 'video'
-  // Added with the navigation tree (P3.2): the four tab roots need glyphs.
-  | 'home'
-  | 'user'
-  // Added with the UI states (P2.1): error and empty screens need a glyph.
-  | 'alert-circle'
-  | 'inbox'
-  // Added with the meetings calendar and card (P4.2).
-  | 'calendar'
-  | 'chevron-down'
-  | 'chevron-left'
-  | 'chevron-right'
-  | 'chevron-up'
-  | 'clock'
-  | 'map-pin'
-  | 'users'
-  // Added with the account screens (P4.3).
-  | 'camera'
-  | 'info'
-  | 'logout'
-  // Added with the reader chrome (P5.4): menu, search, editions, notes.
-  | 'menu'
-  | 'search'
-  | 'layers'
-  | 'pencil'
-  // Added with audio playback (P6.1): open the panel and control the player.
-  | 'volume'
-  | 'play'
-  | 'pause';
+export const ICON_NAMES = [
+  'book-open',
+  'chart-line',
+  'check-circle',
+  'external-link',
+  'file-text',
+  'video',
+  // The four tab roots.
+  'home',
+  'user',
+  // UI states.
+  'alert-circle',
+  'inbox',
+  // Calendar and meeting cards.
+  'calendar',
+  'chevron-down',
+  'chevron-left',
+  'chevron-right',
+  'chevron-up',
+  'clock',
+  'map-pin',
+  'users',
+  // Settings rows.
+  'palette',
+  'languages',
+  'globe',
+  // Account.
+  'camera',
+  'info',
+  'logout',
+  // Reader chrome.
+  'menu',
+  'search',
+  'layers',
+  'pencil',
+  // Audio.
+  'volume',
+  'play',
+  'pause',
+  // Auth and password surfaces.
+  'close',
+  'eye',
+  'eye-off',
+] as const;
+
+export type IconName = (typeof ICON_NAMES)[number];
 
 /** Component type for an icon registry, kept platform-agnostic. */
 export type IconRegistry<Component> = Readonly<Record<IconName, Component>>;

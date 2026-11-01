@@ -24,10 +24,11 @@ export default function NotFoundScreen() {
         <title>{`${t('error.404.title')} · ${t('app.name')}`}</title>
       </Head>
       <ErrorState
+        headingLevel={1}
         title={t('error.404.title')}
         description={t('error.404.description')}
-        retryLabel={t('action.goBackHome')}
-        onRetry={() => router.replace('/')}
+        actionLabel={t('action.goBackHome')}
+        onAction={() => router.replace('/')}
       />
     </ScreenView>
   );

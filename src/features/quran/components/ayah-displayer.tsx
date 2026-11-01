@@ -1,6 +1,11 @@
-import { View } from 'react-native';
+import { useColorScheme, View } from 'react-native';
+import { AYAH_ORNAMENT } from '@/features/brand/assets';
+import { useDirection } from '@/i18n';
+import { useOptionalThemeMode } from '@/providers/theme-provider';
+import { Image } from '@/ui/image';
 import { Text } from '@/ui/text';
 import type { AyahContentBlock } from '../ayah-content';
+import { formatReaderNumber } from '../format';
 
 /**
  * Renders one ayah's content blocks.
@@ -12,12 +17,11 @@ import type { AyahContentBlock } from '../ayah-content';
  *    left-aligned inside an Arabic reader and an RTL e3rab excerpt stays
  *    right-aligned inside an English one. The surrounding reader is never
  *    flipped by its content.
- *  - **The ayah-end ornament replaces a PNG.** The web inlined
- *    `/ayah_icon-*.svg` before and after the text. Those assets are not in the
- *    Expo bundle, so the typographic ayah marker (`۝`, U+06DD) in the Quran font
- *    serves the same decorative role without a theme-dependent binary. It is
- *    marked non-accessible: a screen reader should read the ayah, not "end of
- *    ayah" twice.
+ *  - **The ayah-end ornament is the product's own artwork.** The source's
+ *    `ayah_icon-*` medallions are back in the bundle; the ayah-in-surah number
+ *    sits inside the medallion, in the reader's digits. The mark is decorative
+ *    (the panel already states the selected ayah), so it is hidden from
+ *    assistive tech and never announced twice.
  *  - **No fixed line height.** A hard `lineHeight` does not follow the OS text
  *    size and would clip 200% text; the Quran font's own generous metrics carry
  *    the loose leading, and `leading-loose` is a scaling-friendly loosening on
@@ -28,13 +32,24 @@ import type { AyahContentBlock } from '../ayah-content';
  */
 export type AyahDisplayerProps = {
   blocks: readonly AyahContentBlock[];
+  /** Ayah number inside its surah; the number printed in the medallion. */
+  ayahNumber?: number | null;
   testID?: string;
 };
 
 export function AyahDisplayer({
   blocks,
+  ayahNumber = null,
   testID = 'ayah-content',
 }: AyahDisplayerProps) {
+  const { language } = useDirection();
+  const theme = useOptionalThemeMode();
+  const scheme = useColorScheme();
+  const isDark = theme?.isDark ?? scheme === 'dark';
+  const ornament = AYAH_ORNAMENT[isDark ? 'onDark' : 'onLight'];
+  const hasNumber =
+    ayahNumber !== null && Number.isInteger(ayahNumber) && ayahNumber > 0;
+
   return (
     <View className="w-full max-w-2xl gap-4 self-center" testID={testID}>
       {blocks.map((block) => {
@@ -64,19 +79,25 @@ export function AyahDisplayer({
               }}
               testID={`ayah-block:${block.key}`}
             >
-              {isQuran ? (
-                <Text accessible={false} className="text-primary">
-                  ۝{' '}
-                </Text>
-              ) : null}
               {block.text}
-              {isQuran ? (
-                <Text accessible={false} className="text-primary">
-                  {' '}
-                  ۝
-                </Text>
-              ) : null}
             </Text>
+
+            {isQuran && hasNumber ? (
+              <View
+                className="mt-2 h-12 w-12 items-center justify-center self-center"
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+              >
+                <Image
+                  source={ornament}
+                  className="absolute inset-0 h-full w-full"
+                  contentFit="contain"
+                />
+                <Text variant="caption" className="pb-0.5 font-semibold">
+                  {formatReaderNumber(ayahNumber, language)}
+                </Text>
+              </View>
+            ) : null}
           </View>
         );
       })}

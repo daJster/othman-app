@@ -74,6 +74,9 @@ describe('ProgressScreen', () => {
     await render(<ProgressScreen />);
 
     expect(screen.getByText('No progress recorded yet.')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Progress' })).toHaveTextContent(
+      'Progress',
+    );
     expect(screen.queryByTestId('surah-heatmap')).toBeNull();
   });
 

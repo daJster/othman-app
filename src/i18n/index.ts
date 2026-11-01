@@ -1,4 +1,4 @@
-export { default as i18n, detectDeviceLanguage, resources } from './i18n';
+export { default as i18n, resources } from './i18n';
 export {
   DEFAULT_LANGUAGE,
   LANGUAGES,

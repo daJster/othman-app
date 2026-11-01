@@ -14,6 +14,14 @@
     },
     "explore": {
       "title": "استكشف"
+    },
+    "halqa": {
+      "cohort": "تعلّم مع شيخك وزملائك، آيةً بعد آية.",
+      "continue": "متابعة القراءة",
+      "ring": "حلقة"
+    },
+    "circle": {
+      "title": "حلقتك"
     }
   },
   "action": {
@@ -32,7 +40,9 @@
   },
   "label": {
     "email": "البريد الإلكتروني",
-    "password": "كلمة المرور"
+    "password": "كلمة المرور",
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
   },
   "nav": {
     "home": "الرئيسية",
@@ -55,6 +65,8 @@
     "title": "اللغة",
     "arabic": "العربية",
     "english": "English",
+    "arShort": "ع",
+    "enShort": "EN",
     "restartTitle": "يلزم إعادة التشغيل",
     "restartMessage": "يتغيّر اتجاه النص الآن. بعض العناصر الأصلية، مثل حقول الإدخال والتنبيهات، تتّبع الاتجاه الجديد بعد إعادة تشغيل التطبيق."
   },
@@ -62,14 +74,16 @@
     "title": "السمة",
     "light": "فاتحة",
     "dark": "داكنة",
-    "system": "النظام"
+    "system": "النظام",
+    "autoShort": "تلقائي",
+    "lightShort": "فاتحة",
+    "darkShort": "داكنة"
   },
   "reader": {
     "pageImage": "صفحة {{page}} من المصحف",
     "ayahLabel": "الآية {{ayah}} من سورة {{surah}}",
     "clearSelection": "إلغاء تحديد الآية",
     "continueTitle": "متابعة القراءة",
-    "continueDescription": "صفحة {{page}}",
     "open": "افتح المصحف",
     "entryHint": "يُفتح المصحف بملء الشاشة، ويمكنك قلب الصفحات بالسحب.",
     "imageFailed": "تعذّر تحميل صورة الصفحة.",
@@ -85,7 +99,6 @@
     "searchSurahs": "ابحث في السور",
     "noSurahsFound": "لا توجد سورة تطابق بحثك.",
     "editionPickerTitle": "النسخ",
-    "editionSelected": "محددة",
     "menuTitle": "قائمة المصحف",
     "menuSurah": "السور",
     "menuEdition": "النسخ",
@@ -197,6 +210,7 @@
   },
   "account": {
     "sections": {
+      "preferences": "التفضيلات",
       "settings": "الإعدادات",
       "session": "الجلسة"
     },

@@ -1,12 +1,12 @@
-import { BottomSheet } from '@expo/ui';
+import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, View } from 'react-native';
 import type { NoteAyah } from '@/core/domain/notes/notes';
 import type { AyahContent } from '@/core/types';
 import type { AsyncPresentResult } from '@/features/query/async-state';
 import { useDirection } from '@/i18n';
-import { Button } from '@/ui/button';
 import { NativeSheetContent } from '@/ui/native-sheet-content';
+import { SheetHeader } from '@/ui/sheet-header';
 import { ErrorState, Loading } from '@/ui/states';
 import { Text } from '@/ui/text';
 import { buildAyahBlocks } from '../ayah-content';
@@ -85,7 +85,7 @@ export function AyahPanelSheet({
   const selected = panel !== null && ayahKey !== null && surah !== null;
 
   return (
-    <BottomSheet
+    <ThemedBottomSheet
       isPresented={panel !== null}
       onDismiss={onDismiss}
       testID="ayah-panel-sheet"
@@ -93,16 +93,11 @@ export function AyahPanelSheet({
       {copy ? (
         <NativeSheetContent>
           <View className="gap-3">
-            <View className="flex-row items-center justify-between gap-2">
-              <Text variant="subtitle">{t(copy.titleKey)}</Text>
-              <Button
-                variant="ghost"
-                size="sm"
-                label={t('action.close')}
-                onPress={onDismiss}
-                testID="ayah-panel-close"
-              />
-            </View>
+            <SheetHeader
+              title={t(copy.titleKey)}
+              onClose={onDismiss}
+              closeTestID="ayah-panel-close"
+            />
 
             {selected ? (
               <>
@@ -117,7 +112,12 @@ export function AyahPanelSheet({
                   })}
                 </Text>
 
-                {panel === 'read' ? <ReadPanelBody content={content} /> : null}
+                {panel === 'read' ? (
+                  <ReadPanelBody
+                    content={content}
+                    ayahNumber={ayahKey === null ? null : Number(ayahKey)}
+                  />
+                ) : null}
 
                 {panel === 'notes' ? (
                   <NotesPanel
@@ -139,7 +139,7 @@ export function AyahPanelSheet({
           </View>
         </NativeSheetContent>
       ) : null}
-    </BottomSheet>
+    </ThemedBottomSheet>
   );
 }
 
@@ -153,8 +153,10 @@ export function AyahPanelSheet({
  */
 function ReadPanelBody({
   content,
+  ayahNumber,
 }: {
   content: AsyncPresentResult<AyahContent>;
+  ayahNumber: number | null;
 }) {
   const { t } = useTranslation();
 
@@ -180,7 +182,10 @@ function ReadPanelBody({
 
   return (
     <ScrollView className="max-h-96" testID="ayah-panel-content">
-      <AyahDisplayer blocks={buildAyahBlocks(content.state.data)} />
+      <AyahDisplayer
+        blocks={buildAyahBlocks(content.state.data)}
+        ayahNumber={ayahNumber}
+      />
     </ScrollView>
   );
 }

@@ -94,3 +94,17 @@ src/
 - **Dark mode**: default class applied in HTML, toggled via `ThemeProvider`
 - **PWA**: served from `public/js/` (manifest + service worker in `public/js/`)
 - **`src/pages/` route files** export `{ path, element }` — NOT default exports
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs live as markdown files under `.scratch/<feature>/` in this repo. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical triage roles, used unchanged. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.

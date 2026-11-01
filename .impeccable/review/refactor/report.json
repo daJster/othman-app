@@ -1,0 +1,1549 @@
+[
+  {
+    "name": "home-390-en-light",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 1504,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Othman",
+        "size": "16px",
+        "x": 20,
+        "w": 1
+      },
+      {
+        "tag": "H2",
+        "text": "Your circle",
+        "size": "20px",
+        "x": 20,
+        "w": 264
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 0,
+        "right": 78,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 82,
+        "right": 160,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 164,
+        "right": 265,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 269,
+        "right": 363,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 198,
+        "w": 288,
+        "h": 288
+      },
+      {
+        "x": -128,
+        "w": 256,
+        "h": 256
+      },
+      {
+        "x": 35,
+        "w": 320,
+        "h": 320
+      },
+      {
+        "x": 59,
+        "w": 272,
+        "h": 272
+      }
+    ],
+    "focusables": 10,
+    "errors": []
+  },
+  {
+    "name": "home-768-en-light",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 1174,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Othman",
+        "size": "16px",
+        "x": 40,
+        "w": 1
+      },
+      {
+        "tag": "H2",
+        "text": "Your circle",
+        "size": "20px",
+        "x": 20,
+        "w": 194
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 54,
+        "right": 144,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 148,
+        "right": 238,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 242,
+        "right": 355,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 359,
+        "right": 465,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 576,
+        "w": 288,
+        "h": 288
+      },
+      {
+        "x": -128,
+        "w": 256,
+        "h": 256
+      },
+      {
+        "x": 344,
+        "w": 384,
+        "h": 384
+      },
+      {
+        "x": 368,
+        "w": 336,
+        "h": 336
+      }
+    ],
+    "focusables": 10,
+    "errors": []
+  },
+  {
+    "name": "home-1440-en-light",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 1174,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Othman",
+        "size": "16px",
+        "x": 144,
+        "w": 1
+      },
+      {
+        "tag": "H2",
+        "text": "Your circle",
+        "size": "20px",
+        "x": 164,
+        "w": 362
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 198,
+        "right": 288,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 292,
+        "right": 382,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 386,
+        "right": 499,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 503,
+        "right": 609,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 1248,
+        "w": 288,
+        "h": 288
+      },
+      {
+        "x": -128,
+        "w": 256,
+        "h": 256
+      },
+      {
+        "x": 912,
+        "w": 384,
+        "h": 384
+      },
+      {
+        "x": 936,
+        "w": 336,
+        "h": 336
+      }
+    ],
+    "focusables": 10,
+    "errors": []
+  },
+  {
+    "name": "home-390-ar-dark",
+    "dir": "rtl",
+    "overflow": 0,
+    "scrollHeight": 1447,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "كُتَّاب عُثمَانُ",
+        "size": "16px",
+        "x": 20,
+        "w": 1
+      },
+      {
+        "tag": "H2",
+        "text": "حلقتك",
+        "size": "20px",
+        "x": 144,
+        "w": 226
+      }
+    ],
+    "tabs": [
+      {
+        "label": "الرئيسية",
+        "x": 0,
+        "right": 80,
+        "h": 44
+      },
+      {
+        "label": "القرآن",
+        "x": 84,
+        "right": 151,
+        "h": 44
+      },
+      {
+        "label": "الحلقات",
+        "x": 155,
+        "right": 233,
+        "h": 44
+      },
+      {
+        "label": "حسابي",
+        "x": 237,
+        "right": 310,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 198,
+        "w": 288,
+        "h": 288
+      },
+      {
+        "x": -128,
+        "w": 256,
+        "h": 256
+      },
+      {
+        "x": 35,
+        "w": 320,
+        "h": 320
+      },
+      {
+        "x": 59,
+        "w": 272,
+        "h": 272
+      }
+    ],
+    "focusables": 10,
+    "errors": []
+  },
+  {
+    "name": "home-1440-ar-dark",
+    "dir": "rtl",
+    "overflow": 0,
+    "scrollHeight": 1174,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "كُتَّاب عُثمَانُ",
+        "size": "16px",
+        "x": 592,
+        "w": 1
+      },
+      {
+        "tag": "H2",
+        "text": "حلقتك",
+        "size": "20px",
+        "x": 952,
+        "w": 324
+      }
+    ],
+    "tabs": [
+      {
+        "label": "الرئيسية",
+        "x": 198,
+        "right": 290,
+        "h": 44
+      },
+      {
+        "label": "القرآن",
+        "x": 294,
+        "right": 373,
+        "h": 44
+      },
+      {
+        "label": "الحلقات",
+        "x": 377,
+        "right": 467,
+        "h": 44
+      },
+      {
+        "label": "حسابي",
+        "x": 471,
+        "right": 556,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 1248,
+        "w": 288,
+        "h": 288
+      },
+      {
+        "x": -128,
+        "w": 256,
+        "h": 256
+      },
+      {
+        "x": 144,
+        "w": 384,
+        "h": 384
+      },
+      {
+        "x": 168,
+        "w": 336,
+        "h": 336
+      }
+    ],
+    "focusables": 10,
+    "errors": []
+  },
+  {
+    "name": "home-390-en-dark",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 1504,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Othman",
+        "size": "16px",
+        "x": 20,
+        "w": 1
+      },
+      {
+        "tag": "H2",
+        "text": "Your circle",
+        "size": "20px",
+        "x": 20,
+        "w": 264
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 0,
+        "right": 78,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 82,
+        "right": 160,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 164,
+        "right": 265,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 269,
+        "right": 363,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 198,
+        "w": 288,
+        "h": 288
+      },
+      {
+        "x": -128,
+        "w": 256,
+        "h": 256
+      },
+      {
+        "x": 35,
+        "w": 320,
+        "h": 320
+      },
+      {
+        "x": 59,
+        "w": 272,
+        "h": 272
+      }
+    ],
+    "focusables": 10,
+    "errors": []
+  },
+  {
+    "name": "home-1440-en-dark",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 1174,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Othman",
+        "size": "16px",
+        "x": 144,
+        "w": 1
+      },
+      {
+        "tag": "H2",
+        "text": "Your circle",
+        "size": "20px",
+        "x": 164,
+        "w": 362
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 198,
+        "right": 288,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 292,
+        "right": 382,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 386,
+        "right": 499,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 503,
+        "right": 609,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 1248,
+        "w": 288,
+        "h": 288
+      },
+      {
+        "x": -128,
+        "w": 256,
+        "h": 256
+      },
+      {
+        "x": 912,
+        "w": 384,
+        "h": 384
+      },
+      {
+        "x": 936,
+        "w": 336,
+        "h": 336
+      }
+    ],
+    "focusables": 10,
+    "errors": []
+  },
+  {
+    "name": "quran-390-en-light",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 844,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Quran",
+        "size": "24px",
+        "x": 20,
+        "w": 350
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 0,
+        "right": 78,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 82,
+        "right": 160,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 164,
+        "right": 265,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 269,
+        "right": 363,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 20,
+        "w": 350,
+        "h": 196
+      }
+    ],
+    "focusables": 5,
+    "errors": []
+  },
+  {
+    "name": "quran-768-en-light",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 844,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Quran",
+        "size": "24px",
+        "x": 32,
+        "w": 704
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 54,
+        "right": 144,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 148,
+        "right": 238,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 242,
+        "right": 355,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 359,
+        "right": 465,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 32,
+        "w": 704,
+        "h": 212
+      }
+    ],
+    "focusables": 5,
+    "errors": []
+  },
+  {
+    "name": "quran-1440-en-light",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 1000,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Quran",
+        "size": "24px",
+        "x": 368,
+        "w": 704
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 198,
+        "right": 288,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 292,
+        "right": 382,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 386,
+        "right": 499,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 503,
+        "right": 609,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 368,
+        "w": 704,
+        "h": 212
+      }
+    ],
+    "focusables": 5,
+    "errors": []
+  },
+  {
+    "name": "quran-390-ar-dark",
+    "dir": "rtl",
+    "overflow": 0,
+    "scrollHeight": 844,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "القرآن",
+        "size": "24px",
+        "x": 20,
+        "w": 350
+      }
+    ],
+    "tabs": [
+      {
+        "label": "الرئيسية",
+        "x": 0,
+        "right": 80,
+        "h": 44
+      },
+      {
+        "label": "القرآن",
+        "x": 84,
+        "right": 151,
+        "h": 44
+      },
+      {
+        "label": "الحلقات",
+        "x": 155,
+        "right": 233,
+        "h": 44
+      },
+      {
+        "label": "حسابي",
+        "x": 237,
+        "right": 310,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 20,
+        "w": 350,
+        "h": 196
+      }
+    ],
+    "focusables": 5,
+    "errors": []
+  },
+  {
+    "name": "quran-1440-ar-dark",
+    "dir": "rtl",
+    "overflow": 0,
+    "scrollHeight": 1000,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "القرآن",
+        "size": "24px",
+        "x": 368,
+        "w": 704
+      }
+    ],
+    "tabs": [
+      {
+        "label": "الرئيسية",
+        "x": 198,
+        "right": 290,
+        "h": 44
+      },
+      {
+        "label": "القرآن",
+        "x": 294,
+        "right": 373,
+        "h": 44
+      },
+      {
+        "label": "الحلقات",
+        "x": 377,
+        "right": 467,
+        "h": 44
+      },
+      {
+        "label": "حسابي",
+        "x": 471,
+        "right": 556,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 368,
+        "w": 704,
+        "h": 212
+      }
+    ],
+    "focusables": 5,
+    "errors": []
+  },
+  {
+    "name": "quran-390-en-dark",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 844,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Quran",
+        "size": "24px",
+        "x": 20,
+        "w": 350
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 0,
+        "right": 78,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 82,
+        "right": 160,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 164,
+        "right": 265,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 269,
+        "right": 363,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 20,
+        "w": 350,
+        "h": 196
+      }
+    ],
+    "focusables": 5,
+    "errors": []
+  },
+  {
+    "name": "quran-1440-en-dark",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 1000,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Quran",
+        "size": "24px",
+        "x": 368,
+        "w": 704
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 198,
+        "right": 288,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 292,
+        "right": 382,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 386,
+        "right": 499,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 503,
+        "right": 609,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 368,
+        "w": 704,
+        "h": 212
+      }
+    ],
+    "focusables": 5,
+    "errors": []
+  },
+  {
+    "name": "meetings-390-en-light",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 844,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Meetings",
+        "size": "24px",
+        "x": 16,
+        "w": 358
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 0,
+        "right": 78,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 82,
+        "right": 160,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 164,
+        "right": 265,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 269,
+        "right": 363,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 16,
+        "w": 358,
+        "h": 464
+      },
+      {
+        "x": 16,
+        "w": 358,
+        "h": 131
+      }
+    ],
+    "focusables": 51,
+    "errors": []
+  },
+  {
+    "name": "meetings-768-en-light",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 844,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Meetings",
+        "size": "24px",
+        "x": 16,
+        "w": 736
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 54,
+        "right": 144,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 148,
+        "right": 238,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 242,
+        "right": 355,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 359,
+        "right": 465,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 16,
+        "w": 736,
+        "h": 464
+      },
+      {
+        "x": 16,
+        "w": 736,
+        "h": 131
+      }
+    ],
+    "focusables": 51,
+    "errors": []
+  },
+  {
+    "name": "meetings-1440-en-light",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 1000,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Meetings",
+        "size": "24px",
+        "x": 352,
+        "w": 736
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 198,
+        "right": 288,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 292,
+        "right": 382,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 386,
+        "right": 499,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 503,
+        "right": 609,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 352,
+        "w": 736,
+        "h": 464
+      },
+      {
+        "x": 352,
+        "w": 736,
+        "h": 131
+      }
+    ],
+    "focusables": 51,
+    "errors": []
+  },
+  {
+    "name": "meetings-390-ar-dark",
+    "dir": "rtl",
+    "overflow": 0,
+    "scrollHeight": 844,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "الحلقات",
+        "size": "24px",
+        "x": 16,
+        "w": 358
+      }
+    ],
+    "tabs": [
+      {
+        "label": "الرئيسية",
+        "x": 0,
+        "right": 80,
+        "h": 44
+      },
+      {
+        "label": "القرآن",
+        "x": 84,
+        "right": 151,
+        "h": 44
+      },
+      {
+        "label": "الحلقات",
+        "x": 155,
+        "right": 233,
+        "h": 44
+      },
+      {
+        "label": "حسابي",
+        "x": 237,
+        "right": 310,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 16,
+        "w": 358,
+        "h": 464
+      },
+      {
+        "x": 16,
+        "w": 358,
+        "h": 131
+      }
+    ],
+    "focusables": 51,
+    "errors": []
+  },
+  {
+    "name": "meetings-1440-ar-dark",
+    "dir": "rtl",
+    "overflow": 0,
+    "scrollHeight": 1000,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "الحلقات",
+        "size": "24px",
+        "x": 352,
+        "w": 736
+      }
+    ],
+    "tabs": [
+      {
+        "label": "الرئيسية",
+        "x": 198,
+        "right": 290,
+        "h": 44
+      },
+      {
+        "label": "القرآن",
+        "x": 294,
+        "right": 373,
+        "h": 44
+      },
+      {
+        "label": "الحلقات",
+        "x": 377,
+        "right": 467,
+        "h": 44
+      },
+      {
+        "label": "حسابي",
+        "x": 471,
+        "right": 556,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 352,
+        "w": 736,
+        "h": 464
+      },
+      {
+        "x": 352,
+        "w": 736,
+        "h": 131
+      }
+    ],
+    "focusables": 51,
+    "errors": []
+  },
+  {
+    "name": "meetings-390-en-dark",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 844,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Meetings",
+        "size": "24px",
+        "x": 16,
+        "w": 358
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 0,
+        "right": 78,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 82,
+        "right": 160,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 164,
+        "right": 265,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 269,
+        "right": 363,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 16,
+        "w": 358,
+        "h": 464
+      },
+      {
+        "x": 16,
+        "w": 358,
+        "h": 131
+      }
+    ],
+    "focusables": 51,
+    "errors": []
+  },
+  {
+    "name": "meetings-1440-en-dark",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 1000,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Meetings",
+        "size": "24px",
+        "x": 352,
+        "w": 736
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 198,
+        "right": 288,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 292,
+        "right": 382,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 386,
+        "right": 499,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 503,
+        "right": 609,
+        "h": 44
+      }
+    ],
+    "cards": [
+      {
+        "x": 352,
+        "w": 736,
+        "h": 464
+      },
+      {
+        "x": 352,
+        "w": 736,
+        "h": 131
+      }
+    ],
+    "focusables": 51,
+    "errors": []
+  },
+  {
+    "name": "account-390-en-light",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 844,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Account",
+        "size": "24px",
+        "x": 16,
+        "w": 358
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 0,
+        "right": 78,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 82,
+        "right": 160,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 164,
+        "right": 265,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 269,
+        "right": 363,
+        "h": 44
+      }
+    ],
+    "cards": [],
+    "focusables": 8,
+    "errors": []
+  },
+  {
+    "name": "account-768-en-light",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 844,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Account",
+        "size": "24px",
+        "x": 16,
+        "w": 736
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 54,
+        "right": 144,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 148,
+        "right": 238,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 242,
+        "right": 355,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 359,
+        "right": 465,
+        "h": 44
+      }
+    ],
+    "cards": [],
+    "focusables": 8,
+    "errors": []
+  },
+  {
+    "name": "account-1440-en-light",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 1000,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Account",
+        "size": "24px",
+        "x": 352,
+        "w": 736
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 198,
+        "right": 288,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 292,
+        "right": 382,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 386,
+        "right": 499,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 503,
+        "right": 609,
+        "h": 44
+      }
+    ],
+    "cards": [],
+    "focusables": 8,
+    "errors": []
+  },
+  {
+    "name": "account-390-ar-dark",
+    "dir": "rtl",
+    "overflow": 0,
+    "scrollHeight": 844,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "حسابي",
+        "size": "24px",
+        "x": 16,
+        "w": 358
+      }
+    ],
+    "tabs": [
+      {
+        "label": "الرئيسية",
+        "x": 0,
+        "right": 80,
+        "h": 44
+      },
+      {
+        "label": "القرآن",
+        "x": 84,
+        "right": 151,
+        "h": 44
+      },
+      {
+        "label": "الحلقات",
+        "x": 155,
+        "right": 233,
+        "h": 44
+      },
+      {
+        "label": "حسابي",
+        "x": 237,
+        "right": 310,
+        "h": 44
+      }
+    ],
+    "cards": [],
+    "focusables": 8,
+    "errors": []
+  },
+  {
+    "name": "account-1440-ar-dark",
+    "dir": "rtl",
+    "overflow": 0,
+    "scrollHeight": 1000,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "حسابي",
+        "size": "24px",
+        "x": 352,
+        "w": 736
+      }
+    ],
+    "tabs": [
+      {
+        "label": "الرئيسية",
+        "x": 198,
+        "right": 290,
+        "h": 44
+      },
+      {
+        "label": "القرآن",
+        "x": 294,
+        "right": 373,
+        "h": 44
+      },
+      {
+        "label": "الحلقات",
+        "x": 377,
+        "right": 467,
+        "h": 44
+      },
+      {
+        "label": "حسابي",
+        "x": 471,
+        "right": 556,
+        "h": 44
+      }
+    ],
+    "cards": [],
+    "focusables": 8,
+    "errors": []
+  },
+  {
+    "name": "account-390-en-dark",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 844,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Account",
+        "size": "24px",
+        "x": 16,
+        "w": 358
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 0,
+        "right": 78,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 82,
+        "right": 160,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 164,
+        "right": 265,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 269,
+        "right": 363,
+        "h": 44
+      }
+    ],
+    "cards": [],
+    "focusables": 8,
+    "errors": []
+  },
+  {
+    "name": "account-1440-en-dark",
+    "dir": "ltr",
+    "overflow": 0,
+    "scrollHeight": 1000,
+    "headings": [
+      {
+        "tag": "H1",
+        "text": "Account",
+        "size": "24px",
+        "x": 352,
+        "w": 736
+      }
+    ],
+    "tabs": [
+      {
+        "label": "Home",
+        "x": 198,
+        "right": 288,
+        "h": 44
+      },
+      {
+        "label": "Quran",
+        "x": 292,
+        "right": 382,
+        "h": 44
+      },
+      {
+        "label": "Meetings",
+        "x": 386,
+        "right": 499,
+        "h": 44
+      },
+      {
+        "label": "Account",
+        "x": 503,
+        "right": 609,
+        "h": 44
+      }
+    ],
+    "cards": [],
+    "focusables": 8,
+    "errors": []
+  }
+]

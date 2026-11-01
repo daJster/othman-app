@@ -2,8 +2,8 @@ import { render, screen } from '@testing-library/react-native';
 import { Avatar } from '@/ui/avatar';
 
 /**
- * `expo-image` renders a native adapter, not a React Native `Image`, so the
- * rendered tree is walked instead of querying by component type.
+ * The RNR avatar renders a React Native `Image`, so the rendered tree is walked
+ * instead of querying by component type.
  */
 type TreeNode = {
   type: string;
@@ -30,8 +30,9 @@ function findNode(
 }
 
 function imageNode() {
-  return findNode(screen.toJSON() as unknown as TreeNode, (node) =>
-    node.type.includes('ExpoImage'),
+  return findNode(
+    screen.toJSON() as unknown as TreeNode,
+    (node) => node.type === 'Image',
   );
 }
 
@@ -57,9 +58,9 @@ describe('Avatar', () => {
       />,
     );
 
-    expect(imageNode()?.props.source).toEqual([
-      { uri: 'https://example.com/amina.png' },
-    ]);
+    expect(imageNode()?.props.source).toEqual({
+      uri: 'https://example.com/amina.png',
+    });
     expect(screen.queryByText('AE')).toBeNull();
   });
 

@@ -1,15 +1,14 @@
 import { render, screen } from '@testing-library/react-native';
-import { BlurView } from '@/ui/blur';
 import { Image } from '@/ui/image';
 
 /**
- * Both components are third-party and reach Uniwind only through `withUniwind`.
+ * The image is third-party and reaches Uniwind only through `withUniwind`.
  * These tests prove the wrapper is wired: `className` survives the HOC and the
  * component's own props still arrive.
  *
- * The rendered tree is walked because both render native adapters
- * (`ViewManagerAdapter_ExpoImage`, `ViewManagerAdapter_ExpoBlur`); the wrapper
- * `View` the libraries add is an implementation detail, not the subject.
+ * The rendered tree is walked because the component renders a native adapter
+ * (`ViewManagerAdapter_ExpoImage`); the wrapper `View` the library adds is an
+ * implementation detail, not the subject.
  */
 type TreeNode = {
   type: string;
@@ -72,26 +71,5 @@ describe('Image', () => {
     expect(
       findNode(tree(), 'ViewManagerAdapter_ExpoImage')?.props.className,
     ).toBe('h-full w-full rounded-lg');
-  });
-});
-
-describe('BlurView', () => {
-  it('keeps intensity and tint', async () => {
-    await render(<BlurView testID="header" intensity={40} tint="dark" />);
-
-    const node = findNode(tree(), 'ViewManagerAdapter_ExpoBlur');
-    expect(node?.props.intensity).toBe(40);
-    expect(node?.props.tint).toBe('dark');
-  });
-
-  it('puts the className on the wrapper and keeps the testID queryable', async () => {
-    await render(
-      <BlurView testID="header" intensity={40} className="p-4">
-        <BlurView testID="inner" />
-      </BlurView>,
-    );
-
-    expect(screen.getByTestId('header').props.className).toBe('p-4');
-    expect(screen.getByTestId('inner')).toBeTruthy();
   });
 });

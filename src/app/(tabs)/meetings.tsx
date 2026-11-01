@@ -13,7 +13,9 @@ import {
 } from '@/features/meetings/use-meetings';
 import { formatLongDate } from '@/features/meetings/calendar-format';
 import { useDirection } from '@/i18n';
-import { EmptyState, ErrorState } from '@/ui/states';
+import { Page, PAGE_GUTTER } from '@/ui/page';
+import { Section } from '@/ui/section';
+import { ErrorState } from '@/ui/states';
 import { Text } from '@/ui/text';
 
 /**
@@ -59,67 +61,86 @@ function MeetingsContent() {
         <title>{`${t('nav.meetings')} · ${t('app.name')}`}</title>
       </Head>
 
-      <FlatList
-        data={meetings}
-        keyExtractor={(meeting) => String(meeting.id)}
-        renderItem={({ item }) => <MeetingCard meeting={item} />}
-        className="flex-1 bg-background"
-        contentContainerClassName="gap-3 p-4 pb-10"
-        contentInsetAdjustmentBehavior="automatic"
-        refreshControl={
-          <RefreshControl
-            refreshing={isFetching && state.status === 'ready'}
-            onRefresh={() => void refresh()}
-          />
-        }
-        ListHeaderComponent={
-          <View className="gap-4">
-            <View className="gap-1">
-              <Text variant="title" accessibilityRole="header">
-                {t('page.meetings.header.title')}
-              </Text>
-              <Text tone="muted">{t('page.meetings.header.description')}</Text>
-            </View>
-
-            <MeetingCalendar
-              selectedDate={selectedDate}
-              onSelect={setSelectedDate}
+      {/*
+       * One column, measured rather than viewport-wide: on a desktop the day
+       * cells used to stretch to ~195 px each, which read as a table of boxes
+       * instead of a calendar. The single FlatList (with the calendar in its
+       * header) keeps pull-to-refresh and virtualisation intact.
+       */}
+      <Page width="default" className="flex-1">
+        <FlatList
+          data={meetings}
+          keyExtractor={(meeting) => String(meeting.id)}
+          renderItem={({ item }) => <MeetingCard meeting={item} />}
+          className="flex-1 bg-background"
+          contentContainerClassName={`${PAGE_GUTTER} gap-3 py-4 pb-10`}
+          contentInsetAdjustmentBehavior="automatic"
+          refreshControl={
+            <RefreshControl
+              refreshing={isFetching && state.status === 'ready'}
+              onRefresh={() => void refresh()}
             />
+          }
+          ListHeaderComponent={
+            <View className="gap-4">
+              <Section
+                title={t('page.meetings.header.title')}
+                description={t('page.meetings.header.description')}
+              />
 
-            <View className="gap-0.5">
-              <Text variant="subtitle">
-                {formatLongDate(selectedDate, language)}
-              </Text>
-              {state.status === 'ready' ? (
-                <Text variant="caption" tone="muted">
-                  {t('meeting.found', { count: meetings.length })}
-                </Text>
+              <MeetingCalendar
+                selectedDate={selectedDate}
+                onSelect={setSelectedDate}
+              />
+
+              {/* The empty state carries the date itself as its overline. */}
+              {state.status !== 'empty' ? (
+                <View className="gap-0.5">
+                  <Text variant="subtitle">
+                    {formatLongDate(selectedDate, language)}
+                  </Text>
+                  {state.status === 'ready' ? (
+                    <Text variant="caption" tone="muted">
+                      {t('meeting.found', { count: meetings.length })}
+                    </Text>
+                  ) : null}
+                </View>
               ) : null}
             </View>
-          </View>
-        }
-        ListEmptyComponent={
-          state.status === 'pending' ? (
-            <View className="gap-3">
-              {[0, 1, 2].map((index) => (
-                <MeetingCardSkeleton key={index} />
-              ))}
-            </View>
-          ) : state.status === 'error' ? (
-            <ErrorState
-              className="py-10"
-              title={t('state.errorTitle')}
-              description={t('state.errorDescription')}
-              onRetry={state.retry}
-            />
-          ) : (
-            <EmptyState
-              className="py-10"
-              title={t('page.meetings.list.empty')}
-            />
-          )
-        }
-      />
+          }
+          ListEmptyComponent={
+            state.status === 'pending' ? (
+              <View className="gap-3">
+                {[0, 1, 2].map((index) => (
+                  <MeetingCardSkeleton key={index} />
+                ))}
+              </View>
+            ) : state.status === 'error' ? (
+              <ErrorState
+                className="py-10"
+                title={t('state.errorTitle')}
+                description={t('state.errorDescription')}
+                onRetry={state.retry}
+              />
+            ) : (
+              /*
+               * Typographic, not an illustration: the selected date as a quiet
+               * brass overline (the header omits its own copy for this state),
+               * the copy the screen already owns, and a muted second line. No
+               * icon, no new locale keys, no action that would invent a flow.
+               */
+              <View className="items-center gap-1.5 border-t border-border py-10">
+                <Text variant="subtitle" className="text-center">
+                  {formatLongDate(selectedDate, language)}
+                </Text>
+                <Text variant="caption" tone="muted" className="text-center">
+                  {t('page.meetings.list.empty')}
+                </Text>
+              </View>
+            )
+          }
+        />
+      </Page>
     </>
   );
 }

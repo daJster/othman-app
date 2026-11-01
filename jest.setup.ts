@@ -1,5 +1,8 @@
 // Keep the console honest: a warning here usually means a real problem in the
 // component under test (missing key, act() leak, unknown prop).
+import i18n from '@/i18n/i18n';
+import { setLanguageState } from '@/i18n/language-store';
+
 const originalWarn = console.warn;
 
 /**
@@ -24,6 +27,16 @@ jest.mock('expo-font', () => ({
   isLoaded: jest.fn(() => true),
   loadAsync: jest.fn(async () => undefined),
 }));
+
+/**
+ * The product defaults to Arabic on first launch. The suite asserts English
+ * copy, so it pins English once per test file instead of every test having to
+ * change the language.
+ */
+beforeAll(async () => {
+  await i18n.changeLanguage('en');
+  setLanguageState({ language: 'en', ready: true });
+});
 
 /**
  * Warnings that are expected in Jest and carry no signal here.

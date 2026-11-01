@@ -13,8 +13,9 @@ import { tryGregorianDateToHijri } from '@/core/utils/hijri';
 import { useDirection } from '@/i18n';
 import { Button } from '@/ui/button';
 import { cn } from '@/ui/cn';
+import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
-import { SegmentedControl } from '@/ui/segmented-control';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Text } from '@/ui/text';
 import {
   formatDayNumber,
@@ -95,11 +96,14 @@ export function MeetingCalendar({
           disabled={!canGoPrevious}
           onPress={() => setAnchor(shiftCalendarMonth(anchor, system, -1))}
         />
+        {/*
+         * A subtitle, not a heading: the screen's title is the only H1, and
+         * `accessibilityRole="header"` here promoted the month to a second one.
+         */}
         <Text
           testID="calendar-month-label"
           variant="subtitle"
           className="flex-1 text-center"
-          accessibilityRole="header"
         >
           {formatMonthLabel(month, language)}
         </Text>
@@ -135,6 +139,7 @@ export function MeetingCalendar({
                 onPress={() => selectDay(day.date)}
                 className={cn(
                   'h-11 items-center justify-center rounded-md border active:opacity-70',
+                  FOCUS_RING,
                   selected
                     ? 'border-primary bg-primary'
                     : day.isToday
@@ -161,18 +166,34 @@ export function MeetingCalendar({
       </View>
 
       <View className="flex-row flex-wrap items-center justify-between gap-2">
-        <SegmentedControl
-          label={t('meeting.calendar.system')}
+        <ToggleGroup
+          type="single"
           value={system}
-          onChange={changeSystem}
-          options={[
-            {
-              value: 'gregorian',
-              label: t('meeting.calendar.gregorian'),
-            },
-            { value: 'hijri', label: t('meeting.calendar.hijri') },
-          ]}
-        />
+          onValueChange={(next) => {
+            if (next === 'gregorian' || next === 'hijri') changeSystem(next);
+          }}
+          accessibilityLabel={t('meeting.calendar.system')}
+          variant="outline"
+          size="sm"
+          className="h-11"
+        >
+          <ToggleGroupItem value="gregorian" isFirst className="h-11 px-3">
+            <Text
+              variant="label"
+              tone={system === 'gregorian' ? 'default' : 'muted'}
+            >
+              {t('meeting.calendar.gregorian')}
+            </Text>
+          </ToggleGroupItem>
+          <ToggleGroupItem value="hijri" isLast className="h-11 px-3">
+            <Text
+              variant="label"
+              tone={system === 'hijri' ? 'default' : 'muted'}
+            >
+              {t('meeting.calendar.hijri')}
+            </Text>
+          </ToggleGroupItem>
+        </ToggleGroup>
         <Button
           variant="ghost"
           label={t('meeting.calendar.today')}
@@ -203,6 +224,7 @@ function MonthButton({
       onPress={onPress}
       className={cn(
         'h-11 w-11 items-center justify-center rounded-full active:bg-muted',
+        FOCUS_RING,
         disabled && 'opacity-40',
       )}
     >
