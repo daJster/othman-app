@@ -132,9 +132,7 @@ export default function QuranScreen() {
 
             <View className="flex-1 gap-5">
               <View className="gap-1">
-                <Text variant="heading" className="tabular-nums">
-                  {t('reader.continueDescription', { page: pageLabel })}
-                </Text>
+                <Text variant="heading">{t('reader.continueTitle')}</Text>
                 <Text variant="caption" tone="muted" className="tabular-nums">
                   {`${surahLabel} · ${t('reader.pageOf', {
                     page: pageLabel,

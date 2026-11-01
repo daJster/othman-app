@@ -21,8 +21,7 @@
       "ring": "حلقة"
     },
     "circle": {
-      "title": "Your circle",
-      "description": "Four ways back into the circle."
+      "title": "Your circle"
     }
   },
   "action": {
@@ -85,7 +84,6 @@
     "ayahLabel": "Ayah {{ayah}} of surah {{surah}}",
     "clearSelection": "Clear the selected ayah",
     "continueTitle": "Continue reading",
-    "continueDescription": "Page {{page}}",
     "open": "Open the mushaf",
     "entryHint": "The mushaf opens full screen; swipe to turn the page.",
     "imageFailed": "Could not load this page image.",
@@ -101,7 +99,6 @@
     "searchSurahs": "Search surahs",
     "noSurahsFound": "No surah matches your search.",
     "editionPickerTitle": "Editions",
-    "editionSelected": "Selected",
     "menuTitle": "Reader menu",
     "menuSurah": "Surahs",
     "menuEdition": "Editions",

@@ -7,9 +7,7 @@ import Animated, {
   LinearTransition,
 } from 'react-native-reanimated';
 import { getMeetingStatusConfig } from '@/core/config';
-import { parseDateKey } from '@/core/domain/meetings/date-key';
 import type { Meeting } from '@/core/types';
-import { useDirection } from '@/i18n';
 import { Badge } from '@/ui/badge';
 import { Button } from '@/ui/button';
 import { Card } from '@/ui/card';
@@ -17,7 +15,6 @@ import { Icon } from '@/ui/icon';
 import { Separator } from '@/ui/separator';
 import { Text } from '@/ui/text';
 import { AttendeeStack } from './attendee-stack';
-import { formatLongDate } from './calendar-format';
 import { openMeetLink } from './open-meet-link';
 
 /**
@@ -32,6 +29,9 @@ import { openMeetLink } from './open-meet-link';
  * transition animates the card's height, and the details themselves fade in, so
  * expansion does not jump.
  *
+ * The card omits the date on purpose: the Meetings screen is scoped to one
+ * selected day and prints it once above the list.
+ *
  * Attendee names are in the expanded block rather than a long-press tooltip:
  * there is no hover on a phone, and a hidden gesture is not an accessible way to
  * read four names.
@@ -42,7 +42,6 @@ export type MeetingCardProps = {
 
 export function MeetingCard({ meeting }: MeetingCardProps) {
   const { t } = useTranslation();
-  const { language } = useDirection();
   const [expanded, setExpanded] = useState(false);
 
   const status = getMeetingStatusConfig(meeting.status);
@@ -59,10 +58,6 @@ export function MeetingCard({ meeting }: MeetingCardProps) {
         </View>
 
         <View className="gap-1.5">
-          <MetaRow
-            icon="calendar"
-            label={formatLongDate(parseDateKey(meeting.date), language)}
-          />
           <MetaRow
             icon="clock"
             label={`${meeting.time} · ${meeting.duration}`}
@@ -132,7 +127,7 @@ function MetaRow({
   icon,
   label,
 }: {
-  icon: 'calendar' | 'clock' | 'map-pin';
+  icon: 'clock' | 'map-pin';
   label: string;
 }) {
   return (

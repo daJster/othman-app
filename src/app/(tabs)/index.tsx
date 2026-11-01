@@ -67,7 +67,6 @@ export default function HomeScreen() {
           >
             <Section
               title={t('home.circle.title')}
-              description={t('home.circle.description')}
               titleVariant="heading"
               descriptionVariant="caption"
               level={2}

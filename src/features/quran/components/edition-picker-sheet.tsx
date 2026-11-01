@@ -96,12 +96,7 @@ export function EditionPickerSheet({
                 </View>
 
                 {selected ? (
-                  <>
-                    <Text variant="caption" tone="muted">
-                      {t('reader.editionSelected')}
-                    </Text>
-                    <Icon name="check-circle" size={18} tone="primary" />
-                  </>
+                  <Icon name="check-circle" size={18} tone="primary" />
                 ) : null}
               </Pressable>
             );

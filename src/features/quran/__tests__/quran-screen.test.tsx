@@ -44,7 +44,7 @@ describe('QuranScreen', () => {
   it('shows the restored page and opens the reader route from it', async () => {
     await render(<QuranScreen />);
 
-    expect(screen.getByText('Page 12')).toBeTruthy();
+    expect(screen.getByText('Continue reading')).toBeTruthy();
     expect(mockRestore).toHaveBeenCalledTimes(1);
 
     await fireEvent.press(screen.getByTestId('quran-open-reader'));

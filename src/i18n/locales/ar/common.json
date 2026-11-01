@@ -21,8 +21,7 @@
       "ring": "حلقة"
     },
     "circle": {
-      "title": "حلقتك",
-      "description": "أربع طرق للعودة إلى الحلقة."
+      "title": "حلقتك"
     }
   },
   "action": {
@@ -85,7 +84,6 @@
     "ayahLabel": "الآية {{ayah}} من سورة {{surah}}",
     "clearSelection": "إلغاء تحديد الآية",
     "continueTitle": "متابعة القراءة",
-    "continueDescription": "صفحة {{page}}",
     "open": "افتح المصحف",
     "entryHint": "يُفتح المصحف بملء الشاشة، ويمكنك قلب الصفحات بالسحب.",
     "imageFailed": "تعذّر تحميل صورة الصفحة.",
@@ -101,7 +99,6 @@
     "searchSurahs": "ابحث في السور",
     "noSurahsFound": "لا توجد سورة تطابق بحثك.",
     "editionPickerTitle": "النسخ",
-    "editionSelected": "محددة",
     "menuTitle": "قائمة المصحف",
     "menuSurah": "السور",
     "menuEdition": "النسخ",

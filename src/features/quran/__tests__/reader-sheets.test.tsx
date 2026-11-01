@@ -194,7 +194,12 @@ describe('EditionPickerSheet', () => {
     );
 
     expect(screen.getByText('Tajweed')).toBeTruthy();
-    expect(screen.getByText('Selected')).toBeTruthy();
+    expect(
+      screen.getByTestId('edition-row:1').props.accessibilityState,
+    ).toMatchObject({ selected: true });
+    expect(
+      screen.getByTestId('edition-row:2').props.accessibilityState,
+    ).toMatchObject({ selected: false });
     expect(screen.getByText('warsh · Pages 4–605')).toBeTruthy();
 
     await fireEvent.press(screen.getByTestId('edition-row:2'));
