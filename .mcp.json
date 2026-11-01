@@ -1,8 +1,0 @@
-{
-	"mcpServers": {
-		"expo-server": {
-			"url": "https://mcp.expo.dev/mcp",
-			"type": "http"
-		}
-	}
-}
