@@ -1,0 +1,262 @@
+[
+  {
+    "name": "fresh-390",
+    "lang": "ar",
+    "dir": "rtl",
+    "overflow": 0,
+    "tabs": [
+      {
+        "name": "الرئيسية",
+        "x": 326,
+        "w": 44,
+        "labelDisplay": "none"
+      },
+      {
+        "name": "القرآن",
+        "x": 278,
+        "w": 44,
+        "labelDisplay": "none"
+      },
+      {
+        "name": "الحلقات",
+        "x": 230,
+        "w": 44,
+        "labelDisplay": "none"
+      },
+      {
+        "name": "حسابي",
+        "x": 182,
+        "w": 44,
+        "labelDisplay": "none"
+      }
+    ],
+    "controls": [
+      {
+        "id": "nav-theme-toggle",
+        "label": "تغيير السمة: فاتحة",
+        "x": 68,
+        "w": 44,
+        "h": 44,
+        "text": ""
+      },
+      {
+        "id": "nav-language-toggle",
+        "label": "تغيير اللغة: العربية",
+        "x": 20,
+        "w": 44,
+        "h": 44,
+        "text": "ع"
+      }
+    ],
+    "themeClass": "light",
+    "errors": []
+  },
+  {
+    "name": "fresh-1440",
+    "lang": "ar",
+    "dir": "rtl",
+    "overflow": 0,
+    "tabs": [
+      {
+        "name": "الرئيسية",
+        "x": 1130,
+        "w": 92,
+        "labelDisplay": "block"
+      },
+      {
+        "name": "القرآن",
+        "x": 1047,
+        "w": 80,
+        "labelDisplay": "block"
+      },
+      {
+        "name": "الحلقات",
+        "x": 953,
+        "w": 89,
+        "labelDisplay": "block"
+      },
+      {
+        "name": "حسابي",
+        "x": 864,
+        "w": 86,
+        "labelDisplay": "block"
+      }
+    ],
+    "controls": [
+      {
+        "id": "nav-theme-toggle",
+        "label": "تغيير السمة: فاتحة",
+        "x": 212,
+        "w": 44,
+        "h": 44,
+        "text": ""
+      },
+      {
+        "id": "nav-language-toggle",
+        "label": "تغيير اللغة: العربية",
+        "x": 164,
+        "w": 44,
+        "h": 44,
+        "text": "ع"
+      }
+    ],
+    "themeClass": "light",
+    "errors": []
+  },
+  {
+    "name": "en-390",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": 0,
+    "tabs": [
+      {
+        "name": "Home",
+        "x": 20,
+        "w": 44,
+        "labelDisplay": "none"
+      },
+      {
+        "name": "Quran",
+        "x": 68,
+        "w": 44,
+        "labelDisplay": "none"
+      },
+      {
+        "name": "Meetings",
+        "x": 116,
+        "w": 44,
+        "labelDisplay": "none"
+      },
+      {
+        "name": "Account",
+        "x": 164,
+        "w": 44,
+        "labelDisplay": "none"
+      }
+    ],
+    "controls": [
+      {
+        "id": "nav-theme-toggle",
+        "label": "Change theme: Light",
+        "x": 278,
+        "w": 44,
+        "h": 44,
+        "text": ""
+      },
+      {
+        "id": "nav-language-toggle",
+        "label": "Change language: English",
+        "x": 326,
+        "w": 44,
+        "h": 44,
+        "text": "EN"
+      }
+    ],
+    "themeClass": "light",
+    "errors": []
+  },
+  {
+    "name": "en-768",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": 0,
+    "tabs": [
+      {
+        "name": "Home",
+        "x": 74,
+        "w": 90,
+        "labelDisplay": "block"
+      },
+      {
+        "name": "Quran",
+        "x": 168,
+        "w": 91,
+        "labelDisplay": "block"
+      },
+      {
+        "name": "Meetings",
+        "x": 262,
+        "w": 112,
+        "labelDisplay": "block"
+      },
+      {
+        "name": "Account",
+        "x": 379,
+        "w": 106,
+        "labelDisplay": "block"
+      }
+    ],
+    "controls": [
+      {
+        "id": "nav-theme-toggle",
+        "label": "Change theme: Light",
+        "x": 656,
+        "w": 44,
+        "h": 44,
+        "text": ""
+      },
+      {
+        "id": "nav-language-toggle",
+        "label": "Change language: English",
+        "x": 704,
+        "w": 44,
+        "h": 44,
+        "text": "EN"
+      }
+    ],
+    "themeClass": "light",
+    "errors": []
+  },
+  {
+    "name": "en-1440",
+    "lang": "en",
+    "dir": "ltr",
+    "overflow": 0,
+    "tabs": [
+      {
+        "name": "Home",
+        "x": 218,
+        "w": 90,
+        "labelDisplay": "block"
+      },
+      {
+        "name": "Quran",
+        "x": 312,
+        "w": 91,
+        "labelDisplay": "block"
+      },
+      {
+        "name": "Meetings",
+        "x": 406,
+        "w": 112,
+        "labelDisplay": "block"
+      },
+      {
+        "name": "Account",
+        "x": 523,
+        "w": 106,
+        "labelDisplay": "block"
+      }
+    ],
+    "controls": [
+      {
+        "id": "nav-theme-toggle",
+        "label": "Change theme: Light",
+        "x": 1184,
+        "w": 44,
+        "h": 44,
+        "text": ""
+      },
+      {
+        "id": "nav-language-toggle",
+        "label": "Change language: English",
+        "x": 1232,
+        "w": 44,
+        "h": 44,
+        "text": "EN"
+      }
+    ],
+    "themeClass": "light",
+    "errors": []
+  }
+]
