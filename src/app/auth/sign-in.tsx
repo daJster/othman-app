@@ -19,10 +19,8 @@ import type { AuthErrorCode } from '@/core/types';
 import { sanitizeReturnTo } from '@/features/auth/return-to';
 import { GOOGLE_MARK } from '@/features/brand/assets';
 import { BrandMark } from '@/features/brand/brand-mark';
-import { useDirection } from '@/i18n';
 import { useAuth } from '@/providers/auth-provider';
 import { Button, ButtonText } from '@/ui/button';
-import { cn } from '@/ui/cn';
 import { Icon } from '@/ui/icon';
 import { Image } from '@/ui/image';
 import { Input } from '@/ui/input';
@@ -80,7 +78,6 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export default function SignInScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { isRTL } = useDirection();
   const { returnTo } = useLocalSearchParams<{ returnTo?: string }>();
   const { user, status, signInWithEmail, signInWithGoogle } = useAuth();
 
@@ -246,12 +243,7 @@ export default function SignInScreen() {
           keyboardShouldPersistTaps="handled"
         >
           <View className="mx-auto w-full max-w-md gap-8">
-            <View
-              className={cn(
-                'flex-row items-center justify-between gap-4',
-                isRTL && 'flex-row-reverse',
-              )}
-            >
+            <View className="flex-row items-center justify-between gap-4">
               <BrandMark className="h-9 w-16" />
               <Button
                 variant="ghost"
@@ -306,12 +298,7 @@ export default function SignInScreen() {
 
               {step === 'email' ? (
                 <View className="gap-3">
-                  <View
-                    className={cn(
-                      'flex-row items-baseline justify-between gap-2',
-                      isRTL && 'flex-row-reverse',
-                    )}
-                  >
+                  <View className="flex-row items-baseline justify-between gap-2">
                     <Text variant="subtitle">
                       {t('auth.signIn.emailTitle')}
                     </Text>
@@ -358,12 +345,7 @@ export default function SignInScreen() {
                 </View>
               ) : (
                 <View className="gap-3">
-                  <View
-                    className={cn(
-                      'flex-row items-baseline justify-between gap-2',
-                      isRTL && 'flex-row-reverse',
-                    )}
-                  >
+                  <View className="flex-row items-baseline justify-between gap-2">
                     <Text variant="subtitle">
                       {t('auth.signIn.passwordTitle')}
                     </Text>
@@ -375,12 +357,7 @@ export default function SignInScreen() {
                     {t('auth.signIn.passwordHint', { email })}
                   </Text>
                   <Text variant="label">{t('label.password')}</Text>
-                  <View
-                    className={cn(
-                      'flex-row items-center gap-2',
-                      isRTL && 'flex-row-reverse',
-                    )}
-                  >
+                  <View className="flex-row items-center gap-2">
                     <Input
                       ref={passwordRef}
                       testID="auth-password"

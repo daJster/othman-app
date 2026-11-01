@@ -45,9 +45,6 @@ export function ProfileHeader({ account, onEdit }: ProfileHeaderProps) {
         // The web page owns the horizontal gutter; the native list is not
         // inside `Page`, so it keeps the platform inset itself.
         Platform.OS !== 'web' && 'px-4',
-        // Yoga already flips `row` for RTL on device; RN Web does not, so the
-        // reversal is only added there.
-        Platform.OS === 'web' && isRTL && 'flex-row-reverse',
       )}
     >
       <Avatar

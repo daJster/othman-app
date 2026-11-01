@@ -36,13 +36,7 @@ export function FeatureCard({
 
   return (
     <Link href={href} asChild>
-      <Pressable
-        className={cn(
-          'flex-row gap-4 active:opacity-70',
-          FOCUS_RING,
-          isRTL && 'flex-row-reverse',
-        )}
-      >
+      <Pressable className={cn('flex-row gap-4 active:opacity-70', FOCUS_RING)}>
         <View className="w-10 items-center self-stretch">
           <View className="h-10 w-10 items-center justify-center rounded-full border border-brass/50 bg-background">
             <Icon name={icon} size={18} tone="primary" />
@@ -53,7 +47,6 @@ export function FeatureCard({
         <View
           className={cn(
             'flex-1 flex-row items-start justify-between gap-4 pb-7',
-            isRTL && 'flex-row-reverse',
             isLast && 'pb-0',
           )}
         >

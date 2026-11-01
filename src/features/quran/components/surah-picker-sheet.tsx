@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import { FlatList, View } from 'react-native';
 import type { SurahMetadata } from '@/core/types';
 import { useDirection } from '@/i18n';
-import { cn } from '@/ui/cn';
 import { Input } from '@/ui/input';
 import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { Pressable } from '@/ui/pressable';
@@ -41,7 +40,7 @@ export function SurahPickerSheet({
   onSelect,
 }: SurahPickerSheetProps) {
   const { t } = useTranslation();
-  const { language, isRTL } = useDirection();
+  const { language } = useDirection();
   const [query, setQuery] = useState('');
 
   // Clearing through the actions (rather than an effect on `isPresented`)
@@ -132,12 +131,7 @@ export function SurahPickerSheet({
                         {item.nameEnglish}
                       </Text>
                     </View>
-                    <View
-                      className={cn(
-                        'flex-row items-center gap-2',
-                        isRTL && 'flex-row-reverse',
-                      )}
-                    >
+                    <View className="flex-row items-center gap-2">
                       <RevelationMark location={item.location} />
                       <Text variant="caption" tone="muted">
                         {t('reader.ayahCount', {

@@ -89,6 +89,17 @@ Recommended execution: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 0
   `BLOCKED` note in the PR evidence for the visual check; do not claim it was
   performed.
 
+## Post-execution findings
+
+- Web screenshots showed that `flex-row-reverse` on rows was double-reversing
+  RTL: CSS already mirrors `flex-row` under `dir="rtl"`. Removed it from
+  Account rows, the profile header, Home stations, the Home section header,
+  Sign-in, the Quran position band and the surah picker. The two-column
+  compositions (hero, Home lower band) keep their authored direction.
+- Native visual verification remains outstanding: no simulator/device was
+  available while executing. The web export, `e2e:web`, `build:android` and
+  `build:ios` all pass.
+
 ## Findings considered and rejected
 
 - "Account title duplicates the tab label": kept. It is the page's only h1 and

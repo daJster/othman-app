@@ -59,12 +59,7 @@ export default function HomeScreen() {
          * "Your circle" row instead of floating between the two columns.
          */}
         <View className="flex-1 md:max-w-md">
-          <View
-            className={cn(
-              'flex-row items-end justify-between gap-4',
-              isRTL && 'flex-row-reverse',
-            )}
-          >
+          <View className="flex-row items-end justify-between gap-4">
             <Section
               title={t('home.circle.title')}
               titleVariant="heading"

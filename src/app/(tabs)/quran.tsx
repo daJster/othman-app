@@ -119,12 +119,7 @@ export default function QuranScreen() {
 
         <View className="mt-8 border-y border-border py-7 md:py-9">
           <View
-            className={cn(
-              'gap-5 md:gap-7',
-              edition
-                ? cn('flex-row', isRTL && 'flex-row-reverse')
-                : 'flex-col',
-            )}
+            className={cn('gap-5 md:gap-7', edition ? 'flex-row' : 'flex-col')}
           >
             {edition ? (
               <MushafPreview edition={edition} page={page} onPress={open} />
@@ -148,10 +143,7 @@ export default function QuranScreen() {
                   max: QURAN_PAGE_COUNT,
                   now: page,
                 }}
-                className={cn(
-                  'h-0.5 w-full flex-row overflow-hidden bg-border',
-                  isRTL && 'flex-row-reverse',
-                )}
+                className="h-0.5 w-full flex-row overflow-hidden bg-border"
               >
                 <View
                   className="h-full bg-brass"

@@ -19,9 +19,9 @@ import { Text } from '@/ui/text';
  *
  * Grammar follows the rest of the app: hairlines, not boxes; a leading glyph,
  * a label with one quiet supporting line, and a directional chevron. Rows are
- * 56px tall, which also clears the 44px tap target. Native flexbox flips `row`
- * for RTL; RN Web does not, so the row uses `flex-row-reverse` explicitly when
- * the document is RTL.
+ * 56px tall, which also clears the 44px tap target. The row uses `flex-row`:
+ * under `dir="rtl"` CSS already reverses the inline axis, so an additional
+ * `flex-row-reverse` would put the leading glyph on the wrong side.
  */
 
 type SettingsRowProps = {
@@ -53,7 +53,6 @@ function SettingsRow({
       className={cn(
         'min-h-14 w-full flex-row items-center gap-3 border-b border-border py-3 active:opacity-70',
         FOCUS_RING,
-        isRTL && 'flex-row-reverse',
       )}
     >
       <Icon name={icon} tone={destructive ? 'destructive' : 'muted'} />
