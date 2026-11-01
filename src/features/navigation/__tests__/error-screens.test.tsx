@@ -28,7 +28,10 @@ describe('NotFoundScreen', () => {
   it('shows the 404 copy and goes home', async () => {
     await render(<NotFoundScreen />);
 
-    expect(screen.getByText('Page not found')).toBeTruthy();
+    expect(
+      screen.getByRole('heading', { name: 'Page not found' }),
+    ).toBeTruthy();
+    expect(screen.getAllByRole('button')).toHaveLength(1);
     expect(
       screen.getByText(
         'The page you are looking for does not exist or has moved.',
@@ -47,6 +50,8 @@ describe('ErrorScreen', () => {
     await render(<ErrorScreen />);
 
     expect(screen.getByText('Access denied')).toBeTruthy();
+    expect(screen.getByRole('heading', { name: 'Access denied' })).toBeTruthy();
+    expect(screen.getAllByRole('button')).toHaveLength(1);
     expect(
       screen.getByText('Your account does not have access to this page.'),
     ).toBeTruthy();
