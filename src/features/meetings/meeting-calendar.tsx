@@ -95,11 +95,14 @@ export function MeetingCalendar({
           disabled={!canGoPrevious}
           onPress={() => setAnchor(shiftCalendarMonth(anchor, system, -1))}
         />
+        {/*
+         * A subtitle, not a heading: the screen's title is the only H1, and
+         * `accessibilityRole="header"` here promoted the month to a second one.
+         */}
         <Text
           testID="calendar-month-label"
           variant="subtitle"
           className="flex-1 text-center"
-          accessibilityRole="header"
         >
           {formatMonthLabel(month, language)}
         </Text>

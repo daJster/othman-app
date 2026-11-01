@@ -12,6 +12,7 @@ import { TABS } from '@/features/navigation/route-registry';
 import { shouldHandleWebLink } from '@/features/navigation/web-link';
 import { useVisibleTabs } from '@/features/navigation/use-visible-tabs';
 import type { IconName } from '@/core/config';
+import { BrandMark } from '@/features/brand/brand-mark';
 import { cn } from '@/ui/cn';
 import { Icon } from '@/ui/icon';
 import { Text } from '@/ui/text';
@@ -40,7 +41,26 @@ export default function WebTabsLayout() {
 
   return (
     <Tabs className="flex-1 bg-background">
-      <TabList className="flex-row flex-nowrap items-center gap-0 border-b border-border bg-card px-1 py-1 sm:gap-1 sm:px-3 sm:py-2">
+      {/*
+       * The bar is the page grid: one row capped at the same `max-w-6xl`
+       * gutter Home uses, centred, with the tabs packed at the inline start.
+       *
+       * `justifyContent` has to be passed as `style`, not a class: Expo Router's
+       * `TabList` merges `styles.tabList` (which sets `space-between`) into the
+       * `style` array *after* Uniwind's className styles, so a `justify-start`
+       * class would lose to the inline declaration. The style prop is the last
+       * entry, so it wins. Triggers must stay direct children of `TabList` for
+       * Expo Router to discover them, which is why this row itself is the
+       * constrained element rather than wrapping it in another View.
+       */}
+      <TabList
+        className="mx-auto w-full max-w-6xl flex-row flex-nowrap items-center gap-1 border-b border-border bg-background px-3 py-1 sm:px-5 sm:py-2"
+        style={{ justifyContent: 'flex-start' }}
+      >
+        <View className="hidden pe-2 sm:block">
+          <BrandMark className="h-6 w-[42px]" accessible={false} />
+        </View>
+
         {/*
          * Every registry tab is a trigger, even while signed out. A trigger is
          * what registers the route with the navigator; rendering only the
@@ -102,12 +122,14 @@ function TabLink({
     },
     <View
       className={cn(
-        'min-h-11 flex-row items-center justify-center gap-1 rounded-md px-1 py-2 active:opacity-80 sm:justify-start sm:gap-2 sm:px-3',
-        isFocused ? 'bg-muted' : 'bg-transparent',
+        // The underline is a real border on both states, so selecting a tab
+        // recolours it instead of changing the row's height.
+        'min-h-11 flex-row items-center justify-center gap-1 border-b-2 px-2 py-2 active:opacity-80 sm:justify-start sm:gap-2 sm:px-3',
+        isFocused ? 'border-brass' : 'border-transparent',
         className,
       )}
     >
-      <Icon name={icon} size={18} tone={isFocused ? 'primary' : 'muted'} />
+      <Icon name={icon} size={18} tone={isFocused ? 'foreground' : 'muted'} />
       <Text variant="label" tone={isFocused ? 'default' : 'muted'}>
         {label}
       </Text>

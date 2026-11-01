@@ -13,7 +13,7 @@ import {
 } from '@/features/meetings/use-meetings';
 import { formatLongDate } from '@/features/meetings/calendar-format';
 import { useDirection } from '@/i18n';
-import { EmptyState, ErrorState } from '@/ui/states';
+import { ErrorState } from '@/ui/states';
 import { Text } from '@/ui/text';
 
 /**
@@ -59,12 +59,18 @@ function MeetingsContent() {
         <title>{`${t('nav.meetings')} · ${t('app.name')}`}</title>
       </Head>
 
+      {/*
+       * One column, measured rather than viewport-wide: on a desktop the day
+       * cells used to stretch to ~195 px each, which read as a table of boxes
+       * instead of a calendar. The single FlatList (with the calendar in its
+       * header) keeps pull-to-refresh and virtualisation intact.
+       */}
       <FlatList
         data={meetings}
         keyExtractor={(meeting) => String(meeting.id)}
         renderItem={({ item }) => <MeetingCard meeting={item} />}
         className="flex-1 bg-background"
-        contentContainerClassName="gap-3 p-4 pb-10"
+        contentContainerClassName="mx-auto w-full max-w-3xl gap-3 p-4 pb-10"
         contentInsetAdjustmentBehavior="automatic"
         refreshControl={
           <RefreshControl
@@ -86,16 +92,19 @@ function MeetingsContent() {
               onSelect={setSelectedDate}
             />
 
-            <View className="gap-0.5">
-              <Text variant="subtitle">
-                {formatLongDate(selectedDate, language)}
-              </Text>
-              {state.status === 'ready' ? (
-                <Text variant="caption" tone="muted">
-                  {t('meeting.found', { count: meetings.length })}
+            {/* The empty state carries the date itself as its overline. */}
+            {state.status !== 'empty' ? (
+              <View className="gap-0.5">
+                <Text variant="subtitle">
+                  {formatLongDate(selectedDate, language)}
                 </Text>
-              ) : null}
-            </View>
+                {state.status === 'ready' ? (
+                  <Text variant="caption" tone="muted">
+                    {t('meeting.found', { count: meetings.length })}
+                  </Text>
+                ) : null}
+              </View>
+            ) : null}
           </View>
         }
         ListEmptyComponent={
@@ -113,10 +122,20 @@ function MeetingsContent() {
               onRetry={state.retry}
             />
           ) : (
-            <EmptyState
-              className="py-10"
-              title={t('page.meetings.list.empty')}
-            />
+            /*
+             * Typographic, not an illustration: the selected date as a quiet
+             * brass overline (the header omits its own copy for this state),
+             * the copy the screen already owns, and a muted second line. No
+             * icon, no new locale keys, no action that would invent a flow.
+             */
+            <View className="items-center gap-1.5 border-t border-border py-10">
+              <Text variant="subtitle" className="text-center">
+                {formatLongDate(selectedDate, language)}
+              </Text>
+              <Text variant="caption" tone="muted" className="text-center">
+                {t('page.meetings.list.empty')}
+              </Text>
+            </View>
           )
         }
       />

@@ -20,7 +20,7 @@ export function VerseCard({ title, text, reference }: VerseCardProps) {
     <View className="border-y border-border py-8 md:py-10">
       <Text
         variant="overline"
-        className="text-center tracking-[0.3em] text-brass"
+        className="text-center tracking-[0.3em] text-brass-ink"
       >
         {title}
       </Text>

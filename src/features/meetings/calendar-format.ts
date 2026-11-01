@@ -46,6 +46,22 @@ const HIJRI_MONTH_NAMES: Readonly<Record<Language, readonly string[]>> = {
   ],
 };
 
+/**
+ * The BCP 47 tag each app language formats with.
+ *
+ * A bare `ar` is ambiguous: its numbering system depends on the ICU data and
+ * the host (`ar` resolves to Latin digits on Node and in some browsers), which
+ * is exactly how the Arabic calendar ended up printing "1 2 3" inside
+ * "نوفمبر ٢٠٢٦". `ar-EG` is an Arabic-locale default with `arab` digits, and
+ * the `-u-nu-arab` extension pins that even where the host would fall back to
+ * `latn`. This affects formatting only — the Gregorian/Hijri conversion never
+ * sees it.
+ */
+const FORMAT_LOCALE: Readonly<Record<Language, string>> = {
+  ar: 'ar-EG-u-nu-arab',
+  en: 'en',
+};
+
 const WEEKDAY_CACHE = new Map<Language, readonly string[]>();
 
 /** Narrow weekday labels, Sunday first. */
@@ -54,7 +70,9 @@ export function weekdayLabels(language: Language): readonly string[] {
   if (cached) return cached;
 
   const labels = Array.from({ length: 7 }, (_, index) =>
-    new Intl.DateTimeFormat(language, { weekday: 'narrow' }).format(
+    new Intl.DateTimeFormat(FORMAT_LOCALE[language], {
+      weekday: 'narrow',
+    }).format(
       // 7 January 2024 is a Sunday; any Sunday would do.
       new Date(2024, 0, 7 + index, 12),
     ),
@@ -65,7 +83,7 @@ export function weekdayLabels(language: Language): readonly string[] {
 }
 
 export function formatDayNumber(day: number, language: Language): string {
-  return new Intl.NumberFormat(language).format(day);
+  return new Intl.NumberFormat(FORMAT_LOCALE[language]).format(day);
 }
 
 /**
@@ -75,7 +93,9 @@ export function formatDayNumber(day: number, language: Language): string {
  * written; days are ≤ 31 and unaffected either way.
  */
 export function formatYear(year: number, language: Language): string {
-  return new Intl.NumberFormat(language, { useGrouping: false }).format(year);
+  return new Intl.NumberFormat(FORMAT_LOCALE[language], {
+    useGrouping: false,
+  }).format(year);
 }
 
 /** `April 2026` or `Shawwal 1447`, in the active system. */
@@ -84,7 +104,7 @@ export function formatMonthLabel(
   language: Language,
 ): string {
   if (month.system === 'gregorian') {
-    return new Intl.DateTimeFormat(language, {
+    return new Intl.DateTimeFormat(FORMAT_LOCALE[language], {
       month: 'long',
       year: 'numeric',
     }).format(new Date(month.year, month.month - 1, 1, 12));
@@ -98,7 +118,7 @@ export function formatMonthLabel(
 
 /** Long date for the selected-day line and for each cell's accessible name. */
 export function formatLongDate(date: Date, language: Language): string {
-  return new Intl.DateTimeFormat(language, {
+  return new Intl.DateTimeFormat(FORMAT_LOCALE[language], {
     weekday: 'long',
     day: 'numeric',
     month: 'long',

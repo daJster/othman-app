@@ -59,7 +59,10 @@ export function SegmentedControl<Value extends string>({
             accessibilityState={{ selected }}
             onPress={() => onChange(option.value)}
             className={cn(
-              'h-8 items-center justify-center rounded-md px-3 active:opacity-80',
+              // 36 pt segments inside 4 pt of padding clear the app's 44 pt
+              // control height without making the two-option case look like a
+              // toolbar.
+              'h-9 items-center justify-center rounded-md px-3 active:opacity-80',
               selected ? 'bg-background' : 'bg-transparent',
             )}
           >

@@ -2,9 +2,10 @@ import { Host, List, ListItem, RNHostView } from '@expo/ui';
 import { useRouter } from 'expo-router';
 import Head from 'expo-router/head';
 import { useTranslation } from 'react-i18next';
-import { Alert, useColorScheme } from 'react-native';
+import { Alert, Platform, useColorScheme, View } from 'react-native';
 import { useDirection } from '@/i18n';
 import { RequireAuth } from '@/features/auth/require-auth';
+import { AccountSettingsWeb } from '@/features/account/account-settings-web';
 import { ProfileHeader } from '@/features/account/profile-header';
 import {
   useCurrentAccount,
@@ -12,8 +13,9 @@ import {
 } from '@/features/account/use-current-account';
 import { Icon } from '@/ui/icon';
 import { ListSectionHeader } from '@/ui/list-section-header';
+import { Screen, ScreenView } from '@/ui/screen';
 import { Loading, ErrorState, EmptyState } from '@/ui/states';
-import { ScreenView } from '@/ui/screen';
+import { Text } from '@/ui/text';
 
 /**
  * Account tab.
@@ -22,10 +24,15 @@ import { ScreenView } from '@/ui/screen';
  *
  *  - the **profile header** is RN (avatar, identity, edit button) hosted inside
  *    the list so it scrolls as one surface;
- *  - the **settings rows** are `@expo/ui` `List`/`ListItem`, i.e. a real
- *    SwiftUI List / Compose LazyColumn on device and a plain list on web. Native
- *    rows bring the platform's own pressed state, separators and accessibility,
- *    which is exactly what a settings screen should look like.
+ *  - the **settings rows** are `@expo/ui` `List`/`ListItem` on iOS and Android,
+ *    i.e. a real SwiftUI List / Compose LazyColumn with the platform's own
+ *    pressed state, separators and accessibility;
+ *  - on **web** those rows are the app's own `Pressable`/`Text`/`Icon`
+ *    (`AccountSettingsWeb`). `@expo/ui`'s web fallback paints its labels with a
+ *    hard-coded dark colour, which measured 1.23:1 on the dark background;
+ *    rendering from tokens fixes that and lets the rows mirror in RTL. The web
+ *    page is also capped at `max-w-3xl`, so a 1440 viewport gets a readable
+ *    column instead of a 1400px row.
  *
  * The session comes from `AuthProvider`. This route is private: `RequireAuth`
  * (driven by the route registry's `access`) sends a signed-out visitor to the
@@ -111,54 +118,85 @@ function AccountContent() {
         <title>{title}</title>
       </Head>
 
-      {/*
-        `colorScheme` keeps the native list chrome (separators, row labels,
-        pressed states) in the app's scheme. It follows `Appearance`, which
-        `ThemeProvider` keeps in sync with Uniwind, so a `system` theme resolves
-        the same way here as it does in the Stylesheet.
-      */}
-      <Host style={{ flex: 1 }} colorScheme={scheme ?? 'dark'}>
-        <List testID="account-settings">
-          <RNHostView matchContents={{ vertical: true }}>
-            <ProfileHeader
-              account={state.data}
-              onEdit={() => router.push('/account/edit')}
-            />
-          </RNHostView>
-
-          <ListSectionHeader label={t('account.sections.settings')} />
-
-          <ListItem
-            testID="account-progress-row"
-            leading={<Icon name="chart-line" />}
-            trailing={<Icon name={chevron} tone="muted" />}
-            supportingText={t('pages.account.progress.subtitle')}
-            onPress={() => router.push('/account/progress')}
+      {Platform.OS === 'web' ? (
+        <Screen contentContainerClassName="mx-auto w-full max-w-3xl gap-0 p-0 pb-10">
+          <Text
+            variant="title"
+            accessibilityRole="header"
+            className="px-4 pt-6 pb-2"
           >
-            {t('pages.account.progress.title')}
-          </ListItem>
+            {t('nav.account')}
+          </Text>
 
-          <ListItem
-            testID="account-about-row"
-            leading={<Icon name="info" />}
-            trailing={<Icon name={chevron} tone="muted" />}
-            supportingText={t('nav.aboutDesc')}
-            onPress={() => router.push('/about')}
-          >
-            {t('nav.about')}
-          </ListItem>
+          <ProfileHeader
+            account={state.data}
+            onEdit={() => router.push('/account/edit')}
+          />
 
-          <ListSectionHeader label={t('account.sections.session')} />
+          <AccountSettingsWeb
+            isRTL={isRTL}
+            onProgress={() => router.push('/account/progress')}
+            onAbout={() => router.push('/about')}
+            onSignOut={confirmSignOut}
+          />
+        </Screen>
+      ) : (
+        /*
+          `colorScheme` keeps the native list chrome (separators, row labels,
+          pressed states) in the app's scheme. It follows `Appearance`, which
+          `ThemeProvider` keeps in sync with Uniwind, so a `system` theme
+          resolves the same way here as it does in the Stylesheet.
+        */
+        <Host style={{ flex: 1 }} colorScheme={scheme ?? 'dark'}>
+          <List testID="account-settings">
+            <RNHostView matchContents={{ vertical: true }}>
+              <View>
+                <View className="px-4 pt-6 pb-2">
+                  <Text variant="title" accessibilityRole="header">
+                    {t('nav.account')}
+                  </Text>
+                </View>
+                <ProfileHeader
+                  account={state.data}
+                  onEdit={() => router.push('/account/edit')}
+                />
+              </View>
+            </RNHostView>
 
-          <ListItem
-            testID="account-sign-out-row"
-            leading={<Icon name="logout" tone="destructive" />}
-            onPress={confirmSignOut}
-          >
-            {t('account.signOut.confirm')}
-          </ListItem>
-        </List>
-      </Host>
+            <ListSectionHeader label={t('account.sections.settings')} />
+
+            <ListItem
+              testID="account-progress-row"
+              leading={<Icon name="chart-line" />}
+              trailing={<Icon name={chevron} tone="muted" />}
+              supportingText={t('pages.account.progress.subtitle')}
+              onPress={() => router.push('/account/progress')}
+            >
+              {t('pages.account.progress.title')}
+            </ListItem>
+
+            <ListItem
+              testID="account-about-row"
+              leading={<Icon name="info" />}
+              trailing={<Icon name={chevron} tone="muted" />}
+              supportingText={t('nav.aboutDesc')}
+              onPress={() => router.push('/about')}
+            >
+              {t('nav.about')}
+            </ListItem>
+
+            <ListSectionHeader label={t('account.sections.session')} />
+
+            <ListItem
+              testID="account-sign-out-row"
+              leading={<Icon name="logout" tone="destructive" />}
+              onPress={confirmSignOut}
+            >
+              {t('account.signOut.confirm')}
+            </ListItem>
+          </List>
+        </Host>
+      )}
     </ScreenView>
   );
 }

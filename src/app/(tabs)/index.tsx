@@ -46,11 +46,17 @@ export default function HomeScreen() {
 
       <View
         className={cn(
-          'mx-auto w-full max-w-6xl px-5 pt-10 pb-14 md:items-start md:gap-16 md:pt-16 md:pb-20',
+          'mx-auto w-full max-w-6xl px-5 pt-10 pb-14 md:items-start md:justify-between md:gap-16 md:pt-16 md:pb-20',
           isRTL ? 'md:flex-row-reverse' : 'md:flex-row',
         )}
       >
-        <View className="flex-1">
+        {/*
+         * The stations own a capped measure: a chevron should sit beside its
+         * label, not drift to the far edge of a stretched column. The header
+         * row is a child of the same column, so "Sign in" stays pinned to the
+         * "Your circle" row instead of floating between the two columns.
+         */}
+        <View className="flex-1 md:max-w-md">
           <View
             className={cn(
               'flex-row items-end justify-between gap-4',
@@ -68,6 +74,7 @@ export default function HomeScreen() {
               <Button
                 variant="link"
                 size="sm"
+                className="min-h-11 shrink-0"
                 label={t('action.signIn')}
                 onPress={() => router.push('/auth/sign-in')}
                 testID="home-sign-in"
@@ -89,7 +96,13 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <View className="mt-10 md:mt-0 md:w-96">
+        {/*
+         * The verse keeps a fixed reading measure rather than absorbing the
+         * leftover width; its top edge is the "Your circle" heading's top edge.
+         * `shrink-0` stops it collapsing at 768, where both columns share the
+         * row.
+         */}
+        <View className="mt-10 md:mt-0 md:w-96 md:shrink-0">
           <VerseCard
             title={t('home.verse.title')}
             text={t('home.verse.text')}

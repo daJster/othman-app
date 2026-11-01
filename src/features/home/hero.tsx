@@ -1,9 +1,22 @@
 import { Link } from 'expo-router';
 import { Pressable, View } from 'react-native';
 import type { AppHref } from '@/features/navigation/route-registry';
+import { BrandMark } from '@/features/brand/brand-mark';
 import { useDirection } from '@/i18n';
 import { cn } from '@/ui/cn';
 import { Text } from '@/ui/text';
+
+/**
+ * Visually hidden but still in the accessibility tree. The hero's wordmark is
+ * artwork, so the h1 text lives here instead.
+ */
+const visuallyHidden = {
+  position: 'absolute',
+  width: 1,
+  height: 1,
+  overflow: 'hidden',
+  opacity: 0,
+} as const;
 
 /**
  * Home hero: the study circle.
@@ -72,13 +85,27 @@ export function Hero({
         >
           <View className="flex-1 gap-5">
             <View className="gap-2">
-              <Text
-                accessibilityRole="header"
-                variant="title"
-                className="text-4xl text-parchment md:text-6xl"
-              >
+              {/*
+               * The visible mark is artwork, so the heading stays in the tree
+               * as visually hidden text: screen readers still get a real h1
+               * with the product name, and the image never has to carry the
+               * heading role.
+               */}
+              <Text accessibilityRole="header" style={visuallyHidden}>
                 {title}
               </Text>
+              <View
+                className={cn(
+                  'flex-row',
+                  isRTL ? 'justify-end' : 'justify-start',
+                )}
+              >
+                <BrandMark
+                  className="h-16 w-28 md:h-20 md:w-36"
+                  surface="onDark"
+                  accessible={false}
+                />
+              </View>
               <Text className="max-w-xl text-lg text-parchment/80 md:text-xl">
                 {tagline}
               </Text>
@@ -112,7 +139,7 @@ export function Hero({
               </Text>
               <Text
                 variant="overline"
-                className="tracking-[0.35em] text-parchment/50"
+                className="tracking-[0.35em] text-parchment/70"
               >
                 HALQA
               </Text>

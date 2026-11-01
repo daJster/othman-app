@@ -17,18 +17,22 @@ components.
 
 | Token        | Light                 | Dark                  | Job |
 | ------------ | --------------------- | --------------------- | --- |
-| `background` | white                 | deep green-black      | App ground |
+| `background` | white                 | `#040906` near-black green | App ground |
 | `foreground` | near-black            | warm ivory            | Text |
-| `canopy`     | `#003b24` (deep green) | `#00170b`            | Hero field |
+| `canopy`     | `#003b24` (deep green) | `#082b1b` lifted green | Hero field |
 | `parchment`  | `#f8f1e3`             | `#f8f1e3`             | Hero text and primary capsule |
-| `brass`      | `#c79e4d`             | `#d7b16a`             | Rings, labels, station nodes |
+| `brass`      | `#c79e4d`             | `#d7b16a`             | Rings, hairlines, station nodes |
+| `brass-ink`  | `#7a5d28` (text-safe) | `#e5be77`             | Brass-coloured **text** on a page ground |
 | `clay`       | `#b25b40`             | `#c97055`             | One accent dot / quiet alert |
 | `primary`    | `#007948`             | `#009962`             | In-app action green |
-| `secondary`  | pale green            | deep green            | Supporting surfaces |
+| `card`       | white                 | `#0a1710` soft green  | Grouped surfaces (calendar) |
+| `secondary`  | pale green            | `#0d1c14`             | Supporting surfaces |
 | `border`     | warm neutral          | 10% ivory             | Hairlines |
 
 Use colour as a field, not a sprinkle: the hero owns canopy; sections own
-background; brass is line work; clay appears once per composition.
+background; brass is line work; clay appears once per composition. `brass` is
+reserved for line work and for text **on canopy**; on a page ground use
+`brass-ink`, which clears 4.5:1 at overline sizes in both themes.
 
 ## Type
 
@@ -47,13 +51,19 @@ background; brass is line work; clay appears once per composition.
   two-column split at `md`. Copy and ring are 50/50 with a 4rem gap; the ring is
   `aspect-square`, 20rem mobile / 24rem desktop.
 - Lower page: `max-w-6xl`, one column below `md`, two columns above. The circle
-  list is the flexible column; the verse band is `md:w-96`.
+  list is capped at `md:max-w-md`; the verse band is `md:w-96` and shares the
+  heading's top edge.
+- **One page grid**: nav and page content share the same gutter. The web navbar
+  row is `max-w-6xl`; Home is `max-w-6xl`; Quran and Account are `max-w-3xl`
+  centred; Meetings is `max-w-3xl` centred. Nothing stretches past those widths
+  at 1440.
 - Hero-to-section spacing: `pt-10` mobile, `md:pt-16`; section bottoms `pb-14` /
   `md:pb-20`.
 - Station line: 40px node, 1px connector, 28px gap to the reading row. Rows are
   44pt minimum, hairlines not boxes.
 - Mobile nav: icon + label, `min-h-11`, compact at 390; labels never wrap the
-  bar into a second row. Desktop nav is the same top row.
+  bar into a second row. Desktop nav is the same top row, tabs packed at the
+  inline start inside the page grid.
 
 ## Components
 
@@ -65,7 +75,49 @@ background; brass is line work; clay appears once per composition.
   title + muted description; directional chevron. No card, no radius, no shadow.
 - **Verse band** — top and bottom hairline, brass overline, centered scripture,
   muted reference. No card.
-- **Sign-in** — text link in the circle header while gating is disabled.
+- **Sign-in** — a measured `max-w-md` column on every viewport: wordmark and
+  close in one row, title as the page's single heading, Google CTA with the
+  four-colour mark, then email → password with a `1 / 2` / `2 / 2` step marker.
+  Password reveal at the inline end, `aria-invalid` on failed fields, and the
+  server error directly under the step it belongs to. No canopy panel: the
+  wordmark carries identity and the form stays plain.
+- **Web navbar** — page-ground bar, tabs packed at the inline start inside
+  `max-w-6xl`. Active tab: 2px brass underline plus `text-foreground`; no filled
+  pill, no layout shift. Every tab stays a real `<a href>`. The wordmark sits at
+  the start from `sm` up; below that the Home hero carries the brand so the four
+  labels keep their width.
+- **Quran position band** — hairline section with the real page number, surah
+  number and `page / 604` progress hairline; the page scan becomes a preview
+  when an edition is attached. No card.
+- **Account web rows** — app-owned `Text`/`Icon` rows on web (native keeps
+  `@expo/ui` List). 56px tall, hairline separated, leading icon at the inline
+  start, chevron at the inline end, sign-out destructive.
+- **Overline labels** — quiet, uppercase in Latin, letter-spaced; never a kicker
+  above a heading.
+
+## Brand assets
+
+All artwork lives in `assets/brand/` and is resolved by surface, not by filename
+(the source files mix conventions): `WORDMARK`, `READER_LOGO`, `AYAH_ORNAMENT`
+and `REVELATION_MARK` expose `onLight` / `onDark` members in
+`src/features/brand/assets.ts`. `BrandMark` derives the ink from the resolved
+theme unless a surface pins it (the Home hero is always canopy).
+
+- **Wordmark** — Home hero (`h-16 md:h-20`), web navbar (`h-6` from `sm` up) and
+  the sign-in header. Sized with an explicit height and width pair; Expo Image
+  collapses `width: auto` inside a flex row.
+- **Reader emblem** — the reader's loading frame, centred above an indeterminate
+  brass bar. The bar is indeterminate on purpose: boot spans a store restore, a
+  catalog fetch and bbox downloads, so a percentage would be invented.
+- **Ayah medallion** — the Read panel closes the Quran block with the
+  `ayah_icon-*` medallion; the ayah-in-surah number sits inside it in the
+  reader's digits.
+- **Revelation marks** — `madina-*` / `makka-*` beside the ayah count in the
+  surah picker; decorative, so never announced.
+- **App icon and manifest** — `icon512_rounded.png` is the app icon and favicon
+  source; `icon512_maskable.png`, `icon192.png` and `apple-touch-icon.png` live
+  in `public/` with `manifest.json`. `src/app/+html.tsx` links the manifest and
+  theme colour; the splash is the reader emblem on canopy.
 
 ## Motion
 
@@ -80,8 +132,10 @@ every action is reachable by touch and keyboard.
 - Stations are anchors on web and router links on native; chevrons mirror in RTL.
 - Decorative rings/dots are `accessibilityElementsHidden`.
 - Text scales with the OS; no fixed heights, `numberOfLines`, or clipped prose.
-- Targets ≥ 44 pt / 48 dp. Contrast: parchment on canopy, brass labels on
-  canopy, canopy text on parchment.
+- Targets ≥ 44 pt / 48 dp. Contrast: parchment on canopy, brass on canopy,
+  `brass-ink` on page grounds; muted text clears 4.5:1 on both `background` and
+  `muted` surfaces. Dark-mode `background`/`canopy` are separated enough
+  (~1.3:1) that the hero edge reads as a field boundary.
 
 ## Don'ts
 
