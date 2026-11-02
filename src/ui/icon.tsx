@@ -29,6 +29,7 @@ import Pause from 'lucide-react-native/icons/pause';
 import Pencil from 'lucide-react-native/icons/pencil';
 import Play from 'lucide-react-native/icons/play';
 import Search from 'lucide-react-native/icons/search';
+import SunMoon from 'lucide-react-native/icons/sun-moon';
 import User from 'lucide-react-native/icons/user';
 import Users from 'lucide-react-native/icons/users';
 import Video from 'lucide-react-native/icons/video';
@@ -77,6 +78,7 @@ const ICON_COMPONENTS = {
   'map-pin': MapPin,
   users: Users,
   palette: Palette,
+  'sun-moon': SunMoon,
   languages: Languages,
   globe: Globe,
   camera: Camera,

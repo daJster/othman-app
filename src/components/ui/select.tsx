@@ -101,7 +101,7 @@ function SelectContent({
             <TextClassContext.Provider value="text-popover-foreground">
               <SelectPrimitive.Content
                 className={cn(
-                  'relative z-50 min-w-[8rem] rounded-md border border-border bg-popover shadow-md shadow-black/5',
+                  'bg-popover relative z-50 min-w-[8rem] rounded-md border border-border shadow-md shadow-black/5',
                   Platform.select({
                     web: cn(
                       'animate-in fade-in-0 zoom-in-95 max-h-52 origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto',

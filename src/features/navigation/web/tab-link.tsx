@@ -74,7 +74,7 @@ export function WebTabLink({
         // recolours it instead of changing the row's height. It sits directly
         // on the bar's hairline: the row owns no vertical padding, so the
         // indicator touches the bottom edge instead of floating above it.
-        'min-h-12 min-w-11 flex-col items-center justify-center gap-0.5 border-b-2 px-2 pt-2 pb-1.5 active:opacity-80 sm:min-w-0 sm:flex-row sm:gap-2 sm:px-3 sm:pt-0 sm:pb-0',
+        'min-h-12 min-w-11 flex-col items-center justify-center gap-0.5 border-b-2 px-1.5 pt-2 pb-1.5 active:opacity-80 sm:min-w-0 sm:flex-row sm:gap-2 sm:px-3 sm:pt-0 sm:pb-0',
         isFocused ? 'border-brass' : 'border-transparent',
         className,
       )}

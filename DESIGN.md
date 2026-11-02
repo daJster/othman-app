@@ -26,7 +26,6 @@ components.
 | `clay`         | `#b25b40`              | `#c97055`                  | One accent dot / quiet alert             |
 | `primary`      | `#007948`              | `#009962`                  | In-app action green                      |
 | `card`         | white                  | `#0a1710` soft green       | Grouped surfaces (calendar)              |
-| `popover`      | white                  | `#0a1710` soft green       | Floating menu surface (web nav menu)     |
 | `secondary`    | pale green             | `#0d1c14`                  | Supporting surfaces                      |
 | `border`       | warm neutral           | 10% ivory                  | Hairlines                                |
 | `success`      | deep green text-safe   | light green text-safe      | Positive status text                     |
@@ -97,10 +96,13 @@ are semantic roles: a new status uses a role, never a raw Tailwind palette name.
   hairline (the row owns no vertical padding, so the indicator touches the
   edge). No filled pill, no layout shift. All four destinations render signed in
   or out; a private one routes to sign-in rather than disappearing. Wordmark
-  from `sm` up; below that the Home hero carries the brand. One trailing
-  control: the session/preferences menu (avatar when signed in, menu glyph
-  otherwise) holding Theme, Language, Account, Progress and Sign in / Sign out.
-  Theme and Language are submenus; their labels still show the current value.
+  from `sm` up; below that the Home hero carries the brand. Three ghost controls
+  at the trailing edge, no border and no chevron: theme (palette icon only, the
+  active mode marked inside its menu), language (globe icon plus the language's
+  own name — "English" / "العربية" — icon-only below `sm`, where the four
+  labelled destinations leave no room for the name) and the session menu
+  (avatar when signed in, menu glyph otherwise) holding Account, Progress and
+  Sign in / Sign out.
 - **Quran position band** — hairline section with the real page number, surah
   number and `page / 604` progress hairline; the page scan becomes a preview
   when an edition is attached. No card.
@@ -125,9 +127,10 @@ are semantic roles: a new status uses a role, never a raw Tailwind palette name.
   control floor, Lucide `IconName` resolution and the page/state vocabulary.
 - **Settings and overlays** - `Select` is the one settings dropdown; the
   `AlertDialog` confirms sign-out; `Collapsible` carries meeting details;
-  `ToggleGroup` switches Gregorian/Hijri; `DropdownMenu` powers the web nav menu
-  (session, theme and language). Keep `@expo/ui` for native tabs, native list
-  rows, the native picker and the reader bottom sheets.
+  `ToggleGroup` switches Gregorian/Hijri; `ThemeMenu`/`LanguageMenu` in the web
+  bar are `DropdownMenu`s with ghost icon triggers (no border, no chevron).
+  Keep `@expo/ui` for native tabs, native list rows, the native picker and the
+  reader bottom sheets.
 
 ## Brand assets
 

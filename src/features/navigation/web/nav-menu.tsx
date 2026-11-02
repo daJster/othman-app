@@ -16,9 +16,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
@@ -26,32 +23,24 @@ import {
   useCurrentAccount,
   useSignOut,
 } from '@/features/account/use-current-account';
-import { THEME_OPTIONS } from '@/features/settings/theme-options';
-import { useLanguageChoice } from '@/features/settings/use-language-choice';
-import { LANGUAGES, useDirection, type Language } from '@/i18n';
-import { useThemeMode, type ThemeMode } from '@/providers/theme-provider';
+import { useDirection } from '@/i18n';
 import { Avatar } from '@/ui/avatar';
 import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
 import { Text } from '@/ui/text';
 
 /**
- * The web bar's one trailing control: session and preferences.
+ * Session menu in the web bar: who is signed in, the two account destinations,
+ * and sign-in/sign-out.
  *
- * It replaces three separate controls (Theme select, Language select, avatar
- * popover) with a single RNR `DropdownMenu`. That is what lets the bar keep its
- * destinations labelled at 375 px: the trailing edge is one 44 pt control at
- * every width instead of two text dropdowns plus an avatar that used to
- * disappear below `sm`.
+ * Theme and language are **not** here; they are their own ghost controls
+ * (`ThemeMenu`, `LanguageMenu`) so a reader can change either without opening
+ * the account menu. This keeps one control per job: identity and session here,
+ * appearance and language next to it.
  *
- * Theme and language are flat radio groups, not submenus: a submenu is a
- * hover-shaped interaction that touch and keyboard users have to discover, and
- * the menu is short enough to hold both groups inline.
- *
- * Signed out, the trigger is a menu glyph and the menu offers Sign in. Signed
- * in, the trigger is the avatar and the menu offers the account destinations
- * and the destructive sign-out, confirmed by the same `AlertDialog` the Account
- * screen uses.
+ * The trigger is the avatar when signed in and a menu glyph when signed out.
+ * Sign-out is destructive and behind the same `AlertDialog` the Account screen
+ * uses.
  */
 export function NavMenu() {
   const { t } = useTranslation();
@@ -59,8 +48,6 @@ export function NavMenu() {
   const { isRTL } = useDirection();
   const { authUser, state } = useCurrentAccount();
   const signOut = useSignOut();
-  const { mode, setMode } = useThemeMode();
-  const { language, select: selectLanguage } = useLanguageChoice();
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const account = state.status === 'ready' ? state.data : null;
@@ -97,7 +84,7 @@ export function NavMenu() {
             attached to the avatar in RTL. */}
         <DropdownMenuContent
           align={isRTL ? 'start' : 'end'}
-          className="w-64"
+          className="w-64 bg-background"
           testID="nav-menu"
         >
           {signedIn ? (
@@ -135,42 +122,6 @@ export function NavMenu() {
               <DropdownMenuSeparator />
             </>
           ) : null}
-
-          <DropdownMenuLabel>{t('theme.title')}</DropdownMenuLabel>
-          <DropdownMenuRadioGroup
-            value={mode}
-            onValueChange={(next) => setMode(next as ThemeMode)}
-          >
-            {THEME_OPTIONS.map((option) => (
-              <DropdownMenuRadioItem
-                key={option.mode}
-                value={option.mode}
-                className="rtl:pr-8 rtl:pl-2"
-                testID={`nav-theme-${option.mode}`}
-              >
-                <Text variant="label">{t(option.labelKey)}</Text>
-              </DropdownMenuRadioItem>
-            ))}
-          </DropdownMenuRadioGroup>
-
-          <DropdownMenuLabel>{t('language.title')}</DropdownMenuLabel>
-          <DropdownMenuRadioGroup
-            value={language}
-            onValueChange={(next) => void selectLanguage(next as Language)}
-          >
-            {LANGUAGES.map((option) => (
-              <DropdownMenuRadioItem
-                key={option.code}
-                value={option.code}
-                className="rtl:pr-8 rtl:pl-2"
-                testID={`nav-language-${option.code}`}
-              >
-                <Text variant="label">{t(option.labelKey)}</Text>
-              </DropdownMenuRadioItem>
-            ))}
-          </DropdownMenuRadioGroup>
-
-          <DropdownMenuSeparator />
 
           {signedIn ? (
             <DropdownMenuItem

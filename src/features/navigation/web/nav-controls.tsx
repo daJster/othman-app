@@ -1,17 +1,21 @@
 import { View } from 'react-native';
+import { LanguageMenu } from '@/features/navigation/web/language-menu';
 import { NavMenu } from '@/features/navigation/web/nav-menu';
+import { ThemeMenu } from '@/features/navigation/web/theme-menu';
 
 /**
- * Trailing cluster of the web bar.
+ * Trailing cluster of the web bar: appearance, language, session.
  *
- * One control at every width: the session/preferences menu. It is the only
- * part of the bar that is not a navigator child; `TabList` and every
- * `TabTrigger` must stay direct children because Expo Router discovers triggers
- * by element type.
+ * Three ghost controls, each with one job, in that order at the inline end.
+ * They are the only part of the bar that is not a navigator child; `TabList`
+ * and every `TabTrigger` must stay direct children because Expo Router
+ * discovers triggers by element type.
  */
 export function WebNavControls() {
   return (
-    <View className="ms-auto flex-row items-center">
+    <View className="ms-auto flex-row items-center gap-0.5">
+      <ThemeMenu />
+      <LanguageMenu />
       <NavMenu />
     </View>
   );

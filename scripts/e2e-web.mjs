@@ -431,40 +431,60 @@ async function main() {
       JSON.stringify(nav.labels),
     );
 
+    await page.locator('[data-testid="nav-theme-trigger"]').click();
+    await settle(page);
+    check(
+      'the theme control lists the three modes',
+      (await page.getByRole('menuitemradio').count()) === 3,
+    );
+    await page.locator('[data-testid="nav-theme-dark"]').click();
+    await settle(page);
+    await page.locator('[data-testid="nav-theme-trigger"]').click();
+    await settle(page);
+    check(
+      'the theme control marks the chosen mode',
+      (await page
+        .locator('[data-testid="nav-theme-dark"]')
+        .getAttribute('aria-checked')) === 'true',
+    );
+    await page.keyboard.press('Escape');
+    await settle(page);
+
+    const languageTrigger = page.locator(
+      '[data-testid="nav-language-trigger"]',
+    );
+    check(
+      'the language control names the current language',
+      ((await languageTrigger.getAttribute('aria-label')) ?? '').includes(
+        'English',
+      ),
+    );
+    check(
+      'the language control shows the full name from sm up',
+      (await languageTrigger.innerText()).includes('English'),
+    );
+    await languageTrigger.click();
+    await settle(page);
+    check(
+      'the language control lists both languages',
+      (await page.getByRole('menuitemradio').count()) === 2,
+    );
+    await page.keyboard.press('Escape');
+    await settle(page);
+
     await page.locator('[data-testid="nav-menu-trigger"]').click();
     await settle(page);
     check(
-      'the trailing menu opens',
+      'the session menu opens',
       (await page.locator('[data-testid="nav-menu"]').count()) === 1,
     );
-    const themeEntry = await page
-      .locator('[data-testid^="nav-theme-"]')
-      .count();
-    const languageEntry = await page
-      .locator('[data-testid^="nav-language-"]')
-      .count();
     // Development mode projects a mock session, so either session entry is
     // the correct one: sign-in for a real signed-out session, sign-out for the
     // mock account.
     const sessionEntry =
       (await page.locator('[data-testid="nav-menu-sign-in"]').count()) +
       (await page.locator('[data-testid="nav-menu-sign-out"]').count());
-    check(
-      'the menu carries theme, language and a session entry',
-      themeEntry === 3 && languageEntry === 2 && sessionEntry === 1,
-      `${themeEntry}/${languageEntry}/${sessionEntry}`,
-    );
-
-    await page.locator('[data-testid="nav-theme-dark"]').click();
-    await settle(page);
-    await page.locator('[data-testid="nav-menu-trigger"]').click();
-    await settle(page);
-    check(
-      'the menu shows the chosen theme',
-      (await page
-        .locator('[data-testid="nav-theme-dark"]')
-        .getAttribute('aria-checked')) === 'true',
-    );
+    check('the session menu carries a session entry', sessionEntry === 1);
     await page.keyboard.press('Escape');
     await settle(page);
 
@@ -499,6 +519,27 @@ async function main() {
         info.labels.length === 4 &&
           info.labels.every((label) => label.length > 0),
         JSON.stringify(info.labels),
+      );
+      const languageControl = await page.evaluate(() => {
+        const el = document.querySelector(
+          '[data-testid="nav-language-trigger"]',
+        );
+        return {
+          label: el?.getAttribute('aria-label') ?? '',
+          // innerText respects `display: none`, textContent does not.
+          text: el instanceof HTMLElement ? el.innerText.trim() : '',
+        };
+      });
+      check(
+        `language control keeps its name at ${width}`,
+        languageControl.label.includes('اللغة') ||
+          languageControl.label.includes('Language'),
+        JSON.stringify(languageControl),
+      );
+      check(
+        `language name is shown from sm up at ${width}`,
+        width < 640 ? languageControl.text === '' : languageControl.text !== '',
+        JSON.stringify(languageControl.text),
       );
       check(
         `no runtime errors at ${width}`,

@@ -37,12 +37,18 @@ Settled with the maintainer before implementation (recommendations accepted):
    `use-visible-tabs.ts` and their test are deleted with this decision: the
    filter had no consumer left, and a hidden policy that nobody applies is worse
    than none.
-3. **Web trailing cluster** — one account/preferences menu
-   (RNR `DropdownMenu`) holding Theme, Language, Account, Progress and
-   Sign in / Sign out, instead of two always-visible text dropdowns plus an
-   avatar menu that disappears below `sm`.
+3. **Web trailing cluster** — three ghost controls, no border and no chevron:
+   theme (palette-class icon only, the active mode marked in its menu),
+   language (icon plus the language's own name, icon-only below `sm`) and the
+   session menu (avatar when signed in, menu glyph otherwise) with Account,
+   Progress and Sign in / Sign out. The old pair of `Select` triggers is gone:
+   it carried a border and a chevron, and showed `Auto` / `AR` instead of the
+   values a reader recognises.
 4. **Mobile web destinations** — icon above a short label at every width, so
-   the bar is never a row of unlabeled glyphs.
+   the bar is never a row of unlabeled glyphs. The three trailing controls keep
+   a 44 pt target; the language _name_ is the only thing that drops below `sm`
+   (icon and `aria-label` remain), because four labelled destinations leave
+   ~90 px at 375 and the name does not fit.
 5. **Delivery** — three commits on one topic branch: (1) extraction + tests,
    zero visual change; (2) web bar UX; (3) native tab polish. Each commit must
    pass `npm run verify`.
@@ -52,11 +58,15 @@ Settled with the maintainer before implementation (recommendations accepted):
    hiding it on scroll buys nothing), selected label tinted with the same token
    as the selected icon, and a `testID`/`accessibilityLabel` per destination so
    one device test can drive either shell. No new native top bar.
-7. **Popover surface** — the design system had omitted `--popover-*` on the
-   grounds that menus were native. The web nav menu is a floating panel, so the
-   token pair is added (light: white, dark: card) and the palette table records
-   it. Prettier's Tailwind sorter then recognises `bg-popover` and re-sorts six
-   RNR primitives; those hunks are formatting only.
+7. **Menu surface** — the design system has no `--popover-*` pair (menus were
+   native when it was written), while RNR's `DropdownMenu` paints `bg-popover`.
+   The nav menus override the surface with `bg-background` instead of adding the
+   token: the token made Prettier's Tailwind sorter reorder six RNR primitives
+   in this worktree, and the sorter could not see the new variable consistently
+   there (`node_modules` is junctioned to the main checkout). Porting
+   `--popover-*` belongs in a normal checkout that can verify the sorter; until
+   then the menu renders on the page ground, which is the only surface the
+   design system offers anyway.
 
 ## Hard constraints (verified)
 

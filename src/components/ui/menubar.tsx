@@ -151,7 +151,7 @@ function MenubarSubContent({
     <NativeOnlyAnimatedView entering={FadeIn.reduceMotion(ReduceMotion.System)}>
       <MenubarPrimitive.SubContent
         className={cn(
-          'overflow-hidden rounded-md border border-border bg-popover p-1 shadow-lg shadow-black/5',
+          'bg-popover overflow-hidden rounded-md border border-border p-1 shadow-lg shadow-black/5',
           Platform.select({
             web: 'animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 fade-in-0 data-[state=closed]:zoom-out-95 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] origin-(--radix-context-menu-content-transform-origin)',
           }),
@@ -190,7 +190,7 @@ function MenubarContent({
           <TextClassContext.Provider value="text-popover-foreground">
             <MenubarPrimitive.Content
               className={cn(
-                'min-w-[12rem] overflow-hidden rounded-md border border-border bg-popover p-1 shadow-lg shadow-black/5',
+                'bg-popover min-w-[12rem] overflow-hidden rounded-md border border-border p-1 shadow-lg shadow-black/5',
                 Platform.select({
                   web: cn(
                     'animate-in fade-in-0 zoom-in-95 z-50 max-h-(--radix-context-menu-content-available-height) origin-(--radix-context-menu-content-transform-origin) cursor-default',
@@ -225,7 +225,7 @@ function MenubarItem({
   return (
     <TextClassContext.Provider
       value={cn(
-        'text-sm text-popover-foreground select-none group-active:text-popover-foreground',
+        'text-popover-foreground group-active:text-popover-foreground text-sm select-none',
         variant === 'destructive' &&
           'text-destructive group-active:text-destructive',
       )}

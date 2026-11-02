@@ -40,6 +40,7 @@ export const ICON_NAMES = [
   'users',
   // Settings rows.
   'palette',
+  'sun-moon',
   'languages',
   'globe',
   // Account.
