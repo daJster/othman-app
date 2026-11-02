@@ -46,6 +46,17 @@ Settled with the maintainer before implementation (recommendations accepted):
 5. **Delivery** — three commits on one topic branch: (1) extraction + tests,
    zero visual change; (2) web bar UX; (3) native tab polish. Each commit must
    pass `npm run verify`.
+6. **Native tab bar** — keep `NativeTabs`. Make the platform defaults explicit:
+   Android `labelVisibilityMode="labeled"` (Material's `auto` drops labels past
+   three items), iOS 26 `minimizeBehavior="never"` (the bar is the only chrome;
+   hiding it on scroll buys nothing), selected label tinted with the same token
+   as the selected icon, and a `testID`/`accessibilityLabel` per destination so
+   one device test can drive either shell. No new native top bar.
+7. **Popover surface** — the design system had omitted `--popover-*` on the
+   grounds that menus were native. The web nav menu is a floating panel, so the
+   token pair is added (light: white, dark: card) and the palette table records
+   it. Prettier's Tailwind sorter then recognises `bg-popover` and re-sorts six
+   RNR primitives; those hunks are formatting only.
 
 ## Hard constraints (verified)
 
@@ -68,3 +79,22 @@ Settled with the maintainer before implementation (recommendations accepted):
 - Reader chrome (`src/features/quran/**`, `docs/reader-chrome.md`).
 - Sign-in/account screens and the Account settings list.
 - `othman-web/` (frozen reference material).
+
+## Evidence
+
+Web (this worktree, `dist` exported and served at :8089):
+
+- `npm run verify` — 98 suites / 753 tests, typecheck, core purity, i18n audit,
+  lint (0 errors), format all green.
+- `npm run build:web` → `Exported: dist`; `npm run check:web` → passed.
+- `npm run e2e:web` — 74/74 checks, including the four labelled destinations at
+  375/768/1024, the nav landmark, `aria-current`, the trailing menu opening with
+  theme/language/session entries, and a theme choice applying.
+- Screenshots inspected at 375/768/1440 in en-light and ar-dark: labels visible
+  at every width, active underline flush on the bar hairline, menu opaque and
+  anchored to the avatar on both sides of the bar.
+- `npm run build:ios` → `Exported: dist-ios`; `npm run build:android` →
+  `Exported: dist-android` (bundling only).
+
+Native device evidence: **pending** — this agent cannot drive the maintainer's
+Pixel or iPhone. See the hand-off checklist in the PR.

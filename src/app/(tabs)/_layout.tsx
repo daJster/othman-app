@@ -23,6 +23,18 @@ import { getIconGlyph } from '@/ui/icon';
  * shrinks from four items to two is a layout surprise. Access is enforced by
  * `RequireAuth` and the root redirect, not by the bar.
  *
+ * Three platform choices are explicit rather than inherited:
+ *
+ *  - `labelVisibilityMode="labeled"` — Material's default (`auto`) drops labels
+ *    once there are more than three destinations, so Android would show four
+ *    unlabeled glyphs where iOS shows four labels. The bar is the only chrome
+ *    on the screen; it keeps its labels.
+ *  - `minimizeBehavior="never"` — iOS 26 can shrink the bar on scroll. Every
+ *    screen here is a normal scrolling page, so hiding the destinations buys
+ *    nothing and makes them chase the user.
+ *  - `testID`/`accessibilityLabel` per trigger — the same destination names the
+ *    web anchors expose, so one device test can drive either shell.
+ *
  * The web shell is `_layout.web.tsx`; Metro picks it by platform.
  */
 export default function NativeTabsLayout() {
@@ -35,16 +47,23 @@ export default function NativeTabsLayout() {
     <NativeTabs
       backgroundColor={bar.backgroundColor}
       iconColor={{ default: idleIcon.color, selected: activeIcon.color }}
+      labelStyle={{ selected: { color: activeIcon.color } }}
+      labelVisibilityMode="labeled"
+      minimizeBehavior="never"
     >
       {TABS.map((tab) => {
         const glyph = getIconGlyph(tab.icon);
+        const label = t(tab.titleKey);
 
         return (
-          <NativeTabs.Trigger key={tab.tab} name={tab.tab}>
+          <NativeTabs.Trigger
+            key={tab.tab}
+            name={tab.tab}
+            testID={`tab-${tab.tab}`}
+            accessibilityLabel={label}
+          >
             <NativeTabs.Trigger.Icon sf={glyph.ios} md={glyph.mdSymbol} />
-            <NativeTabs.Trigger.Label>
-              {t(tab.titleKey)}
-            </NativeTabs.Trigger.Label>
+            <NativeTabs.Trigger.Label>{label}</NativeTabs.Trigger.Label>
           </NativeTabs.Trigger>
         );
       })}
