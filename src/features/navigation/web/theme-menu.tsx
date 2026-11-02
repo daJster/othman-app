@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { THEME_OPTIONS } from '@/features/settings/theme-options';
+import { flatTrigger } from '@/features/navigation/web/flat-trigger';
 import { useThemeMode, type ThemeMode } from '@/providers/theme-provider';
 import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
@@ -34,6 +35,7 @@ export function ThemeMenu() {
         <Button
           variant="ghost"
           size="icon"
+          className={flatTrigger()}
           accessibilityLabel={t('theme.title')}
           testID="nav-theme-trigger"
         >

@@ -102,12 +102,20 @@ async function navInfo(page) {
   return page.evaluate(() => {
     const nav = document.querySelector('[role="navigation"]');
     const tabs = nav ? [...nav.querySelectorAll('a[href]')] : [];
+    // Account stays registered but is display:none on web, so only the visible
+    // anchors describe the bar.
+    const visible = tabs.filter((tab) => tab.getBoundingClientRect().width > 0);
+    const hidden = tabs.filter(
+      (tab) => tab.getBoundingClientRect().width === 0,
+    );
     return {
-      hrefs: tabs.map((tab) => tab.getAttribute('href')),
-      labels: tabs.map((tab) => tab.textContent?.trim() ?? ''),
-      top: tabs[0]?.getBoundingClientRect().top ?? null,
-      current: tabs.filter((tab) => tab.getAttribute('aria-current') === 'page')
-        .length,
+      hrefs: visible.map((tab) => tab.getAttribute('href')),
+      hiddenHrefs: hidden.map((tab) => tab.getAttribute('href')),
+      labels: visible.map((tab) => tab.textContent?.trim() ?? ''),
+      top: visible[0]?.getBoundingClientRect().top ?? null,
+      current: visible.filter(
+        (tab) => tab.getAttribute('aria-current') === 'page',
+      ).length,
     };
   });
 }
@@ -417,17 +425,22 @@ async function main() {
     check('localhost responds', response?.status() === 200);
     check('title is the app title', (await page.title()) === 'Othman');
     check(
-      'development mode exposes every tab',
+      'development mode exposes the bar destinations',
       JSON.stringify((await navInfo(page)).hrefs) ===
-        JSON.stringify(['/', '/quran', '/meetings', '/account']),
+        JSON.stringify(['/', '/quran', '/meetings']),
       JSON.stringify((await navInfo(page)).hrefs),
+    );
+    check(
+      'account stays registered but out of the bar',
+      (await navInfo(page)).hiddenHrefs.includes('/account'),
+      JSON.stringify((await navInfo(page)).hiddenHrefs),
     );
     check('active tab is announced', (await navInfo(page)).current === 1);
 
     const nav = await navInfo(page);
     check(
       'every destination keeps a visible label',
-      nav.labels.length === 4 && nav.labels.every((label) => label.length > 0),
+      nav.labels.length === 3 && nav.labels.every((label) => label.length > 0),
       JSON.stringify(nav.labels),
     );
 
@@ -488,11 +501,30 @@ async function main() {
     await page.keyboard.press('Escape');
     await settle(page);
 
-    for (const path of ['/quran', '/meetings', '/account', '/']) {
+    for (const path of ['/quran', '/meetings', '/']) {
       await page.locator(`[role="navigation"] a[href="${path}"]`).click();
       await page.waitForURL((url) => url.pathname === path, { timeout: 10000 });
       check(`tab ${path} navigates`, new URL(page.url()).pathname === path);
     }
+
+    // Account has no tab on web; the avatar menu is its entry point.
+    await page.locator('[data-testid="nav-menu-trigger"]').click();
+    await settle(page);
+    await page.locator('[data-testid="nav-menu-account"]').click();
+    await page.waitForURL((url) => url.pathname === '/account', {
+      timeout: 10000,
+    });
+    check(
+      'the avatar menu opens Account',
+      new URL(page.url()).pathname === '/account',
+    );
+    check(
+      'no account tab is shown',
+      (await navInfo(page)).hrefs.every((href) => href !== '/account'),
+      JSON.stringify((await navInfo(page)).hrefs),
+    );
+    await page.locator('[role="navigation"] a[href="/"]').click();
+    await page.waitForURL((url) => url.pathname === '/', { timeout: 10000 });
 
     check('no runtime errors', errors.length === 0, errors.join(' | '));
     await context.close();
@@ -516,7 +548,7 @@ async function main() {
       check(`top navigation at ${width}`, info.top !== null && info.top < 120);
       check(
         `nav labels stay visible at ${width}`,
-        info.labels.length === 4 &&
+        info.labels.length === 3 &&
           info.labels.every((label) => label.length > 0),
         JSON.stringify(info.labels),
       );

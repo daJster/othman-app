@@ -23,6 +23,7 @@ import {
   useCurrentAccount,
   useSignOut,
 } from '@/features/account/use-current-account';
+import { flatTrigger } from '@/features/navigation/web/flat-trigger';
 import { useDirection } from '@/i18n';
 import { Avatar } from '@/ui/avatar';
 import { Button } from '@/ui/button';
@@ -62,6 +63,22 @@ export function NavMenu() {
     router.push(href);
   };
 
+  // Signed out there is no session to show and nothing for a session menu to
+  // do, so the trigger becomes the action itself: one rounded, contrastive
+  // Sign in button that goes straight to the modal.
+  if (!signedIn) {
+    return (
+      <Button
+        size="sm"
+        label={t('action.signIn')}
+        accessibilityLabel={t('action.signIn')}
+        onPress={() => go('/auth/sign-in')}
+        testID="nav-sign-in"
+        className="rounded-full px-4"
+      />
+    );
+  }
+
   return (
     <>
       <DropdownMenu>
@@ -69,14 +86,13 @@ export function NavMenu() {
           <Button
             variant="ghost"
             size="icon"
+            // The avatar is the session menu's handle, not a button that wants
+            // attention: no hover or press wash. Keyboard focus stays.
+            className={flatTrigger()}
             accessibilityLabel={name || t('nav.account')}
             testID="nav-menu-trigger"
           >
-            {signedIn ? (
-              <Avatar size="md" src={photoURL} name={name} />
-            ) : (
-              <Icon name="menu" size={20} />
-            )}
+            <Avatar size="md" src={photoURL} name={name} />
           </Button>
         </DropdownMenuTrigger>
 
@@ -87,62 +103,48 @@ export function NavMenu() {
           className="w-64 bg-background"
           testID="nav-menu"
         >
-          {signedIn ? (
-            <>
-              <View className="p-2">
-                <View className="flex-row items-center gap-3">
-                  <Avatar size="lg" src={photoURL} name={name} />
-                  <View className="min-w-0 flex-1 gap-0.5">
-                    <Text variant="label" numberOfLines={1}>
-                      {name}
-                    </Text>
-                    <Text variant="caption" tone="muted" numberOfLines={1}>
-                      {email}
-                    </Text>
-                  </View>
-                </View>
+          <View className="p-2">
+            <View className="flex-row items-center gap-3">
+              <Avatar size="lg" src={photoURL} name={name} />
+              <View className="min-w-0 flex-1 gap-0.5">
+                <Text variant="label" numberOfLines={1}>
+                  {name}
+                </Text>
+                <Text variant="caption" tone="muted" numberOfLines={1}>
+                  {email}
+                </Text>
               </View>
-              <DropdownMenuSeparator />
+            </View>
+          </View>
+          <DropdownMenuSeparator />
 
-              <DropdownMenuItem
-                onPress={() => go('/account')}
-                testID="nav-menu-account"
-              >
-                <Icon name="user" size={18} tone="muted" />
-                <Text variant="label">{t('nav.account')}</Text>
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onPress={() => go('/account/progress')}
-                testID="nav-menu-progress"
-              >
-                <Icon name="chart-line" size={18} tone="muted" />
-                <Text variant="label">{t('pages.account.progress.title')}</Text>
-              </DropdownMenuItem>
+          <DropdownMenuItem
+            onPress={() => go('/account')}
+            testID="nav-menu-account"
+          >
+            <Icon name="user" size={18} tone="muted" />
+            <Text variant="label">{t('nav.account')}</Text>
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onPress={() => go('/account/progress')}
+            testID="nav-menu-progress"
+          >
+            <Icon name="chart-line" size={18} tone="muted" />
+            <Text variant="label">{t('pages.account.progress.title')}</Text>
+          </DropdownMenuItem>
 
-              <DropdownMenuSeparator />
-            </>
-          ) : null}
+          <DropdownMenuSeparator />
 
-          {signedIn ? (
-            <DropdownMenuItem
-              variant="destructive"
-              onPress={() => setConfirmOpen(true)}
-              testID="nav-menu-sign-out"
-            >
-              <Icon name="logout" size={18} tone="destructive" />
-              <Text variant="label" tone="destructive">
-                {t('action.signOut')}
-              </Text>
-            </DropdownMenuItem>
-          ) : (
-            <DropdownMenuItem
-              onPress={() => go('/auth/sign-in')}
-              testID="nav-menu-sign-in"
-            >
-              <Icon name="user" size={18} tone="muted" />
-              <Text variant="label">{t('action.signIn')}</Text>
-            </DropdownMenuItem>
-          )}
+          <DropdownMenuItem
+            variant="destructive"
+            onPress={() => setConfirmOpen(true)}
+            testID="nav-menu-sign-out"
+          >
+            <Icon name="logout" size={18} tone="destructive" />
+            <Text variant="label" tone="destructive">
+              {t('action.signOut')}
+            </Text>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 

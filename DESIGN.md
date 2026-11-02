@@ -70,8 +70,9 @@ are semantic roles: a new status uses a role, never a raw Tailwind palette name.
   44pt minimum, hairlines not boxes.
 - Mobile nav: icon above an 11px label, `min-h-12`, at every width — labels
   never hide. Desktop is the same top row with the icon inline before the label,
-  tabs packed at the inline start inside the page grid, one 44pt control at the
-  inline end. Labels never wrap the bar into a second row.
+  three destinations packed at the inline start inside the page grid, three
+  44pt controls (theme, language, avatar) at the inline end. Labels never wrap
+  the bar into a second row.
 
 ## Components
 
@@ -94,15 +95,19 @@ are semantic roles: a new status uses a role, never a raw Tailwind palette name.
   is a real `<a href>` inside a `navigation` landmark; the active one carries
   `aria-current="page"` and a 2px brass underline that sits flush on the
   hairline (the row owns no vertical padding, so the indicator touches the
-  edge). No filled pill, no layout shift. All four destinations render signed in
-  or out; a private one routes to sign-in rather than disappearing. Wordmark
+  edge). No filled pill, no layout shift. Three destinations render in the bar —
+  Home, Quran, Meetings — with Account reached from the avatar menu; the
+  Account trigger is still registered with the navigator but not shown, and
+  native keeps its Account tab. A private destination routes to sign-in rather
+  than disappearing. Wordmark
   from `sm` up; below that the Home hero carries the brand. Three ghost controls
   at the trailing edge, no border and no chevron: theme (palette icon only, the
   active mode marked inside its menu), language (globe icon plus the language's
   own name — "English" / "العربية" — icon-only below `sm`, where the four
   labelled destinations leave no room for the name) and the session menu
   (avatar when signed in, menu glyph otherwise) holding Account, Progress and
-  Sign in / Sign out.
+  Sign in / Sign out. The avatar trigger is flat: no hover wash and no press
+  wash, only the keyboard focus ring.
 - **Quran position band** — hairline section with the real page number, surah
   number and `page / 604` progress hairline; the page scan becomes a preview
   when an edition is attached. No card.

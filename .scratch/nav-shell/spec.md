@@ -29,14 +29,15 @@ Settled with the maintainer before implementation (recommendations accepted):
 1. **Scope** — the two chrome surfaces that exist: the web top bar and the
    native bottom tab bar. No new native top app bar; page titles stay in-page
    (plans 002/003 removed duplicate `h1`s on purpose).
-2. **Signed-out destinations** — always render all four destinations. A private
-   destination stays visible; its own `RequireAuth`/root redirect sends a
-   signed-out visitor to sign-in with `returnTo`. This removes the shrinking
-   tab bar and the native navigator remount that
-   `NativeTabs` documents for dynamic `hidden`. `visible-tabs.ts`,
-   `use-visible-tabs.ts` and their test are deleted with this decision: the
-   filter had no consumer left, and a hidden policy that nobody applies is worse
-   than none.
+2. **Signed-out destinations** — every destination stays registered with the
+   navigator, signed in or out. A private one routes to sign-in rather than
+   disappearing (`RequireAuth` and the root redirect own access), which also
+   avoids the native navigator remount that `NativeTabs` documents for a
+   changing trigger set. Web shows Home, Quran and Meetings; Account is
+   registered but `hiddenOnWeb` (the avatar menu is its entry point) so the
+   avatar is the only account control in the bar. Native keeps its Account tab:
+   it has no avatar. `visible-tabs.ts` / `use-visible-tabs.ts` and their test
+   are deleted: the filter had no consumer left.
 3. **Web trailing cluster** — three ghost controls, no border and no chevron:
    theme (palette-class icon only, the active mode marked in its menu),
    language (icon plus the language's own name, icon-only below `sm`) and the
@@ -47,8 +48,8 @@ Settled with the maintainer before implementation (recommendations accepted):
 4. **Mobile web destinations** — icon above a short label at every width, so
    the bar is never a row of unlabeled glyphs. The three trailing controls keep
    a 44 pt target; the language _name_ is the only thing that drops below `sm`
-   (icon and `aria-label` remain), because four labelled destinations leave
-   ~90 px at 375 and the name does not fit.
+   (icon and `aria-label` remain), because three labelled destinations and
+   three controls still leave no room for the name at 375.
 5. **Delivery** — three commits on one topic branch: (1) extraction + tests,
    zero visual change; (2) web bar UX; (3) native tab polish. Each commit must
    pass `npm run verify`.
@@ -62,11 +63,19 @@ Settled with the maintainer before implementation (recommendations accepted):
    native when it was written), while RNR's `DropdownMenu` paints `bg-popover`.
    The nav menus override the surface with `bg-background` instead of adding the
    token: the token made Prettier's Tailwind sorter reorder six RNR primitives
-   in this worktree, and the sorter could not see the new variable consistently
+   in the worktree, and the sorter could not see the new variable consistently
    there (`node_modules` is junctioned to the main checkout). Porting
    `--popover-*` belongs in a normal checkout that can verify the sorter; until
    then the menu renders on the page ground, which is the only surface the
    design system offers anyway.
+8. **One account control** — Account leaves the web bar. The registry keeps the
+   row with `hiddenOnWeb`, so the trigger still registers the screen with the
+   navigator (deleting it would make `router.push('/account')` fall through to
+   not-found) while `display: none` keeps it out of the bar, the tree and the
+   tab order. The avatar menu is the only account entry on web. Native keeps
+   the Account tab; it has no avatar. The avatar trigger is flat on purpose: no
+   hover wash and no press wash (`hover:bg-transparent active:bg-transparent`);
+   the keyboard `focus-visible` ring stays.
 
 ## Hard constraints (verified)
 

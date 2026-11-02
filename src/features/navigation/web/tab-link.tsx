@@ -29,15 +29,32 @@ import { Text } from '@/ui/text';
 export type WebTabLinkProps = TabTriggerSlotProps & {
   label: string;
   icon: IconName;
+  /**
+   * Registered but not shown. The trigger must still render so `expo-router`
+   * creates the screen; `display: none` keeps it out of the bar, the
+   * accessibility tree and the tab order.
+   */
+  hidden?: boolean;
   testID?: string;
 };
 
 export type WebTabAriaState = {
   isFocused: boolean;
+  hidden: boolean;
 };
 
-/** The current destination, and nothing else. */
-export function webTabAria({ isFocused }: WebTabAriaState) {
+/**
+ * ARIA for a tab whose route may be hidden from the bar.
+ *
+ * Visible destinations are links with `aria-current` on the active one. A
+ * hidden destination is removed from the tree entirely: it exists for the
+ * navigator, not for the reader.
+ */
+export function webTabAria({ isFocused, hidden }: WebTabAriaState) {
+  if (hidden) {
+    return { 'aria-hidden': 'true' as const, tabIndex: -1 as const };
+  }
+
   return { 'aria-current': isFocused ? ('page' as const) : undefined };
 }
 
@@ -47,6 +64,7 @@ export function WebTabLink({
   isFocused,
   className,
   href,
+  hidden = false,
   onPress,
   testID,
 }: WebTabLinkProps) {
@@ -54,13 +72,17 @@ export function WebTabLink({
     'a',
     {
       href,
-      ...webTabAria({ isFocused: Boolean(isFocused) }),
-      'aria-label': label,
-      style: { textDecoration: 'none', color: 'inherit' },
+      ...webTabAria({ isFocused: Boolean(isFocused), hidden }),
+      'aria-label': hidden ? undefined : label,
+      style: {
+        textDecoration: 'none',
+        color: 'inherit',
+        display: hidden ? 'none' : undefined,
+      },
       className: FOCUS_RING,
       testID,
       onClick: (event: MouseEvent<HTMLAnchorElement>) => {
-        if (!shouldHandleWebLink(event)) return;
+        if (hidden || !shouldHandleWebLink(event)) return;
 
         // Let Expo Router's tab trigger call `preventDefault` and navigate.
         // Doing it first makes its `shouldHandleMouseEvent` see

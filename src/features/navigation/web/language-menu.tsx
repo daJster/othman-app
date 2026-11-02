@@ -7,6 +7,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLanguageChoice } from '@/features/settings/use-language-choice';
+import { flatTrigger } from '@/features/navigation/web/flat-trigger';
 import { LANGUAGES, type Language } from '@/i18n';
 import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
@@ -37,7 +38,7 @@ export function LanguageMenu() {
         <Button
           variant="ghost"
           size="md"
-          className="h-11 min-w-11 justify-center gap-2 px-2"
+          className={flatTrigger('h-11 min-w-11 justify-center gap-2 px-2')}
           accessibilityLabel={`${t('language.title')}: ${currentName}`}
           testID="nav-language-trigger"
         >

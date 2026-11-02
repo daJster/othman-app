@@ -29,11 +29,12 @@ import { PAGE_GUTTER } from '@/ui/page';
  * produces an empty bar with no error. Leaves live in
  * `src/features/navigation/web/`.
  *
- * Every registry destination is rendered, signed in or out. A trigger is what
- * registers the route with the navigator; hiding private ones made the bar
- * change size at sign-in, and `NativeTabs` documents that a changing trigger
- * set remounts the navigator and resets its state. Access is gated where it
- * belongs: `RequireAuth` on the screen and the root redirect for private paths.
+ * Every registry destination is rendered as a trigger, because a trigger is
+ * what registers the route with the navigator. Destinations marked
+ * `hiddenOnWeb` are rendered but not shown: Account lives in the avatar menu on
+ * web, and the trigger only exists so the navigator knows the screen. Access is
+ * gated where it belongs: `RequireAuth` on the screen and the root redirect for
+ * private paths.
  *
  * The bar is a `navigation` landmark, not a tab widget: its children are real
  * `<a href>` links (`WebTabLink`), so `role="tablist"`/`aria-selected` would
@@ -67,6 +68,7 @@ export default function WebTabsLayout() {
             <WebTabLink
               label={t(tab.titleKey)}
               icon={tab.icon}
+              hidden={tab.hiddenOnWeb === true}
               testID={`nav-tab-${tab.tab}`}
             />
           </TabTrigger>

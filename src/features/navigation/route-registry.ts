@@ -59,6 +59,14 @@ export type AppRoute = {
    * and a card for it belongs on Home without a second list to maintain.
    */
   readonly showOnHome?: true;
+  /**
+   * Keep the destination registered with the web navigator but out of the web
+   * bar. The trigger still has to render: `expo-router` creates the tab screens
+   * from triggers, so deleting it would make `router.push(href)` fall through
+   * to not-found. Account uses this — the avatar menu is its only visible
+   * entry on web, and the bar keeps three destinations plus the avatar.
+   */
+  readonly hiddenOnWeb?: true;
 };
 
 export type TabRoute = AppRoute & {
@@ -100,6 +108,9 @@ export const APP_ROUTES = [
     descriptionKey: 'nav.accountDesc',
     icon: 'user',
     access: 'private',
+    // Web reaches Account from the avatar menu; the trigger only registers the
+    // route with the navigator there. Native keeps the tab: it has no avatar.
+    hiddenOnWeb: true,
   },
   {
     tab: null,
