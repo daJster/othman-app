@@ -6,18 +6,18 @@ Feature slug: `nav-shell`
 
 ## Assignment
 
-| Field                 | Meaning                                                                                                                                                   |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Package / IDs         | Nav shell rebuild (web top bar + native tab bar)                                                                                                          |
-| Owner                 | agent-A (maintainer-delegated, interactive session)                                                                                                       |
-| Branch / worktree     | `feat/nav-shell-rebuild` · `../othman-worktrees/nav-shell-rebuild`                                                                                        |
-| Base SHA              | `1e5b3fc` (RNR primitive layer)                                                                                                                           |
-| Prerequisites         | none — `ui/icon-page-modernization` plans 001–008 are DONE                                                                                                |
-| Owned paths           | `src/app/(tabs)/_layout.tsx`, `src/app/(tabs)/_layout.web.tsx`, `src/features/navigation/**`, `scripts/e2e-web.mjs`, `DESIGN.md`, `.scratch/nav-shell/**` |
-| Authorized operations | commit to this topic branch                                                                                                                               |
-| Checks                | focused Jest suites, `npm run verify`, `npm run build:web && npm run check:web`, `npm run e2e:web`                                                        |
-| Evidence owner        | maintainer (Pixel + iPhone + browser)                                                                                                                     |
-| Tested SHA            | recorded in the PR                                                                                                                                        |
+| Field                 | Meaning                                                                                                                                                                                                                                                   |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Package / IDs         | Nav shell rebuild (web top bar + native tab bar)                                                                                                                                                                                                          |
+| Owner                 | agent-A (maintainer-delegated, interactive session)                                                                                                                                                                                                       |
+| Branch / worktree     | `feat/nav-shell-rebuild` · `../othman-worktrees/nav-shell-rebuild`                                                                                                                                                                                        |
+| Base SHA              | `1e5b3fc` (RNR primitive layer)                                                                                                                                                                                                                           |
+| Prerequisites         | none — `ui/icon-page-modernization` plans 001–008 are DONE                                                                                                                                                                                                |
+| Owned paths           | `src/app/(tabs)/_layout.tsx`, `src/app/(tabs)/_layout.web.tsx`, `src/features/navigation/**`, `src/features/settings/**`, `src/components/blocks/user-menu.tsx` (moved into the nav feature), `scripts/e2e-web.mjs`, `DESIGN.md`, `.scratch/nav-shell/**` |
+| Authorized operations | commit to this topic branch                                                                                                                                                                                                                               |
+| Checks                | focused Jest suites, `npm run verify`, `npm run build:web && npm run check:web`, `npm run e2e:web`                                                                                                                                                        |
+| Evidence owner        | maintainer (Pixel + iPhone + browser)                                                                                                                                                                                                                     |
+| Tested SHA            | recorded in the PR                                                                                                                                                                                                                                        |
 
 Not authorized: push, merge, deploy, branch/worktree deletion, edits to
 `src/app/_layout.tsx`, locale files, `package.json`, or `othman-web/`.
@@ -33,7 +33,10 @@ Settled with the maintainer before implementation (recommendations accepted):
    destination stays visible; its own `RequireAuth`/root redirect sends a
    signed-out visitor to sign-in with `returnTo`. This removes the shrinking
    tab bar and the native navigator remount that
-   `NativeTabs` documents for dynamic `hidden`.
+   `NativeTabs` documents for dynamic `hidden`. `visible-tabs.ts`,
+   `use-visible-tabs.ts` and their test are deleted with this decision: the
+   filter had no consumer left, and a hidden policy that nobody applies is worse
+   than none.
 3. **Web trailing cluster** — one account/preferences menu
    (RNR `DropdownMenu`) holding Theme, Language, Account, Progress and
    Sign in / Sign out, instead of two always-visible text dropdowns plus an

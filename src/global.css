@@ -10,8 +10,9 @@
  * a silent fallback.
  *
  * Deliberately not ported: `--sidebar-*` and `--chart-*` (no sidebar, no
- * charts), `--popover-*` (sheets and menus are native, not floating panels),
- * `tw-animate-css` and the `slideIn/Out` keyframes (Reanimated owns motion).
+ * charts), `tw-animate-css` and the `slideIn/Out` keyframes (Reanimated owns
+ * motion). `--popover-*` **is** ported: the web nav menu is a floating panel
+ * built on the RNR `DropdownMenu`, which paints `bg-popover`.
  *
  * Colors stay in `oklch()`: Uniwind parses it for `className`. Anything that
  * has to reach a JS prop (Reanimated, gradients, native tints) must go through
@@ -69,6 +70,8 @@
       --color-foreground: oklch(0.145 0 0);
       --color-card: oklch(1 0 0);
       --color-card-foreground: oklch(0.145 0 0);
+      --color-popover: oklch(1 0 0);
+      --color-popover-foreground: oklch(0.145 0 0);
       --color-primary: oklch(0.5 0.15 160);
       --color-primary-foreground: oklch(0.985 0 0);
       --color-secondary: oklch(0.96 0.04 160);
@@ -107,6 +110,8 @@
       --color-foreground: oklch(0.95 0.04 160);
       --color-card: oklch(0.18 0.03 160);
       --color-card-foreground: oklch(0.95 0.04 160);
+      --color-popover: oklch(0.18 0.03 160);
+      --color-popover-foreground: oklch(0.95 0.04 160);
       --color-primary: oklch(0.6 0.15 160);
       --color-primary-foreground: oklch(0.2 0.1 160);
       --color-secondary: oklch(0.21 0.035 160);

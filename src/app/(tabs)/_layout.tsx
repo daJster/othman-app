@@ -1,7 +1,7 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useTranslation } from 'react-i18next';
 import { useResolveClassNames } from 'uniwind';
-import { useVisibleTabs } from '@/features/navigation/use-visible-tabs';
+import { TABS } from '@/features/navigation/route-registry';
 import { getIconGlyph } from '@/ui/icon';
 
 /**
@@ -18,11 +18,15 @@ import { getIconGlyph } from '@/ui/icon';
  * tab bar takes `ColorValue`s, not classNames, and a literal hex here would be
  * the one place in the app that ignores the theme.
  *
+ * Every registry tab is always a trigger, signed in or out. A changing trigger
+ * set remounts the navigator (and its state) on auth changes, and a bar that
+ * shrinks from four items to two is a layout surprise. Access is enforced by
+ * `RequireAuth` and the root redirect, not by the bar.
+ *
  * The web shell is `_layout.web.tsx`; Metro picks it by platform.
  */
 export default function NativeTabsLayout() {
   const { t } = useTranslation();
-  const tabs = useVisibleTabs();
   const bar = useResolveClassNames('bg-background');
   const idleIcon = useResolveClassNames('text-muted-foreground');
   const activeIcon = useResolveClassNames('text-primary');
@@ -32,7 +36,7 @@ export default function NativeTabsLayout() {
       backgroundColor={bar.backgroundColor}
       iconColor={{ default: idleIcon.color, selected: activeIcon.color }}
     >
-      {tabs.map((tab) => {
+      {TABS.map((tab) => {
         const glyph = getIconGlyph(tab.icon);
 
         return (

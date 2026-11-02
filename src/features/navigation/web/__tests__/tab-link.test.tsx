@@ -19,35 +19,19 @@ async function renderLink(overrides: Partial<LinkProps> = {}) {
     />,
   );
 
-  return {
-    onPress,
-    // A hidden trigger is removed from the accessibility tree on purpose, so
-    // the query has to opt into hidden elements to see it at all.
-    link: view.getByTestId('nav-tab', { includeHiddenElements: true }),
-  };
+  return { onPress, link: view.getByTestId('nav-tab') };
 }
 
 describe('webTabAria', () => {
-  it('announces the focused destination as the current page', () => {
-    expect(webTabAria({ isFocused: true, hidden: false })).toEqual({
-      role: 'tab',
-      'aria-selected': 'true',
+  it('marks the current destination as the page', () => {
+    expect(webTabAria({ isFocused: true })).toEqual({
       'aria-current': 'page',
     });
   });
 
-  it('marks a non-focused destination as a selectable tab', () => {
-    expect(webTabAria({ isFocused: false, hidden: false })).toEqual({
-      role: 'tab',
-      'aria-selected': 'false',
+  it('leaves every other destination without a current marker', () => {
+    expect(webTabAria({ isFocused: false })).toEqual({
       'aria-current': undefined,
-    });
-  });
-
-  it('removes a hidden destination from the tree and the tab order', () => {
-    expect(webTabAria({ isFocused: false, hidden: true })).toEqual({
-      'aria-hidden': 'true',
-      tabIndex: -1,
     });
   });
 });
@@ -59,27 +43,17 @@ describe('WebTabLink', () => {
     expect(link.type).toBe('a');
     expect(link.props.href).toBe('/quran');
     expect(link.props['aria-label']).toBe('Quran');
-    expect(link.props.role).toBe('tab');
-    expect(link.props['aria-selected']).toBe('false');
     expect(link.props['aria-current']).toBeUndefined();
+    // Navigation links, not a tab widget: no role/selection to promise
+    // arrow-key semantics the bar does not implement.
+    expect(link.props.role).toBeUndefined();
+    expect(link.props['aria-selected']).toBeUndefined();
   });
 
   it('sets aria-current on the active destination only', async () => {
     const { link } = await renderLink({ isFocused: true });
 
     expect(link.props['aria-current']).toBe('page');
-    expect(link.props['aria-selected']).toBe('true');
-  });
-
-  it('keeps a hidden trigger registered but invisible and unfocusable', async () => {
-    const { link } = await renderLink({ hidden: true, href: '/account' });
-
-    expect(link.props.href).toBe('/account');
-    expect(link.props['aria-hidden']).toBe('true');
-    expect(link.props.tabIndex).toBe(-1);
-    expect(link.props.role).toBeUndefined();
-    expect(link.props['aria-label']).toBeUndefined();
-    expect(link.props.style.display).toBe('none');
   });
 
   it('hands a primary click to the router', async () => {
@@ -101,14 +75,6 @@ describe('WebTabLink', () => {
     const { onPress, link } = await renderLink();
 
     await fireEvent(link, 'click', { button: 0, ...modifier });
-
-    expect(onPress).not.toHaveBeenCalled();
-  });
-
-  it('ignores clicks on a hidden destination', async () => {
-    const { onPress, link } = await renderLink({ hidden: true });
-
-    await fireEvent(link, 'click', { button: 0 });
 
     expect(onPress).not.toHaveBeenCalled();
   });

@@ -100,9 +100,11 @@ async function hasOverflow(page) {
 
 async function navInfo(page) {
   return page.evaluate(() => {
-    const tabs = [...document.querySelectorAll('a[role="tab"]')];
+    const nav = document.querySelector('[role="navigation"]');
+    const tabs = nav ? [...nav.querySelectorAll('a[href]')] : [];
     return {
       hrefs: tabs.map((tab) => tab.getAttribute('href')),
+      labels: tabs.map((tab) => tab.textContent?.trim() ?? ''),
       top: tabs[0]?.getBoundingClientRect().top ?? null,
       current: tabs.filter((tab) => tab.getAttribute('aria-current') === 'page')
         .length,
@@ -422,8 +424,52 @@ async function main() {
     );
     check('active tab is announced', (await navInfo(page)).current === 1);
 
+    const nav = await navInfo(page);
+    check(
+      'every destination keeps a visible label',
+      nav.labels.length === 4 && nav.labels.every((label) => label.length > 0),
+      JSON.stringify(nav.labels),
+    );
+
+    await page.locator('[data-testid="nav-menu-trigger"]').click();
+    await settle(page);
+    check(
+      'the trailing menu opens',
+      (await page.locator('[data-testid="nav-menu"]').count()) === 1,
+    );
+    const themeEntry = await page
+      .locator('[data-testid^="nav-theme-"]')
+      .count();
+    const languageEntry = await page
+      .locator('[data-testid^="nav-language-"]')
+      .count();
+    // Development mode projects a mock session, so either session entry is
+    // the correct one: sign-in for a real signed-out session, sign-out for the
+    // mock account.
+    const sessionEntry =
+      (await page.locator('[data-testid="nav-menu-sign-in"]').count()) +
+      (await page.locator('[data-testid="nav-menu-sign-out"]').count());
+    check(
+      'the menu carries theme, language and a session entry',
+      themeEntry === 3 && languageEntry === 2 && sessionEntry === 1,
+      `${themeEntry}/${languageEntry}/${sessionEntry}`,
+    );
+
+    await page.locator('[data-testid="nav-theme-dark"]').click();
+    await settle(page);
+    await page.locator('[data-testid="nav-menu-trigger"]').click();
+    await settle(page);
+    check(
+      'the menu shows the chosen theme',
+      (await page
+        .locator('[data-testid="nav-theme-dark"]')
+        .getAttribute('aria-checked')) === 'true',
+    );
+    await page.keyboard.press('Escape');
+    await settle(page);
+
     for (const path of ['/quran', '/meetings', '/account', '/']) {
-      await page.locator(`a[role="tab"][href="${path}"]`).click();
+      await page.locator(`[role="navigation"] a[href="${path}"]`).click();
       await page.waitForURL((url) => url.pathname === path, { timeout: 10000 });
       check(`tab ${path} navigates`, new URL(page.url()).pathname === path);
     }
@@ -448,6 +494,12 @@ async function main() {
       const info = await navInfo(page);
       check(`no horizontal overflow at ${width}`, !(await hasOverflow(page)));
       check(`top navigation at ${width}`, info.top !== null && info.top < 120);
+      check(
+        `nav labels stay visible at ${width}`,
+        info.labels.length === 4 &&
+          info.labels.every((label) => label.length > 0),
+        JSON.stringify(info.labels),
+      );
       check(
         `no runtime errors at ${width}`,
         errors.length === 0,

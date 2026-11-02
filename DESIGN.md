@@ -26,6 +26,7 @@ components.
 | `clay`         | `#b25b40`              | `#c97055`                  | One accent dot / quiet alert             |
 | `primary`      | `#007948`              | `#009962`                  | In-app action green                      |
 | `card`         | white                  | `#0a1710` soft green       | Grouped surfaces (calendar)              |
+| `popover`      | white                  | `#0a1710` soft green       | Floating menu surface (web nav menu)     |
 | `secondary`    | pale green             | `#0d1c14`                  | Supporting surfaces                      |
 | `border`       | warm neutral           | 10% ivory                  | Hairlines                                |
 | `success`      | deep green text-safe   | light green text-safe      | Positive status text                     |
@@ -68,9 +69,10 @@ are semantic roles: a new status uses a role, never a raw Tailwind palette name.
   `md:pb-20`.
 - Station line: 40px node, 1px connector, 28px gap to the reading row. Rows are
   44pt minimum, hairlines not boxes.
-- Mobile nav: icon + label, `min-h-11`, compact at 390; labels never wrap the
-  bar into a second row. Desktop nav is the same top row, tabs packed at the
-  inline start inside the page grid.
+- Mobile nav: icon above an 11px label, `min-h-12`, at every width — labels
+  never hide. Desktop is the same top row with the icon inline before the label,
+  tabs packed at the inline start inside the page grid, one 44pt control at the
+  inline end. Labels never wrap the bar into a second row.
 
 ## Components
 
@@ -89,13 +91,16 @@ are semantic roles: a new status uses a role, never a raw Tailwind palette name.
   server error directly under the step it belongs to. No canopy panel: the
   wordmark carries identity and the form stays plain.
 - **Web navbar** — page-ground bar, tabs packed at the inline start inside
-  `max-w-6xl`. Active tab: 2px brass underline plus `text-foreground`; no filled
-  pill, no layout shift. Every tab stays a real `<a href>`. The wordmark sits at
-  the start from `sm` up; below that the Home hero carries the brand. Two
-  compact dropdowns sit at the trailing edge: Theme (Auto/Light/Dark) and
-  Language (AR/EN), each showing its current value and opening a list. Tab
-  labels hide below `sm` so the four destinations and both controls fit at 375;
-  their `aria-label`s remain.
+  `max-w-6xl`, one neutral hairline as the bar's bottom edge. Every destination
+  is a real `<a href>` inside a `navigation` landmark; the active one carries
+  `aria-current="page"` and a 2px brass underline that sits flush on the
+  hairline (the row owns no vertical padding, so the indicator touches the
+  edge). No filled pill, no layout shift. All four destinations render signed in
+  or out; a private one routes to sign-in rather than disappearing. Wordmark
+  from `sm` up; below that the Home hero carries the brand. One trailing
+  control: the session/preferences menu (avatar when signed in, menu glyph
+  otherwise) holding Theme, Language, Account, Progress and Sign in / Sign out.
+  Theme and Language are submenus; their labels still show the current value.
 - **Quran position band** — hairline section with the real page number, surah
   number and `page / 604` progress hairline; the page scan becomes a preview
   when an edition is attached. No card.
@@ -104,7 +109,7 @@ are semantic roles: a new status uses a role, never a raw Tailwind palette name.
   start, chevron at the inline end, sign-out destructive.
 - **Preferences** — a shared section on Account for every platform: Theme
   (System / Light / Dark) and Language (Arabic / English) as labelled dropdown
-  rows. The web navbar exposes the same two settings as compact dropdowns; on
+  rows. The web navbar exposes the same two settings as menu submenus; on
   native, a language change tells the user when `I18nManager` needs a relaunch.
   The reader menu carries the Theme dropdown so a reader can change it without
   leaving the page.
@@ -120,9 +125,9 @@ are semantic roles: a new status uses a role, never a raw Tailwind palette name.
   control floor, Lucide `IconName` resolution and the page/state vocabulary.
 - **Settings and overlays** - `Select` is the one settings dropdown; the
   `AlertDialog` confirms sign-out; `Collapsible` carries meeting details;
-  `ToggleGroup` switches Gregorian/Hijri; `Popover` powers the web user menu.
-  Keep `@expo/ui` for native tabs, native list rows, the native picker and the
-  reader bottom sheets.
+  `ToggleGroup` switches Gregorian/Hijri; `DropdownMenu` powers the web nav menu
+  (session, theme and language). Keep `@expo/ui` for native tabs, native list
+  rows, the native picker and the reader bottom sheets.
 
 ## Brand assets
 
