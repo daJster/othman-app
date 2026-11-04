@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { QueryClientContext } from '@tanstack/react-query';
+import { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform, View } from 'react-native';
 import type { ReadingEntry } from '@/core/domain/quran/reading-log';
+import type { SurahMetadata } from '@/core/types';
 import { useDirection } from '@/i18n';
 import { cn } from '@/ui/cn';
 import { Pressable } from '@/ui/pressable';
 import { Text } from '@/ui/text';
 import { formatReaderNumber } from '../format';
+import { useQuranCatalog } from '../use-quran-catalog';
 
 /**
  * One recorded reading session, as a card.
@@ -16,6 +19,12 @@ import { formatReaderNumber } from '../format';
  * says how long ago the session was. The card is a single `Pressable`: it names
  * the whole position, so a tap anywhere on it should open exactly that
  * position, not the card's page alone.
+ *
+ * The surah is named from the catalog the mushaf itself uses, so the card can
+ * never disagree with the reader about where a page belongs. Until that payload
+ * arrives — or on a surface composed without the app's query tree, which is what
+ * a unit test is — the card falls back to the surah's number rather than
+ * showing a gap.
  *
  * The newest session is the resume action, so it is the one lifted surface in
  * the band: a brass hairline and the secondary fill. The other two sit on the
@@ -35,12 +44,40 @@ export type ReadingSessionCardProps = {
   onPress: () => void;
 };
 
-export function ReadingSessionCard({
+export function ReadingSessionCard(props: ReadingSessionCardProps) {
+  const client = useContext(QueryClientContext);
+
+  // A band may be composed without the app's query tree; without a client there
+  // is no catalog to read, which is the same not-loaded branch as a cold fetch.
+  if (!client) {
+    return <ReadingSessionCardView {...props} metadata={null} />;
+  }
+
+  return <ReadingSessionCardContent {...props} />;
+}
+
+function ReadingSessionCardContent(props: ReadingSessionCardProps) {
+  const catalog = useQuranCatalog();
+  const metadata =
+    catalog.state.status === 'ready'
+      ? (catalog.state.data.surahs[String(props.entry.surah)] ?? null)
+      : null;
+
+  return <ReadingSessionCardView {...props} metadata={metadata} />;
+}
+
+type ReadingSessionCardViewProps = ReadingSessionCardProps & {
+  /** `null` while the catalog is unavailable: name the number, not a gap. */
+  metadata: SurahMetadata | null;
+};
+
+function ReadingSessionCardView({
   entry,
   latest,
   className,
   onPress,
-}: ReadingSessionCardProps) {
+  metadata,
+}: ReadingSessionCardViewProps) {
   const { t } = useTranslation();
   const { language } = useDirection();
   // A relative label is a statement about "now", so the clock is read once per
@@ -50,18 +87,23 @@ export function ReadingSessionCard({
   const [now] = useState(() => Date.now());
 
   const page = formatReaderNumber(entry.page, language);
-  const surah = t('pages.account.progress.surah', {
-    number: formatReaderNumber(entry.surah, language),
-  });
+  const surah = surahLabel(entry.surah, metadata, language, t);
+  /*
+   * `ayahKey` is the ayah *within its surah* — the bbox tables are keyed that
+   * way (`byPage[page][ayahKey]`), and a shared link carries the same number.
+   * The card therefore never prints an absolute Quran-wide index; the label is
+   * the language's own word for ayah, with the number in that language's
+   * digits.
+   */
   const supporting = entry.ayahKey
     ? t('quran.resume.ayahLabel', {
         ayah: formatReaderNumber(Number(entry.ayahKey), language),
       })
     : relativeDay(entry.at, now, t);
 
-  // The visible labels already carry their own unit ("Page", "Surah", "Ayah"),
-  // so the spoken name is the three of them, in reading order, rather than a
-  // fourth sentence assembled from fragments.
+  // The visible labels already carry their own unit ("Page", "Ayah"), so the
+  // spoken name is those plus the surah, in reading order, rather than a fourth
+  // sentence assembled from fragments.
   const label = [t('quran.resume.pageLabel', { page }), surah, supporting].join(
     ' · ',
   );
@@ -91,13 +133,35 @@ export function ReadingSessionCard({
       </Text>
 
       <View className="gap-0.5">
-        <Text variant="label">{surah}</Text>
+        <Text className="text-xl font-semibold">{surah}</Text>
         <Text variant="caption" tone="muted">
           {supporting}
         </Text>
       </View>
     </Pressable>
   );
+}
+
+/**
+ * The surah's own name from the catalog, in the interface language.
+ *
+ * Falls back to "Surah 12" while the payload is unavailable: the number is
+ * always true, the name is only true once the catalog has told us which page
+ * belongs to which surah.
+ */
+function surahLabel(
+  surah: number,
+  metadata: SurahMetadata | null,
+  language: 'ar' | 'en',
+  t: ReturnType<typeof useTranslation>['t'],
+): string {
+  if (metadata === null) {
+    return t('pages.account.progress.surah', {
+      number: formatReaderNumber(surah, language),
+    });
+  }
+
+  return language === 'ar' ? metadata.name : metadata.nameEnglish;
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;

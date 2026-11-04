@@ -4,6 +4,7 @@ import {
   screen,
   within,
 } from '@testing-library/react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { formatDateKey } from '@/core/domain/meetings/date-key';
 import type { ReadingEntry } from '@/core/domain/quran/reading-log';
 import { ResumeBand } from '@/features/quran/components/resume-band';
@@ -24,6 +25,15 @@ import { SEED_READING_LOG } from '@/features/quran/history/seed';
 const mockOnOpen = jest.fn();
 let mockEntries: ReadingEntry[] = [];
 let mockWide = false;
+let mockSurahs: Record<string, { name: string; nameEnglish: string }> = {};
+
+const queryClient = new QueryClient();
+
+jest.mock('@/features/quran/use-quran-catalog', () => ({
+  useQuranCatalog: () => ({
+    state: { status: 'ready', data: { surahs: mockSurahs } },
+  }),
+}));
 
 jest.mock('@/features/quran/history/use-reading-log', () => ({
   useHydrateReadingLog: () => undefined,
@@ -59,6 +69,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockEntries = [];
   mockWide = false;
+  mockSurahs = {};
 });
 
 describe('ResumeBand', () => {
@@ -183,5 +194,41 @@ describe('ResumeBand', () => {
     expect(within(cards[0]).getByText('42')).toBeTruthy();
     expect(within(cards[0]).getByText('Surah 2')).toBeTruthy();
     expect(screen.getByText('Sample history')).toBeTruthy();
+  });
+});
+
+/**
+ * The card names the surah from the catalog the mushaf uses, and falls back to
+ * the number when that payload is not there. Both branches matter: the name is
+ * the useful label, the number is the only true one before the catalog lands.
+ */
+describe('ReadingSessionCard surah name', () => {
+  it('prints the catalog name instead of the surah number', async () => {
+    mockEntries = [entry(604, 114, 1)];
+    mockSurahs = {
+      '114': { name: 'الناس', nameEnglish: 'An-Nas' },
+    };
+
+    await render(
+      <QueryClientProvider client={queryClient}>
+        <ResumeBand onOpen={mockOnOpen} />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByText('An-Nas')).toBeTruthy();
+    expect(screen.queryByText('Surah 114')).toBeNull();
+  });
+
+  it('falls back to the number when the catalog has no such surah', async () => {
+    mockEntries = [entry(604, 114, 1)];
+    mockSurahs = {};
+
+    await render(
+      <QueryClientProvider client={queryClient}>
+        <ResumeBand onOpen={mockOnOpen} />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getByText('Surah 114')).toBeTruthy();
   });
 });
