@@ -78,7 +78,6 @@
   },
   "quran": {
     "landing": {
-      "position": "{{surah}} · صفحة {{page}} من {{total}}",
       "hizb": "ورد اليوم",
       "activity": "النشاط الأخير",
       "history": "رحلة المصحف",
@@ -100,7 +99,6 @@
     "resume": {
       "at": "{{surah}} · الآية {{ayah}}",
       "page": "الصفحة {{page}} من {{total}}",
-      "previous": "قراءات سابقة",
       "sample": "سجل تجريبي",
       "time": {
         "today": "اليوم",
@@ -162,7 +160,6 @@
     "pageImage": "صفحة {{page}} من المصحف",
     "ayahLabel": "الآية {{ayah}} من سورة {{surah}}",
     "clearSelection": "إلغاء تحديد الآية",
-    "continueTitle": "متابعة القراءة",
     "open": "افتح المصحف",
     "entryHint": "يُفتح المصحف بملء الشاشة، ويمكنك قلب الصفحات بالسحب.",
     "imageFailed": "تعذّر تحميل صورة الصفحة.",

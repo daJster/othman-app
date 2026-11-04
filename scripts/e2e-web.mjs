@@ -473,8 +473,8 @@ async function main() {
       ),
     );
     check(
-      'the language control shows the full name from sm up',
-      (await languageTrigger.innerText()).includes('English'),
+      'the language control is icon-only at every width',
+      (await languageTrigger.innerText()).trim() === '',
     );
     await languageTrigger.click();
     await settle(page);
@@ -569,8 +569,8 @@ async function main() {
         JSON.stringify(languageControl),
       );
       check(
-        `language name is shown from sm up at ${width}`,
-        width < 640 ? languageControl.text === '' : languageControl.text !== '',
+        `language control is icon-only at ${width}`,
+        languageControl.text === '',
         JSON.stringify(languageControl.text),
       );
       check(
@@ -589,6 +589,116 @@ async function main() {
     }
   });
 
+  await scenario('direction geometry', async () => {
+    /*
+     * The app keeps one physical layout for both languages: only the text
+     * direction changes. This is the guard rail — a `flex-row-reverse`, a
+     * logical margin or a flipped `dir` shows up here as a moved edge.
+     *
+     * Edges, not boxes: a nav destination's *width* is its label's width
+     * ("Meetings" is wider than "الحلقات"), and that is text, not layout. What
+     * must not move is the edge each element is anchored to.
+     */
+    const landmarks = [
+      { selector: '[role="navigation"]', edges: ['left', 'right'] },
+      { selector: '[role="navigation"] a[href="/"]', edges: ['left'] },
+      { selector: '[data-testid="hero-panel"]', edges: ['left', 'right'] },
+      { selector: '[data-testid="nav-menu-trigger"]', edges: ['right'] },
+      { selector: '[data-testid="nav-theme-trigger"]', edges: ['right'] },
+      { selector: '[data-testid="nav-language-trigger"]', edges: ['right'] },
+    ];
+
+    const settingsLandmarks = [
+      { selector: '[data-testid="theme-dropdown"]', edges: ['left', 'right'] },
+      {
+        selector: '[data-testid="language-dropdown"]',
+        edges: ['left', 'right'],
+      },
+    ];
+
+    // The landing page is a reading column, not a content mirror: the band
+    // edges must land on the same physical coordinates in both languages. The
+    // history band is listed before its plan lands; `compare` skips a missing
+    // selector, so an absent module does not fail the guard.
+    const quranLandmarks = [
+      { selector: '[role="navigation"]', edges: ['left', 'right'] },
+      {
+        selector: '[data-testid="quran-resume-band"]',
+        edges: ['left', 'right'],
+      },
+      {
+        selector: '[data-testid="quran-history-band"]',
+        edges: ['left', 'right'],
+      },
+    ];
+
+    const measure = async (path, width, language, list) => {
+      const context = await makeContext(browser, {
+        width,
+        height: 900,
+        language,
+        theme: 'light',
+      });
+      const page = await context.newPage();
+      await goto(page, path);
+      const boxes = await page.evaluate((list) => {
+        const result = {};
+        for (const { selector } of list) {
+          const element = document.querySelector(selector);
+          if (!element) continue;
+          const rect = element.getBoundingClientRect();
+          result[selector] = {
+            left: Math.round(rect.left),
+            right: Math.round(rect.right),
+          };
+        }
+        return result;
+      }, list);
+      await context.close();
+      return boxes;
+    };
+
+    const compare = (width, list, en, ar) => {
+      for (const { selector, edges } of list) {
+        const english = en[selector];
+        const arabic = ar[selector];
+        if (!english || !arabic) continue;
+
+        for (const edge of edges) {
+          check(
+            `${width}: ${selector} keeps its ${edge} edge`,
+            Math.abs(english[edge] - arabic[edge]) <= 1,
+            `en=${JSON.stringify(english)} ar=${JSON.stringify(arabic)}`,
+          );
+        }
+      }
+    };
+
+    for (const width of [390, 1440]) {
+      const en = await measure('/', width, 'en', landmarks);
+      const ar = await measure('/', width, 'ar', landmarks);
+      check(
+        `the hero is on the page at ${width}`,
+        Boolean(en['[data-testid="hero-panel"]']),
+        JSON.stringify(Object.keys(en)),
+      );
+      compare(width, landmarks, en, ar);
+
+      const enQuran = await measure('/quran', width, 'en', quranLandmarks);
+      const arQuran = await measure('/quran', width, 'ar', quranLandmarks);
+      check(
+        `the resume band is on the Quran page at ${width}`,
+        Boolean(enQuran['[data-testid="quran-resume-band"]']),
+        JSON.stringify(Object.keys(enQuran)),
+      );
+      compare(width, quranLandmarks, enQuran, arQuran);
+    }
+
+    const enSettings = await measure('/account', 1440, 'en', settingsLandmarks);
+    const arSettings = await measure('/account', 1440, 'ar', settingsLandmarks);
+    compare(1440, settingsLandmarks, enSettings, arSettings);
+  });
+
   await scenario('storage hydration', async () => {
     const context = await makeContext(browser, {
       width: 768,
@@ -605,7 +715,7 @@ async function main() {
     }));
     check(
       'stored Arabic is applied',
-      info.lang === 'ar' && info.dir === 'rtl',
+      info.lang === 'ar' && info.dir === 'ltr',
       JSON.stringify(info),
     );
     check('stored dark mode is applied', info.dark);
@@ -678,7 +788,7 @@ async function main() {
     const context = await makeContext(browser, { width: 768, height: 900 });
     const page = await context.newPage();
     await goto(page, '/quran');
-    await page.locator('[data-testid="quran-open-reader"]').click();
+    await page.locator('[data-testid="quran-session-card"]').first().click();
     await page.waitForURL(/\/reader\/\d+/, { timeout: 15000 });
     await page.waitForSelector('[data-testid="reader-header"]', {
       timeout: 30000,
