@@ -111,3 +111,74 @@ Recommended execution: 001 → 002 → 003 → 004 → 005 → 006 → 007 → 0
 - "Replace the native tab bar with Lucide icons": rejected. `NativeTabs` needs
   SF Symbol / Material Symbol names; plan 001 keeps `getIconGlyph` for the four
   tab glyphs.
+
+---
+
+# Qur'an landing page — 2026-11-03 (commit `de327df`)
+
+A second pass, scoped to the Qur'an tab. The brief: resume (with three previous
+readings), daily hizb gauge, reading-activity board, a history entry, and a
+surah-story suggestion — mock data where the app has none, web + Android + iOS.
+
+**Design stance carried in from the direction refactor:** one physical layout
+for both languages. Nothing on this page may mirror; Arabic text aligns to its
+own start inside the same boxes as English.
+
+## Execution order & status
+
+| Plan | Title | Priority | Effort | Depends on | Status |
+| ---- | ----- | -------- | ------ | ---------- | ------ |
+| 009 | Reading log and daily hizb data | P1 | M | — | DONE |
+| 010 | Qur'an landing composition | P1 | M | — | DONE |
+| 011 | Resume band | P1 | M | 009, 010 | DONE |
+| 012 | Hizb gauge + activity board (catalog) | P1 | M | 009, 010 | DONE — cart resolved via `ctlgs`, web + native |
+| 013 | History entry and page | P2 | M | 010 | DONE — copy needs human review |
+| 014 | Surah story band | P3 | S | 010 | DONE |
+
+Recommended order: 009 → 010 → 011 → 013 → 014, with 012 as soon as the cart is
+reachable. 010 is written so the page renders correctly with only the continue
+block present, so no step leaves `/quran` broken.
+
+## Blocked work
+
+None. The cart was resolved on 2026-11-03 by installing `ctlgs` as a dev
+dependency and reading both items from it: `contribution-graph` ships as an
+inline file (12 KB, `date-fns`), `gauge` is reference-only and resolves through
+`https://diceui.com/r/radix-vega/gauge.json` (`radix-ui`). Both are web-only React
+DOM components, so each has a native port under `src/components/catalogs/` with a
+shared adapter API (`hizb-gauge`, `activity-grid`).
+
+## Outstanding after execution
+
+- Native visual check (iOS/Android) for the new page has **not** been performed:
+  no simulator/device was available. Web is verified at 390 and 1440.
+- `quran.history.*` copy is sourced but **requires human review** — see plan 013's
+  NOTES and the source lines in `history-content/timeline.ts`.
+- Reading-row and entry-band chevrons sit at the physical right while Arabic text
+  aligns right, so the chevron leads the text in an RTL read. It is consistent
+  with the no-mirroring rule but reads ambiguously; a design decision is owed.
+
+## Design decisions recorded here
+
+- **Order** is resume → hizb → activity → history → story: one primary action,
+  then four glances.
+- **Data honesty**: resume, previous readings, daily pages and the hizb count
+  are all derived from a *real* local log written as the user reads. The only
+  mock is an eight-day seed used when the log is empty (labelled in the UI) plus
+  the story notes.
+- **Hizb** is fractional against a 10-page daily target; the cross and the check
+  are its two ends, not a binary toggle.
+- **Bands, not cards**: every module is a hairline band inside the `max-w-3xl`
+  column, per `DESIGN.md`'s station/verse grammar.
+- **No mirroring**: no `self-start`/`self-end` used to chase text; chevrons are
+  physical; alignment rides on the `Text` primitive.
+
+## Findings considered and rejected
+
+- "Rebuild the contribution graph and the gauge from scratch since the cart is
+  unreachable": rejected — recreating catalog content to route around an access
+  failure is out of bounds; the plan stops instead.
+- "Show a fabricated live reading streak": rejected — `PRODUCT.md` forbids
+  presenting demo data as synchronized account data.
+- "Two-column dashboard at 1440": rejected — the modules are a reading sequence,
+  and two columns make the order arbitrary.
