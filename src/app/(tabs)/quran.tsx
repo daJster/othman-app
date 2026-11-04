@@ -2,44 +2,38 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import Head from 'expo-router/head';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
-import { QURAN_PAGE_COUNT } from '@/core/domain/quran/surah';
-import { MushafPreview } from '@/features/quran/components/mushaf-preview';
-import { formatReaderNumber } from '@/features/quran/format';
-import {
-  useReaderEdition,
-  useReaderPage,
-  useReaderSurah,
-  useRestoreReader,
-} from '@/features/quran/store/use-reader';
+import { ActivityBand } from '@/features/quran/components/activity-band';
+import { DailyHizbBand } from '@/features/quran/components/daily-hizb-band';
+import { HistoryBand } from '@/features/quran/components/history-band';
+import { ResumeBand } from '@/features/quran/components/resume-band';
+import { StoryBand } from '@/features/quran/components/story-band';
 import { parseQuranLink } from '@/features/quran/links';
-import { useDirection } from '@/i18n';
-import { Button } from '@/ui/button';
-import { cn } from '@/ui/cn';
+import { useRestoreReader } from '@/features/quran/store/use-reader';
 import { Page } from '@/ui/page';
 import { Screen, ScreenView } from '@/ui/screen';
 import { Section } from '@/ui/section';
 import { ErrorState } from '@/ui/states';
-import { Text } from '@/ui/text';
 
 /**
- * Quran tab — the entry into the mushaf reader.
+ * Quran tab — the landing surface for the mushaf.
  *
  * The reader itself is a full-screen modal (`/reader/[page]`), not a tab: the
  * scan needs every pixel and the page-turn gesture would compete with the tab
- * bar. This screen therefore has one job — open that route at the right page —
- * and it deliberately does not duplicate the reader or prefetch its data.
+ * bar. This screen is the front door: the resume band shows the last three
+ * places the reading log recorded, and, as the supporting modules land, becomes
+ * the place a reader starts their day — the daily hizb, recent activity, history
+ * and a suggested surah.
  *
- * `useRestoreReader` reads the persisted page once. Calling it here is what
- * makes "continue" point at the page the reader last showed instead of always
- * page 1; the reader calls the same guarded action when it mounts, so opening
- * the tab first costs nothing extra.
+ * The bands are a reading sequence, so the page stays a single column at every
+ * width. Each module is optional; with none attached, the resume band alone is
+ * a complete entry point.
  *
- * The position is shown with the same facts the reader uses: the stored page,
- * the standard 604-page extent, and the surah number the store last resolved.
- * Surah *names* live in the catalog payload, so naming the surah here would
- * mean fetching it on a screen whose only job is to forward; the number is
- * already in the store and is shown instead.
+ * This screen owns where a position goes, not what it is: `openEntry()` is the
+ * only navigation the band performs, and it always targets `/reader/[page]`
+ * with the page and, when the session recorded one, the surah/ayah pair, so a
+ * card restores the position it names rather than only its page.
+ * `useRestoreReader` still runs here so the stored page is read once at the
+ * front door; the reader keeps its own guarded restore for a direct deep link.
  *
  * A link such as `/quran?surah=2&ayah=255` forwards to the reader with the same
  * parameters. Validity is checked in two steps: the parser rejects malformed or
@@ -50,7 +44,6 @@ import { Text } from '@/ui/text';
 export default function QuranScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { language, isRTL } = useDirection();
   const params = useLocalSearchParams<{
     page?: string;
     surah?: string;
@@ -58,9 +51,6 @@ export default function QuranScreen() {
   }>();
 
   useRestoreReader();
-  const page = useReaderPage();
-  const surah = useReaderSurah();
-  const edition = useReaderEdition();
 
   const link = useMemo(
     () => parseQuranLink(params),
@@ -94,19 +84,23 @@ export default function QuranScreen() {
     );
   }
 
-  const open = () => {
-    router.push({ pathname: '/reader/[page]', params: { page: String(page) } });
+  const openEntry = (entry: {
+    page: number;
+    surah: number;
+    ayahKey: string | null;
+  }) => {
+    router.push({
+      pathname: '/reader/[page]',
+      params: {
+        page: String(entry.page),
+        // `surah` without an `ayah` is a surah-start link: `resolveQuranLink`
+        // would ignore the page. Send the pair together, or the page alone.
+        ...(entry.ayahKey
+          ? { surah: String(entry.surah), ayah: entry.ayahKey }
+          : {}),
+      },
+    });
   };
-
-  const pageLabel = formatReaderNumber(page, language);
-  const surahLabel = t('pages.account.progress.surah', {
-    number: formatReaderNumber(surah, language),
-  });
-  // The extent is the standard mushaf, not the attached edition's own range:
-  // the reader clamps to the edition after it attaches, and this screen does
-  // not have that range to hand. Out-of-range values are pinned so the
-  // hairline can never overflow or invert.
-  const progress = Math.min(1, Math.max(0, page / QURAN_PAGE_COUNT));
 
   return (
     <Screen contentContainerClassName="gap-0 p-0">
@@ -117,54 +111,11 @@ export default function QuranScreen() {
 
         <Section title={t('nav.quran')} description={t('nav.quranDesc')} />
 
-        <View className="mt-8 border-y border-border py-7 md:py-9">
-          <View
-            className={cn('gap-5 md:gap-7', edition ? 'flex-row' : 'flex-col')}
-          >
-            {edition ? (
-              <MushafPreview edition={edition} page={page} onPress={open} />
-            ) : null}
-
-            <View className="flex-1 gap-5">
-              <View className="gap-1">
-                <Text variant="heading">{t('reader.continueTitle')}</Text>
-                <Text variant="caption" tone="muted" className="tabular-nums">
-                  {`${surahLabel} · ${t('reader.pageOf', {
-                    page: pageLabel,
-                    total: formatReaderNumber(QURAN_PAGE_COUNT, language),
-                  })}`}
-                </Text>
-              </View>
-
-              <View
-                accessibilityRole="progressbar"
-                accessibilityValue={{
-                  min: 1,
-                  max: QURAN_PAGE_COUNT,
-                  now: page,
-                }}
-                className="h-0.5 w-full flex-row overflow-hidden bg-border"
-              >
-                <View
-                  className="h-full bg-brass"
-                  style={{ width: `${progress * 100}%` }}
-                />
-              </View>
-
-              <Button
-                size="lg"
-                label={t('reader.open')}
-                onPress={open}
-                testID="quran-open-reader"
-                className={isRTL ? 'self-end' : 'self-start'}
-              />
-            </View>
-          </View>
-        </View>
-
-        <Text variant="caption" tone="muted" className="mt-5">
-          {t('reader.entryHint')}
-        </Text>
+        <ResumeBand onOpen={openEntry} />
+        <DailyHizbBand />
+        <ActivityBand />
+        <HistoryBand />
+        <StoryBand />
       </Page>
     </Screen>
   );
