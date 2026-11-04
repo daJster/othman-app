@@ -17,8 +17,7 @@
     },
     "halqa": {
       "cohort": "Learn with your shaykh and classmates, ayah by ayah.",
-      "continue": "Continue reading",
-      "ring": "حلقة"
+      "continue": "Continue reading"
     },
     "circle": {
       "title": "Your circle"
@@ -66,9 +65,7 @@
     "arabic": "العربية",
     "english": "English",
     "arShort": "AR",
-    "enShort": "EN",
-    "restartTitle": "Restart needed",
-    "restartMessage": "The text direction changes now. A few native controls, such as text fields and alerts, follow it after the app restarts."
+    "enShort": "EN"
   },
   "theme": {
     "title": "Theme",
@@ -78,6 +75,84 @@
     "autoShort": "Auto",
     "lightShort": "Light",
     "darkShort": "Dark"
+  },
+  "quran": {
+    "landing": {
+      "position": "{{surah}} · page {{page}} of {{total}}",
+      "hizb": "Today's hizb",
+      "activity": "Recent activity",
+      "history": "The mushaf's journey",
+      "story": "Surah story"
+    },
+    "hizb": {
+      "title": "Today's hizb",
+      "progress": "{{read}} of {{target}} pages",
+      "done": "Today's hizb is complete.",
+      "sample": "Counted from this device"
+    },
+    "activity": {
+      "title": "Recent activity",
+      "less": "Less",
+      "more": "More",
+      "met": "Read",
+      "missed": "No reading"
+    },
+    "resume": {
+      "at": "{{surah}} · ayah {{ayah}}",
+      "page": "Page {{page}} of {{total}}",
+      "previous": "Previous readings",
+      "sample": "Sample history",
+      "time": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "days_one": "{{count}} day ago",
+        "days_other": "{{count}} days ago"
+      },
+      "pageLabel": "Page {{page}}",
+      "ayahLabel": "Ayah {{ayah}}",
+      "latest": "Latest",
+      "recent": "Recent readings"
+    },
+    "story": {
+      "open": "Open",
+      "place": {
+        "makka": "Revealed in Makka",
+        "madina": "Revealed in Madina"
+      },
+      "ayahs": "{{count}} ayat",
+      "notes": {
+        "fatiha": "The Makkan surah of seven ayat that opens the mushaf, recited in every unit of prayer. It moves from praise of God to a request for guidance.",
+        "yasin": "A Makkan surah of eighty-three ayat, named for the two letters that open it. It sets the signs of creation beside the account of the resurrection.",
+        "rahman": "A Madinan surah of seventy-eight ayat that returns to one question: which of your Lord's blessings would you deny? It sets the creation of the human being beside the order of the heavens.",
+        "mulk": "A Makkan surah of thirty ayat about the One in whose hand the kingdom rests and the trial of His creation. It opens the twenty-ninth juz of the mushaf.",
+        "ikhlas": "A Makkan surah of four ayat. It states God's oneness and self-sufficiency in a few lines."
+      }
+    },
+    "history": {
+      "title": "The history of the mushaf",
+      "intro": "The milestones below trace the Qur'an from its revelation to the page in your hand.",
+      "bandPromise": "How the mushaf came to be",
+      "plateLabel": "Quran page {{page}}",
+      "source": "Source",
+      "eras": {
+        "revelation": "Revelation and memorisation",
+        "codex": "The written codex",
+        "standardisation": "Standardisation",
+        "print": "The printed and digital mushaf"
+      },
+      "bodies": {
+        "revelation": "The Qur'an was revealed to the Prophet Muhammad ﷺ and preserved as it was received.",
+        "codex": "The revealed verses were gathered into a single written codex.",
+        "standardisation": "The caliph Uthman standardised the written codex and ordered copies to be made from it.",
+        "print": "The printed and digital mushaf carries that text to the page you are reading now."
+      }
+    },
+    "goal": {
+      "title": "Today",
+      "progress": "{{read}} of {{target}} page",
+      "done": "Daily goal complete",
+      "sample": "Counted from this device"
+    }
   },
   "reader": {
     "pageImage": "Page {{page}} of the mushaf",
