@@ -214,13 +214,18 @@ describe('QuranScreen', () => {
     expect(mockReplace).toHaveBeenCalledWith('/quran');
   });
 
-  it('locks section 1 to 30% of the viewport and leaves the rest natural', async () => {
+  it('locks sections 1 and 2 to 30/70 of the phone viewport', async () => {
     await render(<QuranScreen />);
 
-    const windowHeight = Dimensions.get('window').height;
+    const { height: windowHeight, width: windowWidth } =
+      Dimensions.get('window');
 
+    expect(windowWidth).toBeLessThan(768);
     expect(screen.getByTestId('quran-section-history').props.style).toEqual({
       height: Math.round(windowHeight * 0.3),
+    });
+    expect(screen.getByTestId('quran-section-resume').props.style).toEqual({
+      height: Math.round(windowHeight * 0.7),
     });
     expect(
       screen.getByTestId('quran-section-activity').props.style,

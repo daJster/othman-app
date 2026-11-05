@@ -9,6 +9,7 @@ import { ResumeBand } from '@/features/quran/components/resume-band';
 import { StoryBand } from '@/features/quran/components/story-band';
 import { parseQuranLink } from '@/features/quran/links';
 import { useRestoreReader } from '@/features/quran/store/use-reader';
+import { useIsWide } from '@/ui/layout';
 import { Page } from '@/ui/page';
 import { Screen, ScreenView } from '@/ui/screen';
 import { ErrorState } from '@/ui/states';
@@ -24,11 +25,12 @@ import { ErrorState } from '@/ui/states';
  * and a suggested surah.
  *
  * The bands are a reading sequence, so the page stays a single column at every
- * width. Section 1 locks to 30% of the viewport height in portrait only; every
- * other section sizes to its content with the page's own rhythm. The lock
- * touches that section alone: the page keeps its own vertical padding and
- * sections 2+ render exactly as before. In landscape (height < width) no fixed heights apply and the
- * bands stack naturally — a fallback the builder of the future must keep.
+ * width. On phones in portrait the landing page opens tightly positioned:
+ * section 1 (history) locks to 30% of the viewport height and section 2
+ * (resume) takes the remaining 70%. Everywhere else — tablets, desktops,
+ * landscape — sections size to their content with the page's own rhythm. The
+ * lock touches those two sections alone: the page keeps its own vertical
+ * padding and the rest renders exactly as before.
  * Each module is optional; with none attached, the resume band alone is
  * a complete entry point.
  *
@@ -54,8 +56,14 @@ export default function QuranScreen() {
     ayah?: string;
   }>();
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+  // Phone-only lock: on a phone the landing page opens tightly positioned —
+  // history takes 30% of the viewport and resume the remaining 70%. Tablets,
+  // desktops and landscape keep natural heights.
   const portrait = windowHeight >= windowWidth;
+  const wide = useIsWide();
+  const lock = portrait && !wide;
   const s1 = Math.round(windowHeight * 0.3);
+  const s2 = Math.round(windowHeight * 0.7);
 
   useRestoreReader();
 
@@ -118,12 +126,17 @@ export default function QuranScreen() {
 
         <View
           testID="quran-section-history"
-          style={{ height: portrait ? s1 : undefined }}
+          style={{ height: lock ? s1 : undefined }}
           className="justify-center"
         >
           <HistoryBand />
         </View>
-        <ResumeBand onOpen={openEntry} />
+        <View
+          testID="quran-section-resume"
+          style={{ height: lock ? s2 : undefined }}
+        >
+          <ResumeBand onOpen={openEntry} />
+        </View>
         <View testID="quran-section-activity">
           <ActivityBand />
         </View>
