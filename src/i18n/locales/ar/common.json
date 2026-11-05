@@ -115,7 +115,13 @@
       "latest": "الأحدث",
       "recent": "استئناف القراءة",
       "empty": "ستظهر صفحتك الأخيرة هنا",
-      "soon": "قريبًا"
+      "metrics": {
+        "pages": "صفحات",
+        "salat": "الصلاة",
+        "duaa": "الدعاء",
+        "nafila": "النافلة",
+        "progress": "{{label}}: {{read}} من {{target}}"
+      }
     },
     "story": {
       "open": "افتح",

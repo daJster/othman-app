@@ -111,7 +111,13 @@
       "latest": "Latest",
       "recent": "Resume reading",
       "empty": "Your last page will appear here",
-      "soon": "Soon"
+      "metrics": {
+        "pages": "Pages",
+        "salat": "Salah",
+        "duaa": "Duaa",
+        "nafila": "Nafila",
+        "progress": "{{label}}: {{read}} of {{target}}"
+      }
     },
     "story": {
       "open": "Open",
