@@ -30,10 +30,11 @@ import {
  *
  * A `ButtonGroup` switches between two spans — Monthly (rolling 3 months) and
  * Annual (rolling 365 days) — GitHub-style: full weeks of seven rows,
- * neighbouring-month cells faded out. The title sits top-left with the summary
- * beneath it; the small segment control and the chevron toggles share the
- * top-right corner in an `ltr` row so the order holds in both languages, and
- * left still means older. Each span keeps its own position: Monthly pages 3
+ * neighbouring-month cells faded out. The header is two rows: row 1 pairs the
+ * span title (left, truncated) with the summary (right) in an `ltr` row, and
+ * row 2 pairs the small segment control (left) with the chevron toggles
+ * (right) in an `ltr` row so the order holds in both languages, and left
+ * still means older. Each span keeps its own position: Monthly pages 3
  * months over a 12-month history, Annual pages 12 months over two years.
  * Switching spans resets to the current period.
  *
@@ -170,46 +171,48 @@ export function ActivityBand() {
         </Text>
 
         <View
-          className="mt-3 flex-row items-center justify-between gap-2"
+          className="mt-3 flex-row items-center gap-2"
           style={{ direction: 'ltr' }}
         >
-          <View className="min-w-0 flex-1 gap-0.5">
-            <Text
-              testID="quran-activity-title"
-              variant="label"
-              numberOfLines={1}
-            >
-              {title}
-            </Text>
-            <Text
-              testID="quran-activity-summary"
-              variant="caption"
-              tone="muted"
-            >
-              {t('quran.activity.summary', {
-                read: readDays,
-                total: spanDays.length,
-              })}
-            </Text>
-          </View>
-
-          <View
-            className="flex-row items-center gap-1.5"
-            style={{ direction: 'ltr' }}
+          <Text
+            testID="quran-activity-title"
+            variant="label"
+            numberOfLines={1}
+            className="min-w-0 flex-1"
           >
-            <ButtonGroup>
-              {SPANS.map((option) => (
-                <Button
-                  key={option}
-                  testID={`quran-activity-span-${option}`}
-                  size="sm"
-                  variant={option === span ? 'secondary' : 'ghost'}
-                  accessibilityState={{ selected: option === span }}
-                  label={t(`quran.activity.${option}`)}
-                  onPress={() => select(option)}
-                />
-              ))}
-            </ButtonGroup>
+            {title}
+          </Text>
+          <Text
+            testID="quran-activity-summary"
+            variant="caption"
+            tone="muted"
+            className="shrink-0"
+          >
+            {t('quran.activity.summary', {
+              read: readDays,
+              total: spanDays.length,
+            })}
+          </Text>
+        </View>
+
+        <View
+          className="mt-2 flex-row items-center justify-between"
+          style={{ direction: 'ltr' }}
+        >
+          <ButtonGroup>
+            {SPANS.map((option) => (
+              <Button
+                key={option}
+                testID={`quran-activity-span-${option}`}
+                size="sm"
+                variant={option === span ? 'secondary' : 'ghost'}
+                accessibilityState={{ selected: option === span }}
+                label={t(`quran.activity.${option}`)}
+                onPress={() => select(option)}
+              />
+            ))}
+          </ButtonGroup>
+          <View className="flex-row items-center gap-1.5">
             <Pressable
               testID="quran-activity-prev"
               accessibilityRole="button"
