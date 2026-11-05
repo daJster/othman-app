@@ -247,6 +247,15 @@ describe('ActivityBand', () => {
     expect(screen.queryByText('More')).toBeNull();
   });
 
+  it('fills a fixed-height parent', async () => {
+    await render(<ActivityBand />);
+
+    const className = screen.getByTestId('quran-activity-band').props
+      .className as string;
+    expect(className).toContain('flex-1');
+    expect(className).not.toContain('py-7');
+  });
+
   it('caps the cell and scrolls wider grids', () => {
     const phone = activityBandGeometry(390, 14);
     expect(phone.cell).toBe(20);
@@ -254,7 +263,7 @@ describe('ActivityBand', () => {
     expect(phone.width).toBe(phone.available);
 
     const desktop = activityBandGeometry(768, 5);
-    expect(desktop.cell).toBe(22);
+    expect(desktop.cell).toBe(28);
     expect(desktop.width).toBeLessThanOrEqual(desktop.available);
 
     const year = activityBandGeometry(390, 53);

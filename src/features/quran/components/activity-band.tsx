@@ -37,17 +37,23 @@ import {
  * months over a 12-month history, Annual pages 12 months over two years.
  * Switching spans resets to the current period.
  *
- * Cells are small on purpose (22px max): a quarter no longer fits the phone
+ * Cells are small on purpose (28px max): a quarter no longer fits the phone
  * width, so the grid lives in a horizontal `ScrollView` pinned to the newest
  * (rightmost) end, like the old year view. The data is a seeded demo grid for
  * now (see `use-monthly-activity`); the summary counts in-span days read.
+ *
+ * The band fills its fixed-height parent (`flex-1`, no vertical padding): a
+ * top block (overline + header), a middle grid wrapper (`flex-1
+ * justify-center`), and the legend pinned to the bottom, so the grid stays
+ * vertically centered between header and legend. Chevron toggles are 44pt
+ * targets (`h-11 w-11`); segments are already 44px via `size="sm"`.
  *
  * The reveal is one fade of the whole grid. There is no per-cell animation and
  * no continuous motion; reduced-motion users get the final frame immediately.
  */
 const GAP = 6;
 const CELL_MIN = 10;
-const CELL_MAX = 22;
+const CELL_MAX = 28;
 
 /** `Page width="default"` is `max-w-3xl`. */
 const PAGE_MAX_WIDTH = 768;
@@ -80,7 +86,7 @@ export type ActivityBandGeometry = {
  * Cell size for the span band.
  *
  * The page column is `min(window, max-w-3xl)` minus the gutter its breakpoint
- * uses. The cell fills the column up to 22px; wider grids (the quarter, the
+ * uses. The cell fills the column up to 28px; wider grids (the quarter, the
  * year) overflow into the band's horizontal scroll instead of shrinking past
  * the 10px floor.
  */
@@ -156,79 +162,89 @@ export function ActivityBand() {
   return (
     <View
       testID="quran-activity-band"
-      className="w-full border-b border-border py-7 md:py-8"
+      className="w-full flex-1 border-b border-border"
     >
-      <Text variant="overline" tone="muted">
-        {t('quran.activity.title')}
-      </Text>
-
-      <View
-        className="mt-3 flex-row items-center justify-between gap-2"
-        style={{ direction: 'ltr' }}
-      >
-        <View className="min-w-0 flex-1 gap-0.5">
-          <Text testID="quran-activity-title" variant="label" numberOfLines={1}>
-            {title}
-          </Text>
-          <Text testID="quran-activity-summary" variant="caption" tone="muted">
-            {t('quran.activity.summary', {
-              read: readDays,
-              total: spanDays.length,
-            })}
-          </Text>
-        </View>
+      <View>
+        <Text variant="overline" tone="muted">
+          {t('quran.activity.title')}
+        </Text>
 
         <View
-          className="flex-row items-center gap-1.5"
+          className="mt-3 flex-row items-center justify-between gap-2"
           style={{ direction: 'ltr' }}
         >
-          <ButtonGroup>
-            {SPANS.map((option) => (
-              <Button
-                key={option}
-                testID={`quran-activity-span-${option}`}
-                size="sm"
-                variant={option === span ? 'secondary' : 'ghost'}
-                accessibilityState={{ selected: option === span }}
-                label={t(`quran.activity.${option}`)}
-                onPress={() => select(option)}
+          <View className="min-w-0 flex-1 gap-0.5">
+            <Text
+              testID="quran-activity-title"
+              variant="label"
+              numberOfLines={1}
+            >
+              {title}
+            </Text>
+            <Text
+              testID="quran-activity-summary"
+              variant="caption"
+              tone="muted"
+            >
+              {t('quran.activity.summary', {
+                read: readDays,
+                total: spanDays.length,
+              })}
+            </Text>
+          </View>
+
+          <View
+            className="flex-row items-center gap-1.5"
+            style={{ direction: 'ltr' }}
+          >
+            <ButtonGroup>
+              {SPANS.map((option) => (
+                <Button
+                  key={option}
+                  testID={`quran-activity-span-${option}`}
+                  size="sm"
+                  variant={option === span ? 'secondary' : 'ghost'}
+                  accessibilityState={{ selected: option === span }}
+                  label={t(`quran.activity.${option}`)}
+                  onPress={() => select(option)}
+                />
+              ))}
+            </ButtonGroup>
+            <Pressable
+              testID="quran-activity-prev"
+              accessibilityRole="button"
+              accessibilityLabel={t('meeting.calendar.previous')}
+              accessibilityState={{ disabled: !canOlder }}
+              disabled={!canOlder}
+              onPress={() => turn(-1)}
+              className="h-11 w-11 items-center justify-center rounded-md active:opacity-70 disabled:opacity-40"
+            >
+              <Icon
+                name="chevron-left"
+                size={18}
+                tone={canOlder ? 'foreground' : 'muted'}
               />
-            ))}
-          </ButtonGroup>
-          <Pressable
-            testID="quran-activity-prev"
-            accessibilityRole="button"
-            accessibilityLabel={t('meeting.calendar.previous')}
-            accessibilityState={{ disabled: !canOlder }}
-            disabled={!canOlder}
-            onPress={() => turn(-1)}
-            className="h-8 w-8 items-center justify-center rounded-md active:opacity-70 disabled:opacity-40"
-          >
-            <Icon
-              name="chevron-left"
-              size={18}
-              tone={canOlder ? 'foreground' : 'muted'}
-            />
-          </Pressable>
-          <Pressable
-            testID="quran-activity-next"
-            accessibilityRole="button"
-            accessibilityLabel={t('meeting.calendar.next')}
-            accessibilityState={{ disabled: !canNewer }}
-            disabled={!canNewer}
-            onPress={() => turn(1)}
-            className="h-8 w-8 items-center justify-center rounded-md active:opacity-70 disabled:opacity-40"
-          >
-            <Icon
-              name="chevron-right"
-              size={18}
-              tone={canNewer ? 'foreground' : 'muted'}
-            />
-          </Pressable>
+            </Pressable>
+            <Pressable
+              testID="quran-activity-next"
+              accessibilityRole="button"
+              accessibilityLabel={t('meeting.calendar.next')}
+              accessibilityState={{ disabled: !canNewer }}
+              disabled={!canNewer}
+              onPress={() => turn(1)}
+              className="h-11 w-11 items-center justify-center rounded-md active:opacity-70 disabled:opacity-40"
+            >
+              <Icon
+                name="chevron-right"
+                size={18}
+                tone={canNewer ? 'foreground' : 'muted'}
+              />
+            </Pressable>
+          </View>
         </View>
       </View>
 
-      <Animated.View entering={reveal} className="mt-4 w-full">
+      <Animated.View entering={reveal} className="w-full flex-1 justify-center">
         <ScrollView
           key={`quran-activity-${span}`}
           testID="quran-activity-scroller"
@@ -254,7 +270,7 @@ export function ActivityBand() {
         </ScrollView>
       </Animated.View>
 
-      <View className="mt-3 flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2">
+      <View className="flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2">
         <LegendSwatch className="bg-primary" label={t('quran.activity.met')} />
         <LegendSwatch className="bg-muted" label={t('quran.activity.missed')} />
       </View>
