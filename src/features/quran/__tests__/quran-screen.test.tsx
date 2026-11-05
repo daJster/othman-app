@@ -87,11 +87,11 @@ beforeEach(() => {
 });
 
 describe('QuranScreen', () => {
-  it('opens with the page header and the history band first', async () => {
+  it('opens with the history band first and no page header', async () => {
     await render(<QuranScreen />);
 
-    expect(screen.getByText('Quran')).toBeTruthy();
-    expect(screen.getByText('Read the mushaf page by page')).toBeTruthy();
+    expect(screen.queryByText('Quran')).toBeNull();
+    expect(screen.queryByText('Read the mushaf page by page')).toBeNull();
 
     const bands = screen
       .getAllByTestId(/quran-(story|resume|activity|history)-band/)
