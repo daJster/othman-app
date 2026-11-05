@@ -14,7 +14,7 @@ import { formatReaderNumber } from '../format';
 import { useReaderEdition, useReaderPage } from '../store/use-reader';
 
 /**
- * The landing page's history entry as a single 3:1 image card.
+ * The landing page's history entry as a single 2:1 image card.
  *
  * Layers, bottom to top: the reader's current page scan (or a canopy
  * fallback when no edition is attached, the page is outside it, or the scan
@@ -88,7 +88,7 @@ export function HistoryBand() {
         }}
         className="relative w-full overflow-hidden rounded-2xl border border-border active:opacity-70"
         style={[
-          { aspectRatio: 3 },
+          { aspectRatio: 2 },
           cardShadow,
           hovered ? cardShadowHovered : null,
         ]}

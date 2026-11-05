@@ -9,7 +9,7 @@ import { HISTORY_MILESTONES } from '@/features/quran/history-content/timeline';
  *
  * `HistoryBand()` takes no props. The whole card is a button
  * (`testID="quran-history-band"`, `accessibilityRole="button"`) that routes to
- * `/quran/history`. It keeps a 3:1 card ratio (`aspectRatio: 3` in the root
+ * `/quran/history`. It keeps a 2:1 card ratio (`aspectRatio: 2` in the root
  * Pressable style), exposes the plate number only in the accessible name
  * (`accessibilityLabel` ends with `Quran page <page>`, e.g. /Quran page 12/),
  * never as visible text, and shows the current page scan
@@ -53,7 +53,7 @@ beforeEach(() => {
 });
 
 describe('HistoryBand', () => {
-  it('renders the band copy, hides the plate number, and keeps the 3:1 card ratio', async () => {
+  it('renders the band copy, hides the plate number, and keeps the 2:1 card ratio', async () => {
     await render(<HistoryBand />);
 
     const band = screen.getByTestId('quran-history-band');
@@ -63,7 +63,7 @@ describe('HistoryBand', () => {
     expect(screen.getByText('How the mushaf came to be')).toBeTruthy();
     expect(screen.queryByText('12')).toBeNull();
     expect(screen.getByLabelText(/Quran page 12/)).toBeTruthy();
-    expect(JSON.stringify(band.props.style)).toContain('"aspectRatio":3');
+    expect(JSON.stringify(band.props.style)).toContain('"aspectRatio":2');
   });
 
   it('opens the history route from the whole band', async () => {
