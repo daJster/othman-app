@@ -236,17 +236,29 @@ export default function ContributionGraph({
 
   return (
     <View>
-      <View className="flex-row" style={{ gap, marginBottom: 4 }}>
-        {shown.map((visible, columnIndex) => (
-          // Placeholders keep the labels over their own week column.
-          <View key={columnIndex} style={{ width: cell }}>
-            {visible !== null ? (
+      {/*
+       * Absolute anchors, GitHub-style: a label is positioned at its week's
+       * x offset and shrink-wraps its text instead of squeezing into the
+       * column width (a 10px annual cell would truncate "Sep" to "…").
+       * Sparse by construction — a new label only starts where the month
+       * changes, so neighbours never overlap.
+       */}
+      <View style={{ position: 'relative', height: 18, marginBottom: 4 }}>
+        {shown.map((visible, columnIndex) =>
+          visible !== null ? (
+            <View
+              key={columnIndex}
+              style={{
+                position: 'absolute',
+                left: columnIndex * (cell + gap),
+              }}
+            >
               <Text variant="caption" tone="muted" numberOfLines={1}>
                 {visible}
               </Text>
-            ) : null}
-          </View>
-        ))}
+            </View>
+          ) : null,
+        )}
       </View>
       {grid}
     </View>

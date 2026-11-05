@@ -40,6 +40,14 @@ describe('ContributionGraph month labels (native)', () => {
     expect(screen.getAllByText('2026-09')).toHaveLength(1);
     expect(screen.getAllByText('2026-10')).toHaveLength(1);
     expect(screen.getAllByText('2026-11')).toHaveLength(1);
+
+    // Anchors, not column-width boxes: each label sits at its week's x
+    // offset with room for its text (default cell 10 + gap 3).
+    const leftOf = (text: string): number =>
+      screen.getByText(text).parent?.props.style.left;
+    expect([leftOf('2026-09'), leftOf('2026-10'), leftOf('2026-11')]).toEqual([
+      0, 13, 65,
+    ]);
     expect(
       screen.getAllByTestId('contribution-cell', {
         includeHiddenElements: true,
