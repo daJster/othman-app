@@ -27,7 +27,9 @@ import { ErrorState } from '@/ui/states';
  * The bands are a reading sequence, so the page stays a single column at every
  * width. Sections 1+2 lock to 30/70 of the viewport height in portrait only;
  * S2 subtracts the bottom safe-area inset so native tabs never cover the
- * legend (web insets are zero so web is unaffected). In landscape (height < width) no fixed heights apply and the
+ * legend (web insets are zero so web is unaffected). The lock touches those
+ * two sections alone: the page keeps its own vertical padding and sections
+ * 3+4 render exactly as before. In landscape (height < width) no fixed heights apply and the
  * bands stack naturally — a fallback the builder of the future must keep.
  * Each module is optional; with none attached, the resume band alone is
  * a complete entry point.
@@ -114,7 +116,7 @@ export default function QuranScreen() {
 
   return (
     <Screen contentContainerClassName="gap-0 p-0">
-      <Page width="default">
+      <Page width="default" className="pt-8 pb-10 md:pt-12">
         <Head>
           <title>{`${t('nav.quran')} · ${t('app.name')}`}</title>
         </Head>
