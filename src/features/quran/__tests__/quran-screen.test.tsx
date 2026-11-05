@@ -87,12 +87,22 @@ beforeEach(() => {
 });
 
 describe('QuranScreen', () => {
-  it('renders the page header and the resume band', async () => {
+  it('opens with the story band and no page header', async () => {
     await render(<QuranScreen />);
 
-    expect(screen.getByText('Quran')).toBeTruthy();
-    expect(screen.getByText('Read the mushaf page by page')).toBeTruthy();
-    expect(screen.getByTestId('quran-resume-band')).toBeTruthy();
+    expect(screen.queryByText('Quran')).toBeNull();
+    expect(screen.queryByText('Read the mushaf page by page')).toBeNull();
+
+    const bands = screen
+      .getAllByTestId(/quran-(story|resume|activity|history)-band/)
+      .map((band) => band.props.testID);
+
+    expect(bands).toEqual([
+      'quran-story-band',
+      'quran-resume-band',
+      'quran-activity-band',
+      'quran-history-band',
+    ]);
   });
 
   it('renders the recorded session and opens it in the reader', async () => {

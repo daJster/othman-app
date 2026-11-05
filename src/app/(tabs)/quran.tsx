@@ -10,7 +10,6 @@ import { parseQuranLink } from '@/features/quran/links';
 import { useRestoreReader } from '@/features/quran/store/use-reader';
 import { Page } from '@/ui/page';
 import { Screen, ScreenView } from '@/ui/screen';
-import { Section } from '@/ui/section';
 import { ErrorState } from '@/ui/states';
 
 /**
@@ -108,12 +107,10 @@ export default function QuranScreen() {
           <title>{`${t('nav.quran')} · ${t('app.name')}`}</title>
         </Head>
 
-        <Section title={t('nav.quran')} description={t('nav.quranDesc')} />
-
+        <StoryBand />
         <ResumeBand onOpen={openEntry} />
         <ActivityBand />
         <HistoryBand />
-        <StoryBand />
       </Page>
     </Screen>
   );
