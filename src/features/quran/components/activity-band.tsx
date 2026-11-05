@@ -43,11 +43,9 @@ import {
  * (rightmost) end, like the old year view. The data is a seeded demo grid for
  * now (see `use-monthly-activity`); the summary counts in-span days read.
  *
- * The band fills its fixed-height parent (`flex-1`, no vertical padding): a
- * top block (overline + header), a middle grid wrapper (`flex-1
- * justify-center`), and the legend pinned to the bottom, so the grid stays
- * vertically centered between header and legend. Chevron toggles are 44pt
- * targets (`h-11 w-11`); segments are already 44px via `size="sm"`.
+ * The band sizes to its content with the page's standard section rhythm
+ * (`py-7`): a top block (overline + two-row header), the grid, and the legend
+ * stacked with fixed gaps. The chevron toggles meet the 44pt floor.
  *
  * The reveal is one fade of the whole grid. There is no per-cell animation and
  * no continuous motion; reduced-motion users get the final frame immediately.
@@ -118,8 +116,7 @@ export function ActivityBand() {
   const reducedMotion = useReducedMotion();
   const scroller = useRef<ScrollViewInstance | null>(null);
 
-  const [span, setSpan] = useState<ActivitySpan>('monthly');
-  // Page per span from the current period: 0 is newest, negative is older.
+  const [span, setSpan] = useState<ActivitySpan>('monthly'); // Page per span from the current period: 0 is newest, negative is older.
   const [pages, setPages] = useState<Record<ActivitySpan, number>>({
     monthly: 0,
     annual: 0,
@@ -163,7 +160,7 @@ export function ActivityBand() {
   return (
     <View
       testID="quran-activity-band"
-      className="w-full flex-1 border-b border-border"
+      className="w-full border-b border-border py-7 md:py-8"
     >
       <View>
         <Text variant="overline" tone="muted">
@@ -247,7 +244,7 @@ export function ActivityBand() {
         </View>
       </View>
 
-      <Animated.View entering={reveal} className="w-full flex-1 justify-center">
+      <Animated.View entering={reveal} className="mt-4 w-full">
         <ScrollView
           key={`quran-activity-${span}`}
           testID="quran-activity-scroller"
@@ -273,7 +270,7 @@ export function ActivityBand() {
         </ScrollView>
       </Animated.View>
 
-      <View className="flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2">
+      <View className="mt-3 flex-row flex-wrap items-center justify-center gap-x-4 gap-y-2">
         <LegendSwatch className="bg-primary" label={t('quran.activity.met')} />
         <LegendSwatch className="bg-muted" label={t('quran.activity.missed')} />
       </View>

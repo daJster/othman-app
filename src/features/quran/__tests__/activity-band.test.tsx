@@ -247,13 +247,13 @@ describe('ActivityBand', () => {
     expect(screen.queryByText('More')).toBeNull();
   });
 
-  it('fills a fixed-height parent', async () => {
+  it('keeps the section rhythm instead of filling a parent', async () => {
     await render(<ActivityBand />);
 
     const className = screen.getByTestId('quran-activity-band').props
       .className as string;
-    expect(className).toContain('flex-1');
-    expect(className).not.toContain('py-7');
+    expect(className).toContain('py-7');
+    expect(className).not.toContain('flex-1');
   });
 
   it('caps the cell and scrolls wider grids', () => {

@@ -3,7 +3,6 @@ import Head from 'expo-router/head';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View, useWindowDimensions } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ActivityBand } from '@/features/quran/components/activity-band';
 import { HistoryBand } from '@/features/quran/components/history-band';
 import { ResumeBand } from '@/features/quran/components/resume-band';
@@ -25,11 +24,10 @@ import { ErrorState } from '@/ui/states';
  * and a suggested surah.
  *
  * The bands are a reading sequence, so the page stays a single column at every
- * width. Sections 1+2 lock to 30/70 of the viewport height in portrait only;
- * S2 subtracts the bottom safe-area inset so native tabs never cover the
- * legend (web insets are zero so web is unaffected). The lock touches those
- * two sections alone: the page keeps its own vertical padding and sections
- * 3+4 render exactly as before. In landscape (height < width) no fixed heights apply and the
+ * width. Section 1 locks to 30% of the viewport height in portrait only; every
+ * other section sizes to its content with the page's own rhythm. The lock
+ * touches that section alone: the page keeps its own vertical padding and
+ * sections 2+ render exactly as before. In landscape (height < width) no fixed heights apply and the
  * bands stack naturally — a fallback the builder of the future must keep.
  * Each module is optional; with none attached, the resume band alone is
  * a complete entry point.
@@ -56,11 +54,8 @@ export default function QuranScreen() {
     ayah?: string;
   }>();
   const { height: windowHeight, width: windowWidth } = useWindowDimensions();
-  const insets = useSafeAreaInsets();
   const portrait = windowHeight >= windowWidth;
   const s1 = Math.round(windowHeight * 0.3);
-  const tabBottom = insets.bottom ?? 0;
-  const s2 = Math.max(0, Math.round(windowHeight * 0.7) - tabBottom);
 
   useRestoreReader();
 
@@ -129,10 +124,7 @@ export default function QuranScreen() {
           <HistoryBand />
         </View>
         <ResumeBand onOpen={openEntry} />
-        <View
-          testID="quran-section-activity"
-          style={{ height: portrait ? s2 : undefined }}
-        >
+        <View testID="quran-section-activity">
           <ActivityBand />
         </View>
         <StoryBand />

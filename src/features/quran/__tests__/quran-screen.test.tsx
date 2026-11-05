@@ -1,12 +1,10 @@
 import {
   fireEvent,
   render,
-  renderHook,
   screen,
   within,
 } from '@testing-library/react-native';
 import { Dimensions } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import QuranScreen from '@/app/(tabs)/quran';
 import type { ReadingEntry } from '@/core/domain/quran/reading-log';
 import type { QuranEdition } from '@/core/types';
@@ -72,11 +70,6 @@ jest.mock('expo-router', () => ({
 }));
 
 jest.mock('expo-router/head', () => () => null);
-
-jest.mock(
-  'react-native-safe-area-context',
-  () => jest.requireActual('react-native-safe-area-context/jest/mock').default,
-);
 
 jest.mock('@/features/quran/store/use-reader', () => ({
   useRestoreReader: () => mockRestore(),
@@ -221,21 +214,16 @@ describe('QuranScreen', () => {
     expect(mockReplace).toHaveBeenCalledWith('/quran');
   });
 
-  it('locks sections 1 and 2 to 30/70 of the viewport', async () => {
-    const { result } = await renderHook(() => useSafeAreaInsets());
-    const bottomInset = result.current.bottom ?? 0;
-
+  it('locks section 1 to 30% of the viewport and leaves the rest natural', async () => {
     await render(<QuranScreen />);
 
     const windowHeight = Dimensions.get('window').height;
-    const s2 = Math.round(windowHeight * 0.7) - bottomInset;
 
     expect(screen.getByTestId('quran-section-history').props.style).toEqual({
       height: Math.round(windowHeight * 0.3),
     });
-    expect(screen.getByTestId('quran-section-activity').props.style).toEqual({
-      height: s2,
-    });
-    expect(s2).toBeGreaterThan(0);
+    expect(
+      screen.getByTestId('quran-section-activity').props.style,
+    ).toBeUndefined();
   });
 });
