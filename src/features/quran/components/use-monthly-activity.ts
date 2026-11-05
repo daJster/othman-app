@@ -67,6 +67,17 @@ export function weekStartFor(language: Language): 6 | 1 {
   return language === 'ar' ? 6 : 1;
 }
 
+/** Abbreviated month (`Sep` / `سبتمبر`) for heatmap month labels. */
+export function formatMonthShort(day: string, language: Language): string {
+  const [year, month] = day.split('-').map(Number);
+
+  if (!year || !month) return '';
+
+  return new Intl.DateTimeFormat(language, { month: 'short' }).format(
+    new Date(year, month - 1, 1, 12),
+  );
+}
+
 /** `12 Nov` / `12 نوفمبر` style label for tooltips and accessibility names. */
 export function formatDayLabel(day: string, language: Language): string {
   const [year, month, date] = day.split('-').map(Number);

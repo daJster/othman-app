@@ -9,7 +9,11 @@ import {
   ContributionGraphCalendar,
 } from '@/components/catalogs/contribution-graph.web';
 import { useDirection } from '@/i18n';
-import { formatDayLabel, type MonthlyActivity } from './use-monthly-activity';
+import {
+  formatDayLabel,
+  formatMonthShort,
+  type MonthlyActivity,
+} from './use-monthly-activity';
 
 /**
  * The reading-activity board, on the web catalog calendar.
@@ -19,10 +23,11 @@ import { formatDayLabel, type MonthlyActivity } from './use-monthly-activity';
  * is computed by the band from the page column; the catalog's own horizontal
  * overflow is disabled so the band owns the scroll position on both platforms.
  *
- * Month labels are hidden — the band's header already names the month — and
- * the week start follows the language (Saturday for Arabic, Monday otherwise).
- * Neighbouring-month cells render faded and carry the same localized
- * `date: count` accessible name as native.
+ * Month labels are visible in Annual only (`showMonthLabels`); the Monthly
+ * band header already names the month — and the week start follows the
+ * language (Saturday for Arabic, Monday otherwise). Neighbouring-month cells
+ * render faded and carry the same localized `date: count` accessible name as
+ * native.
  */
 export type ActivityLevel = 0 | 1 | 2 | 3 | 4;
 
@@ -46,6 +51,8 @@ export type ActivityGridProps = {
   cellSize: number;
   /** First day of the week column. */
   weekStart?: MonthlyActivity['weekStart'];
+  /** Abbreviated month labels above the graph; Annual only. */
+  showMonthLabels?: boolean;
 };
 
 const BLOCK_RAMP: Record<ActivityLevel, string> = {
@@ -61,8 +68,18 @@ export function ActivityGrid({
   columns,
   cellSize,
   weekStart = 1,
+  showMonthLabels = false,
 }: ActivityGridProps) {
   const { language } = useDirection();
+
+  // Fixed year avoids DST edges; mirrors the previous implementation.
+  const months = useMemo(
+    () =>
+      Array.from({ length: 12 }, (_, m) =>
+        formatMonthShort(`2026-${String(m + 1).padStart(2, '0')}-01`, language),
+      ),
+    [language],
+  );
 
   const data = useMemo<Activity[]>(() => {
     const columnCount = Number.isFinite(columns)
@@ -91,9 +108,13 @@ export function ActivityGrid({
       className="max-w-none"
       data={data}
       fontSize={12}
+      labels={{ months }}
       weekStart={weekStart as WeekDay}
     >
-      <ContributionGraphCalendar hideMonthLabels className="overflow-visible">
+      <ContributionGraphCalendar
+        hideMonthLabels={!showMonthLabels}
+        className="overflow-visible"
+      >
         {({ activity, dayIndex, weekIndex }) => (
           <ContributionGraphBlock
             activity={activity}

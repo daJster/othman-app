@@ -1,7 +1,11 @@
 import { useMemo } from 'react';
 import ContributionGraph from '@/components/catalogs/contribution-graph.native';
 import { useDirection } from '@/i18n';
-import { formatDayLabel, type MonthlyActivity } from './use-monthly-activity';
+import {
+  formatDayLabel,
+  formatMonthShort,
+  type MonthlyActivity,
+} from './use-monthly-activity';
 
 /**
  * The reading-activity board, as a native week grid.
@@ -12,7 +16,9 @@ import { formatDayLabel, type MonthlyActivity } from './use-monthly-activity';
  * both platforms from one API.
  *
  * The band shows one month with a five-step demo ramp (0–4); the label each
- * cell exposes is the localized day plus its page count.
+ * cell exposes is the localized day plus its page count. The Annual heatmap
+ * opts into GitHub-style month labels through `showMonthLabels`, fed by
+ * `formatMonthShort` in the active language.
  */
 export type ActivityLevel = 0 | 1 | 2 | 3 | 4;
 
@@ -36,6 +42,11 @@ export type ActivityGridProps = {
   cellSize: number;
   /** First day of the week column, Sunday = 0. */
   weekStart?: MonthlyActivity['weekStart'];
+  /**
+   * Show month labels above the week columns, for the Annual heatmap.
+   * Defaults to false; the Monthly board names its month in the header.
+   */
+  showMonthLabels?: boolean;
 };
 
 export function ActivityGrid({
@@ -43,6 +54,7 @@ export function ActivityGrid({
   columns,
   cellSize,
   weekStart = 1,
+  showMonthLabels = false,
 }: ActivityGridProps) {
   const { language } = useDirection();
 
@@ -63,6 +75,11 @@ export function ActivityGrid({
       weekStart={weekStart}
       gap={6}
       radiusClass="rounded-[6px]"
+      monthLabel={
+        showMonthLabels
+          ? (day: string) => formatMonthShort(day, language)
+          : undefined
+      }
     />
   );
 }

@@ -32,6 +32,7 @@ type GridProps = {
   columns: number;
   cellSize: number;
   weekStart?: number;
+  showMonthLabels?: boolean;
 };
 
 let mockGrid: GridProps | null = null;
@@ -97,6 +98,7 @@ describe('ActivityBand', () => {
     );
     expect(grid().days).toHaveLength(expected.length);
     expect(grid().columns).toBe(expected.length / 7);
+    expect(grid().showMonthLabels).toBe(false);
     expect(summary()).toBe(expectedSummary(grid().days));
     expect(isNextDisabled()).toBe(true);
   });
@@ -149,6 +151,7 @@ describe('ActivityBand', () => {
     expect(title()).toBe(formatYearTitle(base, 'en'));
     expect(grid().columns).toBe(53);
     expect(grid().days).toHaveLength(365);
+    expect(grid().showMonthLabels).toBe(true);
     expect(grid().days.map((day) => day.day)).toEqual(
       buildYearCells(endOfMonth(base)).map((day) => day.day),
     );

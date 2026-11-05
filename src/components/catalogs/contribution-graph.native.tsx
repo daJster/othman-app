@@ -5,8 +5,10 @@
  * The catalog original is an SVG calendar built on `date-fns` and DOM props; a
  * native port cannot share that markup, and the reading log already supplies
  * plain day/count pairs. This file therefore keeps the *look* — a grid of
- * 7-row columns, one column per week, the five-step accent ramp — and drops the
- * month labels, the hover tooltips and the composed sub-components.
+ * 7-row columns, one column per week, the five-step accent ramp — and drops
+ * the hover tooltips and the composed sub-components. Month labels are
+ * opt-in through `monthLabel`: one label per week column, GitHub-style, with
+ * repeats hidden so a month names its first column only.
  *
  * Shape of the data: `weeks` is a flat list of days, oldest first. The newest
  * `columns * 7` entries are kept and aligned to their weekday column, so a
@@ -23,6 +25,7 @@
  * cannot see a concatenated class name.
  */
 import { View } from 'react-native';
+import { Text } from '@/ui/text';
 
 const GAP = 3;
 const ROWS = 7;
@@ -65,6 +68,13 @@ export type ContributionGraphProps = {
   gap?: number;
   /** Rounded-corner class for a cell. Literal for the Tailwind scanner. */
   radiusClass?: string;
+  /**
+   * Month label for an ISO day (`Sep`, `سبتمبر`), shown once per month in a
+   * row above the week columns. A column shows the label of its first day
+   * only when it differs from the last shown label; a `null` return hides
+   * the column's label. Omit the prop and no row renders at all.
+   */
+  monthLabel?: (isoDay: string) => string | null;
 };
 
 function levelFor(count: number): ContributionLevel {
@@ -133,6 +143,34 @@ function cellsFor(
   return cells;
 }
 
+/**
+ * One label per week column: the month of the column's first defined cell,
+ * shown only when it changes from the last shown label (GitHub-style sparse
+ * month anchors). Pure so the render never mutates across columns.
+ */
+function labelsFor(
+  cells: readonly (ContributionDay | undefined)[],
+  columnCount: number,
+  monthLabel: (isoDay: string) => string | null,
+): (string | null)[] {
+  const shown: (string | null)[] = [];
+  let last: string | null = null;
+
+  for (let columnIndex = 0; columnIndex < columnCount; columnIndex += 1) {
+    const first: ContributionDay | undefined = cells
+      .slice(columnIndex * ROWS, columnIndex * ROWS + ROWS)
+      .find((day) => day !== undefined);
+    const label: string | null = first ? monthLabel(first.day) : null;
+    const visible: string | null =
+      label !== null && label !== last ? label : null;
+
+    if (visible !== null) last = visible;
+    shown.push(visible);
+  }
+
+  return shown;
+}
+
 export default function ContributionGraph({
   weeks,
   columns = DEFAULT_COLUMNS,
@@ -140,6 +178,7 @@ export default function ContributionGraph({
   weekStart = 0,
   gap = GAP,
   radiusClass = 'rounded-[2px]',
+  monthLabel,
 }: ContributionGraphProps) {
   const columnCount = Number.isFinite(columns)
     ? Math.max(1, Math.floor(columns))
@@ -150,7 +189,7 @@ export default function ContributionGraph({
     : 0;
   const cells = cellsFor(weeks, columnCount * ROWS, start);
 
-  return (
+  const grid = (
     <View className="flex-row" style={{ gap }}>
       {new Array(columnCount).fill(undefined).map((_, columnIndex) => (
         <View
@@ -186,6 +225,30 @@ export default function ContributionGraph({
             )}
         </View>
       ))}
+    </View>
+  );
+
+  if (!monthLabel) {
+    return grid;
+  }
+
+  const shown = labelsFor(cells, columnCount, monthLabel);
+
+  return (
+    <View>
+      <View className="flex-row" style={{ gap, marginBottom: 4 }}>
+        {shown.map((visible, columnIndex) => (
+          // Placeholders keep the labels over their own week column.
+          <View key={columnIndex} style={{ width: cell }}>
+            {visible !== null ? (
+              <Text variant="caption" tone="muted" numberOfLines={1}>
+                {visible}
+              </Text>
+            ) : null}
+          </View>
+        ))}
+      </View>
+      {grid}
     </View>
   );
 }

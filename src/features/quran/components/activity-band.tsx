@@ -266,6 +266,7 @@ export function ActivityBand() {
             columns={columns}
             cellSize={geometry.cell}
             weekStart={weekStart}
+            showMonthLabels={span === 'annual'}
           />
         </ScrollView>
       </Animated.View>
