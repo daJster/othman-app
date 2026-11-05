@@ -1,4 +1,3 @@
-import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
@@ -21,8 +20,7 @@ import { useReaderEdition, useReaderPage } from '../store/use-reader';
  * fallback when no edition is attached, the page is outside it, or the scan
  * failed, keyed by URI so a later page or edition can try again), a
  * bottom-weighted gradient scrim that lifts the text off any scan behind it,
- * and a bottom-left frosted chip (BlurView plus a canopy wash for platforms
- * that refuse to blur) carrying the title and the promise. Physical
+ * and the title plus promise set directly on the scrim at the physical
  * left-bottom in both languages; the Text primitive handles direction.
  *
  * The whole card is one control with the button role; the plate is decorative
@@ -120,30 +118,19 @@ export function HistoryBand() {
           pointerEvents="none"
         />
 
-        <View className="absolute right-0 bottom-0 left-0 p-3 md:p-4">
-          <View className="relative overflow-hidden rounded-xl">
-            <BlurView
-              intensity={60}
-              tint="systemThinMaterialDark"
-              blurMethod="dimezisBlurView"
-              style={[StyleSheet.absoluteFill, { borderRadius: 12 }]}
-            />
-            <View className="absolute inset-0 bg-canopy/50" />
-            <View className="gap-0.5 px-3 py-2.5">
-              <Text
-                className="text-lg leading-snug font-semibold text-parchment"
-                numberOfLines={1}
-              >
-                {t('quran.landing.history')}
-              </Text>
-              <Text
-                className="text-xs font-medium text-parchment"
-                numberOfLines={2}
-              >
-                {t('quran.history.bandPromise')}
-              </Text>
-            </View>
-          </View>
+        <View className="absolute right-0 bottom-0 left-0 gap-0.5 p-3 md:p-4">
+          <Text
+            className="text-lg leading-snug font-semibold text-parchment"
+            numberOfLines={1}
+          >
+            {t('quran.landing.history')}
+          </Text>
+          <Text
+            className="text-xs font-medium text-parchment"
+            numberOfLines={2}
+          >
+            {t('quran.history.bandPromise')}
+          </Text>
         </View>
       </Pressable>
     </Animated.View>
