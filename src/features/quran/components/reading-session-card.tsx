@@ -17,7 +17,7 @@ import { useQuranCatalog } from '../use-quran-catalog';
 /**
  * One recorded reading session, as a compact image card.
  *
- * Portrait 4:5: the mushaf page scan sits behind everything, and all text
+ * Portrait 3:4: the mushaf page scan sits behind everything, and all text
  * lives at the physical left-bottom over a black scrim so it stays legible in
  * both languages. The card is a single `Pressable`: it names the whole
  * position, so a tap anywhere on it should open exactly that position, not the
@@ -144,7 +144,7 @@ function ReadingSessionCardView({
         }),
         className,
       )}
-      style={{ aspectRatio: 4 / 5 }}
+      style={{ aspectRatio: 3 / 4 }}
     >
       {imageUrl ? (
         <Image

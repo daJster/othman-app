@@ -30,15 +30,16 @@ import { ReadingSessionCard } from './reading-session-card';
  *
  * One row: the newest entry is the resume action — the card it shows is the
  * page it opens, carrying the whole recorded position (page, surah and, when
- * one was selected, ayah), so a tap restores that session — and the gauge
- * beside it reads how much of today's one-page goal is done. The card is the
- * only press target; the gauge is a readout, never a button. The row is
- * physical LTR in both languages: nothing mirrors, and the text's own
+ * one was selected, ayah), so a tap restores that session — and the 2×2
+ * gauge grid beside it reads how much of today's one-page goal is done in
+ * the first cell, with three placeholder cells for future metrics. The card
+ * is the only press target; the gauges are readouts, never buttons. The row
+ * is physical LTR in both languages: nothing mirrors, and the text's own
  * direction comes from the `Text` primitive.
  *
- * The gauge is the small arc (104pt, 128pt from `md`): the card stays the
- * section's anchor, and the caption under the gauge names the goal the same
- * way the fraction would. The completion line mounts below the row when the
+ * The gauges are the small arcs (84pt, 104pt from `md`): the card stays the
+ * section's anchor, and the caption under the first gauge names the goal the
+ * same way the fraction would. The completion line mounts below the row when the
  * goal is done, keyed by day so its entrance runs once. With reduced motion
  * both entrances are simply there.
  *
@@ -99,31 +100,76 @@ export function ResumeBand({ onOpen }: ResumeBandProps) {
         <Animated.View
           entering={reducedMotion ? undefined : FadeInDown.duration(240)}
         >
-          <View className="mt-4 flex-row items-center justify-center gap-4 md:gap-6">
+          <View className="mt-4 flex-row items-center gap-3 md:gap-4">
             <ReadingSessionCard
               key={latest.day}
               entry={latest}
               compact
               latest
-              className="w-full max-w-[220px] md:max-w-[240px]"
+              className="w-full max-w-[150px] md:max-w-[168px]"
               onPress={() => open(latest)}
             />
 
-            <View className="shrink-0 items-center gap-1">
-              <HizbGauge
-                value={read}
-                max={target}
-                size={wide ? 128 : 104}
-                strokeWidth={wide ? 10 : 8}
-                centerLabel={formatReaderNumber(read, language)}
-                accessibilityLabel={t('quran.goal.progress', {
-                  read: formatReaderNumber(read, language),
-                  target: formatReaderNumber(target, language),
-                })}
-              />
-              <Text variant="caption" tone="muted">
-                {t('quran.goal.title')}
-              </Text>
+            <View className="flex-1 items-center gap-2">
+              <View className="flex-row justify-center gap-2 md:gap-3">
+                <View testID="quran-mini-gauge" className="items-center gap-1">
+                  <HizbGauge
+                    value={read}
+                    max={target}
+                    size={wide ? 104 : 84}
+                    strokeWidth={wide ? 10 : 9}
+                    centerLabel={formatReaderNumber(read, language)}
+                    accessibilityLabel={t('quran.goal.progress', {
+                      read: formatReaderNumber(read, language),
+                      target: formatReaderNumber(target, language),
+                    })}
+                  />
+                  <Text variant="caption" tone="muted">
+                    {t('quran.goal.title')}
+                  </Text>
+                </View>
+                <View testID="quran-mini-gauge" className="items-center gap-1">
+                  <HizbGauge
+                    value={0}
+                    max={1}
+                    size={wide ? 104 : 84}
+                    strokeWidth={wide ? 10 : 9}
+                    centerLabel="–"
+                    accessibilityLabel={t('quran.resume.soon')}
+                  />
+                  <Text variant="caption" tone="muted">
+                    {t('quran.resume.soon')}
+                  </Text>
+                </View>
+              </View>
+              <View className="flex-row justify-center gap-2 md:gap-3">
+                <View testID="quran-mini-gauge" className="items-center gap-1">
+                  <HizbGauge
+                    value={0}
+                    max={1}
+                    size={wide ? 104 : 84}
+                    strokeWidth={wide ? 10 : 9}
+                    centerLabel="–"
+                    accessibilityLabel={t('quran.resume.soon')}
+                  />
+                  <Text variant="caption" tone="muted">
+                    {t('quran.resume.soon')}
+                  </Text>
+                </View>
+                <View testID="quran-mini-gauge" className="items-center gap-1">
+                  <HizbGauge
+                    value={0}
+                    max={1}
+                    size={wide ? 104 : 84}
+                    strokeWidth={wide ? 10 : 9}
+                    centerLabel="–"
+                    accessibilityLabel={t('quran.resume.soon')}
+                  />
+                  <Text variant="caption" tone="muted">
+                    {t('quran.resume.soon')}
+                  </Text>
+                </View>
+              </View>
             </View>
           </View>
 
