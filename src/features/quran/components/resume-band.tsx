@@ -30,18 +30,19 @@ import { ReadingSessionCard } from './reading-session-card';
  *
  * One row: the newest entry is the resume action — the card it shows is the
  * page it opens, carrying the whole recorded position (page, surah and, when
- * one was selected, ayah), so a tap restores that session — and the 2×2
- * gauge grid beside it reads how much of today's one-page goal is done in
- * the first cell, with three placeholder cells for future metrics. The card
- * is the only press target; the gauges are readouts, never buttons. The row
- * is physical LTR in both languages: nothing mirrors, and the text's own
- * direction comes from the `Text` primitive.
+ * one was selected, ayah), so a tap restores that session — and four metric
+ * gauges beside it in centered 2×2 rows: the pages gauge is live, reading how
+ * much of today's one-page goal is done, while salat (0/5), duaa (0/3) and
+ * nafila (0/1) are placeholders at zero until their tracking sources land.
+ * The card is the only press target; the gauges are readouts, never buttons.
+ * The row is physical LTR in both languages: nothing mirrors, and the text's
+ * own direction comes from the `Text` primitive.
  *
  * The gauges are the small arcs (84pt, 104pt from `md`): the card stays the
- * section's anchor, and the caption under the first gauge names the goal the
- * same way the fraction would. The completion line mounts below the row when the
- * goal is done, keyed by day so its entrance runs once. With reduced motion
- * both entrances are simply there.
+ * section's anchor, and the caption under each gauge names its metric. The
+ * completion line mounts below the row when the pages goal is done, keyed by
+ * day so its entrance runs once. With reduced motion both entrances are
+ * simply there.
  *
  * The demo seed is history, never a position. While the log is the seed alone,
  * the card is labelled by the caption below it rather than by a heading that
@@ -111,7 +112,7 @@ export function ResumeBand({ onOpen }: ResumeBandProps) {
             />
 
             <View className="flex-1 items-center gap-2">
-              <View className="flex-row justify-center gap-2 md:gap-3">
+              <View className="flex-row justify-center gap-3">
                 <View testID="quran-mini-gauge" className="items-center gap-1">
                   <HizbGauge
                     value={read}
@@ -125,35 +126,44 @@ export function ResumeBand({ onOpen }: ResumeBandProps) {
                     })}
                   />
                   <Text variant="caption" tone="muted">
-                    {t('quran.goal.title')}
+                    {t('quran.resume.metrics.pages')}
                   </Text>
                 </View>
+                {/* TODO: wire salat/duaa/nafila to their tracking sources when they land; 0 until then. */}
                 <View testID="quran-mini-gauge" className="items-center gap-1">
                   <HizbGauge
                     value={0}
-                    max={1}
+                    max={5}
                     size={wide ? 104 : 84}
                     strokeWidth={wide ? 10 : 9}
-                    centerLabel="–"
-                    accessibilityLabel={t('quran.resume.soon')}
+                    centerLabel={formatReaderNumber(0, language)}
+                    accessibilityLabel={t('quran.resume.metrics.progress', {
+                      label: t('quran.resume.metrics.salat'),
+                      read: formatReaderNumber(0, language),
+                      target: formatReaderNumber(5, language),
+                    })}
                   />
                   <Text variant="caption" tone="muted">
-                    {t('quran.resume.soon')}
+                    {t('quran.resume.metrics.salat')}
                   </Text>
                 </View>
               </View>
-              <View className="flex-row justify-center gap-2 md:gap-3">
+              <View className="flex-row justify-center gap-3">
                 <View testID="quran-mini-gauge" className="items-center gap-1">
                   <HizbGauge
                     value={0}
-                    max={1}
+                    max={3}
                     size={wide ? 104 : 84}
                     strokeWidth={wide ? 10 : 9}
-                    centerLabel="–"
-                    accessibilityLabel={t('quran.resume.soon')}
+                    centerLabel={formatReaderNumber(0, language)}
+                    accessibilityLabel={t('quran.resume.metrics.progress', {
+                      label: t('quran.resume.metrics.duaa'),
+                      read: formatReaderNumber(0, language),
+                      target: formatReaderNumber(3, language),
+                    })}
                   />
                   <Text variant="caption" tone="muted">
-                    {t('quran.resume.soon')}
+                    {t('quran.resume.metrics.duaa')}
                   </Text>
                 </View>
                 <View testID="quran-mini-gauge" className="items-center gap-1">
@@ -162,11 +172,15 @@ export function ResumeBand({ onOpen }: ResumeBandProps) {
                     max={1}
                     size={wide ? 104 : 84}
                     strokeWidth={wide ? 10 : 9}
-                    centerLabel="–"
-                    accessibilityLabel={t('quran.resume.soon')}
+                    centerLabel={formatReaderNumber(0, language)}
+                    accessibilityLabel={t('quran.resume.metrics.progress', {
+                      label: t('quran.resume.metrics.nafila'),
+                      read: formatReaderNumber(0, language),
+                      target: formatReaderNumber(1, language),
+                    })}
                   />
                   <Text variant="caption" tone="muted">
-                    {t('quran.resume.soon')}
+                    {t('quran.resume.metrics.nafila')}
                   </Text>
                 </View>
               </View>
