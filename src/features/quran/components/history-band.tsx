@@ -1,31 +1,54 @@
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { isPageInEdition, quranPageImageUrl } from '@/core/domain/quran/page';
 import { useDirection } from '@/i18n';
-import { Icon } from '@/ui/icon';
 import { Image } from '@/ui/image';
+import { useReducedMotion } from '@/ui/motion';
 import { Pressable } from '@/ui/pressable';
 import { Text } from '@/ui/text';
 import { formatReaderNumber } from '../format';
 import { useReaderEdition, useReaderPage } from '../store/use-reader';
 
 /**
- * The landing page's entry into the history of the mushaf.
+ * The landing page's history entry as a single 3:1 image card.
  *
- * The plate is the reader's current page when an edition is attached: the
- * history page is about this copy of the text, so showing a real page is more
- * honest than a generic book glyph. With no edition, or a stored page the
- * edition does not carry, a hairline plate with the page number takes its
- * place. A failed scan falls back the same way, keyed by URI so a later page
- * or edition can try again.
+ * Layers, bottom to top: the reader's current page scan (or a canopy
+ * fallback when no edition is attached, the page is outside it, or the scan
+ * failed, keyed by URI so a later page or edition can try again), a
+ * bottom-weighted gradient scrim that lifts the text off any scan behind it,
+ * and a bottom-left frosted chip (BlurView plus a canopy wash for platforms
+ * that refuse to blur) carrying the title and the promise. Physical
+ * left-bottom in both languages; the Text primitive handles direction.
  *
- * The whole band is one control. It has no nested button, so it can carry the
- * button role; the plate is decorative inside that control, and its description
- * is folded into the band's accessible name instead of being a second focus
- * stop.
+ * The whole card is one control with the button role; the plate is decorative
+ * inside it and its description is folded into the card's accessible name.
+ * The reveal is one mount fade, skipped for reduced-motion visitors. On web
+ * the shadow deepens on hover.
  */
+const cardShadow = {
+  shadowColor: '#000000',
+  shadowOpacity: 0.25,
+  shadowRadius: 12,
+  shadowOffset: { width: 0, height: 6 },
+  elevation: 8,
+  ...Platform.select({
+    web: { boxShadow: '0 6px 12px rgba(0,0,0,0.25)' },
+  }),
+} as const;
+
+const cardShadowHovered = {
+  shadowOpacity: 0.35,
+  shadowRadius: 16,
+  ...Platform.select({
+    web: { boxShadow: '0 8px 16px rgba(0,0,0,0.35)' },
+  }),
+} as const;
+
 export function HistoryBand() {
   const { t } = useTranslation();
   const { language } = useDirection();
@@ -33,6 +56,8 @@ export function HistoryBand() {
   const page = useReaderPage();
   const edition = useReaderEdition();
   const [failedUri, setFailedUri] = useState<string | null>(null);
+  const [hovered, setHovered] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   const pageLabel = formatReaderNumber(page, language);
 
@@ -48,49 +73,79 @@ export function HistoryBand() {
     plateLabel,
   ].join(' · ');
 
+  const reveal = reducedMotion ? undefined : FadeIn.duration(180);
+
   return (
-    <Pressable
-      testID="quran-history-band"
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      onPress={() => router.push('/quran/history')}
-      className="flex-row items-center gap-4 border-b border-border py-7 active:opacity-70 md:py-8"
-    >
-      <View
-        testID="quran-history-plate"
-        className="w-24 shrink-0 overflow-hidden border border-border bg-muted md:w-28"
-        style={{ aspectRatio: 412 / 600 }}
+    <Animated.View entering={reveal} className="w-full py-7 md:py-8">
+      <Pressable
+        testID="quran-history-band"
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel}
+        onPress={() => router.push('/quran/history')}
+        onHoverIn={() => {
+          if (Platform.OS === 'web') setHovered(true);
+        }}
+        onHoverOut={() => {
+          if (Platform.OS === 'web') setHovered(false);
+        }}
+        className="relative w-full overflow-hidden rounded-2xl border border-border active:opacity-70"
+        style={[
+          { aspectRatio: 3 },
+          cardShadow,
+          hovered ? cardShadowHovered : null,
+        ]}
       >
         {imageUri !== null && failedUri !== imageUri ? (
           <Image
             testID="quran-history-plate-image"
             source={{ uri: imageUri }}
-            className="h-full w-full"
             contentFit="cover"
             cachePolicy="memory-disk"
             transition={120}
             accessible={false}
             onError={() => setFailedUri(imageUri)}
+            style={StyleSheet.absoluteFill}
           />
         ) : (
-          <View className="absolute inset-0 items-center justify-center gap-1 px-2">
-            <View className="h-px w-2/3 bg-border" />
-            <Text variant="caption" tone="muted" className="tabular-nums">
-              {pageLabel}
-            </Text>
-            <View className="h-px w-2/3 bg-border" />
-          </View>
+          <View
+            testID="quran-history-fallback"
+            className="absolute inset-0 bg-canopy"
+          />
         )}
-      </View>
 
-      <View className="flex-1 gap-1">
-        <Text variant="label">{t('quran.landing.history')}</Text>
-        <Text variant="caption" tone="muted">
-          {t('quran.history.bandPromise')}
-        </Text>
-      </View>
+        <LinearGradient
+          colors={['rgba(3,10,7,0)', 'rgba(3,10,7,0.82)']}
+          locations={[0.42, 1]}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
 
-      <Icon name="chevron-right" size={18} tone="muted" />
-    </Pressable>
+        <View className="absolute right-0 bottom-0 left-0 p-3 md:p-4">
+          <View className="relative overflow-hidden rounded-xl">
+            <BlurView
+              intensity={60}
+              tint="systemThinMaterialDark"
+              blurMethod="dimezisBlurView"
+              style={[StyleSheet.absoluteFill, { borderRadius: 12 }]}
+            />
+            <View className="absolute inset-0 bg-canopy/50" />
+            <View className="gap-0.5 px-3 py-2.5">
+              <Text
+                className="text-lg leading-snug font-semibold text-parchment"
+                numberOfLines={1}
+              >
+                {t('quran.landing.history')}
+              </Text>
+              <Text
+                className="text-xs font-medium text-parchment"
+                numberOfLines={2}
+              >
+                {t('quran.history.bandPromise')}
+              </Text>
+            </View>
+          </View>
+        </View>
+      </Pressable>
+    </Animated.View>
   );
 }

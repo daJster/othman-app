@@ -5,12 +5,16 @@ import { HistoryScreen } from '@/features/quran/history-content/history-screen';
 import { HISTORY_MILESTONES } from '@/features/quran/history-content/timeline';
 
 /**
- * The history entry band and page.
+ * History band card contract.
  *
- * The band's contract is the plate it shows and where it sends the reader; the
- * page's contract is that every milestone it renders carries a non-empty,
- * checkable source. The copy itself is not asserted here — the data file is the
- * single place to review it.
+ * `HistoryBand()` takes no props. The whole card is a button
+ * (`testID="quran-history-band"`, `accessibilityRole="button"`) that routes to
+ * `/quran/history`. It keeps a 3:1 card ratio (`aspectRatio: 3` in the root
+ * Pressable style), exposes the plate number only in the accessible name
+ * (`accessibilityLabel` ends with `Quran page <page>`, e.g. /Quran page 12/),
+ * never as visible text, and shows the current page scan
+ * (`testID="quran-history-plate-image"`) when an edition covers the page,
+ * otherwise an imageless fallback (`testID="quran-history-fallback"`).
  */
 const mockPush = jest.fn();
 const mockBack = jest.fn();
@@ -49,14 +53,17 @@ beforeEach(() => {
 });
 
 describe('HistoryBand', () => {
-  it('renders the fallback plate with the current page and the band copy', async () => {
+  it('renders the band copy, hides the plate number, and keeps the 3:1 card ratio', async () => {
     await render(<HistoryBand />);
 
-    expect(screen.getByTestId('quran-history-band')).toBeTruthy();
+    const band = screen.getByTestId('quran-history-band');
+    expect(band).toBeTruthy();
+    expect(band.props.accessibilityRole).toBe('button');
     expect(screen.getByText("The mushaf's journey")).toBeTruthy();
     expect(screen.getByText('How the mushaf came to be')).toBeTruthy();
-    expect(screen.getByText('12')).toBeTruthy();
+    expect(screen.queryByText('12')).toBeNull();
     expect(screen.getByLabelText(/Quran page 12/)).toBeTruthy();
+    expect(JSON.stringify(band.props.style)).toContain('"aspectRatio":3');
   });
 
   it('opens the history route from the whole band', async () => {
@@ -78,6 +85,14 @@ describe('HistoryBand', () => {
     ).toEqual([{ uri: 'https://cdn.test/1/pages/012.png' }]);
   });
 
+  it('shows the imageless fallback when no edition is attached', async () => {
+    await render(<HistoryBand />);
+
+    expect(screen.queryByTestId('quran-history-plate-image')).toBeNull();
+    expect(screen.getByTestId('quran-history-fallback')).toBeTruthy();
+    expect(screen.getByLabelText(/Quran page 12/)).toBeTruthy();
+  });
+
   it('falls back when the stored page is outside the edition', async () => {
     mockEdition = EDITION;
     mockPage = 700;
@@ -85,7 +100,7 @@ describe('HistoryBand', () => {
     await render(<HistoryBand />);
 
     expect(screen.queryByTestId('quran-history-plate-image')).toBeNull();
-    expect(screen.getByText('700')).toBeTruthy();
+    expect(screen.getByLabelText(/Quran page 700/)).toBeTruthy();
   });
 });
 
