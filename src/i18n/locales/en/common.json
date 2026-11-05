@@ -109,7 +109,8 @@
       "pageLabel": "Page {{page}}",
       "ayahLabel": "Ayah {{ayah}}",
       "latest": "Latest",
-      "recent": "Recent readings"
+      "recent": "Resume reading",
+      "empty": "Your last page will appear here"
     },
     "story": {
       "open": "Open",

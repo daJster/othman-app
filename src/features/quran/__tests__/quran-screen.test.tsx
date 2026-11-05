@@ -12,8 +12,8 @@ import type { QuranEdition } from '@/core/types';
  * The tab is the landing surface, not a second reader: it must open the
  * existing `/reader/[page]` route at the position the pressed session card
  * records. The store is mocked at its boundary instead of booting the whole
- * reader, and the reading log is mocked so the band renders three fixed
- * sessions instead of the demo seed or the device's stored history.
+ * reader, and the reading log is mocked so the band renders one fixed session
+ * instead of the demo seed or the device's stored history.
  */
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
@@ -25,7 +25,7 @@ const mockParams = jest.fn<Record<string, string | string[] | undefined>, []>(
   () => ({}),
 );
 
-const mockEntries: ReadingEntry[] = [
+const baseEntries = (): ReadingEntry[] => [
   {
     day: '2026-11-04',
     page: 42,
@@ -55,6 +55,8 @@ const mockEntries: ReadingEntry[] = [
   },
 ];
 
+const mockEntries: ReadingEntry[] = baseEntries();
+
 jest.mock('@/features/quran/history/use-reading-log', () => ({
   ...jest.requireActual('@/features/quran/history/use-reading-log'),
   useHydrateReadingLog: () => undefined,
@@ -77,6 +79,7 @@ jest.mock('@/features/quran/store/use-reader', () => ({
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockEntries.splice(0, mockEntries.length, ...baseEntries());
   mockPage.mockReturnValue(12);
   mockSurah.mockReturnValue(2);
   mockEdition.mockReturnValue(null);
@@ -92,14 +95,14 @@ describe('QuranScreen', () => {
     expect(screen.getByTestId('quran-resume-band')).toBeTruthy();
   });
 
-  it('renders the recorded sessions and opens the first card in the reader', async () => {
+  it('renders the recorded session and opens it in the reader', async () => {
     await render(<QuranScreen />);
 
     expect(mockRestore).toHaveBeenCalledTimes(1);
     expect(mockPush).not.toHaveBeenCalled();
 
     const cards = screen.getAllByTestId('quran-session-card');
-    expect(cards).toHaveLength(3);
+    expect(cards).toHaveLength(1);
 
     await fireEvent.press(cards[0]);
 
@@ -111,10 +114,22 @@ describe('QuranScreen', () => {
   });
 
   it('opens a page-only session with just its page', async () => {
+    mockEntries.splice(0, mockEntries.length, {
+      day: '2026-11-03',
+      page: 36,
+      surah: 2,
+      ayahKey: null,
+      editionKey: null,
+      at: Date.UTC(2026, 10, 3, 18, 0, 0),
+      readPages: [36],
+    });
+
     await render(<QuranScreen />);
 
     const cards = screen.getAllByTestId('quran-session-card');
-    await fireEvent.press(cards[1]);
+    expect(cards).toHaveLength(1);
+    expect(within(cards[0]).getByText(/Page 36/)).toBeTruthy();
+    await fireEvent.press(cards[0]);
 
     expect(mockPush).toHaveBeenCalledWith({
       pathname: '/reader/[page]',
@@ -163,21 +178,16 @@ describe('QuranScreen', () => {
 
     // The band is driven by the log, not by the stored reader position or an
     // attached edition, and it no longer offers a page preview control.
-    expect(screen.getByText('Recent readings')).toBeTruthy();
-    expect(screen.queryByText('Continue reading')).toBeNull();
+    expect(screen.getByText('Resume reading')).toBeTruthy();
     expect(screen.queryByText('Surah 2 · page 12 of 604')).toBeNull();
     expect(screen.queryByTestId('quran-preview-open')).toBeNull();
 
     const cards = screen.getAllByTestId('quran-session-card');
-    expect(cards).toHaveLength(3);
+    expect(cards).toHaveLength(1);
 
-    expect(within(cards[0]).getByText('42')).toBeTruthy();
+    expect(within(cards[0]).getByText('Page 42 · Ayah 255')).toBeTruthy();
     expect(within(cards[0]).getByText('Surah 2')).toBeTruthy();
-    expect(within(cards[0]).getByText('Ayah 255')).toBeTruthy();
-
-    expect(within(cards[1]).getByText('36')).toBeTruthy();
-    expect(within(cards[2]).getByText('604')).toBeTruthy();
-    expect(within(cards[2]).getByText('Surah 114')).toBeTruthy();
+    expect(screen.queryByText('Page 36')).toBeNull();
   });
 
   it('shows a recoverable error for a malformed link', async () => {

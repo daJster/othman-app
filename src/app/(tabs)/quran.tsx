@@ -3,7 +3,6 @@ import Head from 'expo-router/head';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityBand } from '@/features/quran/components/activity-band';
-import { DailyHizbBand } from '@/features/quran/components/daily-hizb-band';
 import { HistoryBand } from '@/features/quran/components/history-band';
 import { ResumeBand } from '@/features/quran/components/resume-band';
 import { StoryBand } from '@/features/quran/components/story-band';
@@ -21,7 +20,7 @@ import { ErrorState } from '@/ui/states';
  * scan needs every pixel and the page-turn gesture would compete with the tab
  * bar. This screen is the front door: the resume band shows the last three
  * places the reading log recorded, and, as the supporting modules land, becomes
- * the place a reader starts their day — the daily hizb, recent activity, history
+ * the place a reader starts their day — recent activity, history
  * and a suggested surah.
  *
  * The bands are a reading sequence, so the page stays a single column at every
@@ -112,7 +111,6 @@ export default function QuranScreen() {
         <Section title={t('nav.quran')} description={t('nav.quranDesc')} />
 
         <ResumeBand onOpen={openEntry} />
-        <DailyHizbBand />
         <ActivityBand />
         <HistoryBand />
         <StoryBand />

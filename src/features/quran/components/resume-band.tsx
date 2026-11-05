@@ -1,19 +1,25 @@
 import { useTranslation } from 'react-i18next';
-import { ScrollView, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import { View } from 'react-native';
+import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated';
+import { formatDateKey } from '@/core/domain/meetings/date-key';
 import type { ReadingEntry } from '@/core/domain/quran/reading-log';
 import { SEED_READING_LOG } from '@/features/quran/history/seed';
 import {
+  useDailyHizb,
   useHydrateReadingLog,
   useReadingLog,
 } from '@/features/quran/history/use-reading-log';
+import { useDirection } from '@/i18n';
+import { Icon } from '@/ui/icon';
 import { useIsWide } from '@/ui/layout';
 import { useReducedMotion } from '@/ui/motion';
 import { Text } from '@/ui/text';
+import { formatReaderNumber } from '../format';
+import { HizbGauge } from './hizb-gauge';
 import { ReadingSessionCard } from './reading-session-card';
 
 /**
- * The last three places the reader stopped.
+ * The last place the reader stopped, beside today's goal.
  *
  * The reading log is the durable record: it is the only thing that survives a
  * cold launch with the page the reader actually stopped on, because the reader
@@ -22,27 +28,34 @@ import { ReadingSessionCard } from './reading-session-card';
  * page is a complete entry point on a fresh load, not only after a visit to the
  * reader.
  *
- * There is no separate "current position" block any more. Three sessions sit in
- * one row, newest first, and the first card is the resume action: the page it
- * shows is the page it opens. Each card carries the whole recorded position
- * (page, surah and, when one was selected, ayah), so a tap restores that
- * session rather than only its page.
+ * One row: the newest entry is the resume action — the card it shows is the
+ * page it opens, carrying the whole recorded position (page, surah and, when
+ * one was selected, ayah), so a tap restores that session — and the gauge
+ * beside it reads how much of today's one-page goal is done. The card is the
+ * only press target; the gauge is a readout, never a button. The row is
+ * physical LTR in both languages: nothing mirrors, and the text's own
+ * direction comes from the `Text` primitive.
+ *
+ * The gauge is the small arc (104pt, 128pt from `md`): the card stays the
+ * section's anchor, and the caption under the gauge names the goal the same
+ * way the fraction would. The completion line mounts below the row when the
+ * goal is done, keyed by day so its entrance runs once. With reduced motion
+ * both entrances are simply there.
  *
  * The demo seed is history, never a position. While the log is the seed alone,
- * the cards are labelled by the caption below them rather than by a heading
- * that claims the reader is on the seed's last page: a first-run install must
- * not claim its reader is sitting on An-Nas page 604.
+ * the card is labelled by the caption below it rather than by a heading that
+ * claims the reader is on the seed's last page: a first-run install must not
+ * claim its reader is sitting on An-Nas page 604.
  *
- * One rail on a phone, three equal columns from `md`. The phone rail is a
- * horizontal `ScrollView` so the cards keep a readable width instead of
- * squeezing three columns into 320px; the first card is fully visible without
- * scrolling, and nothing overflows the page itself. The row fades in once —
- * a single entrance on the container, no per-card stagger — and with reduced
- * motion it is simply there.
+ * The band fades in once — a single entrance on the container. With no entry
+ * yet it shows one quiet line instead of a labelled void, and no gauge: there
+ * is nothing to count towards.
  *
  * Hairlines and borders, not shadow: the band closes with one border, and the
- * cards' 1px borders are the only elevation in the section.
+ * card's 1px border is the only elevation in the section.
  */
+const DAILY_PAGES = 1;
+
 export type ResumeBandProps = {
   /** Open the reader at the position the chosen session recorded. */
   onOpen: (entry: {
@@ -54,30 +67,24 @@ export type ResumeBandProps = {
 
 export function ResumeBand({ onOpen }: ResumeBandProps) {
   const { t } = useTranslation();
-  const reducedMotion = useReducedMotion();
+  const { language } = useDirection();
   const wide = useIsWide();
+  const reducedMotion = useReducedMotion();
 
   useHydrateReadingLog();
-  const { entries } = useReadingLog();
+  const { entries, ready } = useReadingLog();
 
-  // The log is newest-first, so the three newest sessions are its first three
-  // entries. A short log shows fewer cards; duplicating the only entry to fill
-  // the row would pretend to a history the reader does not have.
-  const recent = entries.slice(0, 3);
+  const day = formatDateKey(new Date());
+  const { read, target, done } = useDailyHizb(day, DAILY_PAGES);
+
+  // The log is newest-first, so the first entry is the latest session. One
+  // card only: an older session is not a resume action, and a row of them
+  // crowded the smallest screen.
+  const latest = entries[0] ?? null;
   const sample = hasSeedHistory(entries);
 
   const open = (entry: ReadingEntry) =>
     onOpen({ page: entry.page, surah: entry.surah, ayahKey: entry.ayahKey });
-
-  const cards = recent.map((entry, index) => (
-    <ReadingSessionCard
-      key={entry.day}
-      entry={entry}
-      latest={index === 0}
-      className={wide ? 'flex-1' : 'w-[150px]'}
-      onPress={() => open(entry)}
-    />
-  ));
 
   return (
     <View
@@ -88,28 +95,63 @@ export function ResumeBand({ onOpen }: ResumeBandProps) {
         {t('quran.resume.recent')}
       </Text>
 
-      {recent.length > 0 ? (
+      {latest ? (
         <Animated.View
           entering={reducedMotion ? undefined : FadeInDown.duration(240)}
-          className="mt-4"
         >
-          {wide ? (
-            <View className="flex-row gap-4">{cards}</View>
-          ) : (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerClassName="gap-3"
-            >
-              {cards}
-            </ScrollView>
-          )}
+          <View className="mt-4 flex-row items-center justify-center gap-4 md:gap-6">
+            <ReadingSessionCard
+              key={latest.day}
+              entry={latest}
+              compact
+              latest
+              className="w-full max-w-[220px] md:max-w-[240px]"
+              onPress={() => open(latest)}
+            />
+
+            <View className="shrink-0 items-center gap-1">
+              <HizbGauge
+                value={read}
+                max={target}
+                size={wide ? 128 : 104}
+                strokeWidth={wide ? 10 : 8}
+                centerLabel={formatReaderNumber(read, language)}
+                accessibilityLabel={t('quran.goal.progress', {
+                  read: formatReaderNumber(read, language),
+                  target: formatReaderNumber(target, language),
+                })}
+              />
+              <Text variant="caption" tone="muted">
+                {t('quran.goal.title')}
+              </Text>
+            </View>
+          </View>
 
           {sample ? (
-            <Text variant="caption" tone="muted" className="pt-3">
+            <Text variant="caption" tone="muted" className="mt-3">
               {t('quran.resume.sample')}
             </Text>
           ) : null}
+        </Animated.View>
+      ) : ready ? (
+        <Text variant="caption" tone="muted" className="mt-4">
+          {t('quran.resume.empty')}
+        </Text>
+      ) : null}
+
+      {done ? (
+        <Animated.View
+          key={day}
+          entering={reducedMotion ? undefined : FadeIn.duration(240)}
+          testID="quran-hizb-done"
+          className="mt-5 flex-row items-center gap-2"
+        >
+          {/* The registry has no bare `check`; `check-circle` is the
+              completion glyph it already ships. */}
+          <Icon name="check-circle" size={14} tone="primary" />
+          <Text variant="caption" className="text-success">
+            {t('quran.goal.done')}
+          </Text>
         </Animated.View>
       ) : null}
     </View>
