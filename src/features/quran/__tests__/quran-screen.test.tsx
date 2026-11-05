@@ -4,6 +4,7 @@ import {
   screen,
   within,
 } from '@testing-library/react-native';
+import { Dimensions } from 'react-native';
 import QuranScreen from '@/app/(tabs)/quran';
 import type { ReadingEntry } from '@/core/domain/quran/reading-log';
 import type { QuranEdition } from '@/core/types';
@@ -211,5 +212,18 @@ describe('QuranScreen', () => {
     await fireEvent.press(screen.getByText('Try again'));
 
     expect(mockReplace).toHaveBeenCalledWith('/quran');
+  });
+
+  it('locks sections 1 and 2 to 30/70 of the viewport', async () => {
+    await render(<QuranScreen />);
+
+    const windowHeight = Dimensions.get('window').height;
+
+    expect(screen.getByTestId('quran-section-history').props.style).toEqual({
+      height: Math.round(windowHeight * 0.3),
+    });
+    expect(screen.getByTestId('quran-section-activity').props.style).toEqual({
+      height: Math.round(windowHeight * 0.7),
+    });
   });
 });

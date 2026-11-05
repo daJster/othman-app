@@ -2,6 +2,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import Head from 'expo-router/head';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { View, useWindowDimensions } from 'react-native';
 import { ActivityBand } from '@/features/quran/components/activity-band';
 import { HistoryBand } from '@/features/quran/components/history-band';
 import { ResumeBand } from '@/features/quran/components/resume-band';
@@ -23,7 +24,10 @@ import { ErrorState } from '@/ui/states';
  * and a suggested surah.
  *
  * The bands are a reading sequence, so the page stays a single column at every
- * width. Each module is optional; with none attached, the resume band alone is
+ * width. Sections 1+2 lock to exactly 100% of the viewport height (30/70) in
+ * portrait only; in landscape (height < width) no fixed heights apply and the
+ * bands stack naturally — a fallback the builder of the future must keep.
+ * Each module is optional; with none attached, the resume band alone is
  * a complete entry point.
  *
  * This screen owns where a position goes, not what it is: `openEntry()` is the
@@ -47,6 +51,10 @@ export default function QuranScreen() {
     surah?: string;
     ayah?: string;
   }>();
+  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
+  const portrait = windowHeight >= windowWidth;
+  const s1 = Math.round(windowHeight * 0.3);
+  const s2 = Math.round(windowHeight * 0.7);
 
   useRestoreReader();
 
@@ -102,14 +110,25 @@ export default function QuranScreen() {
 
   return (
     <Screen contentContainerClassName="gap-0 p-0">
-      <Page width="default" className="pt-8 pb-10 md:pt-12">
+      <Page width="default">
         <Head>
           <title>{`${t('nav.quran')} · ${t('app.name')}`}</title>
         </Head>
 
-        <HistoryBand />
+        <View
+          testID="quran-section-history"
+          style={{ height: portrait ? s1 : undefined }}
+          className="justify-center"
+        >
+          <HistoryBand />
+        </View>
         <ResumeBand onOpen={openEntry} />
-        <ActivityBand />
+        <View
+          testID="quran-section-activity"
+          style={{ height: portrait ? s2 : undefined }}
+        >
+          <ActivityBand />
+        </View>
         <StoryBand />
       </Page>
     </Screen>
