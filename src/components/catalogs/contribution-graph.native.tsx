@@ -46,6 +46,10 @@ export type ContributionDay = {
   count: number;
   /** Pre-computed accent step. Falls back to the count ramp when omitted. */
   level?: ContributionLevel;
+  /** A cell from the neighbouring month, shown faded. */
+  outside?: boolean;
+  /** Localised label. Falls back to `day: count` when omitted. */
+  accessibilityLabel?: string;
 };
 
 export type ContributionGraphProps = {
@@ -55,6 +59,12 @@ export type ContributionGraphProps = {
   columns?: number;
   /** Cell edge in px. The band sizes this so 53 columns fill the page. */
   cellSize?: number;
+  /** First day of the week column, Sunday = 0. Defaults to Sunday. */
+  weekStart?: number;
+  /** Gap between cells in px. Defaults to 3. */
+  gap?: number;
+  /** Rounded-corner class for a cell. Literal for the Tailwind scanner. */
+  radiusClass?: string;
 };
 
 function levelFor(count: number): ContributionLevel {
@@ -105,12 +115,12 @@ function weekdayOf(day: string): number {
 function cellsFor(
   weeks: readonly ContributionDay[],
   cellCount: number,
+  weekStart: number,
 ): (ContributionDay | undefined)[] {
   const days = weeks.slice(-cellCount);
-  const lead =
-    days.length === 0
-      ? 0
-      : Math.min(weekdayOf(days[0].day), cellCount - days.length);
+  const rawLead =
+    days.length === 0 ? 0 : (weekdayOf(days[0].day) - weekStart + 7) % 7;
+  const lead = Math.min(rawLead, cellCount - days.length);
   const cells: (ContributionDay | undefined)[] = [
     ...new Array<undefined>(lead).fill(undefined),
     ...days,
@@ -127,21 +137,27 @@ export default function ContributionGraph({
   weeks,
   columns = DEFAULT_COLUMNS,
   cellSize = DEFAULT_CELL,
+  weekStart = 0,
+  gap = GAP,
+  radiusClass = 'rounded-[2px]',
 }: ContributionGraphProps) {
   const columnCount = Number.isFinite(columns)
     ? Math.max(1, Math.floor(columns))
     : DEFAULT_COLUMNS;
   const cell = Number.isFinite(cellSize) ? Math.max(1, cellSize) : DEFAULT_CELL;
-  const cells = cellsFor(weeks, columnCount * ROWS);
+  const start = Number.isFinite(weekStart)
+    ? ((Math.floor(weekStart) % 7) + 7) % 7
+    : 0;
+  const cells = cellsFor(weeks, columnCount * ROWS, start);
 
   return (
-    <View className="flex-row" style={{ gap: GAP }}>
+    <View className="flex-row" style={{ gap }}>
       {new Array(columnCount).fill(undefined).map((_, columnIndex) => (
         <View
           // Columns have no identity of their own; index is the week offset.
           key={columnIndex}
           className="flex-col"
-          style={{ gap: GAP }}
+          style={{ gap }}
         >
           {cells
             .slice(columnIndex * ROWS, columnIndex * ROWS + ROWS)
@@ -151,8 +167,10 @@ export default function ContributionGraph({
                   key={entry.day}
                   testID="contribution-cell"
                   accessible
-                  accessibilityLabel={`${entry.day}: ${entry.count}`}
-                  className={`rounded-[2px] ${RAMP[entry.level ?? levelFor(entry.count)]}`}
+                  accessibilityLabel={
+                    entry.accessibilityLabel ?? `${entry.day}: ${entry.count}`
+                  }
+                  className={`${radiusClass} ${RAMP[entry.level ?? levelFor(entry.count)]}${entry.outside ? 'opacity-30' : ''}`}
                   style={{ width: cell, height: cell }}
                 />
               ) : (
@@ -161,7 +179,7 @@ export default function ContributionGraph({
                   testID="contribution-cell"
                   accessibilityElementsHidden
                   importantForAccessibility="no"
-                  className="rounded-[2px] bg-transparent"
+                  className={`${radiusClass} bg-transparent`}
                   style={{ width: cell, height: cell }}
                 />
               ),

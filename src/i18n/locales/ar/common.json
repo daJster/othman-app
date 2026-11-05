@@ -94,7 +94,10 @@
       "less": "أقل",
       "more": "أكثر",
       "met": "قراءة",
-      "missed": "لا قراءة"
+      "missed": "لا قراءة",
+      "summary": "{{read}} من {{total}} أيام قراءة",
+      "monthly": "3 أشهر",
+      "annual": "سنوي"
     },
     "resume": {
       "at": "{{surah}} · الآية {{ayah}}",

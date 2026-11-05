@@ -1,4 +1,4 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ScrollView,
@@ -7,35 +7,47 @@ import {
   View,
 } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { formatDateKey } from '@/core/domain/meetings/date-key';
-import type { ReadingEntry } from '@/core/domain/quran/reading-log';
-import { useReadingLog } from '@/features/quran/history/use-reading-log';
+import { useDirection, type Language } from '@/i18n';
+import { ButtonGroup, Button } from '@/ui/button-group';
+import { Icon } from '@/ui/icon';
 import { useReducedMotion } from '@/ui/motion';
+import { Pressable } from '@/ui/pressable';
 import { Text } from '@/ui/text';
-import { ActivityGrid, type ActivityDay } from './activity-grid';
+import { ActivityGrid } from './activity-grid';
+import {
+  currentMonthKey,
+  formatMonthRange,
+  formatYearTitle,
+  shiftMonthKey,
+  useSpanActivity,
+  YEAR_HISTORY,
+  type ActivitySpan,
+  type MonthKey,
+} from './use-monthly-activity';
 
 /**
- * The shape of the last year of reading.
+ * The reading board (Section 2 of the Quran landing page).
  *
- * Fifty-three week columns, one cell per calendar day, oldest on the left and
- * today in the last column. The goal is binary — one page — so the board is a
- * year of "read / did not read" rather than a heat ramp; the legend says the
- * same thing in two swatches.
+ * A `ButtonGroup` switches between two spans — Monthly (rolling 3 months) and
+ * Annual (rolling 365 days) — GitHub-style: full weeks of seven rows,
+ * neighbouring-month cells faded out. The title sits top-left with the summary
+ * beneath it; the small segment control and the chevron toggles share the
+ * top-right corner in an `ltr` row so the order holds in both languages, and
+ * left still means older. Each span keeps its own position: Monthly pages 3
+ * months over a 12-month history, Annual pages 12 months over two years.
+ * Switching spans resets to the current period.
  *
- * The band is full-width inside the page column. From `md` the cell is computed
- * so `53 * cell + 52 * 3` fills the column exactly; on a phone the minimum
- * 10px cell makes the year wider than the screen, so the grid lives in a
- * horizontal `ScrollView` that starts at the newest (rightmost) column. The
- * scroll is inside the band: the page itself never scrolls sideways.
+ * Cells are small on purpose (22px max): a quarter no longer fits the phone
+ * width, so the grid lives in a horizontal `ScrollView` pinned to the newest
+ * (rightmost) end, like the old year view. The data is a seeded demo grid for
+ * now (see `use-monthly-activity`); the summary counts in-span days read.
  *
  * The reveal is one fade of the whole grid. There is no per-cell animation and
  * no continuous motion; reduced-motion users get the final frame immediately.
  */
-const DAYS = 365;
-const COLUMNS = 53;
-const GAP = 3;
+const GAP = 6;
 const CELL_MIN = 10;
-const CELL_MAX = 14;
+const CELL_MAX = 22;
 
 /** `Page width="default"` is `max-w-3xl`. */
 const PAGE_MAX_WIDTH = 768;
@@ -44,52 +56,102 @@ const SM_BREAKPOINT = 640;
 const BASE_GUTTER = 32;
 const SM_GUTTER = 40;
 
-/** The scroll begins at today, and a fade-in is a mount gesture, not a state. */
+/** A fade-in is a mount gesture, not a state. */
 const REVEAL_MS = 180;
+
+const SPANS: ActivitySpan[] = ['monthly', 'annual'];
+
+/** Toggle steps in months and oldest page per span. */
+const SPAN_PAGING: Record<ActivitySpan, { step: number; pages: number }> = {
+  monthly: { step: 3, pages: 4 },
+  annual: { step: 12, pages: YEAR_HISTORY },
+};
 
 export type ActivityBandGeometry = {
   /** Width the grid may occupy inside the page column. */
   available: number;
   /** Cell edge in px. */
   cell: number;
-  /** Exact grid width from 53 cells and 52 gaps. */
+  /** Exact grid width from its columns and gaps. */
   width: number;
 };
 
 /**
- * Cell size for the year band.
+ * Cell size for the span band.
  *
  * The page column is `min(window, max-w-3xl)` minus the gutter its breakpoint
- * uses. Cell size is fractional on purpose: 728px cannot hold 53 whole cells at
- * this gap, and rounding down to 10 would leave 42px of dead space. Flooring to
- * two decimals keeps the grid from ever being wider than its column.
+ * uses. The cell fills the column up to 22px; wider grids (the quarter, the
+ * year) overflow into the band's horizontal scroll instead of shrinking past
+ * the 10px floor.
  */
 export function activityBandGeometry(
   windowWidth: number,
+  columns: number,
 ): ActivityBandGeometry {
+  const safeColumns = Number.isFinite(columns)
+    ? Math.max(1, Math.floor(columns))
+    : 1;
   const column = Math.min(Math.max(windowWidth, 0), PAGE_MAX_WIDTH);
   const gutter = windowWidth >= SM_BREAKPOINT ? SM_GUTTER : BASE_GUTTER;
   const available = Math.max(0, column - gutter);
-  const raw = (available - (COLUMNS - 1) * GAP) / COLUMNS;
+  const raw = (available - (safeColumns - 1) * GAP) / safeColumns;
   const cell = Math.min(
     CELL_MAX,
     Math.max(CELL_MIN, Math.floor(raw * 100) / 100),
   );
-  const width = COLUMNS * cell + (COLUMNS - 1) * GAP;
+  const width = safeColumns * cell + (safeColumns - 1) * GAP;
 
   return { available, cell, width };
 }
 
 export function ActivityBand() {
   const { t } = useTranslation();
-  const { entries } = useReadingLog();
+  const { language } = useDirection();
   const { width } = useWindowDimensions();
   const reducedMotion = useReducedMotion();
   const scroller = useRef<ScrollViewInstance | null>(null);
 
-  const days = useMemo(() => recentActivity(entries), [entries]);
-  const geometry = activityBandGeometry(width);
+  const [span, setSpan] = useState<ActivitySpan>('monthly');
+  // Page per span from the current period: 0 is newest, negative is older.
+  const [pages, setPages] = useState<Record<ActivitySpan, number>>({
+    monthly: 0,
+    annual: 0,
+  });
+  const base = useMemo(() => currentMonthKey(), []);
+  const { step, pages: stops } = SPAN_PAGING[span];
+  const page = pages[span];
+  // Newest month of the window the toggles currently show.
+  const end = shiftMonthKey(base, page * step);
+  const { days, columns, weekStart } = useSpanActivity(span, end, language);
+
+  const geometry = activityBandGeometry(width, columns);
   const reveal = reducedMotion ? undefined : FadeIn.duration(REVEAL_MS);
+
+  const canOlder = page > -(stops - 1);
+  const canNewer = page < 0;
+  const title = formatSpanTitle(span, end, language);
+  const spanDays = days.filter((day) => !day.outside);
+  const readDays = spanDays.filter((day) => day.count > 0).length;
+  // Center the grid when it fits; wider grids pin to the newest end.
+  const centered = geometry.width <= geometry.available;
+
+  // Switching spans must show the newest end at once: the scroller remounts
+  // per span and re-pins on every page, so no tap is needed to reveal it.
+  // `onContentSizeChange`/`onLayout` stay as the post-layout backstop.
+  useEffect(() => {
+    scroller.current?.scrollToEnd({ animated: false });
+  }, [page, span]);
+
+  const turn = (delta: 1 | -1) =>
+    setPages((previous) => ({
+      ...previous,
+      [span]: Math.min(0, Math.max(-(stops - 1), previous[span] + delta)),
+    }));
+
+  const select = (next: ActivitySpan) => {
+    setSpan(next);
+    setPages({ monthly: 0, annual: 0 });
+  };
 
   return (
     <View
@@ -100,12 +162,84 @@ export function ActivityBand() {
         {t('quran.activity.title')}
       </Text>
 
+      <View
+        className="mt-3 flex-row items-center justify-between gap-2"
+        style={{ direction: 'ltr' }}
+      >
+        <View className="min-w-0 flex-1 gap-0.5">
+          <Text testID="quran-activity-title" variant="label" numberOfLines={1}>
+            {title}
+          </Text>
+          <Text testID="quran-activity-summary" variant="caption" tone="muted">
+            {t('quran.activity.summary', {
+              read: readDays,
+              total: spanDays.length,
+            })}
+          </Text>
+        </View>
+
+        <View
+          className="flex-row items-center gap-1.5"
+          style={{ direction: 'ltr' }}
+        >
+          <ButtonGroup>
+            {SPANS.map((option) => (
+              <Button
+                key={option}
+                testID={`quran-activity-span-${option}`}
+                size="sm"
+                variant={option === span ? 'secondary' : 'ghost'}
+                accessibilityState={{ selected: option === span }}
+                label={t(`quran.activity.${option}`)}
+                onPress={() => select(option)}
+              />
+            ))}
+          </ButtonGroup>
+          <Pressable
+            testID="quran-activity-prev"
+            accessibilityRole="button"
+            accessibilityLabel={t('meeting.calendar.previous')}
+            accessibilityState={{ disabled: !canOlder }}
+            disabled={!canOlder}
+            onPress={() => turn(-1)}
+            className="h-8 w-8 items-center justify-center rounded-md active:opacity-70 disabled:opacity-40"
+          >
+            <Icon
+              name="chevron-left"
+              size={18}
+              tone={canOlder ? 'foreground' : 'muted'}
+            />
+          </Pressable>
+          <Pressable
+            testID="quran-activity-next"
+            accessibilityRole="button"
+            accessibilityLabel={t('meeting.calendar.next')}
+            accessibilityState={{ disabled: !canNewer }}
+            disabled={!canNewer}
+            onPress={() => turn(1)}
+            className="h-8 w-8 items-center justify-center rounded-md active:opacity-70 disabled:opacity-40"
+          >
+            <Icon
+              name="chevron-right"
+              size={18}
+              tone={canNewer ? 'foreground' : 'muted'}
+            />
+          </Pressable>
+        </View>
+      </View>
+
       <Animated.View entering={reveal} className="mt-4 w-full">
         <ScrollView
+          key={`quran-activity-${span}`}
+          testID="quran-activity-scroller"
           ref={scroller}
           horizontal
           showsHorizontalScrollIndicator={false}
           style={{ width: '100%' }}
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: centered ? 'center' : 'flex-start',
+          }}
           onContentSizeChange={() =>
             scroller.current?.scrollToEnd({ animated: false })
           }
@@ -113,8 +247,9 @@ export function ActivityBand() {
         >
           <ActivityGrid
             days={days}
-            columns={COLUMNS}
+            columns={columns}
             cellSize={geometry.cell}
+            weekStart={weekStart}
           />
         </ScrollView>
       </Animated.View>
@@ -125,6 +260,16 @@ export function ActivityBand() {
       </View>
     </View>
   );
+}
+
+function formatSpanTitle(
+  span: ActivitySpan,
+  end: MonthKey,
+  language: Language,
+): string {
+  if (span === 'annual') return formatYearTitle(end, language);
+
+  return formatMonthRange(shiftMonthKey(end, -2), end, language);
 }
 
 function LegendSwatch({
@@ -142,29 +287,4 @@ function LegendSwatch({
       </Text>
     </View>
   );
-}
-
-/**
- * One entry per day in the window, oldest first.
- *
- * A full window is built from the calendar rather than from the log so the
- * newest day is always in the last cell and the grid keeps its width before the
- * log is long enough to fill it. Noon avoids a DST edge landing on the previous
- * day when the clock moves.
- */
-function recentActivity(entries: readonly ReadingEntry[]): ActivityDay[] {
-  const counts = new Map(
-    entries.map((entry) => [entry.day, entry.readPages.length]),
-  );
-  const today = new Date();
-  today.setHours(12, 0, 0, 0);
-
-  return Array.from({ length: DAYS }, (_, index) => {
-    const date = new Date(today);
-    date.setDate(today.getDate() - (DAYS - 1 - index));
-    const day = formatDateKey(date);
-    const count = counts.get(day) ?? 0;
-
-    return { day, count, level: count >= 1 ? 4 : 0 };
-  });
 }

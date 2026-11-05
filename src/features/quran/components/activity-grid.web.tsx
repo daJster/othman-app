@@ -1,30 +1,28 @@
 'use client';
 
 import { useMemo } from 'react';
+import type { Day as WeekDay } from 'date-fns';
 import {
   type Activity,
   ContributionGraph,
   ContributionGraphBlock,
   ContributionGraphCalendar,
 } from '@/components/catalogs/contribution-graph.web';
-import { useDirection, type Language } from '@/i18n';
+import { useDirection } from '@/i18n';
+import { formatDayLabel, type MonthlyActivity } from './use-monthly-activity';
 
 /**
  * The reading-activity board, on the web catalog calendar.
  *
- * `days` already arrives oldest-first and padded with zero-count days, so the
- * adapter only has to translate it into the catalog's `Activity` shape and keep
- * the newest `columns * 7` entries. The intensity is binary — the goal is one
- * page — so the band maps a met day to level 4 and a missed day to level 0;
- * the catalog's five-step ramp stays intact but only its ends are used.
+ * `days` already arrives oldest-first and padded to full weeks, so the adapter
+ * only has to translate it into the catalog's `Activity` shape. The cell size
+ * is computed by the band from the page column; the catalog's own horizontal
+ * overflow is disabled so the band owns the scroll position on both platforms.
  *
- * The cell size is computed by the band from the page column, not fixed here:
- * a 53-column year has to fill `max-w-3xl` at `md` and scroll on a phone. The
- * catalog's own horizontal overflow is disabled so the band's single
- * `ScrollView` owns the scroll position on both platforms.
- *
- * Month labels come from `Intl` rather than the catalog's English defaults, so
- * an Arabic page does not print "Jan" under the grid.
+ * Month labels are hidden — the band's header already names the month — and
+ * the week start follows the language (Saturday for Arabic, Monday otherwise).
+ * Neighbouring-month cells render faded and carry the same localized
+ * `date: count` accessible name as native.
  */
 export type ActivityLevel = 0 | 1 | 2 | 3 | 4;
 
@@ -33,17 +31,21 @@ export type ActivityDay = {
   day: string;
   /** Distinct pages read that day. */
   count: number;
-  /** 4 when at least one page was read, 0 otherwise. */
+  /** Intensity step, 0 for nothing read up to 4 for a full day. */
   level: ActivityLevel;
+  /** A cell from the neighbouring month, shown faded. */
+  outside?: boolean;
 };
 
 export type ActivityGridProps = {
-  /** Days read, oldest first. */
+  /** Days read, oldest first, padded to full weeks. */
   days: ActivityDay[];
-  /** Number of week columns. */
+  /** Number of week columns; `days.length` is `columns * 7`. */
   columns: number;
   /** Cell edge in px, sized by the band to the page column. */
   cellSize: number;
+  /** First day of the week column. */
+  weekStart?: MonthlyActivity['weekStart'];
 };
 
 const BLOCK_RAMP: Record<ActivityLevel, string> = {
@@ -54,15 +56,12 @@ const BLOCK_RAMP: Record<ActivityLevel, string> = {
   4: 'data-[level="4"]:fill-primary',
 };
 
-function monthLabels(language: Language): string[] {
-  const format = new Intl.DateTimeFormat(language, { month: 'short' });
-
-  return Array.from({ length: 12 }, (_, month) =>
-    format.format(new Date(2026, month, 1)),
-  );
-}
-
-export function ActivityGrid({ days, columns, cellSize }: ActivityGridProps) {
+export function ActivityGrid({
+  days,
+  columns,
+  cellSize,
+  weekStart = 1,
+}: ActivityGridProps) {
   const { language } = useDirection();
 
   const data = useMemo<Activity[]>(() => {
@@ -75,7 +74,10 @@ export function ActivityGrid({ days, columns, cellSize }: ActivityGridProps) {
       .map(({ day, count, level }) => ({ date: day, count, level }));
   }, [columns, days]);
 
-  const labels = useMemo(() => ({ months: monthLabels(language) }), [language]);
+  const meta = useMemo(
+    () => new Map(days.map((day) => [day.day, day])),
+    [days],
+  );
 
   // The band always supplies a full window, but an empty array must not throw:
   // the catalog itself returns null for it, and so does this adapter.
@@ -83,20 +85,20 @@ export function ActivityGrid({ days, columns, cellSize }: ActivityGridProps) {
 
   return (
     <ContributionGraph
-      blockMargin={3}
-      blockRadius={2}
+      blockMargin={6}
+      blockRadius={5}
       blockSize={cellSize}
       className="max-w-none"
       data={data}
       fontSize={12}
-      labels={labels}
+      weekStart={weekStart as WeekDay}
     >
-      <ContributionGraphCalendar className="overflow-visible">
+      <ContributionGraphCalendar hideMonthLabels className="overflow-visible">
         {({ activity, dayIndex, weekIndex }) => (
           <ContributionGraphBlock
             activity={activity}
-            aria-label={`${activity.date}: ${activity.count}`}
-            className={BLOCK_RAMP[activity.level as ActivityLevel]}
+            aria-label={`${formatDayLabel(activity.date, language)}: ${activity.count}`}
+            className={`${BLOCK_RAMP[activity.level as ActivityLevel]}${meta.get(activity.date)?.outside ? 'opacity-30' : ''}`}
             dayIndex={dayIndex}
             weekIndex={weekIndex}
           />

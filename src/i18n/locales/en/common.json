@@ -94,7 +94,10 @@
       "less": "Less",
       "more": "More",
       "met": "Read",
-      "missed": "No reading"
+      "missed": "No reading",
+      "summary": "{{read}} of {{total}} days read",
+      "monthly": "3 months",
+      "annual": "Annual"
     },
     "resume": {
       "at": "{{surah}} · ayah {{ayah}}",
