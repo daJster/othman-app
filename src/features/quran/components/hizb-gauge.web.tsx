@@ -38,6 +38,10 @@ export type HizbGaugeProps = {
   size?: number;
   /** Arc thickness in points. */
   strokeWidth?: number;
+  /** Centered primary readout while the goal is incomplete. */
+  centerLabel?: string;
+  /** Accessible name for the gauge, announced as a meter. */
+  accessibilityLabel?: string;
 };
 
 const CHECK_PATH = 'M20 6 9 17l-5-5';
@@ -56,6 +60,8 @@ export function HizbGauge({
   max,
   size = DEFAULT_SIZE,
   strokeWidth = DEFAULT_STROKE_WIDTH,
+  centerLabel,
+  accessibilityLabel,
 }: HizbGaugeProps) {
   const reducedMotion = useReducedMotion();
   const safeMax = Number.isFinite(max) && max > 0 ? max : 1;
@@ -81,13 +87,18 @@ export function HizbGauge({
 
   return (
     <Gauge
-      aria-hidden="true"
       className="text-foreground"
       getValueText={valueText}
       max={safeMax}
       size={size}
       thickness={strokeWidth}
       value={shown}
+      {...(accessibilityLabel === undefined
+        ? { 'aria-hidden': 'true' as const }
+        : {
+            'aria-label': accessibilityLabel,
+            'aria-labelledby': undefined,
+          })}
     >
       <GaugeIndicator>
         <GaugeTrack className="text-border" />
@@ -117,6 +128,10 @@ export function HizbGauge({
           >
             <path d={CHECK_PATH} />
           </svg>
+        </GaugeValueText>
+      ) : centerLabel !== undefined ? (
+        <GaugeValueText className="text-lg font-semibold text-foreground tabular-nums">
+          {centerLabel}
         </GaugeValueText>
       ) : null}
     </Gauge>

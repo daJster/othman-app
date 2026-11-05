@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { View } from 'react-native';
+import { Text, View } from 'react-native';
 import Animated, {
   Easing,
   useAnimatedProps,
@@ -49,6 +49,10 @@ export type HizbGaugeProps = {
   size?: number;
   /** Arc thickness in points. */
   strokeWidth?: number;
+  /** Centered primary readout while the goal is incomplete. */
+  centerLabel?: string;
+  /** Accessible name for the gauge, announced as a progressbar. */
+  accessibilityLabel?: string;
 };
 
 /** `transparent` keeps an unresolved token from becoming an opaque black ring. */
@@ -61,6 +65,8 @@ export function HizbGauge({
   max,
   size = DEFAULT_SIZE,
   strokeWidth = DEFAULT_STROKE_WIDTH,
+  centerLabel,
+  accessibilityLabel,
 }: HizbGaugeProps) {
   const reducedMotion = useReducedMotion();
   const [borderToken, brassToken, successToken] = useCSSVariable([
@@ -70,9 +76,10 @@ export function HizbGauge({
   ]);
 
   const safeMax = Number.isFinite(max) && max > 0 ? max : 1;
-  const ratio = Number.isFinite(value)
-    ? Math.min(1, Math.max(0, value / safeMax))
+  const target = Number.isFinite(value)
+    ? Math.min(safeMax, Math.max(0, value))
     : 0;
+  const ratio = target / safeMax;
   const complete = ratio >= 1;
 
   const radius = Math.max(0, (size - strokeWidth) / 2);
@@ -102,9 +109,15 @@ export function HizbGauge({
 
   return (
     <View
-      accessible={false}
       className="items-center justify-center"
       style={{ width: size, height: size }}
+      {...(accessibilityLabel === undefined
+        ? { accessible: false }
+        : {
+            accessibilityRole: 'progressbar' as const,
+            accessibilityValue: { min: 0, max: safeMax, now: target },
+            accessibilityLabel,
+          })}
     >
       <Svg width={size} height={size}>
         <Circle
@@ -143,6 +156,12 @@ export function HizbGauge({
               strokeLinejoin="round"
             />
           </Svg>
+        </View>
+      ) : centerLabel !== undefined ? (
+        <View className="absolute inset-0 items-center justify-center">
+          <Text className="text-lg font-semibold text-foreground tabular-nums">
+            {centerLabel}
+          </Text>
         </View>
       ) : null}
     </View>
