@@ -1,39 +1,42 @@
 import { QueryClientContext } from '@tanstack/react-query';
 import { useContext, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Platform, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import type { ReadingEntry } from '@/core/domain/quran/reading-log';
-import type { SurahMetadata } from '@/core/types';
+import { isPageInEdition, quranPageImageUrl } from '@/core/domain/quran/page';
+import type { QuranEdition, SurahMetadata } from '@/core/types';
 import { useDirection } from '@/i18n';
 import { cn } from '@/ui/cn';
+import { Image } from '@/ui/image';
 import { Pressable } from '@/ui/pressable';
 import { Text } from '@/ui/text';
 import { formatReaderNumber } from '../format';
 import { useQuranCatalog } from '../use-quran-catalog';
 
 /**
- * One recorded reading session, as a card.
+ * One recorded reading session, as a compact image card.
  *
- * The page is the headline because it is what a reader recognises; the surah
- * names the place, and the third line either points at the selected ayah or
- * says how long ago the session was. The card is a single `Pressable`: it names
- * the whole position, so a tap anywhere on it should open exactly that
- * position, not the card's page alone.
+ * Portrait 4:5: the mushaf page scan sits behind everything, and all text
+ * lives at the physical left-bottom over a black scrim so it stays legible in
+ * both languages. The card is a single `Pressable`: it names the whole
+ * position, so a tap anywhere on it should open exactly that position, not the
+ * card's page alone.
  *
  * The surah is named from the catalog the mushaf itself uses, so the card can
  * never disagree with the reader about where a page belongs. Until that payload
  * arrives — or on a surface composed without the app's query tree, which is what
  * a unit test is — the card falls back to the surah's number rather than
- * showing a gap.
+ * showing a gap. The scan comes from the same catalog: the entry's edition when
+ * it is attached, otherwise no photo and the canopy field shows through.
  *
- * The newest session is the resume action, so it is the one lifted surface in
- * the band: a brass hairline and the secondary fill. The other two sit on the
- * card colour with an ordinary border. The border is also the elevation — a
- * shadow here would compete with the band's hairline, so there is none.
+ * The card is the resume action, so it carries the brass hairline that marks
+ * it. The border is also the elevation — a shadow here would compete with the
+ * band's hairline, so there is none.
  *
  * Hover is a web affordance only; native has no pointer to hover with. Nothing
- * mirrors: in both languages the page sits at the top and the labels below it,
- * and the text's own alignment comes from the `Text` primitive.
+ * mirrors: in both languages the text sits at the physical left-bottom, and
+ * the text's own direction comes from the `Text` primitive.
  */
 export type ReadingSessionCardProps = {
   entry: ReadingEntry;
@@ -41,6 +44,8 @@ export type ReadingSessionCardProps = {
   latest: boolean;
   /** Sizing from the row: a fixed width on a phone, `flex-1` from `md`. */
   className?: string;
+  /** Denser type and padding when the card sits beside the gauge. */
+  compact?: boolean;
   onPress: () => void;
 };
 
@@ -50,7 +55,7 @@ export function ReadingSessionCard(props: ReadingSessionCardProps) {
   // A band may be composed without the app's query tree; without a client there
   // is no catalog to read, which is the same not-loaded branch as a cold fetch.
   if (!client) {
-    return <ReadingSessionCardView {...props} metadata={null} />;
+    return <ReadingSessionCardView {...props} metadata={null} edition={null} />;
   }
 
   return <ReadingSessionCardContent {...props} />;
@@ -58,25 +63,33 @@ export function ReadingSessionCard(props: ReadingSessionCardProps) {
 
 function ReadingSessionCardContent(props: ReadingSessionCardProps) {
   const catalog = useQuranCatalog();
-  const metadata =
-    catalog.state.status === 'ready'
-      ? (catalog.state.data.surahs[String(props.entry.surah)] ?? null)
-      : null;
+  if (catalog.state.status !== 'ready') {
+    return <ReadingSessionCardView {...props} metadata={null} edition={null} />;
+  }
+  const metadata = catalog.state.data.surahs[String(props.entry.surah)] ?? null;
+  const edition =
+    catalog.state.data.editions[props.entry.editionKey ?? ''] ?? null;
 
-  return <ReadingSessionCardView {...props} metadata={metadata} />;
+  return (
+    <ReadingSessionCardView {...props} metadata={metadata} edition={edition} />
+  );
 }
 
 type ReadingSessionCardViewProps = ReadingSessionCardProps & {
   /** `null` while the catalog is unavailable: name the number, not a gap. */
   metadata: SurahMetadata | null;
+  /** `null` while the catalog is unavailable: no photo, canopy shows through. */
+  edition: QuranEdition | null;
 };
 
 function ReadingSessionCardView({
   entry,
   latest,
   className,
+  compact = false,
   onPress,
   metadata,
+  edition,
 }: ReadingSessionCardViewProps) {
   const { t } = useTranslation();
   const { language } = useDirection();
@@ -91,7 +104,7 @@ function ReadingSessionCardView({
   /*
    * `ayahKey` is the ayah *within its surah* — the bbox tables are keyed that
    * way (`byPage[page][ayahKey]`), and a shared link carries the same number.
-   * The card therefore never prints an absolute Quran-wide index; the label is
+   * The card therefore never prints an absolute Quran-wide index: the label is
    * the language's own word for ayah, with the number in that language's
    * digits.
    */
@@ -100,13 +113,17 @@ function ReadingSessionCardView({
         ayah: formatReaderNumber(Number(entry.ayahKey), language),
       })
     : relativeDay(entry.at, now, t);
+  // "Page" travels through the locale, never hardcoded: "Page 12" / "صفحة ١٢".
+  const pageLine = t('quran.resume.pageLabel', { page });
 
   // The visible labels already carry their own unit ("Page", "Ayah"), so the
   // spoken name is those plus the surah, in reading order, rather than a fourth
   // sentence assembled from fragments.
-  const label = [t('quran.resume.pageLabel', { page }), surah, supporting].join(
-    ' · ',
-  );
+  const label = [pageLine, surah, supporting].join(' · ');
+  const imageUrl =
+    edition && isPageInEdition(edition, entry.page)
+      ? quranPageImageUrl(edition, entry.page)
+      : null;
 
   return (
     <Pressable
@@ -116,8 +133,8 @@ function ReadingSessionCardView({
       onPress={onPress}
       testID="quran-session-card"
       className={cn(
-        'min-h-[88px] justify-between gap-2 rounded-xl border p-3 active:opacity-70',
-        latest ? 'border-brass/60 bg-secondary' : 'border-border bg-card',
+        'relative justify-end overflow-hidden rounded-xl border active:opacity-70',
+        latest ? 'border-brass/60' : 'border-border',
         // Border only: the hairline is the affordance, not a shadow or a lift.
         Platform.select({
           web: cn(
@@ -127,15 +144,50 @@ function ReadingSessionCardView({
         }),
         className,
       )}
+      style={{ aspectRatio: 4 / 5 }}
     >
-      <Text variant="title" className="text-3xl leading-none tabular-nums">
-        {page}
-      </Text>
+      {imageUrl ? (
+        <Image
+          source={{ uri: imageUrl }}
+          contentFit="cover"
+          style={StyleSheet.absoluteFill}
+          accessible={false}
+        />
+      ) : (
+        <View className="absolute inset-0 bg-canopy" />
+      )}
 
-      <View className="gap-0.5">
-        <Text className="text-xl font-semibold">{surah}</Text>
-        <Text variant="caption" tone="muted">
-          {supporting}
+      {/*
+       * Ink at the bottom only: the gradient lifts the left-bottom text off
+       * any scan behind it. The top stays clear so the page itself shows.
+       */}
+      <LinearGradient
+        colors={['rgba(3,10,7,0)', 'rgba(3,10,7,0.82)']}
+        locations={[0.42, 1]}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
+      />
+
+      <View className={compact ? 'gap-0.5 p-3' : 'gap-0.5 p-4'}>
+        <Text
+          className={
+            compact
+              ? 'text-lg leading-snug font-semibold text-parchment'
+              : 'text-2xl leading-snug font-semibold text-parchment'
+          }
+          numberOfLines={2}
+          ellipsizeMode="tail"
+        >
+          {surah}
+        </Text>
+        <Text
+          className={
+            compact
+              ? 'text-xs font-medium text-parchment tabular-nums'
+              : 'text-sm font-medium text-parchment tabular-nums'
+          }
+        >
+          {pageLine} · {supporting}
         </Text>
       </View>
     </Pressable>
