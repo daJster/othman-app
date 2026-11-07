@@ -1,22 +1,21 @@
-import { render } from '@testing-library/react-native';
+import { act, render, screen } from '@testing-library/react-native';
 import { HeroFilm } from '@/features/home/hero-film';
 
 /**
- * The hero film starts somewhere new on every mount.
+ * The hero film plays from the beginning in an infinite loop.
  *
- * The player seeks to a random position once its duration is known — either
- * immediately when it is already ready, or on the first `readyToPlay` status —
- * and only then plays, so the poster underneath hides the seek. `expo-video`
- * is mocked at its boundary; the media set itself stays real.
+ * Playback starts on mount (looped, muted); the poster underneath lifts on
+ * the first rendered frame, and a player that errors never lifts it — the
+ * still frame stays the hero. `expo-video` is mocked at its boundary; the
+ * media set itself stays real.
  */
 type Listener = (payload: { status: string }) => void;
 
 const mockListeners = new Map<string, Listener[]>();
+let mockFirstFrame: (() => void) | null = null;
 
 const mockPlayer = {
   status: 'loading',
-  duration: 42,
-  currentTime: 0,
   loop: false,
   muted: false,
   audioMixingMode: '',
@@ -37,42 +36,72 @@ jest.mock('expo-video', () => ({
 
     return mockPlayer;
   },
-  VideoView: () => null,
+  VideoView: (props: { onFirstFrameRender?: () => void }) => {
+    mockFirstFrame = props.onFirstFrameRender ?? null;
+
+    return null;
+  },
 }));
 
-function emitStatus(status: string): void {
-  for (const listener of mockListeners.get('statusChange') ?? []) {
-    listener({ status });
-  }
+function emitStatus(status: string): Promise<void> {
+  return act(async () => {
+    for (const listener of mockListeners.get('statusChange') ?? []) {
+      listener({ status });
+    }
+  });
+}
+
+function emitFirstFrame(): Promise<void> {
+  return act(async () => {
+    mockFirstFrame?.();
+  });
+}
+
+function poster(): unknown {
+  return screen.queryByTestId('hero-poster', { includeHiddenElements: true });
 }
 
 beforeEach(() => {
   mockListeners.clear();
+  mockFirstFrame = null;
   jest.clearAllMocks();
   mockPlayer.status = 'loading';
-  mockPlayer.currentTime = 0;
 });
 
 describe('HeroFilm', () => {
-  it('seeks to a random position on ready, then plays', async () => {
+  it('loops muted from the start and lifts the poster on first frame', async () => {
     await render(<HeroFilm portrait />);
 
-    expect(mockPlayer.play).not.toHaveBeenCalled();
+    expect(mockPlayer.loop).toBe(true);
+    expect(mockPlayer.muted).toBe(true);
+    expect(mockPlayer.play).toHaveBeenCalled();
+    expect(poster()).toBeTruthy();
 
-    emitStatus('readyToPlay');
+    await emitFirstFrame();
 
-    expect(mockPlayer.currentTime).toBeGreaterThanOrEqual(0);
-    expect(mockPlayer.currentTime).toBeLessThan(42);
-    expect(mockPlayer.play).toHaveBeenCalledTimes(1);
+    expect(poster()).toBeNull();
   });
 
-  it('arms immediately when the player is already ready', async () => {
-    mockPlayer.status = 'readyToPlay';
+  it('warns on error but still lifts on a real frame', async () => {
+    const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
-    await render(<HeroFilm portrait />);
+    try {
+      await render(<HeroFilm portrait />);
+      await emitStatus('error');
 
-    expect(mockPlayer.currentTime).toBeGreaterThanOrEqual(0);
-    expect(mockPlayer.currentTime).toBeLessThan(42);
-    expect(mockPlayer.play).toHaveBeenCalledTimes(1);
+      expect(warn).toHaveBeenCalledWith(
+        '[HeroFilm] playback failed; keeping the poster.',
+        null,
+      );
+      // No frame has rendered, so the still frame stays the hero.
+      expect(poster()).toBeTruthy();
+
+      // A frame is a frame: once pixels exist the poster gets out of the way.
+      await emitFirstFrame();
+
+      expect(poster()).toBeNull();
+    } finally {
+      warn.mockRestore();
+    }
   });
 });

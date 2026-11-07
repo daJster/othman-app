@@ -12,11 +12,11 @@ import { getHeroFilm } from './hero-media';
  * Three rules, in order of importance:
  *
  * 1. **A still frame is always a valid hero.** The poster is rendered
- *    underneath and removed only on `onFirstFrameRender`, so a blocked
- *    autoplay, a slow network or a decoder that never starts leaves a designed
- *    image rather than a black rectangle. Reduced motion never mounts a player
- *    at all — it does not mount one and pause it, because a paused player has
- *    still downloaded the film.
+ *    underneath and removed on the first rendered frame, so a blocked
+ *    autoplay, a slow network or a decoder that never starts leaves a
+ *    designed image rather than a black rectangle. Reduced motion
+ *    never mounts a player at all — it does not mount one and pause it,
+ *    because a paused player has still downloaded the film.
  * 2. **Nothing decodes off screen.** The film scrolls away with the page, so it
  *    is paused when it leaves the viewport (web, `IntersectionObserver`) and
  *    when the app goes to the background (native, `AppState`).
@@ -53,12 +53,14 @@ export function HeroFilm({ portrait }: { portrait: boolean }) {
       )}
 
       {playing ? null : (
-        <Image
-          source={source.poster}
-          contentFit="cover"
-          style={StyleSheet.absoluteFill}
-          transition={240}
-        />
+        <View testID="hero-poster" style={StyleSheet.absoluteFill}>
+          <Image
+            source={source.poster}
+            contentFit="cover"
+            style={StyleSheet.absoluteFill}
+            transition={240}
+          />
+        </View>
       )}
     </View>
   );
@@ -77,35 +79,20 @@ function FilmPlayback({
     // Even muted, a video player claims an audio session on iOS and would
     // pause the visitor's recitation or podcast. This asks not to.
     instance.audioMixingMode = 'mixWithOthers';
+    // Play from the beginning at once; the loop carries on from there.
+    instance.play();
   });
 
-  // Every mount starts somewhere new: seek to a random position once the
-  // duration is known, then play. The poster underneath hides the seek and
-  // the loop carries on from there, so launches vary without extra files.
-  // Forward only — neither platform plays backwards (`playbackRate` is
-  // 0–16), so there is no reverse to ask for.
+  // A player that errors never lifts the poster — report it in dev and leave
+  // the still frame as the hero.
   useEffect(() => {
-    const arm = () => {
-      // The player is expo-video's mutable shared object: reading duration
-      // and seeking via the `currentTime` setter is its documented mechanism.
-      // eslint-disable-next-line react-hooks/immutability
-      const duration = player.duration;
-
-      if (Number.isFinite(duration) && duration > 0) {
-        player.currentTime = Math.random() * duration;
+    const subscription = player.addListener('statusChange', (event) => {
+      if (event.status === 'error' && __DEV__) {
+        console.warn(
+          '[HeroFilm] playback failed; keeping the poster.',
+          event.error ?? null,
+        );
       }
-
-      player.play();
-    };
-
-    if (player.status === 'readyToPlay') {
-      arm();
-
-      return;
-    }
-
-    const subscription = player.addListener('statusChange', ({ status }) => {
-      if (status === 'readyToPlay') arm();
     });
 
     return () => subscription.remove();

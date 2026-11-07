@@ -1,22 +1,18 @@
 /**
  * The landing film.
  *
- * Two encodes, one per composition: a 16:9 wide take for the desktop split and
- * a 9:16 tall take for the phone. The hero picks by viewport *shape*, never by
- * user agent, so a tablet in landscape gets the wide cut.
+ * Two H.264 MP4s, one per composition (`hero-tall.mp4`, `hero-wide.mp4`,
+ * ~1.3 MB together): H.264 plays on iOS (AVPlayer), Android (ExoPlayer) and
+ * every browser, so both slots share the same files on all platforms — no
+ * platform branches, no fallbacks. The hero picks tall or wide by viewport
+ * shape, never by user agent.
  *
- * The wired pair is the 420p encodes (`hero-wide.mp4`, `hero-tall.mp4`,
- * ~30 MB each): behind the scrim, the glass and the panel the extra pixels of
- * the 720p mezzanine (`landing-page-video-720p-*`, kept in `assets/hero/` as
- * the re-encode source) buy nothing on a hero. Metro bundles only what is
- * `require`d below, so the mezzanine costs repo weight, never app weight. If
- * the weight ever has to go further, re-encode to the README spec
- * (2–3 Mbps) and swap these two files — nothing else changes.
- *
- * Posters are frame-one PNGs (`poster-wide.png`, `poster-tall.png`): the
- * instant-paint layer under the player, and the whole hero when the film is
- * skipped for reduced motion, data saving or a failed autoplay.
+ * Posters are frame-one JPEGs: the instant-paint layer under the player, and
+ * the whole hero when the film is skipped for reduced motion, data saving or
+ * a failed autoplay. Each poster matches its own encode so the first-frame
+ * swap stays invisible.
  */
+
 export type HeroFilmSource = {
   /** Bundled encode. H.264, muted, seamless loop, grade baked in. */
   video: number;
@@ -38,11 +34,11 @@ export function getHeroFilm(): HeroFilmSet | null {
   return {
     wide: {
       video: require('../../../assets/hero/hero-wide.mp4'),
-      poster: require('../../../assets/hero/poster-wide.png'),
+      poster: require('../../../assets/hero/poster-wide.jpeg'),
     },
     tall: {
       video: require('../../../assets/hero/hero-tall.mp4'),
-      poster: require('../../../assets/hero/poster-tall.png'),
+      poster: require('../../../assets/hero/poster-tall.jpeg'),
     },
   };
 }
