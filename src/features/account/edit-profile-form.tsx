@@ -9,6 +9,7 @@ import {
   useColorScheme,
   View,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { AccountProfile } from '@/core/domain/account/merge-profile';
 import {
   isProfileDraftDirty,
@@ -61,6 +62,7 @@ export function EditProfileForm({
 }: EditProfileFormProps) {
   const { t } = useTranslation();
   const scheme = useColorScheme();
+  const insets = useSafeAreaInsets();
   const update = useUpdateAccount(account.uid);
 
   const [draft, setDraft] = useState(() => toProfileDraft(account));
@@ -231,7 +233,7 @@ export function EditProfileForm({
           </Text>
         </View>
 
-        <View className="gap-1.5">
+        <View className="gap-2">
           <Text variant="label">{t('account.edit.displayName')}</Text>
           <Input
             value={draft.displayName}
@@ -257,7 +259,7 @@ export function EditProfileForm({
           ) : null}
         </View>
 
-        <View className="gap-1.5">
+        <View className="gap-2">
           <Text variant="label">{t('account.edit.email')}</Text>
           <Input
             value={account.email ?? ''}
@@ -271,7 +273,7 @@ export function EditProfileForm({
           </Text>
         </View>
 
-        <View className="gap-1.5">
+        <View className="gap-2">
           <Text variant="label">{t('account.edit.phone')}</Text>
           <Input
             value={draft.phoneNumber}
@@ -302,7 +304,7 @@ export function EditProfileForm({
         </View>
 
         {roleEditable ? (
-          <View className="gap-1.5">
+          <View className="gap-2">
             <Text variant="label">{t('account.edit.role')}</Text>
             <Host
               matchContents={{ vertical: true }}
@@ -325,7 +327,7 @@ export function EditProfileForm({
             </Host>
           </View>
         ) : (
-          <View className="gap-1.5">
+          <View className="gap-2">
             <Text variant="label">{t('account.edit.role')}</Text>
             <Badge variant="outline" label={t(roleLabelKey(account.role))} />
             <Text variant="caption" tone="muted">
@@ -346,7 +348,10 @@ export function EditProfileForm({
         but the action that ends the form must stay reachable. This is the
         "keyboard never covers Save" requirement.
       */}
-      <View className="border-t border-border bg-background p-4">
+      <View
+        className="border-t border-border bg-background px-4 pt-4"
+        style={{ paddingBottom: Math.max(16, insets.bottom) }}
+      >
         <Button
           label={update.isPending ? t('account.edit.saving') : t('action.save')}
           onPress={handleSave}

@@ -6,6 +6,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react-native';
+import { SafeAreaProvider, type Metrics } from 'react-native-safe-area-context';
 import type { AccountData, AuthUser } from '@/core/types';
 import EditAccountScreen from '@/app/account/edit';
 import { profileService } from '@/services/profile';
@@ -83,15 +84,28 @@ const USER: AuthUser = {
   photoURL: null,
 };
 
+/**
+ * `useSafeAreaInsets()` throws without a provider, and the bare provider has
+ * no native module under Jest — so the sheet renders inside a provider with
+ * fixed metrics. The 34pt bottom inset exercises the Save bar's
+ * `max(16, inset)` floor; per repo convention no test asserts computed styles.
+ */
+const TEST_METRICS: Metrics = {
+  insets: { top: 0, bottom: 34, left: 0, right: 0 },
+  frame: { x: 0, y: 0, width: 390, height: 844 },
+};
+
 async function renderSheet(account: AccountData = ACCOUNT) {
   service.getAccount.mockResolvedValue(account);
 
   const client = makeTestQueryClient();
   const auth = createFakeAuthService(USER);
   await render(
-    <TestProviders client={client} service={auth}>
-      <EditAccountScreen />
-    </TestProviders>,
+    <SafeAreaProvider initialMetrics={TEST_METRICS}>
+      <TestProviders client={client} service={auth}>
+        <EditAccountScreen />
+      </TestProviders>
+    </SafeAreaProvider>,
   );
 
   await waitFor(() =>
