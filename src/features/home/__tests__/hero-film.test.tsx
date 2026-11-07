@@ -43,6 +43,12 @@ jest.mock('expo-video', () => ({
   },
 }));
 
+let mockReducedMotion = false;
+
+jest.mock('@/ui/motion', () => ({
+  useReducedMotion: () => mockReducedMotion,
+}));
+
 function emitStatus(status: string): Promise<void> {
   return act(async () => {
     for (const listener of mockListeners.get('statusChange') ?? []) {
@@ -66,6 +72,7 @@ beforeEach(() => {
   mockFirstFrame = null;
   jest.clearAllMocks();
   mockPlayer.status = 'loading';
+  mockReducedMotion = false;
 });
 
 describe('HeroFilm', () => {
@@ -76,6 +83,18 @@ describe('HeroFilm', () => {
     expect(mockPlayer.muted).toBe(true);
     expect(mockPlayer.play).toHaveBeenCalled();
     expect(poster()).toBeTruthy();
+
+    await emitFirstFrame();
+
+    expect(poster()).toBeNull();
+  });
+
+  it('plays even when the visitor asked to reduce motion', async () => {
+    mockReducedMotion = true;
+
+    await render(<HeroFilm portrait />);
+
+    expect(mockPlayer.play).toHaveBeenCalled();
 
     await emitFirstFrame();
 

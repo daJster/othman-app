@@ -14,8 +14,8 @@ import { AccessibilityInfo, Platform } from 'react-native';
  * `useSyncExternalStore` rather than `useState` + `useEffect`: the value is
  * external state, not derived state, and reading it during render is what keeps
  * the static web export's first paint in step with the client's. Callers decide
- * what "reduced" means for their surface — the hero film stops playing and
- * shows its poster frame, the dust field holds still. There is no global switch
+ * what "reduced" means for their surface — the dust field holds still, and the
+ * hero film is not gated on it. There is no global switch
  * that silently removes motion, because a still frame is a better answer than a
  * missing element.
  */

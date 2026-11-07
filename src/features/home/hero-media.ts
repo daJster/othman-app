@@ -8,9 +8,8 @@
  * shape, never by user agent.
  *
  * Posters are frame-one JPEGs: the instant-paint layer under the player, and
- * the whole hero when the film is skipped for reduced motion, data saving or
- * a failed autoplay. Each poster matches its own encode so the first-frame
- * swap stays invisible.
+ * the whole hero when playback fails. Each poster matches its own encode so
+ * the first-frame swap stays invisible.
  */
 
 export type HeroFilmSource = {

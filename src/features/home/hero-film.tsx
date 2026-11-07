@@ -2,7 +2,6 @@ import { useVideoPlayer, VideoView } from 'expo-video';
 import { useEffect, useRef, useState, type ComponentRef } from 'react';
 import { AppState, Platform, StyleSheet, View } from 'react-native';
 import { Image } from '@/ui/image';
-import { useReducedMotion } from '@/ui/motion';
 import { getHeroFilm } from './hero-media';
 
 /**
@@ -14,9 +13,9 @@ import { getHeroFilm } from './hero-media';
  * 1. **A still frame is always a valid hero.** The poster is rendered
  *    underneath and removed on the first rendered frame, so a blocked
  *    autoplay, a slow network or a decoder that never starts leaves a
- *    designed image rather than a black rectangle. Reduced motion
- *    never mounts a player at all — it does not mount one and pause it,
- *    because a paused player has still downloaded the film.
+ *    designed image rather than a black rectangle. The film plays for
+ *    every visitor, reduced motion included: it is muted, looped and
+ *    decorative, and the poster is the fallback, not a preference gate.
  * 2. **Nothing decodes off screen.** The film scrolls away with the page, so it
  *    is paused when it leaves the viewport (web, `IntersectionObserver`) and
  *    when the app goes to the background (native, `AppState`).
@@ -28,7 +27,6 @@ import { getHeroFilm } from './hero-media';
  * window and would cover the glass panel and the dust drawn above it.
  */
 export function HeroFilm({ portrait }: { portrait: boolean }) {
-  const still = useReducedMotion();
   const [playing, setPlaying] = useState(false);
   const film = getHeroFilm();
 
@@ -45,12 +43,10 @@ export function HeroFilm({ portrait }: { portrait: boolean }) {
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
-      {still ? null : (
-        <FilmPlayback
-          source={source.video}
-          onFirstFrame={() => setPlaying(true)}
-        />
-      )}
+      <FilmPlayback
+        source={source.video}
+        onFirstFrame={() => setPlaying(true)}
+      />
 
       {playing ? null : (
         <View testID="hero-poster" style={StyleSheet.absoluteFill}>
