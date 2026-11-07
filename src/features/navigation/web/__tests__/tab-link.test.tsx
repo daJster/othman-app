@@ -7,7 +7,7 @@ type LinkProps = ComponentProps<typeof WebTabLink>;
 
 async function renderLink(overrides: Partial<LinkProps> = {}) {
   const onPress = jest.fn();
-  const view = await render(
+  const rendered = await render(
     <WebTabLink
       label="Quran"
       icon="book-open"
@@ -21,9 +21,18 @@ async function renderLink(overrides: Partial<LinkProps> = {}) {
 
   return {
     onPress,
-    // A hidden trigger is removed from the accessibility tree on purpose, so
-    // the query has to opt into hidden elements to see it at all.
-    link: view.getByTestId('nav-tab', { includeHiddenElements: true }),
+    // The hook sits on the inner View (the anchor itself cannot carry a
+    // `testID` without React warning on web); the anchor is its parent.
+    link: (() => {
+      const segment = rendered.getByTestId('nav-tab', {
+        includeHiddenElements: true,
+      });
+      const anchor = segment.parent;
+
+      if (!anchor) throw new Error('tab link has no anchor parent');
+
+      return anchor;
+    })(),
   };
 }
 

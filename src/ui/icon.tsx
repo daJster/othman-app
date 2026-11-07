@@ -1,5 +1,6 @@
 import type { AndroidSymbol, SFSymbol } from 'expo-symbols';
 import type { LucideIcon } from 'lucide-react-native';
+import { Platform } from 'react-native';
 import BookOpen from 'lucide-react-native/icons/book-open';
 import Calendar from 'lucide-react-native/icons/calendar';
 import Camera from 'lucide-react-native/icons/camera';
@@ -148,14 +149,18 @@ export type IconProps = {
 export function Icon({ name, size = 20, tone = 'foreground' }: IconProps) {
   const Component = ICON_COMPONENTS[name];
   const { color } = useResolveClassNames(TONE_CLASS[tone]);
+  const native = Platform.OS !== 'web';
 
   return (
     <Component
       color={color}
       size={size}
       strokeWidth={1.8}
-      accessible={false}
-      importantForAccessibility="no-hide-descendants"
+      // React Native props only: on web Lucide renders a raw `<svg>` and both
+      // leak to the DOM as unknown attributes (dev warnings). `aria-hidden`
+      // below is the web equivalent and stays on every platform.
+      accessible={native ? false : undefined}
+      importantForAccessibility={native ? 'no-hide-descendants' : undefined}
       {...({ 'aria-hidden': true } as Record<string, unknown>)}
     />
   );

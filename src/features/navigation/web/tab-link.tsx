@@ -80,7 +80,6 @@ export function WebTabLink({
         display: hidden ? 'none' : undefined,
       },
       className: FOCUS_RING,
-      testID,
       onClick: (event: MouseEvent<HTMLAnchorElement>) => {
         if (hidden || !shouldHandleWebLink(event)) return;
 
@@ -91,6 +90,10 @@ export function WebTabLink({
       },
     },
     <View
+      // The hook lives here, not on the anchor: a raw `<a>` passes `testID`
+      // straight to the DOM and React warns, while this View maps it to
+      // `data-testid` through react-native-web.
+      testID={testID}
       className={cn(
         // The underline is a real border on both states, so selecting a tab
         // recolours it instead of changing the row's height. It sits directly
