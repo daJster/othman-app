@@ -104,6 +104,7 @@ const TONE_CLASS = {
   primary: 'text-primary',
   'primary-foreground': 'text-primary-foreground',
   destructive: 'text-destructive',
+  parchment: 'text-parchment',
 } as const;
 
 export type IconTone = keyof typeof TONE_CLASS;

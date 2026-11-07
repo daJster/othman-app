@@ -5,7 +5,9 @@
   },
   "home": {
     "hero": {
-      "opening": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
+      "opening": "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+      "playFilm": "Play the hero film",
+      "pauseFilm": "Pause the hero film"
     },
     "verse": {
       "title": "Verse of the Day",
