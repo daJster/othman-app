@@ -328,14 +328,11 @@ export const ContributionGraphBlock = ({
 
   return (
     <rect
-      className={cn(
-        'data-[level="0"]:fill-muted',
-        'data-[level="1"]:fill-muted-foreground/20',
-        'data-[level="2"]:fill-muted-foreground/40',
-        'data-[level="3"]:fill-muted-foreground/60',
-        'data-[level="4"]:fill-muted-foreground/80',
-        className,
-      )}
+      // Level fills live in `global.css` (`.activity-cell[data-level]`);
+      // data-variant Tailwind classes are intentionally absent here because
+      // Uniwind's native serializer cannot serialize them. Callers that pass
+      // their own `className` (like the Quran adapter's) keep full control.
+      className={cn('activity-cell', className)}
       data-count={activity.count}
       data-date={activity.date}
       data-level={activity.level}
@@ -493,14 +490,9 @@ export const ContributionGraphLegend = ({
           <svg height={blockSize} key={level} width={blockSize}>
             <title>{`${level} contributions`}</title>
             <rect
-              className={cn(
-                'stroke-border stroke-[1px]',
-                'data-[level="0"]:fill-muted',
-                'data-[level="1"]:fill-muted-foreground/20',
-                'data-[level="2"]:fill-muted-foreground/40',
-                'data-[level="3"]:fill-muted-foreground/60',
-                'data-[level="4"]:fill-muted-foreground/80',
-              )}
+              // Muted ramp lives in `global.css` (`.activity-legend`);
+              // see the Block note above for why no data-variant classes.
+              className={cn('stroke-border stroke-[1px]', 'activity-legend')}
               data-level={level}
               height={blockSize}
               rx={blockRadius}

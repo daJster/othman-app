@@ -65,7 +65,14 @@
 @layer theme {
   :root {
     @variant light {
-      --color-background: oklch(1 0 0);
+      /*
+       * The ground is warm paper, not white. Pure white made `card` (also
+       * white) invisible: the calendar's rounded corners were nothing but a
+       * hairline, and every panel in the app read as a hole in the page. One
+       * step of warmth on the ground, kept off the cards, restores the surface
+       * without changing a single component.
+       */
+      --color-background: oklch(0.985 0.008 85);
       --color-foreground: oklch(0.145 0 0);
       --color-card: oklch(1 0 0);
       --color-card-foreground: oklch(0.145 0 0);
@@ -73,14 +80,14 @@
       --color-primary-foreground: oklch(0.985 0 0);
       --color-secondary: oklch(0.96 0.04 160);
       --color-secondary-foreground: oklch(0.205 0 0);
-      --color-muted: oklch(0.97 0 0);
+      --color-muted: oklch(0.962 0.01 85);
       --color-muted-foreground: oklch(0.52 0 0);
       --color-accent: oklch(0.95 0.06 160);
       --color-accent-foreground: oklch(0.205 0 0);
       --color-destructive: oklch(0.577 0.245 27.325);
       --color-destructive-foreground: oklch(0.985 0 0);
-      --color-border: oklch(0.922 0 0);
-      --color-input: oklch(0.922 0 0);
+      --color-border: oklch(0.92 0.008 85);
+      --color-input: oklch(0.92 0.008 85);
       --color-ring: oklch(0.708 0 0);
       --color-canopy: oklch(0.31 0.07 160);
       --color-sand: oklch(0.96 0.02 85);
@@ -134,4 +141,46 @@
       --color-info-line: oklch(0.36 0.06 245);
     }
   }
+}
+
+/*
+ * Heatmap cells, web only. Uniwind's native serializer cannot serialize
+ * `data-[level]:fill-*` selectors (it skips them with an export-time error),
+ * so the levels live here as plain CSS instead of Tailwind classes — the two
+ * catalog/adapter files that used those classes now carry only
+ * `activity-cell` / `activity-legend` plus the `data-level` attribute the
+ * rules below key on. Theme comes free: both rules read the same
+ * `--color-*` variables the light/dark blocks above define, and the opacity
+ * steps match the old `fill-primary/25…` ramp via `color-mix`.
+ */
+.activity-cell[data-level='0'] {
+  fill: var(--color-muted);
+}
+.activity-cell[data-level='1'] {
+  fill: color-mix(in oklch, var(--color-primary) 25%, transparent);
+}
+.activity-cell[data-level='2'] {
+  fill: color-mix(in oklch, var(--color-primary) 45%, transparent);
+}
+.activity-cell[data-level='3'] {
+  fill: color-mix(in oklch, var(--color-primary) 65%, transparent);
+}
+.activity-cell[data-level='4'] {
+  fill: var(--color-primary);
+}
+
+.activity-legend[data-level='0'] {
+  fill: var(--color-muted);
+}
+.activity-legend[data-level='1'] {
+  fill: color-mix(in oklch, var(--color-muted-foreground) 20%, transparent);
+}
+.activity-legend[data-level='2'] {
+  fill: color-mix(in oklch, var(--color-muted-foreground) 40%, transparent);
+}
+.activity-legend[data-level='3'] {
+  fill: color-mix(in oklch, var(--color-muted-foreground) 60%, transparent);
+}
+.activity-legend[data-level='4'] {
+  fill: color-mix(in oklch, var(--color-muted-foreground) 80%, transparent);
 }

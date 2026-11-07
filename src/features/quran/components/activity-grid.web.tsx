@@ -55,13 +55,13 @@ export type ActivityGridProps = {
   showMonthLabels?: boolean;
 };
 
-const BLOCK_RAMP: Record<ActivityLevel, string> = {
-  0: 'data-[level="0"]:fill-muted',
-  1: 'data-[level="1"]:fill-primary/25',
-  2: 'data-[level="2"]:fill-primary/45',
-  3: 'data-[level="3"]:fill-primary/65',
-  4: 'data-[level="4"]:fill-primary',
-};
+/**
+ * Every level shares one class; `global.css` paints `.activity-cell` per
+ * `data-level` in plain CSS, because Uniwind's native serializer cannot
+ * serialize `data-[level]:fill-*` selectors (it skips them with an
+ * export-time error on native builds, where this web-only file never ships).
+ */
+const CELL_CLASS = 'activity-cell';
 
 export function ActivityGrid({
   days,
@@ -119,7 +119,7 @@ export function ActivityGrid({
           <ContributionGraphBlock
             activity={activity}
             aria-label={`${formatDayLabel(activity.date, language)}: ${activity.count}`}
-            className={`${BLOCK_RAMP[activity.level as ActivityLevel]}${meta.get(activity.date)?.outside ? 'opacity-30' : ''}`}
+            className={`${CELL_CLASS}${meta.get(activity.date)?.outside ? 'opacity-30' : ''}`}
             dayIndex={dayIndex}
             weekIndex={weekIndex}
           />
