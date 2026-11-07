@@ -77,7 +77,7 @@ beforeEach(() => {
 
 describe('HeroFilm', () => {
   it('loops muted from the start and lifts the poster on first frame', async () => {
-    await render(<HeroFilm portrait />);
+    await render(<HeroFilm />);
 
     expect(mockPlayer.loop).toBe(true);
     expect(mockPlayer.muted).toBe(true);
@@ -92,7 +92,7 @@ describe('HeroFilm', () => {
   it('plays even when the visitor asked to reduce motion', async () => {
     mockReducedMotion = true;
 
-    await render(<HeroFilm portrait />);
+    await render(<HeroFilm />);
 
     expect(mockPlayer.play).toHaveBeenCalled();
 
@@ -105,7 +105,7 @@ describe('HeroFilm', () => {
     const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
     try {
-      await render(<HeroFilm portrait />);
+      await render(<HeroFilm />);
       await emitStatus('error');
 
       expect(warn).toHaveBeenCalledWith(

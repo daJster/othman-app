@@ -1,15 +1,14 @@
 /**
  * The landing film.
  *
- * Two H.264 MP4s, one per composition (`hero-tall.mp4`, `hero-wide.mp4`,
- * ~1.3 MB together): H.264 plays on iOS (AVPlayer), Android (ExoPlayer) and
- * every browser, so both slots share the same files on all platforms — no
- * platform branches, no fallbacks. The hero picks tall or wide by viewport
- * shape, never by user agent.
+ * One H.264 MP4 (`hero-wide.mp4`): H.264 plays on iOS (AVPlayer), Android
+ * (ExoPlayer) and every browser, so a single encode serves the phone, the
+ * tablet and the web. The hero cover-crops it, so a portrait phone sees the
+ * centre of the same push — there is no second file to download and no source
+ * swap when the window changes shape.
  *
- * Posters are frame-one JPEGs: the instant-paint layer under the player, and
- * the whole hero when playback fails. Each poster matches its own encode so
- * the first-frame swap stays invisible.
+ * The poster is frame one of the same encode: the instant-paint layer under
+ * the player, and the whole hero when playback fails.
  */
 
 export type HeroFilmSource = {
@@ -19,25 +18,14 @@ export type HeroFilmSource = {
   poster: number;
 };
 
-export type HeroFilmSet = {
-  wide: HeroFilmSource;
-  tall: HeroFilmSource;
-};
-
 /**
  * A function rather than a const so the empty case stays a plain runtime
  * branch: a module-level `const … = null` is narrowed to `null` at every use
  * site, and the video path would typecheck as unreachable code.
  */
-export function getHeroFilm(): HeroFilmSet | null {
+export function getHeroFilm(): HeroFilmSource | null {
   return {
-    wide: {
-      video: require('../../../assets/hero/hero-wide.mp4'),
-      poster: require('../../../assets/hero/poster-wide.jpeg'),
-    },
-    tall: {
-      video: require('../../../assets/hero/hero-tall.mp4'),
-      poster: require('../../../assets/hero/poster-tall.jpeg'),
-    },
+    video: require('../../../assets/hero/hero-wide.mp4'),
+    poster: require('../../../assets/hero/poster-wide.jpeg'),
   };
 }

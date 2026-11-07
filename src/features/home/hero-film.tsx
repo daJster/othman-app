@@ -26,15 +26,13 @@ import { getHeroFilm } from './hero-media';
  * On Android the view uses `textureView`: a `SurfaceView` punches through the
  * window and would cover the glass panel and the dust drawn above it.
  */
-export function HeroFilm({ portrait }: { portrait: boolean }) {
+export function HeroFilm() {
   const [playing, setPlaying] = useState(false);
   const film = getHeroFilm();
 
   if (!film) {
     return null;
   }
-
-  const source = portrait ? film.tall : film.wide;
 
   return (
     <View
@@ -43,15 +41,12 @@ export function HeroFilm({ portrait }: { portrait: boolean }) {
       accessibilityElementsHidden
       importantForAccessibility="no-hide-descendants"
     >
-      <FilmPlayback
-        source={source.video}
-        onFirstFrame={() => setPlaying(true)}
-      />
+      <FilmPlayback source={film.video} onFirstFrame={() => setPlaying(true)} />
 
       {playing ? null : (
         <View testID="hero-poster" style={StyleSheet.absoluteFill}>
           <Image
-            source={source.poster}
+            source={film.poster}
             contentFit="cover"
             style={StyleSheet.absoluteFill}
             transition={240}

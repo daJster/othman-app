@@ -5,8 +5,8 @@ import { Dimensions } from 'react-native';
  * The `md` breakpoint as a boolean.
  *
  * Layout is CSS' job (`md:` utilities), and stays that way. A handful of
- * decisions cannot be expressed in a class, though: which of the two hero
- * encodes to use, how many dust motes to draw. Those are JS.
+ * decisions cannot be expressed in a class, though: how many dust motes to
+ * draw. That is JS.
  *
  * Read through `useSyncExternalStore` rather than `useState` + `useEffect` so
  * the static web export hydrates cleanly: the server snapshot is `false`, the
