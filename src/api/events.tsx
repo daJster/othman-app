@@ -50,7 +50,10 @@ const POLL_INTERVAL_MS = 5_000;
  * bytes it already had: the event arrived, the network call happened, and
  * nothing changed.
  */
-function invalidateForEvent(client: QueryClient, event: BackendEvent): void {
+export function invalidateForEvent(
+  client: QueryClient,
+  event: BackendEvent,
+): void {
   const { type } = event;
 
   if (type.startsWith('meetings.')) {
