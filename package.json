@@ -97,7 +97,16 @@
   },
   "scripts": {
     "start": "node --max-old-space-size=8192 ./node_modules/expo/bin/cli start",
+    "dev": "node scripts/dev-all.mjs",
+    "dev:web": "node scripts/dev-all.mjs --web",
+    "mock": "node --env-file-if-exists=.env server/mockServer.ts",
     "android": "expo run:android",
+    "android:build": "expo run:android --no-bundler",
+    "phone": "node scripts/dev-phone.mjs connect",
+    "phone:shot": "node scripts/dev-phone.mjs shot",
+    "phone:reload": "node scripts/dev-phone.mjs reload",
+    "phone:logs": "node scripts/dev-phone.mjs logs",
+    "phone:info": "node scripts/dev-phone.mjs info",
     "ios": "expo run:ios",
     "web": "expo start --web",
     "build:web": "expo export --platform web",
@@ -112,11 +121,12 @@
     "typecheck:core": "tsc -p tsconfig.core.json",
     "check:core": "node scripts/check-core-purity.mjs",
     "check:i18n": "node scripts/i18n-audit.mjs",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\" \"*.{ts,js}\" \"scripts/**/*.mjs\" \"MIGRATE.md\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json}\" \"*.{ts,js}\" \"scripts/**/*.mjs\" \"MIGRATE.md\"",
+    "format": "prettier --write \"src/**/*.{ts,tsx,css,json}\" \"server/**/*.{ts,json,md}\" \"*.{ts,js}\" \"scripts/**/*.mjs\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,css,json}\" \"server/**/*.{ts,json,md}\" \"*.{ts,js}\" \"scripts/**/*.mjs\"",
     "test": "jest",
+    "test:server": "node --test --test-reporter=spec server/**/*.test.ts",
     "test:watch": "jest --watch",
-    "verify": "npm run typecheck && npm run typecheck:core && npm run check:core && npm run check:i18n && npm run lint && npm run format:check && npm test"
+    "verify": "npm run typecheck && npm run typecheck:core && npm run check:core && npm run check:i18n && npm run lint && npm run format:check && npm run test:server && npm test"
   },
   "private": true
 }

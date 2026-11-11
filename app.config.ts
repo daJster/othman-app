@@ -51,6 +51,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   plugins: [
     'expo-router',
+    // Playback only: the home hero film and nothing else. Picture-in-picture
+    // and background playback stay off — the film is decorative and must never
+    // outlive its panel.
+    'expo-video',
     // Re-exported by expo-audio as a required native peer; without the plugin,
     // release builds can fail to resolve bundled audio assets.
     'expo-asset',

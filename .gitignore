@@ -48,3 +48,19 @@ example
 # generated native folders
 /ios
 /android
+
+# mock backend runtime data (SQLite + JSON documents)
+server/data/
+
+# local verification artifacts (Playwright MCP cache, baseline screenshots)
+.playwright-mcp/
+baseline-*.png
+
+# draw.io workspace scratch files
+docs/.$*.bkp
+
+# sideloaded client builds
+*.apk
+
+# font source archives (only the extracted faces are committed)
+assets/fonts/*.zip

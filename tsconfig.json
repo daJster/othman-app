@@ -5,6 +5,7 @@
     // TypeScript 6 no longer auto-includes every `@types/*` package, so the
     // global test types have to be named explicitly.
     "types": ["jest", "node"],
+    "allowImportingTsExtensions": true,
     "paths": {
       "@/*": [
         "./src/*"

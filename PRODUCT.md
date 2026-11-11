@@ -32,6 +32,11 @@ reader. A generic Quran app could copy the reader but not the class relationship
 - Arabic is the default interface on first launch; English is the fully
   supported second language, selected explicitly. Once a preference exists it
   wins on every launch.
+- **Both languages share one physical layout.** Switching language changes the
+  text — writing direction, alignment, bidi and number formatting — and nothing
+  else: no element moves, no row reverses, no chevron flips. Arabic-first is a
+  voice and a typography, not a mirrored screen. The mushaf's own reading order
+  is the one exception, because a Quran page is right-to-left by nature.
 - Used on phones and the web; the same product adapts to both native and web
   conventions rather than shrinking a desktop site.
 - Sessions are scheduled by day; progress is a memorisation heatmap; reading is

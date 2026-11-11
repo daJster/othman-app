@@ -10,6 +10,9 @@ module.exports = {
     '/dist/',
     '/dist-android/',
     '/dist-ios/',
+    // The mock backend runs under Node's own test runner (`npm run test:server`);
+    // `node:sqlite` + native fetch are not Jest/React Native environments.
+    '/server/',
   ],
   // Uniwind compiles `className` in Metro, so in Jest it is an inert prop. Tests
   // therefore assert structure, text and behaviour — never computed styles.

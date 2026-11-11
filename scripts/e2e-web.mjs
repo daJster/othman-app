@@ -609,7 +609,7 @@ async function main() {
     ];
 
     const settingsLandmarks = [
-      { selector: '[data-testid="theme-dropdown"]', edges: ['left', 'right'] },
+      { selector: '[data-testid="theme-selector"]', edges: ['left', 'right'] },
       {
         selector: '[data-testid="language-dropdown"]',
         edges: ['left', 'right'],

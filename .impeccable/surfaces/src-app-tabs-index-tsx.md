@@ -7,9 +7,9 @@ related_targets: []
 
 ## Scope
 
-The Home tab / landing page for Othman, on web and native. This is a
-replacement visual world for the landing surface; it keeps every existing
-destination and does not add product capabilities.
+The Home tab / landing page for Othman, on web and native. This is a visual
+world for the landing surface that replaced the first halqa ring; it keeps every
+existing destination and does not add product capabilities.
 
 ## Visitor mode
 
@@ -24,33 +24,37 @@ mushaf; secondary: sign in, meet, account.
 
 ## Chosen direction
 
-**Halqa study circle.** A concentric study ring organises the reading, the
-cohort, and the four ways back into the circle. Deep canopy green, warm sand,
-brass line work and one clay note; calm, text-first, community-visible.
+**The study circle behind a window.** A single graded film — one slow push
+through mosque, inscription and open mushaf — holds the first viewport behind one
+frosted panel. The four ways back into the circle continue on a brass station
+line below it. The hero is monochrome; brass begins below the fold.
 
-Memorable moment: the hero ring's four stations resolve into a vertical
-"circle line" on the phone, so the same community diagram reads at both sizes.
+Memorable moment: the film's push settles on the open mushaf as the panel's
+basmalah resolves — the page and the screen hold the same text at different
+scales.
 
 ## Direction contract
 
-THESIS: The landing page is a study circle, not a feature catalogue: one ring
-holds the reading and the people around it, and the category's card grid is
-refused.
+THESIS: The landing page is a study circle seen through a window, not a feature
+catalogue: one film and one panel carry the reading and the people around it, and
+the category's card grid is refused.
 
-OWN-WORLD: Deep canopy green fields, warm sand ground, brass hairlines and
-station rings, one clay accent. Quranic calligraphy is an object inside the
-world, not decoration. Type: Quran face for sacred text, Naskh for Arabic UI,
-Inter for Latin labels; tight display scale, generous reading measure.
+OWN-WORLD: A graded, near-monochrome film over deep canopy; parchment type on one
+frosted panel; brass hairline and station nodes begin below the fold, with one
+clay note. Quranic calligraphy is an object inside the world, not decoration.
+Type: Quran face for sacred text, Naskh for Arabic UI, Inter for Latin labels;
+the tagline is the only display line.
 
 STORY: The visitor understands that Othman is a guided Quran cohort around a
 serious mushaf, then continues reading, meets the circle, or signs in.
 
-FIRST VIEWPORT: Full-bleed canopy hero; basmalah and wordmark at left, cohort
-line and a sand CTA; a large brass-ring study diagram at right with the Arabic
-word حلقة at its centre. On phone the ring sits below the copy at reduced size,
-still above the fold.
+FIRST VIEWPORT: Full-bleed film; one frosted panel at the inline start on desktop
+(bottom-anchored on the phone) holding the basmalah, wordmark, the tagline and a
+parchment CTA, with a muted cohort line behind a hairline. Dust drifts through the
+uncovered film. Nothing in the hero is brass.
 
-FORM: Grounded direction 4 of 7, the halqa/study-circle world; seed:2f8109a46a34992f.
+FORM: Grounded direction 4 of 7, the halqa/study-circle world, re-opened as a
+window; seed:2f8109a46a34992f.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the
 finish review, the verdict, DESIGN.md, and every shipping raster carrying its
@@ -59,4 +63,6 @@ provenance.
 ## Unresolved
 
 No real cohort photography or testimonials are available, so the page uses
-typographic and geometric material only.
+typographic and filmed atmosphere only. The film's two encodes are not committed
+yet: until `src/features/home/hero-media.ts` returns a film, the hero shows its
+dust field, which is also the reduced-motion and failed-autoplay state.

@@ -8,11 +8,30 @@ deploy permissions, PR evidence fields, cleanup rules, and the scope boundaries
 (demo meetings/progress, local photos, deferred Stage 9). The full P9.3 rewrite
 of this file remains deferred.
 
+## Dev environment (authoritative)
+
+Parts of this file still describe a retired Vite/web-only layout. The app is
+**Expo SDK 58 + Expo Router**, with the web target as a static export. Real
+commands and the emulator loop are in
+[`docs/dev-environment.md`](docs/dev-environment.md):
+
+- `npm start` — one Metro on **:8081** serving web and the native dev client
+- `npm run dev` — the mock backend on **:9000** + Metro together
+- `npm run mock` — the mock backend alone (`server/README.md`)
+- `npm run test:server` — backend integration tests (Node's own runner)
+- `npm run phone` — `adb reverse` + launch the dev client on the emulator
+- `npm run phone:shot` / `phone:logs` — screenshot and logcat for verification
+- `npm run verify` — typecheck, core purity, i18n audit, lint, format, Jest
+
+Jest **is** configured (`npm test`); the "no test framework" note below is stale.
+
 ## Commands
 
 | Command                | Description                                         |
 | ---------------------- | --------------------------------------------------- |
-| `npm run dev`          | Dev server on **port 8080**                         |
+| `npm run dev`          | Mock backend on **:9000** + Metro on **:8081**      |
+| `npm run mock`         | Mock backend only (`server/README.md`)              |
+| `npm run test:server`  | Mock backend integration tests (Node runner)        |
 | `npm run build`        | Vite build (outputs to `dist/`)                     |
 | `npm run deploy`       | Firebase hosting deploy (`dist/` → `kuttab-othman`) |
 | `npm run lint`         | ESLint                                              |
