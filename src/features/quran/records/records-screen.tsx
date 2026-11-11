@@ -197,6 +197,7 @@ function ProgressSection({
         description={t('records.progress.description')}
         actionLabel={t('records.progress.add')}
         onAction={() => setEditing('new')}
+        showAction={rows.length > 0}
         testID="records-progress-add"
       />
 
@@ -517,6 +518,7 @@ function BookmarksSection({
         description={t('records.bookmarks.description')}
         actionLabel={t('records.bookmarks.add')}
         onAction={() => setEditing('new')}
+        showAction={rows.length > 0}
         testID="records-bookmarks-add"
       />
 
@@ -870,6 +872,7 @@ function NotesSection({
         description={t('records.notes.description')}
         actionLabel={t('records.notes.add')}
         onAction={() => setEditing('new')}
+        showAction={rows.length > 0}
         testID="records-notes-add"
       />
 
@@ -1156,11 +1159,14 @@ function SectionIntro({
   description,
   actionLabel,
   onAction,
+  showAction = true,
   testID,
 }: {
   description: string;
   actionLabel: string;
   onAction: () => void;
+  /** Hidden while the empty state owns the one call to action. */
+  showAction?: boolean;
   testID: string;
 }) {
   return (
@@ -1168,10 +1174,12 @@ function SectionIntro({
       <Text variant="caption" tone="muted" className="min-w-0 flex-1">
         {description}
       </Text>
-      <Button size="sm" onPress={onAction} testID={testID}>
-        <Icon name="plus" size={16} tone="primary-foreground" />
-        <ButtonText size="sm">{actionLabel}</ButtonText>
-      </Button>
+      {showAction ? (
+        <Button size="sm" onPress={onAction} testID={testID}>
+          <Icon name="plus" size={16} tone="primary-foreground" />
+          <ButtonText size="sm">{actionLabel}</ButtonText>
+        </Button>
+      ) : null}
     </View>
   );
 }

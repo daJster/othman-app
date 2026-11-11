@@ -7,6 +7,7 @@ import {
   type BackendEvent,
 } from '@/platform/backend';
 import { useOptionalAuth } from '@/providers/auth-context';
+import { meetingsService } from '@/services/meetings';
 import { queryKeys } from '@/services/query';
 import { currentCursor, useApiStore } from './store';
 
@@ -42,11 +43,18 @@ const POLL_INTERVAL_MS = 5_000;
  * read through the service (`meetings`, `account`) and through the demo
  * endpoint (`demo.meetings`, `demo.accounts`). Missing one half is how the
  * calendar updates while the diagnostics view keeps showing yesterday.
+ *
+ * Meetings are read through two caches — TanStack Query *and* the service's
+ * per-day/range cache — so the service has to be dropped first. Without that,
+ * the invalidation refetches from the domain cache and the screen keeps the
+ * bytes it already had: the event arrived, the network call happened, and
+ * nothing changed.
  */
 function invalidateForEvent(client: QueryClient, event: BackendEvent): void {
   const { type } = event;
 
   if (type.startsWith('meetings.')) {
+    meetingsService.invalidate();
     void client.invalidateQueries({ queryKey: queryKeys.meetings.root });
     void client.invalidateQueries({ queryKey: queryKeys.backend.meetingsRoot });
     return;

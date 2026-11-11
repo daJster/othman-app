@@ -2,7 +2,7 @@ import { usePathname, useRouter } from 'expo-router';
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useSessionRole } from '@/features/auth/use-session-role';
-import { useAuth } from '@/providers/auth-provider';
+import { useAuth } from '@/providers/auth-context';
 import { MOCK_BACKEND_ENABLED } from '@/api';
 import { ScreenView } from '@/ui/screen';
 import { EmptyState, ErrorState, Loading } from '@/ui/states';

@@ -1,6 +1,6 @@
 import type { UserRole } from '@/core/types';
 import { MOCK_BACKEND_ENABLED } from '@/api';
-import { useAuth } from '@/providers/auth-provider';
+import { useAuth } from '@/providers/auth-context';
 
 /**
  * The *real* session role.

@@ -27,7 +27,7 @@ jest.mock('@/features/meetings/use-meetings', () => ({
 
 jest.mock('expo-router/head', () => () => null);
 
-jest.mock('@/providers/auth-provider', () => ({
+jest.mock('@/providers/auth-context', () => ({
   useAuth: () => ({
     user: { uid: 'uid-1' },
     status: 'signed-in',

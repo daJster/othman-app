@@ -1,7 +1,7 @@
 import { Redirect, usePathname } from 'expo-router';
 import type { ReactNode } from 'react';
 import { AUTH_GATING_ENABLED } from '@/features/auth/auth-policy';
-import { useAuth } from '@/providers/auth-provider';
+import { useAuth } from '@/providers/auth-context';
 
 /**
  * Registry-driven private-route gate.
