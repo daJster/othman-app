@@ -16,6 +16,11 @@ const expoConfig = require('eslint-config-expo/flat');
  *   src/services   single implementation shared by every platform (the cloud
  *                  backend is identical everywhere).
  *
+ *   src/api        the request layer: one registry of commands, their caching
+ *                  strategies and invalidation rules, plus the TanStack hooks
+ *                  and the Zustand transport store. Sits above services (it
+ *                  calls them) and below presentation (nothing in it renders).
+ *
  *   src/providers  isomorphic React contexts.
  *
  *   src/ui, src/features, src/app  presentation. May import anything above it.
@@ -143,6 +148,7 @@ module.exports = defineConfig([
       'src/providers/**/*.{ts,tsx}',
       'src/components/**/*.{ts,tsx}',
       'src/hooks/**/*.{ts,tsx}',
+      'src/api/**/*.{ts,tsx}',
     ],
     rules: {
       'no-restricted-imports': [
@@ -189,6 +195,38 @@ module.exports = defineConfig([
                 '@/features/*',
               ],
               message: 'platform/ and services/ sit below the UI layer.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    /*
+     * The request layer is not presentation: it may call providers (the event
+     * bridge follows the session) but never a screen, a component or a hook
+     * that renders. If a request needs UI, the direction is wrong — the UI
+     * consumes the request, not the other way around.
+     */
+    files: ['src/api/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '@/components',
+                '@/components/*',
+                '@/app',
+                '@/app/*',
+                '@/ui',
+                '@/ui/*',
+                '@/features',
+                '@/features/*',
+              ],
+              message:
+                'api/ sits below the UI layer. Keep commands, strategies and transport state here; render in src/features.',
             },
           ],
         },

@@ -29,6 +29,9 @@ export const queryKeys = {
     root: ['othman', 'meetings'] as const,
     /** One day's list. */
     byDate: (date: DateKey) => ['othman', 'meetings', date] as const,
+    /** Every meeting inside the calendar's density window. */
+    range: (from: DateKey, to: DateKey) =>
+      ['othman', 'meetings', 'range', from, to] as const,
   },
 
   account: {
@@ -43,6 +46,13 @@ export const queryKeys = {
     root: ['othman', 'progress'] as const,
     /** The 114 surah rows behind the heatmap. */
     surah: ['othman', 'progress', 'surah'] as const,
+  },
+
+  circle: {
+    /** Every circle read. Pull-to-refresh invalidates this. */
+    root: ['othman', 'circle'] as const,
+    /** The demo list behind the rail, the pill and the notices sheet. */
+    list: ['othman', 'circle', 'list'] as const,
   },
 
   quran: {
@@ -104,5 +114,60 @@ export const queryKeys = {
       ['othman', 'tafsir', 'content', type, absoluteNumber, sourceId] as const,
     /** Surah-level information, keyed by surah not ayah. */
     surah: (surah: number) => ['othman', 'tafsir', 'surah', surah] as const,
+  },
+
+  /**
+   * Mock-backend reads.
+   *
+   * A separate namespace from the repositories the screens already use: the
+   * adapter-backed reads (`meetings`, `account`, `progress`) keep their original
+   * keys so existing hooks are untouched, and these keys exist for operations
+   * the core has no repository for yet (account administration, bookmarks,
+   * notes, catalog inspection).
+   */
+  backend: {
+    root: ['othman', 'backend'] as const,
+    health: ['othman', 'backend', 'health'] as const,
+    /**
+     * Domain roots.
+     *
+     * A mutation invalidates the *narrowest* prefix that covers what it
+     * changed. Invalidating `backend.root` after every write is correct and
+     * wasteful: editing one meeting would drop every cached account, bookmark
+     * and note in the app. These prefixes keep the blast radius to one domain.
+     */
+    accountsRoot: ['othman', 'backend', 'accounts'] as const,
+    accountRoot: ['othman', 'backend', 'account'] as const,
+    meetingsRoot: ['othman', 'backend', 'meetings'] as const,
+    meetingRoot: ['othman', 'backend', 'meeting'] as const,
+    quranRoot: ['othman', 'backend', 'quran'] as const,
+    accounts: (params: {
+      role?: string;
+      q?: string;
+      limit?: number;
+      offset?: number;
+    }) => ['othman', 'backend', 'accounts', params] as const,
+    account: (uid: string) => ['othman', 'backend', 'account', uid] as const,
+    meetings: (params: { date?: string; from?: string; to?: string }) =>
+      ['othman', 'backend', 'meetings', params] as const,
+    meeting: (id: number) => ['othman', 'backend', 'meeting', id] as const,
+    quran: {
+      catalog: ['othman', 'backend', 'quran', 'catalog'] as const,
+      surah: (number: number) =>
+        ['othman', 'backend', 'quran', 'surah', number] as const,
+      ayah: (absoluteNumber: number) =>
+        ['othman', 'backend', 'quran', 'ayah', absoluteNumber] as const,
+      progress: ['othman', 'backend', 'quran', 'progress'] as const,
+      bookmarks: ['othman', 'backend', 'quran', 'bookmarks'] as const,
+      notesRoot: ['othman', 'backend', 'quran', 'notes'] as const,
+      notes: (absoluteNumber?: number) =>
+        [
+          'othman',
+          'backend',
+          'quran',
+          'notes',
+          absoluteNumber ?? 'all',
+        ] as const,
+    },
   },
 } as const;

@@ -1,11 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
+import { api, useApiQuery } from '@/api';
 import type { AyahContent } from '@/core/types';
 import {
   toAsyncResult,
   type AsyncPresentResult,
 } from '@/features/query/async-state';
-import { queryKeys } from '@/services/query';
-import { quranService } from '@/services/quran';
 
 /**
  * The selected ayah's text.
@@ -15,25 +13,14 @@ import { quranService } from '@/services/quran';
  * identify a cache entry. Passing `null` disables the query — an open panel with
  * no selection must not request ayah 1 as a placeholder.
  *
- * `staleTime: Infinity` because the text is immutable scripture, not a record
- * that changes under the reader. A failed request still surfaces as a retryable
- * error so the panel can offer it.
+ * `api.quran.ayah` carries the `static` policy: the text is immutable scripture,
+ * not a record that changes under the reader. A failed request still surfaces
+ * as a retryable error so the panel can offer it.
  */
 export function useAyahContent(
   absoluteNumber: number | null,
 ): AsyncPresentResult<AyahContent> {
-  const query = useQuery({
-    queryKey: queryKeys.quran.ayah(absoluteNumber ?? 0),
-    queryFn: () => {
-      if (absoluteNumber === null) {
-        throw new Error('ayah content requested without a selection');
-      }
-
-      return quranService.loadAyah(absoluteNumber);
-    },
-    enabled: absoluteNumber !== null,
-    staleTime: Infinity,
-  });
+  const query = useApiQuery(api.quran.ayah, { absoluteNumber });
 
   return toAsyncResult(query);
 }

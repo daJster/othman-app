@@ -1,21 +1,23 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useMemo,
   useRef,
   useState,
   type ReactNode,
 } from 'react';
-import type { AccountData, AuthResult, AuthUser } from '@/core/types';
+import type { AuthUser } from '@/core/types';
 import { useAccount } from '@/features/account/use-account';
-import type { AsyncPresentResult } from '@/features/query/async-state';
 import { readerStore } from '@/features/quran/store/reader-store.instance';
 import { authService } from '@/platform/auth';
 import type { AuthService } from '@/platform/auth/auth.types';
 import { queryKeys } from '@/services/query';
+import {
+  AuthContext,
+  type AuthContextValue,
+  type AuthStatus,
+} from './auth-context';
 
 /**
  * The app's single auth session.
@@ -39,31 +41,10 @@ import { queryKeys } from '@/services/query';
  * produces.
  *
  * `service` is injectable so tests describe the contract with a fake instead of
- * booting Firebase.
+ * booting Firebase. The context object and its type live in `./auth-context`,
+ * so the request layer can depend on the session's *shape* without importing
+ * this provider (and therefore without a cycle through `useAccount`).
  */
-
-export type AuthStatus = 'restoring' | 'signed-in' | 'signed-out' | 'error';
-
-export type AuthContextValue = {
-  readonly user: AuthUser | null;
-  readonly status: AuthStatus;
-  readonly sessionError: Error | null;
-  readonly account: AsyncPresentResult<AccountData>;
-  readonly signInWithEmail: (
-    email: string,
-    password: string,
-  ) => Promise<AuthResult>;
-  readonly registerWithEmail: (
-    email: string,
-    password: string,
-  ) => Promise<AuthResult>;
-  readonly signInWithGoogle: () => Promise<AuthResult>;
-  readonly signOut: () => Promise<void>;
-  /** Retry a failed profile read; no-op unless the query is in `error`. */
-  readonly retryProfile: () => void;
-};
-
-const AuthContext = createContext<AuthContextValue | null>(null);
 
 /** Namespaces that belong to a session. `quran` is public and stays cached. */
 const PRIVATE_QUERY_KEYS = [
@@ -234,12 +215,10 @@ export function AuthProvider({
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export function useAuth(): AuthContextValue {
-  const value = useContext(AuthContext);
-
-  if (!value) {
-    throw new Error('useAuth must be used inside <AuthProvider>');
-  }
-
-  return value;
-}
+/**
+ * Re-exported from the leaf context module so existing imports
+ * (`@/providers/auth-provider`) keep working while the request layer can import
+ * `@/providers/auth-context` directly.
+ */
+export { useAuth, useOptionalAuth } from './auth-context';
+export type { AuthContextValue, AuthStatus } from './auth-context';

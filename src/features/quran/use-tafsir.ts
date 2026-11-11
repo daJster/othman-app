@@ -1,15 +1,12 @@
-import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
+import { api, useApiQuery } from '@/api';
 import type {
-  BookContentType,
   ContentBody,
   ContentSource,
   ContentType,
   SurahInfoSection,
 } from '@/core/types';
 import { toAsyncResult, type AsyncResult } from '@/features/query/async-state';
-import { queryKeys } from '@/services/query';
-import { tafsirService } from '@/services/tafsir';
 import type { SelectedAyah } from './ayah-content';
 
 /**
@@ -55,21 +52,9 @@ export function useTafsirPanel(
   } | null>(null);
 
   const absoluteNumber = ayah?.absoluteNumber ?? null;
-  const local = ayah ? { surah: ayah.surah, ayah: ayah.ayah } : null;
   const isBookType = type !== 'surah';
 
-  const sourceQuery = useQuery({
-    queryKey: queryKeys.tafsir.sources(type, absoluteNumber ?? 0),
-    queryFn: () => {
-      if (local === null || !isBookType) {
-        throw new Error('content sources requested without a selection');
-      }
-
-      return tafsirService.sources(type as BookContentType, local);
-    },
-    enabled: local !== null && isBookType,
-    staleTime: Infinity,
-  });
+  const sourceQuery = useApiQuery(api.tafsir.sources, { type, ayah });
 
   const sourceRows = sourceQuery.data ?? [];
   const rememberedId =
@@ -90,34 +75,16 @@ export function useTafsirPanel(
         ? (sourceRows[0]?.id ?? null)
         : null;
 
-  const contentQuery = useQuery({
-    queryKey: queryKeys.tafsir.content(
-      type,
-      absoluteNumber ?? 0,
-      sourceId ?? 0,
-    ),
-    queryFn: () => {
-      if (local === null || !isBookType || sourceId === null) {
-        throw new Error('content requested without a selection');
-      }
-
-      return tafsirService.content(type as BookContentType, local, sourceId);
-    },
-    enabled: local !== null && isBookType && sourceId !== null,
-    staleTime: Infinity,
+  const contentQuery = useApiQuery(api.tafsir.content, {
+    type,
+    ayah,
+    sourceId,
   });
 
-  const surahQuery = useQuery({
-    queryKey: queryKeys.tafsir.surah(ayah?.surah ?? 0),
-    queryFn: () => {
-      if (ayah === null) {
-        throw new Error('surah information requested without a selection');
-      }
-
-      return tafsirService.surahInfo(ayah.surah);
-    },
-    enabled: ayah !== null && type === 'surah',
-    staleTime: Infinity,
+  const surahQuery = useApiQuery(api.tafsir.surah, {
+    // Only the `surah` tab reads this, so a book type makes the question moot —
+    // `null` disables it without a second `enabled` rule at the call site.
+    surah: type === 'surah' ? (ayah?.surah ?? null) : null,
   });
 
   return {

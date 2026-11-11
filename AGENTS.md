@@ -8,6 +8,14 @@ deploy permissions, PR evidence fields, cleanup rules, and the scope boundaries
 (demo meetings/progress, local photos, deferred Stage 9). The full P9.3 rewrite
 of this file remains deferred.
 
+## Request layer
+
+Every HTTP command lives in one registry, `src/api/endpoints.ts`, with its cache
+key, fetching strategy and invalidation rule. Screens read it through
+`useApiQuery` / `useApiMutation`; client-local transport state is Zustand, server
+state is TanStack Query. See [`docs/api.md`](docs/api.md) before adding a request
+or a `staleTime`.
+
 ## Dev environment (authoritative)
 
 Parts of this file still describe a retired Vite/web-only layout. The app is

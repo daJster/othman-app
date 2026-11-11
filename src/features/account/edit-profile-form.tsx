@@ -63,7 +63,7 @@ export function EditProfileForm({
   const { t } = useTranslation();
   const scheme = useColorScheme();
   const insets = useSafeAreaInsets();
-  const update = useUpdateAccount(account.uid);
+  const update = useUpdateAccount();
 
   const [draft, setDraft] = useState(() => toProfileDraft(account));
   const [photoURL, setPhotoURL] = useState(account.photoURL ?? null);
@@ -174,9 +174,12 @@ export function EditProfileForm({
     if (roleChanged) patch.role = role;
     if (photoChanged) patch.photoURL = photoURL;
 
-    update.mutate(patch, {
-      onSuccess: () => setSaved(true),
-    });
+    update.mutate(
+      { uid: account.uid, patch },
+      {
+        onSuccess: () => setSaved(true),
+      },
+    );
   };
 
   return (
@@ -349,7 +352,7 @@ export function EditProfileForm({
         "keyboard never covers Save" requirement.
       */}
       <View
-        className="border-t border-border bg-background px-4 pt-4"
+        className="border-t border-glass-edge bg-glass px-4 pt-4"
         style={{ paddingBottom: Math.max(16, insets.bottom) }}
       >
         <Button

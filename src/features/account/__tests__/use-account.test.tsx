@@ -149,7 +149,7 @@ describe('useUpdateAccount', () => {
     const { result } = await renderHook(
       () => ({
         account: useAccount(USER),
-        update: useUpdateAccount(USER.uid),
+        update: useUpdateAccount(),
       }),
       { wrapper: makeWrapper(client) },
     );
@@ -159,7 +159,10 @@ describe('useUpdateAccount', () => {
     );
 
     await act(async () => {
-      await result.current.update.mutateAsync({ displayName: 'New name' });
+      await result.current.update.mutateAsync({
+        uid: USER.uid,
+        patch: { displayName: 'New name' },
+      });
     });
 
     expect(service.update).toHaveBeenCalledWith('uid-1', {
@@ -175,12 +178,15 @@ describe('useUpdateAccount', () => {
     service.update.mockResolvedValue(undefined);
     const invalidate = jest.spyOn(client, 'invalidateQueries');
 
-    const { result } = await renderHook(() => useUpdateAccount('uid-1'), {
+    const { result } = await renderHook(() => useUpdateAccount(), {
       wrapper: makeWrapper(client),
     });
 
     await act(async () => {
-      await result.current.mutateAsync({ displayName: 'New name' });
+      await result.current.mutateAsync({
+        uid: 'uid-1',
+        patch: { displayName: 'New name' },
+      });
     });
 
     expect(invalidate).toHaveBeenCalledWith({
@@ -191,13 +197,16 @@ describe('useUpdateAccount', () => {
   it('surfaces a failed write as a mutation error', async () => {
     service.update.mockRejectedValue(new Error('write failed'));
 
-    const { result } = await renderHook(() => useUpdateAccount('uid-1'), {
+    const { result } = await renderHook(() => useUpdateAccount(), {
       wrapper: makeWrapper(client),
     });
 
     await act(async () => {
       await expect(
-        result.current.mutateAsync({ displayName: 'New name' }),
+        result.current.mutateAsync({
+          uid: 'uid-1',
+          patch: { displayName: 'New name' },
+        }),
       ).rejects.toThrow('write failed');
     });
 

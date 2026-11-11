@@ -1,5 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef } from 'react';
+import { api, useApiMutation, useApiQuery } from '@/api';
 import {
   createNote,
   type NoteAyah,
@@ -7,7 +8,6 @@ import {
 } from '@/core/domain/notes/notes';
 import { toAsyncResult, type AsyncState } from '@/features/query/async-state';
 import { queryKeys } from '@/services/query';
-import { notesService } from '@/services/notes';
 
 /**
  * Local notes for one selected ayah.
@@ -39,36 +39,27 @@ export function useAyahNotes(
   const absoluteNumber = ayah?.absoluteNumber ?? null;
   const key = queryKeys.notes.byAyah(namespace, absoluteNumber ?? 0);
 
-  const query = useQuery({
-    queryKey: key,
-    queryFn: async () => {
-      if (absoluteNumber === null) {
-        throw new Error('notes requested without a selection');
-      }
-
-      const notes = await notesService.list(namespace);
-
-      return notes.filter(
-        (note) => note.ayah.absoluteNumber === absoluteNumber,
-      );
-    },
-    enabled: absoluteNumber !== null,
+  const query = useApiQuery(api.notes.byAyah, {
+    namespace,
+    absoluteNumber,
   });
 
-  const mutation = useMutation({
-    mutationFn: (note: QuranNote) => notesService.save(namespace, note),
-    onMutate: async (note) => {
+  const mutation = useApiMutation(api.notes.save, {
+    onMutate: async (variables) => {
       // A refetch that started before this optimistic write must not land on top
       // of it with the old list.
       await client.cancelQueries({ queryKey: key });
 
       const previous = client.getQueryData<QuranNote[]>(key);
 
-      client.setQueryData<QuranNote[]>(key, (rows) => [...(rows ?? []), note]);
+      client.setQueryData<QuranNote[]>(key, (rows) => [
+        ...(rows ?? []),
+        variables.note,
+      ]);
 
       return { previous };
     },
-    onError: (_error, _note, context) => {
+    onError: (_error, _variables, context) => {
       if (context?.previous === undefined) {
         client.removeQueries({ queryKey: key });
 
@@ -76,11 +67,6 @@ export function useAyahNotes(
       }
 
       client.setQueryData<QuranNote[]>(key, context.previous);
-    },
-    onSettled: () => {
-      // Reconcile with what storage actually holds, including a list another
-      // panel wrote while this save was in flight.
-      void client.invalidateQueries({ queryKey: key });
     },
   });
 
@@ -115,7 +101,7 @@ export function useAyahNotes(
       pending.current = note;
 
       try {
-        await mutateAsync(note);
+        await mutateAsync({ namespace, note });
       } catch (writeError) {
         // `pending.current` intentionally survives: the next save of the same
         // draft reuses this identity.
@@ -126,7 +112,7 @@ export function useAyahNotes(
 
       return note;
     },
-    [ayah, mutateAsync],
+    [ayah, mutateAsync, namespace],
   );
 
   return {
