@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { useUiFontClass } from '@/ui/font';
 import { Slot } from '@rn-primitives/slot';
 import { cva, type VariantProps } from 'class-variance-authority';
 import * as React from 'react';
@@ -82,9 +83,23 @@ function Text({
   }) {
   const textClass = React.useContext(TextClassContext);
   const Component = asChild ? Slot : RNText;
+  /**
+   * React Native does not inherit a font family, so a primitive that names none
+   * renders in the platform default — not in the app's typeface. This is the
+   * shared base for every react-native-reusables text (button labels, badges,
+   * dialog titles, inputs), so the family is applied here once, ahead of the
+   * variant classes so `variant="code"` keeps its `font-mono`, and ahead of the
+   * caller's `className` so an explicit family still wins.
+   */
+  const familyClass = useUiFontClass();
   return (
     <Component
-      className={cn(textVariants({ variant }), textClass, className)}
+      className={cn(
+        familyClass,
+        textVariants({ variant }),
+        textClass,
+        className,
+      )}
       role={variant ? ROLE[variant] : undefined}
       aria-level={variant ? ARIA_LEVEL[variant] : undefined}
       {...props}
