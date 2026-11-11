@@ -40,9 +40,15 @@ Feature slug: `integration`
 
 ## What was done
 
-1. **Snapshot first.** The whole dirty tree (tracked + untracked) was captured
-   as `refs/wip/20261111-211656` (`4465fc8`) through a throwaway index, so no
-   agent's work could be lost by a later stage or reset.
+1. **Snapshot first — and it did not work.** The intent was to capture the whole
+   dirty tree (tracked + untracked) as `refs/wip/20261111-211656` through a
+   throwaway index. The index path was relative and `git add -A` failed silently
+   (its stderr was discarded), so the resulting commit has an **empty tree**:
+   `git ls-tree -r refs/wip/20261111-211656` lists 0 files. Nothing was protected
+   by it. No harm followed because no destructive operation (no `stash`, `reset`,
+   `checkout -- .` or `clean`) ran before the agents' own commits landed, and the
+   final working tree is clean. The lesson is recorded rather than hidden: a
+   safety net has to be verified (`git ls-tree` count) before it is trusted.
 2. **Two consolidation commits** written by the integration agent, verified in a
    detached sandbox at `1e143bd`:
    - `af0e3dd` `chore(repo): restore the git authorities and adopt the local
@@ -72,7 +78,8 @@ Feature slug: `integration`
 
 ## Decisions (user unavailable; each branch resolved to the recommended default)
 
-1. **A snapshot is not optional** before staging someone else's uncommitted work.
+1. **A safety net must be verified, not assumed.** The snapshot attempt is kept
+   in the record as a failure precisely because it looked successful.
 2. **The running tree wins over the pushed tree.** The pushed tip was broken;
    the working tree was not.
 3. **Restore authority documents** (`CONTRIBUTING.md`, `MIGRATE.md`) instead of
@@ -97,7 +104,7 @@ Feature slug: `integration`
 typecheck         pass
 typecheck:core    pass
 check:core        pass
-check:i18n        en and ar agree on 620 keys; 372 keys referenced from source
+check:i18n        en and ar agree on 583 keys; 432 keys referenced from source
 lint              0 errors, 13 warnings (pre-existing `require()` in tests)
 format:check      all matched files use Prettier code style
 test:server       14 passed, 0 failed
