@@ -23,11 +23,43 @@
     },
     "circle": {
       "title": "Your circle"
+    },
+    "scroll": {
+      "region": "Page content"
+    },
+    "notices": {
+      "open": "Notifications",
+      "title": "Notifications",
+      "empty": "Nothing yet.",
+      "unread": "Unread notifications",
+      "today": "Today",
+      "thisWeek": "This week"
+    },
+    "rail": {
+      "halqa": "Next session",
+      "exam": "Next exam",
+      "notice": "Latest news",
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "inDays": "In {{days}} days",
+      "empty": "No upcoming sessions",
+      "loading": "Loading your circle…",
+      "error": "Couldn't load your circle."
+    },
+    "pill": {
+      "resume": "Continue reading · page {{page}}",
+      "next": "{{title}} · {{when}}"
+    },
+    "news": {
+      "shaykh": "Shaykh",
+      "halqa": "Circle",
+      "app": "App"
     }
   },
   "action": {
     "back": "Back",
     "cancel": "Cancel",
+    "clear": "Clear",
     "close": "Close",
     "continue": "Continue",
     "edit": "Edit",
@@ -36,8 +68,13 @@
     "loading": "Loading…",
     "retry": "Try again",
     "save": "Save",
+    "sections": "Sections",
     "signIn": "Sign in",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "add": "Add",
+    "create": "Create",
+    "delete": "Delete",
+    "open": "Open"
   },
   "label": {
     "email": "Email",
@@ -76,14 +113,17 @@
     "system": "System",
     "autoShort": "Auto",
     "lightShort": "Light",
-    "darkShort": "Dark"
+    "darkShort": "Dark",
+    "systemHint": "System follows your device's appearance setting."
   },
   "quran": {
     "landing": {
       "hizb": "Today's hizb",
       "activity": "Recent activity",
       "history": "The mushaf's journey",
-      "story": "Surah story"
+      "story": "Surah story",
+      "records": "My records",
+      "recordsHint": "Memorisation, bookmarks and notes"
     },
     "hizb": {
       "title": "Today's hizb",
@@ -229,7 +269,8 @@
     "notesPlaceholder": "Write a note for this ayah",
     "notesSave": "Save note",
     "notesSaving": "Saving…",
-    "notesSaveError": "The note could not be saved. Your draft is still here."
+    "notesSaveError": "The note could not be saved. Your draft is still here.",
+    "menuRecords": "My records"
   },
   "state": {
     "loading": "Loading…",
@@ -297,7 +338,55 @@
     "sections": {
       "preferences": "Preferences",
       "settings": "Settings",
-      "session": "Session"
+      "session": "Session",
+      "manage": "Manage",
+      "danger": "Account"
+    },
+    "completeness": {
+      "title": "Profile completeness",
+      "progress": "{{done}} of {{total}} complete",
+      "name": "Name",
+      "photo": "Photo",
+      "phone": "Phone",
+      "hint": "A complete profile has a name, a photo and a phone number. Only you see these details.",
+      "action": "Finish profile"
+    },
+    "details": {
+      "open": "View details",
+      "title": "Profile",
+      "email": "Email",
+      "phone": "Phone",
+      "role": "Role",
+      "noPhone": "No phone on file",
+      "note": "These details are stored with your account and are not shown to other students.",
+      "edit": "Edit profile"
+    },
+    "snapshot": {
+      "title": "Learning snapshot",
+      "view": "View progress",
+      "error": "Could not load your learning numbers.",
+      "empty": "No progress recorded yet.",
+      "note": "A snapshot of your saved progress.",
+      "average": "Average memorisation",
+      "week": "{{count}} reviews in the latest week",
+      "memorised": "Memorised surahs",
+      "started": "Started surahs"
+    },
+    "feedback": {
+      "open": "Send feedback",
+      "rowDescription": "Tell us how the app is working for you",
+      "title": "Your feedback",
+      "description": "Your notes help us improve reading and meetings.",
+      "rating": "How has it been?",
+      "ratingA11y": "Rate {{value}} out of 5",
+      "ratingValue": "{{value}} of 5",
+      "message": "Your note",
+      "messagePlaceholder": "Write your note here…",
+      "required": "Choose a rating first.",
+      "error": "Could not save your feedback. Try again.",
+      "submit": "Send",
+      "sending": "Sending…",
+      "saved": "Feedback saved on this device. Thank you."
     },
     "profile": {
       "anonymous": "No name yet",
@@ -346,19 +435,33 @@
     "a11y": {
       "profilePhoto": "Profile photo",
       "edit": "Edit profile"
+    },
+    "admin": {
+      "members": "Members",
+      "membersDescription": "Accounts, roles and access"
+    },
+    "danger": {
+      "delete": "Delete my account",
+      "deleteDescription": "Removes your profile and reading records",
+      "title": "Delete your account?",
+      "message": "Your profile, progress, bookmarks and notes will be removed. This cannot be undone.",
+      "confirm": "Delete account",
+      "failed": "Couldn't delete your account."
     }
   },
   "meeting": {
     "status": {
       "soon": "Starting soon",
       "upcoming": "Today",
-      "scheduled": "Scheduled"
+      "scheduled": "Scheduled",
+      "past": "Ended"
     },
+    "duration": "{{minutes}} min",
     "attendees_one": "{{count}} attendee",
     "attendees_other": "{{count}} attendees",
     "found_zero": "No meetings",
-    "found_one": "1 meeting",
-    "found_other": "{{count}} meetings",
+    "found_one": "1 session",
+    "found_other": "{{count}} sessions",
     "calendar": {
       "system": "Calendar system",
       "gregorian": "Gregorian",
@@ -367,9 +470,60 @@
       "next": "Next month",
       "today": "Today"
     },
+    "nextSession": "Next session: {{date}}",
     "details": "Details",
     "less": "Less",
-    "organizedBy": "Organized by {{name}}"
+    "organizedBy": "Organized by {{name}}",
+    "create": "New session",
+    "edit": "Edit session",
+    "form": {
+      "createTitle": "New session",
+      "editTitle": "Edit session",
+      "createDescription": "Pick a day and time; the calendar updates as soon as you save.",
+      "editDescription": "Changes apply to everyone in the circle.",
+      "title": "Title",
+      "titlePlaceholder": "e.g. Weekly review",
+      "date": "Date",
+      "dateHint": "YYYY-MM-DD",
+      "time": "Start",
+      "timeHint": "24-hour, HH:mm",
+      "duration": "Minutes",
+      "location": "Location",
+      "locationPlaceholder": "e.g. In the kuttab, or Google Meet",
+      "meetLink": "Meeting link",
+      "meetLinkHint": "Optional https:// link",
+      "organizer": "Organiser",
+      "description": "Description",
+      "descriptionPlaceholder": "What will you cover?",
+      "optional": "Optional",
+      "create": "Create session",
+      "save": "Save changes",
+      "created": "Session created",
+      "updated": "Session updated",
+      "saveFailed": "Couldn't save this session.",
+      "validation": {
+        "title": "Add a title of at most 200 characters.",
+        "date": "Use a real date in YYYY-MM-DD form.",
+        "time": "Use a 24-hour time such as 18:00.",
+        "duration": "Use a whole number of minutes between 1 and 1440.",
+        "link": "Use an http:// or https:// link, or leave it empty."
+      },
+      "languageHint": "The same text appears in Arabic and English.",
+      "saving": "Saving…"
+    },
+    "rsvp": {
+      "attend": "Attend",
+      "attending": "You're attending",
+      "failed": "Couldn't update your attendance.",
+      "pastHint": "This session has ended."
+    },
+    "delete": {
+      "action": "Delete",
+      "title": "Delete this session?",
+      "message": "“{{title}}” will disappear from everyone’s calendar.",
+      "failed": "Couldn't delete this session.",
+      "done": "Session deleted"
+    }
   },
   "page": {
     "meetings": {
@@ -378,7 +532,7 @@
         "description": "Sessions with your shaykh and classmates"
       },
       "list": {
-        "empty": "No meetings on this day."
+        "empty": "No sessions on this day."
       }
     }
   },
@@ -400,16 +554,70 @@
         "title": "Progress",
         "subtitle": "Your memorisation over time",
         "gridTitle": "Surahs",
+        "gridDescription": "One square per surah. Tap a square for its details.",
+        "sections": {
+          "overview": "Overview",
+          "surahs": "Surahs",
+          "activity": "Activity"
+        },
         "legend": {
           "less": "Less",
-          "more": "More"
+          "more": "More",
+          "open": "How the grid works",
+          "hint": "Each square is a surah; darker means more memorised.",
+          "title": "How the grid works",
+          "body": "Each square is one surah. The fill deepens as more of it is memorised. Tap a square for its details.",
+          "memorised": "The surah is fully memorised.",
+          "inProgress": "The surah is started but not finished.",
+          "notStarted": "The surah has not been started."
         },
         "empty": "No progress recorded yet.",
+        "emptyDescription": "Start reading and your progress will appear here.",
+        "emptyAction": "Open the Quran",
+        "search": {
+          "placeholder": "Search by surah number or status",
+          "clear": "Clear search"
+        },
+        "filters": {
+          "all": "All",
+          "hideEmpty": "Hide not-started surahs",
+          "hideEmptyHint": "Show only surahs you have started.",
+          "showing": "Showing {{shown}} of {{total}}",
+          "emptyTitle": "No surahs match",
+          "emptyDescription": "Try another number or change the filter.",
+          "clear": "Clear filters"
+        },
         "summary": {
           "average": "Overall memorisation",
           "memorised": "Memorised",
           "started": "Started",
           "surahs": "Surahs"
+        },
+        "milestones": {
+          "title": "Milestones",
+          "description": "Milestones follow memorised surahs.",
+          "step": "{{count}} surahs",
+          "progress": "{{done}} of {{total}} memorised"
+        },
+        "week": {
+          "title": "Latest reviews",
+          "weekOf": "Week of {{date}}",
+          "summary": "Week total: {{count}}",
+          "dayA11y": "{{date}}: {{count}} surahs reviewed"
+        },
+        "trend": {
+          "title": "Review rhythm",
+          "subtitle": "Surahs reviewed per week over {{weeks}} weeks",
+          "total": "Total reviews: {{count}}",
+          "pointA11y": "Week of {{week}}: {{count}} surahs",
+          "empty": "No reviews in this period yet.",
+          "a11y": "{{count}} reviews over {{weeks}} weeks"
+        },
+        "recent": {
+          "title": "Recently reviewed",
+          "empty": "No reviews yet.",
+          "rowA11y": "Surah {{number}}: {{percent}} memorised",
+          "all": "View all surahs"
         },
         "surah": "Surah {{number}}",
         "band": {
@@ -429,6 +637,160 @@
           "title": "Recent tasks"
         }
       }
+    }
+  },
+  "backend": {
+    "error": {
+      "invalid": "Check the values and try again.",
+      "unauthenticated": "Your session has ended. Sign in again.",
+      "permission": "You don't have permission to do that.",
+      "notFound": "That item no longer exists.",
+      "exists": "That already exists.",
+      "precondition": "That change isn't allowed right now.",
+      "unavailable": "The server is unavailable. Try again.",
+      "network": "Couldn't reach the server.",
+      "timeout": "The server took too long to answer.",
+      "unknown": "Something went wrong. Try again."
+    }
+  },
+  "admin": {
+    "noBackend": {
+      "title": "Server mode is off",
+      "description": "This surface manages records on the local mock server. Start the app with `npm run dev` to use it."
+    },
+    "signIn": {
+      "title": "Sign in to manage",
+      "description": "Member and session changes are tied to your account."
+    },
+    "forbidden": {
+      "title": "You don't have access",
+      "description": "This area is limited to administrators."
+    }
+  },
+  "members": {
+    "title": "Members",
+    "subtitle": "Accounts, roles and access",
+    "add": "New member",
+    "you": "You",
+    "disabled": "Disabled",
+    "filters": "Role",
+    "search": {
+      "placeholder": "Search by name or email",
+      "clear": "Clear search"
+    },
+    "empty": {
+      "title": "No members yet",
+      "description": "Create the first account for this cohort.",
+      "action": "New member"
+    },
+    "filteredEmpty": {
+      "title": "No member matches",
+      "description": "Try another name or role.",
+      "clear": "Clear filters"
+    },
+    "form": {
+      "createTitle": "New member",
+      "editTitle": "Edit member",
+      "createDescription": "The member signs in with this email and password.",
+      "editDescription": "Change the profile, role or access of this account.",
+      "email": "Email",
+      "emailHint": "Used to sign in. It cannot be changed later.",
+      "password": "Password",
+      "passwordHint": "At least 8 characters.",
+      "displayName": "Display name",
+      "displayNamePlaceholder": "The name the circle sees",
+      "phone": "Phone",
+      "phonePlaceholder": "+212 6 12 34 56 78",
+      "role": "Role",
+      "roleHint": "Only a superadmin can grant or remove the superadmin role.",
+      "disabled": "Disable sign-in",
+      "disabledHint": "Keeps the account and its records, but ends its sessions.",
+      "save": "Save member",
+      "saving": "Saving…",
+      "created": "Member created",
+      "updated": "Member updated",
+      "saveFailed": "Couldn't save this member.",
+      "delete": "Delete member",
+      "deleteTitle": "Delete this member?",
+      "deleteMessage": "“{{name}}” and their reading records will be removed. This cannot be undone.",
+      "deleted": "Member deleted",
+      "deleteFailed": "Couldn't delete this member.",
+      "validation": {
+        "email": "Enter a valid email address.",
+        "password": "Use at least 8 characters.",
+        "displayName": "Use between 2 and 60 characters."
+      }
+    }
+  },
+  "records": {
+    "title": "My Qur'an",
+    "subtitle": "Memorisation, bookmarks and notes",
+    "open": "Open",
+    "signedOut": {
+      "title": "Sign in to see your records",
+      "description": "Progress, bookmarks and notes belong to your account."
+    },
+    "sections": {
+      "progress": "Memorisation",
+      "bookmarks": "Bookmarks",
+      "notes": "Notes"
+    },
+    "progress": {
+      "description": "One percentage per surah. It feeds the progress heatmap.",
+      "add": "Record a surah",
+      "edit": "Edit progress",
+      "empty": {
+        "title": "Nothing recorded yet",
+        "description": "Add a surah and how much of it you have memorised."
+      },
+      "surah": "Surah",
+      "surahHint": "1–114",
+      "percent": "Memorised",
+      "percentHint": "0–100",
+      "reviewed": "Last reviewed",
+      "reviewedHint": "YYYY-MM-DD, optional",
+      "saved": "Progress saved",
+      "removed": "Progress removed",
+      "deleteTitle": "Remove this progress?",
+      "deleteMessage": "You can record the surah again at any time."
+    },
+    "bookmarks": {
+      "description": "Positions you want to return to.",
+      "add": "Add bookmark",
+      "edit": "Edit bookmark",
+      "empty": {
+        "title": "No bookmarks",
+        "description": "Save an ayah you want to come back to."
+      },
+      "surah": "Surah",
+      "ayah": "Ayah",
+      "label": "Label",
+      "labelPlaceholder": "Optional, e.g. “Start of Juz 3”",
+      "saved": "Bookmark saved",
+      "removed": "Bookmark removed",
+      "deleteTitle": "Delete this bookmark?",
+      "deleteMessage": "The position is removed from your list; the mushaf is unchanged.",
+      "openFailed": "Couldn't open this position.",
+      "show": "Show on the page"
+    },
+    "notes": {
+      "description": "Your own words on an ayah.",
+      "add": "Add note",
+      "edit": "Edit note",
+      "empty": {
+        "title": "No notes",
+        "description": "Write a note against any ayah."
+      },
+      "surah": "Surah",
+      "ayah": "Ayah",
+      "text": "Note",
+      "textPlaceholder": "What do you want to remember?",
+      "saved": "Note saved",
+      "removed": "Note deleted",
+      "deleteTitle": "Delete this note?",
+      "deleteMessage": "This note will be removed from your account.",
+      "validation": "Choose a valid surah and ayah, then write the note.",
+      "open": "Open the ayah"
     }
   }
 }

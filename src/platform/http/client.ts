@@ -16,12 +16,15 @@ export interface HttpRequestInit {
 export class HttpError extends Error {
   readonly status: number;
   readonly url: string;
+  /** Parsed JSON error body when the server sent one, else `undefined`. */
+  readonly body?: unknown;
 
-  constructor(status: number, url: string, message?: string) {
+  constructor(status: number, url: string, message?: string, body?: unknown) {
     super(message ?? `Request failed with status ${status}`);
     this.name = 'HttpError';
     this.status = status;
     this.url = url;
+    this.body = body;
   }
 }
 
@@ -98,7 +101,17 @@ export class FetchHttpClient implements HttpClient {
       });
 
       if (!res.ok) {
-        throw new HttpError(res.status, url);
+        // Read the error body before throwing: the backend puts its error code
+        // in `{ error: { code, message } }`, and a status alone cannot tell
+        // "wrong password" from "account disabled".
+        let body: unknown;
+        const contentType = res.headers.get('content-type');
+
+        if (contentType?.includes('application/json')) {
+          body = await res.json().catch(() => undefined);
+        }
+
+        throw new HttpError(res.status, url, undefined, body);
       }
 
       const contentType = res.headers.get('content-type');

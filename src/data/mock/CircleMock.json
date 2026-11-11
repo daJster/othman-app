@@ -1,0 +1,124 @@
+{
+  "items": [
+    {
+      "id": "halqa-3",
+      "kind": "halqa",
+      "dayOffset": 0,
+      "time": "18:00",
+      "title": {
+        "ar": "حلقة الجزء الثالث",
+        "en": "Juz 3 session"
+      },
+      "body": {
+        "ar": "تسميع سورة البقرة، من الآية ١٢٠ إلى ١٨٠، ثم مراجعة الأخطاء المتكررة.",
+        "en": "Recitation of Al-Baqarah, ayah 120 to 180, then a review of repeated mistakes."
+      },
+      "meta": {
+        "ar": "الشيخ عبد الرحمن · عن بعد",
+        "en": "Shaykh Abdulrahman · remote"
+      },
+      "topic": null,
+      "href": "/meetings"
+    },
+    {
+      "id": "halqa-4",
+      "kind": "halqa",
+      "dayOffset": 3,
+      "time": "18:00",
+      "title": {
+        "ar": "حلقة المراجعة الأسبوعية",
+        "en": "Weekly review session"
+      },
+      "body": {
+        "ar": "مراجعة ما حُفظ خلال الأسبوع مع تصحيح التلاوة، آيةً بعد آية.",
+        "en": "Review the week's memorisation with recitation correction, ayah by ayah."
+      },
+      "meta": {
+        "ar": "الشيخ عبد الرحمن · في الكُتّاب",
+        "en": "Shaykh Abdulrahman · at the kuttab"
+      },
+      "topic": null,
+      "href": "/meetings"
+    },
+    {
+      "id": "exam-3",
+      "kind": "exam",
+      "dayOffset": 5,
+      "time": "17:00",
+      "title": {
+        "ar": "اختبار الجزء الثالث",
+        "en": "Juz 3 exam"
+      },
+      "body": {
+        "ar": "الجزء الثالث كاملًا: تسميع متصل، ثم سؤالان في معاني الآيات. المدة ٢٠ دقيقة.",
+        "en": "All of Juz 3: continuous recitation, then two questions on the meanings of the ayat. Twenty minutes."
+      },
+      "meta": {
+        "ar": "الشيخ عبد الرحمن · ٢٠ دقيقة",
+        "en": "Shaykh Abdulrahman · 20 min"
+      },
+      "topic": null,
+      "href": null
+    },
+    {
+      "id": "notice-shaykh",
+      "kind": "notice",
+      "dayOffset": -1,
+      "time": null,
+      "title": {
+        "ar": "موعد حلقة الغد تأخّر نصف ساعة",
+        "en": "Tomorrow's session moved back half an hour"
+      },
+      "body": {
+        "ar": "تبدأ الحلقة السادسة والنصف بدلًا من السادسة، لانشغال الشيخ بدورة إجازة. من تعذّر عليه الحضور يراسل المشرف.",
+        "en": "The session starts at 18:30 instead of 18:00 while the shaykh finishes an ijazah course. Anyone who cannot make it should message the supervisor."
+      },
+      "meta": {
+        "ar": "الشيخ عبد الرحمن",
+        "en": "Shaykh Abdulrahman"
+      },
+      "topic": "shaykh",
+      "href": null
+    },
+    {
+      "id": "notice-halqa",
+      "kind": "notice",
+      "dayOffset": -2,
+      "time": null,
+      "title": {
+        "ar": "تسميع هذا الأسبوع: من الآية ١٢٠ إلى ١٨٠",
+        "en": "This week's recitation: ayah 120 to 180"
+      },
+      "body": {
+        "ar": "نبدأ من الآية ١٢٠ ونقف عند ١٨٠. من أتمّ الحفظ مبكرًا ينتقل إلى المراجعة الخاصة.",
+        "en": "We begin at ayah 120 and stop at 180. Anyone who finishes early moves on to private review."
+      },
+      "meta": {
+        "ar": "المشرف",
+        "en": "Supervisor"
+      },
+      "topic": "halqa",
+      "href": null
+    },
+    {
+      "id": "notice-app",
+      "kind": "notice",
+      "dayOffset": -4,
+      "time": null,
+      "title": {
+        "ar": "المصحف صار يحفظ موضع القراءة لكل صفحة",
+        "en": "The reader now remembers your place on every page"
+      },
+      "body": {
+        "ar": "أغلق التطبيق وعد متى شئت: يفتح المصحف على آخر صفحة قرأتها، مع موضع الآية نفسها.",
+        "en": "Close the app and come back whenever: the mushaf opens on the last page you read, at the same ayah."
+      },
+      "meta": {
+        "ar": "فريق التطبيق",
+        "en": "App team"
+      },
+      "topic": "app",
+      "href": null
+    }
+  ]
+}

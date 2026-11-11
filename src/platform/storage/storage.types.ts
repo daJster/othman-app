@@ -12,6 +12,11 @@ export const STORAGE_KEYS = {
   quranEdition: 'quranreader:edition',
   lastVisitedPage: 'lastVisitedPage',
   quranNotes: 'quran:notes',
+  quranReadingLog: 'quran:reading-log',
+  homeNotices: 'home:notices-read',
+  backendSession: 'backend:session',
+  progressHideEmpty: 'progress:hide-empty',
+  accountFeedback: 'account:feedback',
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

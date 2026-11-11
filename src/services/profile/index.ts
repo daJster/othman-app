@@ -1,3 +1,5 @@
+import { MOCK_BACKEND_ENABLED } from '@/platform/backend';
+import { backendProfileRepository } from './backend-profile.repository';
 import { firestoreProfileRepository } from './firestore-profile.repository';
 import { createProfileService } from './profile.service';
 
@@ -8,15 +10,13 @@ import { createProfileService } from './profile.service';
  * repository directly, which is what keeps `firebase/*` out of the presentation
  * layer (enforced in `eslint.config.js`).
  *
- * The repository is Firestore now that sign-in exists. The in-memory
- * `demo-profile.repository.ts` is retained only as an injectable fixture for
- * tests of the `ProfileRepository` contract; nothing in the app imports it.
- *
- * Reading a missing document is not an error (`mergeAuthWithProfile` supplies
- * the auth-only fallback), and a failed read propagates so the UI can show a
- * retry instead of inventing a role.
+ * With `EXPO_PUBLIC_MOCK_BACKEND=1` the account lives in the mock backend; the
+ * merge contract (`authUser` + profile) is identical, so `useAccount` and the
+ * account screens do not change.
  */
-export const profileService = createProfileService(firestoreProfileRepository);
+export const profileService = createProfileService(
+  MOCK_BACKEND_ENABLED ? backendProfileRepository : firestoreProfileRepository,
+);
 
 export { createProfileService } from './profile.service';
 export type { ProfileService } from './profile.service';

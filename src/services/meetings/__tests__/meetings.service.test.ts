@@ -12,8 +12,8 @@ function meeting(id: number, date: DateKey = DAY): Meeting {
     title: `Meeting ${id}`,
     description: '',
     date,
-    time: '2:00 PM',
-    duration: '60 min',
+    time: '18:00',
+    durationMinutes: 60,
     meetLink: '',
     status: 'scheduled',
     attendees: [],
@@ -24,10 +24,18 @@ function meeting(id: number, date: DateKey = DAY): Meeting {
 
 function createFakeRepository(
   byDay: Partial<Record<DateKey, Meeting[]>> = {},
-): MeetingsRepository & { listByDate: jest.Mock } {
+): MeetingsRepository & {
+  listByDate: jest.Mock;
+  listByRange: jest.Mock;
+} {
   const listByDate = jest.fn(async (dateKey: DateKey) => byDay[dateKey] ?? []);
+  const listByRange = jest.fn(async (from: DateKey, to: DateKey) =>
+    Object.entries(byDay)
+      .filter(([date]) => date >= from && date <= to)
+      .flatMap(([, meetings]) => meetings ?? []),
+  );
 
-  return { listByDate };
+  return { listByDate, listByRange };
 }
 
 describe('createMeetingsService', () => {
@@ -74,12 +82,33 @@ describe('createMeetingsService', () => {
       .fn()
       .mockRejectedValueOnce(new Error('offline'))
       .mockResolvedValueOnce([meeting(1)]);
-    const service = createMeetingsService({ listByDate });
+    const service = createMeetingsService({
+      listByDate,
+      listByRange: jest.fn(async () => []),
+    });
 
     await expect(service.listByDate(DAY)).rejects.toThrow('offline');
     await expect(service.listByDate(DAY)).resolves.toEqual([meeting(1)]);
 
     expect(listByDate).toHaveBeenCalledTimes(2);
+  });
+
+  it('reads a range once and caches it per span', async () => {
+    const repository = createFakeRepository({
+      [DAY]: [meeting(1)],
+      [OTHER_DAY]: [meeting(2, OTHER_DAY)],
+    });
+    const service = createMeetingsService(repository);
+
+    await expect(service.listByRange(DAY, OTHER_DAY)).resolves.toHaveLength(2);
+    await service.listByRange(DAY, OTHER_DAY);
+
+    expect(repository.listByRange).toHaveBeenCalledTimes(1);
+
+    service.invalidate();
+    await service.listByRange(DAY, OTHER_DAY);
+
+    expect(repository.listByRange).toHaveBeenCalledTimes(2);
   });
 
   it('drops the cache on invalidate', async () => {

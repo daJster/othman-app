@@ -1,13 +1,18 @@
+import { MOCK_BACKEND_ENABLED } from '@/platform/backend';
 import { createMeetingsService } from './meetings.service';
+import { backendMeetingsRepository } from './backend-meetings.repository';
 import { mockMeetingsRepository } from './mock-meetings.repository';
 
 /**
  * App-wide meetings service.
  *
- * Swapping mock data for Firestore is a one-line change here;
- * `meetings.service.ts` and its tests stay as they are.
+ * `EXPO_PUBLIC_MOCK_BACKEND=1` (set by `npm run dev`) reads the mock server;
+ * otherwise the app keeps its offline fixture. `meetings.service.ts` and its
+ * tests are unchanged either way.
  */
-export const meetingsService = createMeetingsService(mockMeetingsRepository);
+export const meetingsService = createMeetingsService(
+  MOCK_BACKEND_ENABLED ? backendMeetingsRepository : mockMeetingsRepository,
+);
 
 export { createMeetingsService } from './meetings.service';
 export type { MeetingsRepository, MeetingsService } from './meetings.types';

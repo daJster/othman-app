@@ -26,6 +26,12 @@ export const MEETING_STATUS_CONFIG = defineTable({
     tone: 'neutral',
     pulse: false,
   },
+  /*
+   * Browsing back is normal on a calendar, so the day before yesterday is a
+   * real state rather than a mislabelled "scheduled". Neutral, like scheduled:
+   * both mean "not the thing to act on now", and the label carries the rest.
+   */
+  past: { labelKey: 'meeting.status.past', tone: 'neutral', pulse: false },
 } satisfies Record<MeetingStatus, MeetingStatusConfig>);
 
 export const ATTENDEE_LIST_CONFIG = defineConfig({

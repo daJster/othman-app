@@ -2,109 +2,125 @@
   "meetings": [
     {
       "id": 1,
-      "title": "Q2 Product Roadmap Review",
-      "description": "Quarterly alignment session to review OKRs, discuss upcoming feature launches, and prioritize the backlog for the next sprint cycle.",
-      "date": "2026-04-02",
-      "time": "2:00 PM",
-      "duration": "60 min",
-      "status": "soon",
-      "meetLink": "https://meet.google.com/abc-defg-hij",
+      "dayOffset": 0,
+      "time": "18:00",
+      "durationMinutes": 60,
+      "title": "Juz 3 session",
+      "titleAr": "حلقة الجزء الثالث",
+      "description": "Recitation of Al-Baqarah, ayah 120 to 180, then a review of the repeated mistakes.",
+      "descriptionAr": "تسميع سورة البقرة، من الآية ١٢٠ إلى ١٨٠، ثم مراجعة الأخطاء المتكررة.",
+      "meetLink": "https://meet.google.com/oth-man-hij",
       "attendees": [
-        {
-          "name": "Sara K.",
-          "avatar": "https://i.pravatar.cc/32?img=1"
-        },
-        {
-          "name": "Tom R.",
-          "avatar": "https://i.pravatar.cc/32?img=2"
-        },
-        {
-          "name": "Lena P.",
-          "avatar": "https://i.pravatar.cc/32?img=3"
-        },
-        {
-          "name": "James W.",
-          "avatar": "https://i.pravatar.cc/32?img=4"
-        }
+        { "name": "Yusuf H.", "nameAr": "يوسف ح." },
+        { "name": "Maryam S.", "nameAr": "مريم س." },
+        { "name": "Omar A.", "nameAr": "عمر أ." },
+        { "name": "Salma T.", "nameAr": "سلمى ت." }
       ],
-      "organizer": "Sara K.",
-      "location": "Remote"
+      "organizer": "Shaykh Abdulrahman",
+      "organizerAr": "الشيخ عبد الرحمن",
+      "location": "Remote · Google Meet",
+      "locationAr": "عن بعد · Google Meet"
     },
     {
       "id": 2,
-      "title": "Design System Sync",
-      "description": "Weekly design-engineering sync to align on component specs, review Figma handoffs, and address any open design debt items.",
-      "date": "2026-04-02",
-      "time": "4:30 PM",
-      "duration": "30 min",
-      "status": "upcoming",
-      "meetLink": "https://meet.google.com/klm-nopq-rst",
+      "dayOffset": 0,
+      "time": "19:30",
+      "durationMinutes": 30,
+      "title": "Tajweed correction",
+      "titleAr": "تصحيح التلاوة",
+      "description": "One-to-one correction of the last page: madd, ghunnah and the stops that were missed.",
+      "descriptionAr": "تصحيح فردي لآخر صفحة: المد والغنّة والوقفات التي فاتت.",
+      "meetLink": "https://meet.google.com/oth-man-hij",
       "attendees": [
-        {
-          "name": "Ana M.",
-          "avatar": "https://i.pravatar.cc/32?img=5"
-        },
-        { "name": "Dev S.", "avatar": "https://i.pravatar.cc/32?img=6" }
+        { "name": "Maryam S.", "nameAr": "مريم س." },
+        { "name": "Omar A.", "nameAr": "عمر أ." }
       ],
-      "organizer": "Ana M.",
-      "location": "Remote"
+      "organizer": "Shaykh Abdulrahman",
+      "organizerAr": "الشيخ عبد الرحمن",
+      "location": "Remote · Google Meet",
+      "locationAr": "عن بعد · Google Meet"
     },
     {
       "id": 3,
-      "title": "Onboarding: New Engineer",
-      "description": "First-day introduction covering team norms, tooling setup, codebase overview, and a walk-through of current sprint goals.",
-      "date": "2026-04-03",
-      "time": "10:00 AM",
-      "duration": "90 min",
-      "status": "upcoming",
-      "meetLink": "https://meet.google.com/uvw-xyza-bcd",
+      "dayOffset": 1,
+      "time": "16:30",
+      "durationMinutes": 45,
+      "title": "Juz 2 recitation",
+      "titleAr": "تسميع الجزء الثاني",
+      "description": "Continuous recitation for the whole group, ayah by ayah, with the shaykh stopping for correction.",
+      "descriptionAr": "تسميع متصل للمجموعة كاملة، آيةً بعد آية، ويتوقف الشيخ للتصحيح.",
+      "meetLink": "https://meet.google.com/oth-man-hij",
       "attendees": [
-        {
-          "name": "Chris B.",
-          "avatar": "https://i.pravatar.cc/32?img=7"
-        },
-        {
-          "name": "Mia F.",
-          "avatar": "https://i.pravatar.cc/32?img=8"
-        },
-        { "name": "Ryo T.", "avatar": "https://i.pravatar.cc/32?img=9" }
+        { "name": "Yusuf H.", "nameAr": "يوسف ح." },
+        { "name": "Maryam S.", "nameAr": "مريم س." },
+        { "name": "Omar A.", "nameAr": "عمر أ." },
+        { "name": "Salma T.", "nameAr": "سلمى ت." },
+        { "name": "Khadija M.", "nameAr": "خديجة م." }
       ],
-      "organizer": "Mia F.",
-      "location": "Remote"
+      "organizer": "Shaykh Abdulrahman",
+      "organizerAr": "الشيخ عبد الرحمن",
+      "location": "At the kuttab",
+      "locationAr": "في الكُتّاب"
     },
     {
       "id": 4,
-      "title": "Investor Update — Seed Round",
-      "description": "Monthly progress update for seed investors. Covers MRR growth, key metrics, product milestones, and the path to Series A.",
-      "date": "2026-04-02",
-      "time": "3:00 PM",
-      "duration": "45 min",
-      "status": "scheduled",
-      "meetLink": "https://meet.google.com/efg-hijk-lmn",
+      "dayOffset": 3,
+      "time": "18:00",
+      "durationMinutes": 60,
+      "title": "Weekly review",
+      "titleAr": "حلقة المراجعة الأسبوعية",
+      "description": "Reviewing the week's memorisation with recitation correction, then setting next week's portion.",
+      "descriptionAr": "مراجعة ما حُفظ خلال الأسبوع مع تصحيح التلاوة، ثم تحديد ورد الأسبوع القادم.",
+      "meetLink": "https://meet.google.com/oth-man-hij",
       "attendees": [
-        {
-          "name": "Oliver Q.",
-          "avatar": "https://i.pravatar.cc/32?img=10"
-        },
-        {
-          "name": "Priya N.",
-          "avatar": "https://i.pravatar.cc/32?img=11"
-        },
-        {
-          "name": "Leo C.",
-          "avatar": "https://i.pravatar.cc/32?img=12"
-        },
-        {
-          "name": "Zoe A.",
-          "avatar": "https://i.pravatar.cc/32?img=13"
-        },
-        {
-          "name": "Ben H.",
-          "avatar": "https://i.pravatar.cc/32?img=14"
-        }
+        { "name": "Yusuf H.", "nameAr": "يوسف ح." },
+        { "name": "Maryam S.", "nameAr": "مريم س." },
+        { "name": "Omar A.", "nameAr": "عمر أ." },
+        { "name": "Salma T.", "nameAr": "سلمى ت." }
       ],
-      "organizer": "Oliver Q.",
-      "location": "Remote"
+      "organizer": "Shaykh Abdulrahman",
+      "organizerAr": "الشيخ عبد الرحمن",
+      "location": "At the kuttab",
+      "locationAr": "في الكُتّاب"
+    },
+    {
+      "id": 5,
+      "dayOffset": -1,
+      "time": "18:00",
+      "durationMinutes": 60,
+      "title": "Juz 2 session",
+      "titleAr": "حلقة الجزء الثاني",
+      "description": "Recitation of Al-Baqarah, ayah 60 to 120, with the mistakes logged for review.",
+      "descriptionAr": "تسميع سورة البقرة، من الآية ٦٠ إلى ١٢٠، مع تسجيل الأخطاء للمراجعة.",
+      "meetLink": "https://meet.google.com/oth-man-hij",
+      "attendees": [
+        { "name": "Yusuf H.", "nameAr": "يوسف ح." },
+        { "name": "Maryam S.", "nameAr": "مريم س." },
+        { "name": "Omar A.", "nameAr": "عمر أ." }
+      ],
+      "organizer": "Shaykh Abdulrahman",
+      "organizerAr": "الشيخ عبد الرحمن",
+      "location": "Remote · Google Meet",
+      "locationAr": "عن بعد · Google Meet"
+    },
+    {
+      "id": 6,
+      "dayOffset": -4,
+      "time": "18:00",
+      "durationMinutes": 60,
+      "title": "Juz 1 completion",
+      "titleAr": "إتمام الجزء الأول",
+      "description": "The last page of Juz 1, followed by a short sitting on the meanings of the opening surahs.",
+      "descriptionAr": "آخر صفحة من الجزء الأول، ثم جلسة قصيرة في معاني السور الأولى.",
+      "meetLink": "https://meet.google.com/oth-man-hij",
+      "attendees": [
+        { "name": "Yusuf H.", "nameAr": "يوسف ح." },
+        { "name": "Salma T.", "nameAr": "سلمى ت." }
+      ],
+      "organizer": "Shaykh Abdulrahman",
+      "organizerAr": "الشيخ عبد الرحمن",
+      "location": "Remote · Google Meet",
+      "locationAr": "عن بعد · Google Meet"
     }
   ]
 }
