@@ -109,6 +109,40 @@ test('seeded accounts can sign in and restore a session', async () => {
   assert.equal(session.body.user.role, 'user');
 });
 
+test('the event stream carries CORS headers and a ready frame', async () => {
+  const token = await login();
+  const controller = new AbortController();
+  const response = await fetch(
+    `${running.url}/v1/events/stream?token=${encodeURIComponent(token)}&since=0`,
+    {
+      // The browser opens this stream from :8081 against :9000. Without the
+      // allow-origin header EventSource reports a network error and the app
+      // loses live updates while every other request keeps working.
+      headers: { origin: 'http://localhost:8081' },
+      signal: controller.signal,
+    },
+  );
+
+  assert.equal(response.status, 200);
+  assert.equal(
+    response.headers.get('access-control-allow-origin'),
+    'http://localhost:8081',
+  );
+  assert.match(
+    response.headers.get('content-type') ?? '',
+    /text\/event-stream/,
+  );
+
+  const reader = response.body?.getReader();
+  assert.ok(reader, 'the stream has a body');
+
+  const first = await reader.read();
+  await reader.cancel();
+  controller.abort();
+
+  assert.match(new TextDecoder().decode(first.value), /retry: 3000/);
+});
+
 test('a wrong password is rejected without revealing the account', async () => {
   const wrong = await api<{ error: { code: string; message: string } }>(
     '/v1/auth/login',

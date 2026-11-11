@@ -148,12 +148,13 @@ function handleStream(
   app: MockApplication,
   url: URL,
   headers: Record<string, string>,
+  cors: Record<string, string>,
 ): void {
   const query = queryFrom(url);
   const auth = resolveAuth(app, headers, query);
 
   if (!auth) {
-    sendJson(response, 401, toErrorBody(ApiError.unauthenticated()), headers);
+    sendJson(response, 401, toErrorBody(ApiError.unauthenticated()), cors);
     return;
   }
 
@@ -165,13 +166,17 @@ function handleStream(
       response,
       400,
       toErrorBody(ApiError.invalid('"since" must be a non-negative integer')),
-      headers,
+      cors,
     );
     return;
   }
 
   response.writeHead(200, {
-    ...headers,
+    // The browser opens this stream from :8081 against :9000, so it is a
+    // cross-origin request like any other. It needs the same CORS headers as a
+    // JSON response — without them EventSource reports a network error and the
+    // app silently loses live updates.
+    ...cors,
     'content-type': 'text/event-stream; charset=utf-8',
     'cache-control': 'no-cache, no-transform',
     connection: 'keep-alive',
@@ -265,7 +270,7 @@ export function createRequestListener(app: MockApplication) {
     }
 
     if (pathname === '/v1/events/stream') {
-      handleStream(request, response, app, url, headers);
+      handleStream(request, response, app, url, headers, cors);
 
       if (app.config.logRequests) {
         console.log(
