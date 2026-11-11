@@ -46,7 +46,7 @@ preserved, instead of falling back to Home.
   text; touch drag also turns the page.
 - Document direction is `rtl`/`ar` and `ltr`/`en` as expected; no horizontal
   overflow at 375/768/1024.
-- Fonts report `loaded`; the Arabic page uses `NotoNaskhArabic-Variable`.
+- Fonts report `loaded`; the Arabic page uses `IBMPlexSansArabic`.
 
 ## Defects found and fixed in this pass
 

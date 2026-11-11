@@ -70,13 +70,17 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     'expo-web-browser',
     // Embedding the fonts means native builds have them before the first frame;
     // `src/providers/font-provider.tsx` still awaits `useFonts`, which is what
-    // covers web and what the splash gate waits on.
+    // covers web and what the splash gate waits on. Embedding is per file, not
+    // per weight — the family and its four weights are bound at runtime by the
+    // multi-face `useFonts` call, so this list must stay in step with it.
     [
       'expo-font',
       {
         fonts: [
-          './assets/fonts/Inter-Variable.ttf',
-          './assets/fonts/NotoNaskhArabic-Variable.ttf',
+          './assets/fonts/IBMPlexSansArabic-Regular.ttf',
+          './assets/fonts/IBMPlexSansArabic-Medium.ttf',
+          './assets/fonts/IBMPlexSansArabic-SemiBold.ttf',
+          './assets/fonts/IBMPlexSansArabic-Bold.ttf',
           './assets/fonts/AmiriQuran-Regular.ttf',
         ],
       },

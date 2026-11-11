@@ -17,14 +17,15 @@ import { useUiFontClass } from './font';
  * (`<Text variant="title" className="text-primary">`).
  *
  * `family` defaults to `auto`, which follows the *language* rather than the
- * device: Arabic UI gets Noto Naskh, everything else Inter. React Native has no
- * font fallback list, so this decision cannot be left to the platform — a
- * single font must be named, and naming the wrong one renders tofu.
+ * device: Arabic UI asks for `--font-arabic`, everything else `--font-ui`.
+ * Both are IBM Plex Sans Arabic today, so the choice is invisible — but React
+ * Native has no font fallback list, so exactly one family must be named, and
+ * the language is what decides which token that is.
  */
 const FAMILY_CLASS = {
-  /** Latin UI face (Inter). */
+  /** Latin UI face — IBM Plex Sans Arabic's Latin cut. */
   ui: 'font-ui',
-  /** Arabic UI face (Noto Naskh). */
+  /** Arabic UI face — the same family's Arabic cut. */
   arabic: 'font-arabic',
   /** The mushaf (Amiri Quran) — reader pages only. */
   quran: 'font-quran',

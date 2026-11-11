@@ -42,14 +42,27 @@
   --text-3xl: 30px;
   --text-4xl: 36px;
 
-  /* Fonts (P2.3). Each value is the key the family is registered under in
-     `src/providers/font-provider.tsx` — and the key is the file basename, so a
-     rename cannot silently point at a family that is never loaded.
+  /* Fonts. Each value is the family `src/providers/font-provider.tsx` registers,
+     so a rename cannot silently point at a family that is never loaded.
      RN has no font fallback list: an unresolvable family is a device-level
-     rendering bug, not a graceful degrade. */
-  --font-ui: 'Inter-Variable';
-  --font-arabic: 'NotoNaskhArabic-Variable';
+     rendering bug, not a graceful degrade.
+
+     `--font-ui` and `--font-arabic` are two names for IBM Plex Sans Arabic
+     because it carries both scripts. They stay separate tokens on purpose:
+     the language still decides which one a text run asks for, the difference
+     is now invisible, and keeping the pair means a future Latin-only face can
+     be reapplied without touching a single component. Collapsing them would
+     bake today's coincidence into every call site. */
+  --font-ui: 'IBMPlexSansArabic';
+  --font-arabic: 'IBMPlexSansArabic';
   --font-quran: 'AmiriQuran-Regular';
+
+  /* Tailwind's default sans stack. Uniwind resolves any `font-sans` (and every
+     element that names no family) from this, so it has to point at the same
+     file as `--font-ui`: otherwise the primitives that predate `src/ui/text.tsx`
+     — button labels, badges, anything from `src/components/ui/` — keep the
+     browser's system stack and the interface splits into two typefaces. */
+  --font-sans: 'IBMPlexSansArabic';
 }
 
 /* JS-only values: read with `useCSSVariable`/`getCSSVariable`, never emitted as

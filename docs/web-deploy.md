@@ -44,7 +44,7 @@ secret belongs in this repository.
 ## Startup and fonts
 
 `BootProvider` withholds the app until theme, language, and `useFonts` settle;
-the three bundled families (`Inter-Variable`, `NotoNaskhArabic-Variable`,
+the bundled families (`IBMPlexSansArabic` in four weights, plus
 `AmiriQuran-Regular`) are emitted under `dist/assets/assets/fonts/`. The static
 export is also the guard against module-scope browser globals: it renders every
 route in Node during `expo export`.
