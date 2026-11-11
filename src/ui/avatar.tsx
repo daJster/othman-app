@@ -18,7 +18,7 @@ import { Text } from './text';
  */
 const avatar = tv({
   slots: {
-    root: 'items-center justify-center overflow-hidden rounded-full bg-muted',
+    root: 'items-center justify-center overflow-hidden rounded-full border border-glass-edge bg-glass',
     initials: 'font-semibold text-muted-foreground',
   },
   variants: {
@@ -67,7 +67,7 @@ export function Avatar({ src, name, size, className, ...props }: AvatarProps) {
       {...props}
     >
       {src ? <AvatarImage source={{ uri: src }} /> : null}
-      <AvatarFallback className="items-center justify-center bg-muted">
+      <AvatarFallback className="items-center justify-center">
         <Text className={slots.initials()}>{initials}</Text>
       </AvatarFallback>
     </RNRAvatar>

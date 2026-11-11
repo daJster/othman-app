@@ -1,5 +1,7 @@
+import { formatDateKey } from '@/core/domain/meetings/date-key';
 import { resolveEditionKey } from '@/core/domain/quran/editions';
 import { clampPageToEdition, isPageInEdition } from '@/core/domain/quran/page';
+import type { ReadingEntry } from '@/core/domain/quran/reading-log';
 import { isAyahInSurah, isSurahNumber } from '@/core/domain/quran/surah';
 import type { EditionBboxes, PageAyahBboxes, QuranEdition } from '@/core/types';
 import { STORAGE_KEYS, type StorageService } from '@/platform/storage';
@@ -180,6 +182,42 @@ function turnDirection(from: number, to: number): PageTurnDirection {
   return null;
 }
 
+/**
+ * Forward a settled position to the local reading log.
+ *
+ * The store is imported inside the helper rather than at module scope: booting
+ * the reader must not initialise the log (and its storage read) before an
+ * edition is attached. The write is fire-and-forget, exactly like
+ * `rememberPage`: a log failure must never throw into a gesture handler.
+ */
+function recordReading(state: ReaderFields): void {
+  const now = new Date();
+  const entry: ReadingEntry = {
+    day: formatDateKey(now),
+    page: state.page,
+    surah: state.surah,
+    ayahKey: state.ayahKey,
+    editionKey: state.editionKey,
+    at: now.getTime(),
+    readPages: [state.page],
+  };
+
+  void import('../history/reading-log.store')
+    .then(async ({ readingLogStore }) => {
+      const log = readingLogStore.getState();
+
+      // A deep link can reach the reader before any landing page hydrates the
+      // log. Reading storage first keeps an existing history from being
+      // replaced by today's single entry.
+      await log.hydrate();
+      log.record(entry);
+    })
+    .catch(() => {
+      // The log is a local convenience; losing one entry is better than
+      // surfacing a module or storage error in the middle of a page turn.
+    });
+}
+
 export function createReaderStore(storage: StorageService): ReaderStore {
   const rememberPage = (page: number) => {
     // Fire-and-forget: a failed preference write must never block a page turn.
@@ -313,6 +351,7 @@ export function createReaderStore(storage: StorageService): ReaderStore {
         direction: turnDirection(state.page, target),
       });
       rememberPage(target);
+      recordReading(get());
     },
 
     goNextPage() {
@@ -346,6 +385,7 @@ export function createReaderStore(storage: StorageService): ReaderStore {
       });
 
       if (target !== state.page) rememberPage(target);
+      recordReading(get());
     },
 
     selectAyah(ayahKey) {
@@ -357,6 +397,7 @@ export function createReaderStore(storage: StorageService): ReaderStore {
       if (!row) return;
 
       set({ ayahKey, surah: row.surahNumber });
+      recordReading(get());
     },
 
     clearSelection() {

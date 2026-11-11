@@ -2,9 +2,12 @@ import type { AndroidSymbol, SFSymbol } from 'expo-symbols';
 import type { LucideIcon } from 'lucide-react-native';
 import { Platform } from 'react-native';
 import BookOpen from 'lucide-react-native/icons/book-open';
+import Bell from 'lucide-react-native/icons/bell';
+import Bookmark from 'lucide-react-native/icons/bookmark';
 import Calendar from 'lucide-react-native/icons/calendar';
 import Camera from 'lucide-react-native/icons/camera';
 import ChartLine from 'lucide-react-native/icons/chart-line';
+import Check from 'lucide-react-native/icons/check';
 import ChevronDown from 'lucide-react-native/icons/chevron-down';
 import ChevronLeft from 'lucide-react-native/icons/chevron-left';
 import ChevronRight from 'lucide-react-native/icons/chevron-right';
@@ -16,6 +19,7 @@ import ExternalLink from 'lucide-react-native/icons/external-link';
 import Eye from 'lucide-react-native/icons/eye';
 import EyeOff from 'lucide-react-native/icons/eye-off';
 import FileText from 'lucide-react-native/icons/file-text';
+import Flame from 'lucide-react-native/icons/flame';
 import Globe from 'lucide-react-native/icons/globe';
 import House from 'lucide-react-native/icons/house';
 import Inbox from 'lucide-react-native/icons/inbox';
@@ -25,12 +29,20 @@ import Layers from 'lucide-react-native/icons/layers';
 import LogOut from 'lucide-react-native/icons/log-out';
 import MapPin from 'lucide-react-native/icons/map-pin';
 import Menu from 'lucide-react-native/icons/menu';
+import Monitor from 'lucide-react-native/icons/monitor';
+import Moon from 'lucide-react-native/icons/moon';
 import Palette from 'lucide-react-native/icons/palette';
 import Pause from 'lucide-react-native/icons/pause';
 import Pencil from 'lucide-react-native/icons/pencil';
 import Play from 'lucide-react-native/icons/play';
+import Plus from 'lucide-react-native/icons/plus';
 import Search from 'lucide-react-native/icons/search';
+import Send from 'lucide-react-native/icons/send';
+import Star from 'lucide-react-native/icons/star';
+import Sun from 'lucide-react-native/icons/sun';
 import SunMoon from 'lucide-react-native/icons/sun-moon';
+import Target from 'lucide-react-native/icons/target';
+import Trash from 'lucide-react-native/icons/trash';
 import User from 'lucide-react-native/icons/user';
 import Users from 'lucide-react-native/icons/users';
 import Video from 'lucide-react-native/icons/video';
@@ -70,6 +82,7 @@ const ICON_COMPONENTS = {
   user: User,
   'alert-circle': CircleAlert,
   inbox: Inbox,
+  bell: Bell,
   calendar: Calendar,
   'chevron-down': ChevronDown,
   'chevron-left': ChevronLeft,
@@ -85,6 +98,17 @@ const ICON_COMPONENTS = {
   camera: Camera,
   info: Info,
   logout: LogOut,
+  check: Check,
+  flame: Flame,
+  monitor: Monitor,
+  moon: Moon,
+  send: Send,
+  star: Star,
+  sun: Sun,
+  target: Target,
+  plus: Plus,
+  trash: Trash,
+  bookmark: Bookmark,
   menu: Menu,
   search: Search,
   layers: Layers,
@@ -150,7 +174,6 @@ export type IconProps = {
 export function Icon({ name, size = 20, tone = 'foreground' }: IconProps) {
   const Component = ICON_COMPONENTS[name];
   const { color } = useResolveClassNames(TONE_CLASS[tone]);
-  const native = Platform.OS !== 'web';
 
   return (
     <Component
@@ -159,10 +182,19 @@ export function Icon({ name, size = 20, tone = 'foreground' }: IconProps) {
       strokeWidth={1.8}
       // React Native props only: on web Lucide renders a raw `<svg>` and both
       // leak to the DOM as unknown attributes (dev warnings). `aria-hidden`
-      // below is the web equivalent and stays on every platform.
-      accessible={native ? false : undefined}
-      importantForAccessibility={native ? 'no-hide-descendants' : undefined}
+      // below is the web equivalent and stays on every platform. The object is
+      // conditional rather than undefined-valued because React warns on a key
+      // that exists at all, even when its value is undefined.
+      {...(NATIVE_HIDDEN as Record<string, unknown>)}
       {...({ 'aria-hidden': true } as Record<string, unknown>)}
     />
   );
 }
+
+const NATIVE_HIDDEN =
+  Platform.OS === 'web'
+    ? {}
+    : {
+        accessible: false,
+        importantForAccessibility: 'no-hide-descendants' as const,
+      };

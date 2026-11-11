@@ -69,7 +69,7 @@ export function ReaderHeader({
 
   return (
     <View
-      className="flex-row items-center gap-2 border-b border-border bg-background px-2 pt-safe pb-2"
+      className="flex-row items-center gap-2 border-b border-glass-edge bg-glass px-2 pb-2"
       testID="reader-header"
     >
       <Button

@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/button';
 import { Text as RNRText } from '@/components/ui/text';
 import { cn } from './cn';
+import { useTextDirectionStyle } from './text';
 
 /**
  * Button primitive, backed by react-native-reusables.
@@ -100,6 +101,8 @@ export function Button({
   accessibilityRole = 'button',
   ...props
 }: ButtonProps) {
+  const direction = useTextDirectionStyle();
+
   return (
     <RNRButton
       variant={variant}
@@ -110,7 +113,9 @@ export function Button({
       {...props}
     >
       {label ? (
-        <RNRText className={buttonLabel({ variant, size })}>{label}</RNRText>
+        <RNRText className={buttonLabel({ variant, size })} style={direction}>
+          {label}
+        </RNRText>
       ) : (
         children
       )}
@@ -127,7 +132,13 @@ export function ButtonText({
   className,
   ...props
 }: ButtonTextProps) {
+  const direction = useTextDirectionStyle();
+
   return (
-    <RNRText className={buttonLabel({ variant, size, className })} {...props} />
+    <RNRText
+      className={buttonLabel({ variant, size, className })}
+      style={direction}
+      {...props}
+    />
   );
 }

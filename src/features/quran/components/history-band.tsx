@@ -86,7 +86,7 @@ export function HistoryBand() {
         onHoverOut={() => {
           if (Platform.OS === 'web') setHovered(false);
         }}
-        className="relative w-full overflow-hidden rounded-2xl border border-border active:opacity-70"
+        className="relative w-full overflow-hidden rounded-card border border-glass-edge active:opacity-70"
         style={[
           { aspectRatio: 2 },
           cardShadow,

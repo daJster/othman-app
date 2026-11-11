@@ -17,31 +17,43 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
+import { useDirection } from '@/i18n';
 import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
 import { Separator } from '@/ui/separator';
 import { Text } from '@/ui/text';
 import { AttendeeStack } from './attendee-stack';
+import { formatClockTime, formatCount } from './calendar-format';
+import { MeetingCardActions } from './meeting-actions';
+import {
+  attendeeName,
+  meetingDescription,
+  meetingLocation,
+  meetingOrganizer,
+  meetingTitle,
+} from './meeting-display';
 import { openMeetLink } from './open-meet-link';
 
 /**
- * One meeting.
+ * One session.
  *
- * The status pill is the same `Badge` the design system already uses, fed by
- * `getMeetingStatusConfig(status).tone` — the tone words live in `core`, the
- * class literals in `ui/tone.ts`, and this file only passes one to the other.
+ * The card is a schedule row before it is a card: the time owns a fixed rail at
+ * the start, so a day's list can be scanned by clock without reading a single
+ * title. The status pill sits with the title it describes, and the clock is
+ * formatted per language — a stored "2:00 PM" cannot become "٢:٠٠ م".
  *
- * Details are collapsed by default because the list can hold several cards and
- * the only action that matters at a glance is Join. Reanimated's layout
- * transition animates the card's height, and the details themselves fade in, so
- * expansion does not jump.
+ * Details stay collapsed because the only decision at a glance is Join; the
+ * expanded block carries the description, the organiser and the attendee names.
+ * A past session renders no Join at all: the room is gone, and a disabled
+ * button would be a promise to nowhere.
  *
- * The card omits the date on purpose: the Meetings screen is scoped to one
- * selected day and prints it once above the list.
+ * The footer belongs to `MeetingCardActions`: Join, RSVP and the administrator
+ * row are one decision tree (is there a room, am I going, may I change this?),
+ * and splitting it across two components is how a card ends up offering an
+ * edit button with no session behind it.
  *
- * Attendee names are in the expanded block rather than a long-press tooltip:
- * there is no hover on a phone, and a hidden gesture is not an accessible way to
- * read four names.
+ * `LinearTransition` animates the height change and the details fade, so
+ * expanding one card does not jump the list.
  */
 export type MeetingCardProps = {
   meeting: Meeting;
@@ -49,27 +61,49 @@ export type MeetingCardProps = {
 
 export function MeetingCard({ meeting }: MeetingCardProps) {
   const { t } = useTranslation();
+  const { language } = useDirection();
   const [expanded, setExpanded] = useState(false);
 
   const status = getMeetingStatusConfig(meeting.status);
+
+  const title = meetingTitle(meeting, language);
+  const location = meetingLocation(meeting, language);
+  const organizer = meetingOrganizer(meeting, language);
   const attendeeNames = meeting.attendees
-    .map((attendee) => attendee.name)
+    .map((attendee) => attendeeName(attendee, language))
     .join(' · ');
+
+  const time = formatClockTime(meeting.time, language);
+  const duration = t('meeting.duration', {
+    minutes: formatCount(meeting.durationMinutes, language),
+  });
 
   return (
     <Animated.View layout={LinearTransition.duration(180)}>
-      <Card className="gap-3">
-        <View className="gap-2">
-          <Badge variant={status.tone} label={t(status.labelKey)} />
-          <Text variant="subtitle">{meeting.title}</Text>
-        </View>
+      <Card className="gap-3" testID="meeting-card">
+        <View className="flex-row gap-3">
+          {/* The clock rail: fixed width so every title starts on one line. */}
+          <View className="w-20 shrink-0 gap-0.5">
+            <Text variant="body" className="font-semibold">
+              {time}
+            </Text>
+            <Text variant="caption" tone="muted">
+              {duration}
+            </Text>
+          </View>
 
-        <View className="gap-1.5">
-          <MetaRow
-            icon="clock"
-            label={`${meeting.time} · ${meeting.duration}`}
-          />
-          <MetaRow icon="map-pin" label={meeting.location} />
+          <View className="flex-1 gap-1">
+            <View className="flex-row items-start justify-between gap-2">
+              <Text variant="subtitle" className="flex-1">
+                {title}
+              </Text>
+              <Badge variant={status.tone} label={t(status.labelKey)} />
+            </View>
+
+            <Text variant="caption" tone="muted">
+              {location}
+            </Text>
+          </View>
         </View>
 
         <Separator />
@@ -88,7 +122,7 @@ export function MeetingCard({ meeting }: MeetingCardProps) {
               <Pressable
                 accessibilityRole="button"
                 className={cn(
-                  'min-h-11 flex-row items-center gap-1 rounded-md px-1 active:opacity-70',
+                  'min-h-control flex-row items-center gap-1 rounded-chip px-1 active:opacity-70',
                   FOCUS_RING,
                 )}
               >
@@ -111,10 +145,10 @@ export function MeetingCard({ meeting }: MeetingCardProps) {
               className="gap-2 pt-2"
             >
               <Text variant="caption" className="leading-relaxed">
-                {meeting.description}
+                {meetingDescription(meeting, language)}
               </Text>
               <Text variant="caption" tone="muted">
-                {t('meeting.organizedBy', { name: meeting.organizer })}
+                {t('meeting.organizedBy', { name: organizer })}
               </Text>
               {attendeeNames ? (
                 <Text variant="caption" tone="muted">
@@ -125,31 +159,20 @@ export function MeetingCard({ meeting }: MeetingCardProps) {
           </CollapsibleContent>
         </Collapsible>
 
-        <Button
-          className="self-start"
-          onPress={() => void openMeetLink(meeting.meetLink)}
-        >
-          <Icon name="video" size={16} tone="primary-foreground" />
-          <ButtonText>{t('action.join')}</ButtonText>
-        </Button>
+        <View className="flex-row flex-wrap items-center gap-2">
+          {meeting.status === 'past' ? null : (
+            <Button
+              onPress={() => void openMeetLink(meeting.meetLink)}
+              testID={`meeting-join:${meeting.id}`}
+            >
+              <Icon name="video" size={16} tone="primary-foreground" />
+              <ButtonText>{t('action.join')}</ButtonText>
+            </Button>
+          )}
+
+          <MeetingCardActions meeting={meeting} />
+        </View>
       </Card>
     </Animated.View>
-  );
-}
-
-function MetaRow({
-  icon,
-  label,
-}: {
-  icon: 'clock' | 'map-pin';
-  label: string;
-}) {
-  return (
-    <View className="flex-row items-center gap-2">
-      <Icon name={icon} size={14} tone="muted" />
-      <Text variant="caption" tone="muted" className="flex-1">
-        {label}
-      </Text>
-    </View>
   );
 }

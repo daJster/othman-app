@@ -1,4 +1,4 @@
-﻿import {
+import {
   fireEvent,
   render,
   screen,
@@ -92,5 +92,32 @@ describe('MeetingCalendar', () => {
     expect(date.getFullYear()).toBe(now.getFullYear());
     expect(date.getMonth()).toBe(now.getMonth());
     expect(date.getDate()).toBe(now.getDate());
+  });
+
+  it('marks the days that hold a session and names the count', async () => {
+    await render(
+      <MeetingCalendar
+        selectedDate={SELECTED}
+        onSelect={jest.fn()}
+        markedDays={
+          new Map([
+            ['2026-04-02', 2],
+            ['2026-04-15', 1],
+          ])
+        }
+      />,
+    );
+
+    expect(screen.getByTestId('calendar-mark:2026-04-02')).toBeTruthy();
+    expect(screen.getByTestId('calendar-mark:2026-04-15')).toBeTruthy();
+    expect(screen.queryByTestId('calendar-mark:2026-04-03')).toBeNull();
+
+    // The dot is not the only carrier of the information.
+    expect(
+      screen.getByTestId('calendar-day:2026-04-02').props.accessibilityLabel,
+    ).toContain('sessions');
+    expect(
+      screen.getByTestId('calendar-day:2026-04-03').props.accessibilityLabel,
+    ).not.toContain('sessions');
   });
 });

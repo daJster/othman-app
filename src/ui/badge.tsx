@@ -5,6 +5,7 @@ import { Badge as RNRBadge } from '@/components/ui/badge';
 import { Text as RNRText } from '@/components/ui/text';
 import type { StatusTone } from '@/core/config';
 import { cn } from './cn';
+import { useTextDirectionStyle } from './text';
 
 /**
  * Colour intent for the three meeting statuses.
@@ -17,7 +18,7 @@ import { cn } from './cn';
 const TONE_SURFACE = {
   positive: 'border-success-line bg-success-soft',
   info: 'border-info-line bg-info-soft',
-  neutral: 'border-border bg-muted',
+  neutral: 'border-glass-edge bg-glass',
 } satisfies Readonly<Record<StatusTone, string>>;
 
 const TONE_TEXT = {
@@ -38,7 +39,7 @@ const TONE_TEXT = {
  */
 const badge = tv({
   slots: {
-    root: 'flex-row items-center gap-1 self-start rounded-md border px-2 py-0.5',
+    root: 'flex-row items-center gap-1 self-start rounded-chip border px-2 py-0.5',
     label: 'text-2xs font-semibold',
   },
   variants: {
@@ -52,7 +53,7 @@ const badge = tv({
         label: 'text-secondary-foreground',
       },
       outline: {
-        root: 'border-border bg-transparent',
+        root: 'border-glass-edge bg-glass',
         label: 'text-foreground',
       },
       destructive: {
@@ -105,6 +106,7 @@ export function Badge({
   ...props
 }: BadgeProps) {
   const slots = badge({ variant });
+  const direction = useTextDirectionStyle();
 
   return (
     <RNRBadge
@@ -113,9 +115,13 @@ export function Badge({
       {...props}
     >
       {label ? (
-        <RNRText className={slots.label()}>{label}</RNRText>
+        <RNRText className={slots.label()} style={direction}>
+          {label}
+        </RNRText>
       ) : typeof children === 'string' ? (
-        <RNRText className={slots.label()}>{children}</RNRText>
+        <RNRText className={slots.label()} style={direction}>
+          {children}
+        </RNRText>
       ) : (
         children
       )}

@@ -10,5 +10,5 @@ import { cn } from './cn';
  * caller can still override either through `className`.
  */
 export function Card({ className, ...props }: ViewProps) {
-  return <RNRCARD className={cn('gap-3 p-4', className)} {...props} />;
+  return <RNRCARD className={cn('gap-3 p-panel', className)} {...props} />;
 }

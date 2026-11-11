@@ -4,6 +4,7 @@ import {
   screen,
   within,
 } from '@testing-library/react-native';
+import { PortalHost } from '@rn-primitives/portal';
 import type { SurahProgress } from '@/core/domain/progress/surah-progress';
 import type { AsyncState } from '@/features/query/async-state';
 import ProgressScreen from '@/app/account/progress';
@@ -63,7 +64,7 @@ describe('ProgressScreen', () => {
 
     await render(<ProgressScreen />);
 
-    expect(screen.getByText('Loading…')).toBeTruthy();
+    expect(screen.getByTestId('progress-loading')).toBeTruthy();
     // "Empty" must never be shown while the answer is still unknown.
     expect(screen.queryByText('No progress recorded yet.')).toBeNull();
   });
@@ -108,6 +109,71 @@ describe('ProgressScreen', () => {
       'Surahs',
     );
     expect(screen.getAllByTestId(/^surah-cell:/)).toHaveLength(3);
+  });
+
+  it('filters the surah grid by number and clears the filter', async () => {
+    given({ status: 'ready', data: ROWS });
+
+    await render(<ProgressScreen />);
+
+    await fireEvent.press(screen.getByTestId('section-rail:surahs'));
+
+    await fireEvent.changeText(
+      screen.getByTestId('progress-search-input'),
+      '2',
+    );
+
+    expect(screen.getAllByTestId(/^surah-cell:/)).toHaveLength(1);
+    expect(screen.getByTestId('surah-cell:2')).toBeTruthy();
+
+    await fireEvent.press(screen.getByTestId('progress-band:memorised'));
+
+    // Surah 1 is memorised but does not match "2"; the intersection is empty.
+    expect(screen.getByTestId('progress-filter-empty')).toBeTruthy();
+
+    await fireEvent.press(screen.getByText('Clear filters'));
+
+    expect(screen.getAllByTestId(/^surah-cell:/)).toHaveLength(3);
+  });
+
+  it('hides not-started surahs with the switch', async () => {
+    given({ status: 'ready', data: ROWS });
+
+    await render(<ProgressScreen />);
+
+    await fireEvent.press(screen.getByTestId('section-rail:surahs'));
+    await fireEvent.press(screen.getByTestId('progress-hide-empty'));
+
+    expect(screen.getAllByTestId(/^surah-cell:/)).toHaveLength(2);
+    expect(screen.queryByTestId('surah-cell:3')).toBeNull();
+  });
+
+  it('shows the review week and trend in the Activity section', async () => {
+    given({ status: 'ready', data: ROWS });
+
+    await render(<ProgressScreen />);
+
+    await fireEvent.press(screen.getByTestId('section-rail:activity'));
+
+    expect(screen.getByTestId('progress-week-panel')).toBeTruthy();
+    expect(screen.getByTestId('progress-trend-panel')).toBeTruthy();
+    expect(screen.getByTestId('progress-recent')).toBeTruthy();
+  });
+
+  it('explains the grid in a dialog', async () => {
+    given({ status: 'ready', data: ROWS });
+
+    await render(
+      <>
+        <ProgressScreen />
+        <PortalHost />
+      </>,
+    );
+
+    await fireEvent.press(screen.getByTestId('progress-legend-info'));
+
+    expect(screen.getByTestId('progress-legend-dialog')).toBeTruthy();
+    expect(screen.getByText('How the grid works')).toBeTruthy();
   });
 
   it('opens the detail sheet for the tapped surah and closes it', async () => {

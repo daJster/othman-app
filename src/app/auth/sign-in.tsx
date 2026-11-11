@@ -240,7 +240,7 @@ export default function SignInScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
-          contentContainerClassName="grow justify-center px-6 py-10"
+          contentContainerClassName="grow justify-center px-gutter py-section"
           keyboardShouldPersistTaps="handled"
         >
           <View className="mx-auto w-full max-w-md gap-8">

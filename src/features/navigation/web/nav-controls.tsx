@@ -1,14 +1,16 @@
 import { View } from 'react-native';
+import { NoticesBell } from '@/features/home/notices-bell';
 import { LanguageMenu } from '@/features/navigation/web/language-menu';
 import { NavMenu } from '@/features/navigation/web/nav-menu';
 import { ThemeMenu } from '@/features/navigation/web/theme-menu';
 
 /**
- * Trailing cluster of the web bar: session, appearance, language.
+ * Trailing cluster of the web bar: inbox, session, appearance, language.
  *
- * The avatar comes first and the two preference controls follow it, so the
- * session is the first thing at the inline end and the settings sit outboard of
- * it. Three ghost controls, each with one job.
+ * The inbox comes first so it sits with the session controls rather than the
+ * destinations: the three tabs are places, these four are state. It is the same
+ * bell the hero panel renders, with the same unread dot and the same sheet —
+ * one inbox, two doors.
  *
  * They are the only part of the bar that is not a navigator child; `TabList`
  * and every `TabTrigger` must stay direct children because Expo Router
@@ -17,6 +19,7 @@ import { ThemeMenu } from '@/features/navigation/web/theme-menu';
 export function WebNavControls() {
   return (
     <View className="ms-auto flex-row items-center gap-0.5">
+      <NoticesBell variant="bar" />
       <NavMenu />
       <ThemeMenu />
       <LanguageMenu />

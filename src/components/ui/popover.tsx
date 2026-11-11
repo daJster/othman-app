@@ -1,6 +1,7 @@
 import { NativeOnlyAnimatedView } from '@/components/ui/native-only-animated-view';
 import { TextClassContext } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
+import { GlassFill } from '@/ui/glass';
 import * as PopoverPrimitive from '@rn-primitives/popover';
 import * as React from 'react';
 import { Platform, StyleSheet } from 'react-native';
@@ -16,6 +17,7 @@ const FullWindowOverlay =
 
 function PopoverContent({
   className,
+  children,
   align = 'center',
   sideOffset = 4,
   portalHost,
@@ -40,7 +42,7 @@ function PopoverContent({
                 align={align}
                 sideOffset={sideOffset}
                 className={cn(
-                  'bg-popover z-50 w-72 rounded-md border border-border p-4 shadow-md shadow-black/5 outline-hidden',
+                  'relative z-50 w-72 overflow-hidden rounded-panel border border-glass-edge bg-glass-strong p-panel shadow-xl shadow-black/10 outline-hidden',
                   Platform.select({
                     web: cn(
                       'animate-in fade-in-0 zoom-in-95 origin-(--radix-popover-content-transform-origin) cursor-auto',
@@ -51,7 +53,10 @@ function PopoverContent({
                   className,
                 )}
                 {...props}
-              />
+              >
+                <GlassFill weight="overlay" radius="panel" />
+                {children}
+              </PopoverPrimitive.Content>
             </TextClassContext.Provider>
           </NativeOnlyAnimatedView>
         </PopoverPrimitive.Overlay>

@@ -26,7 +26,7 @@ export function ListSectionHeader({
   inset?: boolean;
 }) {
   const content = (
-    <View className={inset ? 'px-4 pt-6 pb-2' : 'pt-6 pb-2'}>
+    <View className={inset ? 'px-4 pt-4 pb-1' : 'pt-4 pb-1'}>
       <Text variant="overline" className="text-brass-ink">
         {label}
       </Text>

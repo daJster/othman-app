@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
-import { useDirection } from '@/i18n';
 import { Button } from './button';
 import { HEADING_ROLE, headingAriaLevel } from './heading';
 import { Icon } from './icon';
@@ -36,8 +35,6 @@ export function PageHeader({
   backTestID,
 }: PageHeaderProps) {
   const { t } = useTranslation();
-  const { isRTL } = useDirection();
-
   const leading =
     start ??
     (onBack ? (
@@ -48,14 +45,14 @@ export function PageHeader({
         onPress={onBack}
         testID={backTestID}
       >
-        <Icon name={isRTL ? 'chevron-right' : 'chevron-left'} size={20} />
+        <Icon name="chevron-left" size={20} />
       </Button>
     ) : null);
 
   return (
     <View
       testID={testID}
-      className="flex-row items-center gap-2 border-b border-border px-2 py-2"
+      className="flex-row items-center gap-2 border-b border-glass-edge bg-glass px-2 py-2"
     >
       {leading}
       <Text

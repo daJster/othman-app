@@ -14,10 +14,10 @@ import { AccessibilityInfo, Platform } from 'react-native';
  * `useSyncExternalStore` rather than `useState` + `useEffect`: the value is
  * external state, not derived state, and reading it during render is what keeps
  * the static web export's first paint in step with the client's. Callers decide
- * what "reduced" means for their surface — the dust field holds still, and the
- * hero film is not gated on it. There is no global switch
- * that silently removes motion, because a still frame is a better answer than a
- * missing element.
+ * what "reduced" means for their surface — the dust field holds still, the
+ * hero film does not autoplay, and the card's morph crossfades instead of
+ * springing. There is no global switch that silently removes motion, because a
+ * still frame is a better answer than a missing element.
  */
 const QUERY = '(prefers-reduced-motion: reduce)';
 
@@ -85,4 +85,59 @@ function subscribe(listener: () => void) {
 
 export function useReducedMotion(): boolean {
   return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+}
+
+/**
+ * Whether the visitor asked for less transparency.
+ *
+ * A different preference from reduced motion, and Apple treats it separately:
+ * translucent materials become solid rather than disappearing. Web-only — no
+ * native equivalent is exposed through React Native — so a native render
+ * answers `false` and keeps the platform's own material.
+ *
+ * Safari and Firefox honour the query today; Chromium does not yet, where this
+ * simply never matches.
+ */
+const TRANSPARENCY_QUERY = '(prefers-reduced-transparency: reduce)';
+
+let transparentQuery: MediaQueryList | null = null;
+const transparencyListeners = new Set<() => void>();
+let transparencyBound = false;
+
+function emitTransparency() {
+  transparencyListeners.forEach((listener) => listener());
+}
+
+function transparencyMedia(): MediaQueryList | null {
+  if (Platform.OS !== 'web') return null;
+  if (typeof window === 'undefined' || !window.matchMedia) return null;
+
+  transparentQuery ??= window.matchMedia(TRANSPARENCY_QUERY);
+
+  return transparentQuery;
+}
+
+function getTransparencySnapshot(): boolean {
+  return transparencyMedia()?.matches ?? false;
+}
+
+function subscribeTransparency(listener: () => void) {
+  transparencyListeners.add(listener);
+
+  if (!transparencyBound) {
+    transparencyBound = true;
+    transparencyMedia()?.addEventListener('change', emitTransparency);
+  }
+
+  return () => {
+    transparencyListeners.delete(listener);
+  };
+}
+
+export function useReducedTransparency(): boolean {
+  return useSyncExternalStore(
+    subscribeTransparency,
+    getTransparencySnapshot,
+    getServerSnapshot,
+  );
 }

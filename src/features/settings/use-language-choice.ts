@@ -1,31 +1,24 @@
 import { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { Alert, Platform } from 'react-native';
 import type { Language } from '@/i18n';
 import { useLanguage } from '@/providers/language-provider';
 
 /**
- * Language selection with the native restart prompt.
+ * Language selection.
  *
- * Shared by the settings row and the web nav menu. `I18nManager` only applies a
- * direction change after a relaunch on native, so every entry point has to ask
- * the same question — two copies would eventually disagree about when to warn.
+ * Shared by the settings row and the web nav menu. The switch is instant on
+ * every platform: the app keeps one physical layout for both languages, so
+ * there is no native flag to apply and nothing to warn about. There used to be
+ * a restart prompt here — it existed only because `I18nManager.forceRTL` is
+ * read at launch.
  */
 export function useLanguageChoice() {
-  const { t } = useTranslation();
   const { language, setLanguage } = useLanguage();
 
   const select = useCallback(
     async (next: Language) => {
-      const { restartRequired } = await setLanguage(next);
-
-      if (!restartRequired || Platform.OS === 'web') return;
-
-      Alert.alert(t('language.restartTitle'), t('language.restartMessage'), [
-        { text: t('action.close') },
-      ]);
+      await setLanguage(next);
     },
-    [setLanguage, t],
+    [setLanguage],
   );
 
   return { language, select };

@@ -6,7 +6,8 @@ import { WebNavControls } from '@/features/navigation/web/nav-controls';
 import { WebTabLink } from '@/features/navigation/web/tab-link';
 import { BrandMark } from '@/features/brand/brand-mark';
 import { cn } from '@/ui/cn';
-import { PAGE_GUTTER } from '@/ui/page';
+import { GlassFill } from '@/ui/glass';
+import { WIDE_CLASS } from '@/ui/ratio';
 
 /**
  * Web shell (expo-router/ui).
@@ -46,21 +47,26 @@ export default function WebTabsLayout() {
   return (
     <Tabs className="flex-1 bg-background">
       {/*
-       * The bar is the page grid: one row capped at the same `max-w-6xl`
-       * gutter Home uses. `justifyContent` travels in `style`, not a class:
-       * Expo Router applies `styles.tabList` (`justifyContent: space-between`)
-       * after Uniwind's className, so a `justify-start` class loses.
+       * One floating glass bar, not a full-bleed strip. It shares the page's
+       * width and gutter, so the chrome and the content read as one grid, and
+       * the material separates it from the page without a heavy divider.
+       *
+       * `justifyContent` travels in `style`, not a class: Expo Router applies
+       * `styles.tabList` (`justifyContent: space-between`) after Uniwind's
+       * className, so a `justify-start` class loses.
        */}
       <TabList
         role="navigation"
         className={cn(
-          'mx-auto w-full max-w-6xl flex-row flex-nowrap items-center gap-1 border-b border-border bg-background',
-          PAGE_GUTTER,
+          'relative mx-auto my-2 w-full flex-row flex-nowrap items-center gap-1 overflow-hidden rounded-card border border-glass-edge bg-glass-strong px-1.5 py-1 shadow-lg shadow-black/5',
+          WIDE_CLASS,
         )}
         style={{ justifyContent: 'flex-start' }}
       >
-        <View className="hidden pe-2 sm:block">
-          <BrandMark className="h-6 w-[42px]" accessible={false} />
+        <GlassFill weight="chrome" radius="card" />
+
+        <View className="hidden pe-1.5 sm:block">
+          <BrandMark className="h-6 w-10" accessible={false} />
         </View>
 
         {TABS.map((tab) => (
@@ -76,7 +82,15 @@ export default function WebTabsLayout() {
 
         <WebNavControls />
       </TabList>
-      <TabSlot />
+      {/*
+       * `TabSlot` renders a `ScreenContainer` whose own style is
+       * `{ flexGrow: 1, flexShrink: 0 }` — a flex item that cannot shrink below
+       * its content. Any tab taller than the window therefore grew the slot past
+       * the viewport instead of scrolling inside it, and the page became
+       * unreachable below the fold. Allowing it to shrink hands the overflow to
+       * the screen's own `ScrollView`, where it belongs.
+       */}
+      <TabSlot style={{ flexShrink: 1, minHeight: 0 }} />
     </Tabs>
   );
 }

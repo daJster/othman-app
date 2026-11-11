@@ -36,7 +36,7 @@ const MEETING: Meeting = {
   description: 'Weekly tafsir circle',
   date: '2026-10-24',
   time: '18:00',
-  duration: '60',
+  durationMinutes: 60,
   meetLink: 'https://example.test/meet',
   status: 'upcoming',
   attendees: [],

@@ -43,7 +43,7 @@ export function ThemeMenu() {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-48 bg-background">
+      <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuRadioGroup
           value={mode}
           onValueChange={(next) => setMode(next as ThemeMode)}

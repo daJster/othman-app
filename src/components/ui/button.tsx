@@ -5,7 +5,7 @@ import { Platform, Pressable } from 'react-native';
 
 const buttonVariants = cva(
   cn(
-    'group shrink-0 flex-row items-center justify-center gap-2 rounded-md shadow-none',
+    'group shrink-0 flex-row items-center justify-center gap-2 rounded-chip shadow-none',
     Platform.select({
       web: "whitespace-nowrap transition-all outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
     }),
@@ -24,9 +24,9 @@ const buttonVariants = cva(
           }),
         ),
         outline: cn(
-          'border border-border bg-background shadow-sm shadow-black/5 active:bg-accent dark:border-input dark:bg-input/30 dark:active:bg-input/50',
+          'border border-glass-edge bg-glass shadow-sm shadow-black/5 active:bg-accent',
           Platform.select({
-            web: 'hover:bg-accent dark:hover:bg-input/50',
+            web: 'hover:bg-accent',
           }),
         ),
         secondary: cn(

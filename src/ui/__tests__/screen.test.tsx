@@ -24,12 +24,12 @@ describe('Screen', () => {
     );
   });
 
-  it('respects the top inset unless told otherwise', async () => {
+  it('reserves the status bar height on every screen', async () => {
     await render(<Screen testID="screen" />);
 
-    expect(
-      screen.getByTestId('screen').props.contentInsetAdjustmentBehavior,
-    ).toBe('automatic');
+    // The native tabs shell has no header, so the inset has to be owned here.
+    // `contentInsetAdjustmentBehavior` alone did not move the content down.
+    expect(screen.getByTestId('screen').props.className).toContain('pt-safe');
   });
 
   it('lets the caller override scroll behaviour', async () => {
@@ -58,5 +58,11 @@ describe('ScreenView', () => {
     expect(screen.getByText('centred')).toBeTruthy();
     // A `View` has no scroll props at all — that is the point of the split.
     expect(screen.getByTestId('view').props.scrollEnabled).toBeUndefined();
+  });
+
+  it('reserves the status bar height too', async () => {
+    await render(<ScreenView testID="view">{null}</ScreenView>);
+
+    expect(screen.getByTestId('view').props.className).toContain('pt-safe');
   });
 });

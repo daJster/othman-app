@@ -24,7 +24,14 @@ import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
  * tap away.
  */
 export type ReaderMenuAction =
-  'surah' | 'edition' | 'read' | 'tafsir' | 'notes' | 'audio' | 'share';
+  | 'surah'
+  | 'edition'
+  | 'read'
+  | 'tafsir'
+  | 'notes'
+  | 'audio'
+  | 'records'
+  | 'share';
 
 const ACTIONS: readonly {
   id: ReaderMenuAction;
@@ -35,6 +42,7 @@ const ACTIONS: readonly {
     | 'reader.menuTafsir'
     | 'reader.menuNotes'
     | 'reader.menuAudio'
+    | 'reader.menuRecords'
     | 'reader.menuShare';
   icon: IconName;
 }[] = [
@@ -44,6 +52,7 @@ const ACTIONS: readonly {
   { id: 'tafsir', labelKey: 'reader.menuTafsir', icon: 'search' },
   { id: 'notes', labelKey: 'reader.menuNotes', icon: 'pencil' },
   { id: 'audio', labelKey: 'reader.menuAudio', icon: 'volume' },
+  { id: 'records', labelKey: 'reader.menuRecords', icon: 'bookmark' },
   { id: 'share', labelKey: 'reader.menuShare', icon: 'external-link' },
 ];
 
@@ -87,14 +96,14 @@ export function ReaderMenuSheet({
             closeTestID="reader-menu-close"
           />
 
-          <View className="border-t border-border pt-2">
+          <View className="border-t border-glass-edge pt-2">
             <ThemeDropdown testID="reader-theme-dropdown" />
           </View>
 
           {actions.map((action) => (
             <Pressable
               key={action.id}
-              className="flex-row items-center gap-3 rounded-lg px-3 py-3 active:bg-muted"
+              className="flex-row items-center gap-3 rounded-chip px-3 py-3 active:bg-accent"
               accessibilityRole="button"
               accessibilityLabel={t(action.labelKey)}
               onPress={() => onSelect(action.id)}

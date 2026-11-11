@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
+import { Platform, Pressable, View } from 'react-native';
+import * as Haptics from 'expo-haptics';
 import { formatDateKey } from '@/core/domain/meetings/date-key';
 import {
   CALENDAR_WEEK_LENGTH,
@@ -14,6 +15,7 @@ import { useDirection } from '@/i18n';
 import { Button } from '@/ui/button';
 import { cn } from '@/ui/cn';
 import { FOCUS_RING } from '@/ui/focus';
+import { GlassPanel } from '@/ui/glass';
 import { Icon } from '@/ui/icon';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Text } from '@/ui/text';
@@ -35,23 +37,43 @@ import {
  * virtualised list. Six rows are cheap to render, and a `FlatList` inside a
  * `FlatList` header is a scroll-nesting bug waiting to happen.
  *
- * RTL needs no special case: `flex-row` starts at the inline start, so the
- * layout is reversed by `LayoutDirection` and Sunday sits on the right. Only
- * the chevrons are mirrored explicitly.
+ * The grid is `flex-row flex-wrap`, so the week starts on the left in both
+ * languages: the layout does not mirror. The month arrows are physical too —
+ * previous on the left, next on the right — while the weekday and day labels
+ * inside the cells follow the text direction.
+ *
+ * `markedDays` turns the grid into a map: a dot on every day that holds a
+ * session, and the count in that day's accessible name. Before it, a day with
+ * a meeting and a day without one were indistinguishable until you tapped each.
  */
 export type MeetingCalendarProps = {
   selectedDate: Date;
   onSelect: (date: Date) => void;
+  /** Date key → number of sessions that day. */
+  markedDays?: ReadonlyMap<string, number>;
 };
 
 const CELL_WIDTH = 'w-[14.2857%]';
 
+/** Selection is a light, physical confirmation — the same weight as the tap. */
+function tick() {
+  if (Platform.OS === 'web') return;
+  void Haptics.selectionAsync().catch(() => {});
+}
+
+/** A month change is a bigger move than a day, so it gets a firmer tap. */
+function nudge() {
+  if (Platform.OS === 'web') return;
+  void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+}
+
 export function MeetingCalendar({
   selectedDate,
   onSelect,
+  markedDays,
 }: MeetingCalendarProps) {
   const { t } = useTranslation();
-  const { language, isRTL } = useDirection();
+  const { language } = useDirection();
   const [system, setSystem] = useState<CalendarSystem>('gregorian');
   const [anchor, setAnchor] = useState<Date>(() => selectedDate);
 
@@ -72,12 +94,14 @@ export function MeetingCalendar({
       setAnchor(new Date());
     }
     setSystem(next);
+    nudge();
   }
 
   function goToToday() {
     const today = new Date();
     setAnchor(today);
     onSelect(today);
+    tick();
   }
 
   function selectDay(date: Date) {
@@ -85,16 +109,24 @@ export function MeetingCalendar({
     // behaviour of every platform calendar.
     setAnchor(date);
     onSelect(date);
+    tick();
   }
 
   return (
-    <View className="gap-3 rounded-xl border border-border bg-card p-3">
+    <GlassPanel
+      radius="card"
+      weight="panel"
+      className="w-full max-w-lg gap-3 self-center p-3"
+    >
       <View className="flex-row items-center justify-between gap-2">
         <MonthButton
-          direction={isRTL ? 'right' : 'left'}
+          direction="left"
           label={t('meeting.calendar.previous')}
           disabled={!canGoPrevious}
-          onPress={() => setAnchor(shiftCalendarMonth(anchor, system, -1))}
+          onPress={() => {
+            setAnchor(shiftCalendarMonth(anchor, system, -1));
+            nudge();
+          }}
         />
         {/*
          * A subtitle, not a heading: the screen's title is the only H1, and
@@ -108,10 +140,13 @@ export function MeetingCalendar({
           {formatMonthLabel(month, language)}
         </Text>
         <MonthButton
-          direction={isRTL ? 'left' : 'right'}
+          direction="right"
           label={t('meeting.calendar.next')}
           disabled={!canGoNext}
-          onPress={() => setAnchor(shiftCalendarMonth(anchor, system, 1))}
+          onPress={() => {
+            setAnchor(shiftCalendarMonth(anchor, system, 1));
+            nudge();
+          }}
         />
       </View>
 
@@ -128,17 +163,26 @@ export function MeetingCalendar({
       <View className="flex-row flex-wrap">
         {month.days.map((day) => {
           const selected = day.dateKey === selectedKey;
+          const sessions = markedDays?.get(day.dateKey) ?? 0;
+          const dateLabel = formatLongDate(day.date, language);
+          const separator = language === 'ar' ? '، ' : ', ';
 
           return (
             <View key={day.dateKey} className={cn(CELL_WIDTH, 'p-0.5')}>
               <Pressable
                 testID={`calendar-day:${day.dateKey}`}
                 accessibilityRole="button"
-                accessibilityLabel={formatLongDate(day.date, language)}
+                accessibilityLabel={
+                  sessions > 0
+                    ? `${dateLabel}${separator}${t('meeting.found', {
+                        count: sessions,
+                      })}`
+                    : dateLabel
+                }
                 accessibilityState={{ selected }}
                 onPress={() => selectDay(day.date)}
                 className={cn(
-                  'h-11 items-center justify-center rounded-md border active:opacity-70',
+                  'relative h-control items-center justify-center rounded-chip border active:opacity-70',
                   FOCUS_RING,
                   selected
                     ? 'border-primary bg-primary'
@@ -159,6 +203,23 @@ export function MeetingCalendar({
                 >
                   {formatDayNumber(day.day, language)}
                 </Text>
+
+                {/*
+                 * A session mark, not a decoration: it says the day has
+                 * something to open. Primary rather than brass because brass
+                 * clears 3:1 on the card only at text sizes; a 4 px dot needs
+                 * the solid accent. On the selected cell it inverts with the
+                 * numerals.
+                 */}
+                {sessions > 0 ? (
+                  <View
+                    testID={`calendar-mark:${day.dateKey}`}
+                    className={cn(
+                      'absolute bottom-1 h-1 w-1 rounded-full',
+                      selected ? 'bg-primary-foreground' : 'bg-primary',
+                    )}
+                  />
+                ) : null}
               </Pressable>
             </View>
           );
@@ -200,7 +261,7 @@ export function MeetingCalendar({
           onPress={goToToday}
         />
       </View>
-    </View>
+    </GlassPanel>
   );
 }
 
@@ -223,7 +284,7 @@ function MonthButton({
       disabled={disabled}
       onPress={onPress}
       className={cn(
-        'h-11 w-11 items-center justify-center rounded-full active:bg-muted',
+        'h-control w-control items-center justify-center rounded-full active:bg-muted',
         FOCUS_RING,
         disabled && 'opacity-40',
       )}

@@ -403,6 +403,13 @@ export function ReaderScreen({
       return;
     }
 
+    if (action === 'records') {
+      setSheet(null);
+      router.push('/quran/records');
+
+      return;
+    }
+
     setPanel(action);
     setSheet(null);
   };

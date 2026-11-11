@@ -12,6 +12,7 @@ import { cn } from '@/ui/cn';
 import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
 import { Image } from '@/ui/image';
+import { useReducedMotion } from '@/ui/motion';
 import { getHeroFilm } from './hero-media';
 
 /**
@@ -37,6 +38,11 @@ import { getHeroFilm } from './hero-media';
  * 4. **The control is a real control.** A 44 px glass circle with the play or
  *    pause glyph, labelled for screen readers, and its state follows the
  *    player, so an automatic pause and a manual one look the same.
+ * 5. **The film waits its turn.** Playback starts on idle, after the poster has
+ *    painted, and never starts at all when the visitor asked the OS to reduce
+ *    motion — the poster is then the whole hero and the control is how they opt
+ *    in. An 11 MB decode competing with the first paint is the difference
+ *    between a hero that settles and one that stutters.
  *
  * On Android the view uses `textureView`: a `SurfaceView` punches through the
  * window and would cover the glass panel and the dust drawn above it.
@@ -53,8 +59,11 @@ export function HeroFilm() {
 
 function HeroFilmLayer({ film }: { film: { video: number; poster: number } }) {
   const { t } = useTranslation();
+  const reduced = useReducedMotion();
   /** Set only by the control; auto-pause/resume must respect it. */
   const userPaused = useRef(false);
+  /** Playback has been allowed once; before that nothing may start it. */
+  const started = useRef(false);
 
   const player = useVideoPlayer(film.video, (instance) => {
     instance.loop = true;
@@ -62,9 +71,62 @@ function HeroFilmLayer({ film }: { film: { video: number; poster: number } }) {
     // Even muted, a video player claims an audio session on iOS and would
     // pause the visitor's recitation or podcast. This asks not to.
     instance.audioMixingMode = 'mixWithOthers';
-    // Play from the beginning at once; the loop carries on from there.
-    instance.play();
+    // Deliberately no `play()` here: `startWhenIdle` below owns the start.
   });
+
+  /**
+   * Start after the first paint.
+   *
+   * Web waits for an idle slice so an 11 MB decode never competes with the
+   * first paint (with a timeout, so a busy page still starts); native starts at
+   * once, because the player decodes off the JS thread and the poster is
+   * already covering the gap. Reduced motion skips the start entirely — the
+   * poster stays and the control becomes the opt-in.
+   */
+  useEffect(() => {
+    if (reduced) return;
+
+    let cancelled = false;
+    const start = () => {
+      if (cancelled || userPaused.current) return;
+      started.current = true;
+      player.play();
+    };
+
+    if (Platform.OS !== 'web') {
+      start();
+
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    const idle = (
+      window as unknown as {
+        requestIdleCallback?: (
+          callback: () => void,
+          options?: { timeout: number },
+        ) => number;
+        cancelIdleCallback?: (handle: number) => void;
+      }
+    ).requestIdleCallback;
+
+    if (idle) {
+      const handle = idle(start, { timeout: 1200 });
+
+      return () => {
+        cancelled = true;
+        window.cancelIdleCallback?.(handle);
+      };
+    }
+
+    const handle = setTimeout(start, 600);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(handle);
+    };
+  }, [player, reduced]);
 
   // Seeded from the player, not synced in an effect: a fast local file can be
   // ready before the listeners attach, and a synchronous setState in an effect
@@ -105,7 +167,7 @@ function HeroFilmLayer({ film }: { film: { video: number; poster: number } }) {
     if (Platform.OS !== 'web') {
       const subscription = AppState.addEventListener('change', (state) => {
         if (state === 'active') {
-          if (!userPaused.current) player.play();
+          if (started.current && !userPaused.current) player.play();
         } else {
           player.pause();
         }
@@ -129,7 +191,7 @@ function HeroFilmLayer({ film }: { film: { video: number; poster: number } }) {
         }
 
         if (entry.isIntersecting) {
-          if (!userPaused.current) player.play();
+          if (started.current && !userPaused.current) player.play();
         } else {
           player.pause();
         }
@@ -143,6 +205,8 @@ function HeroFilmLayer({ film }: { film: { video: number; poster: number } }) {
   }, [player]);
 
   const toggle = useCallback(() => {
+    started.current = true;
+
     if (player.playing) {
       userPaused.current = true;
       player.pause();
@@ -154,12 +218,7 @@ function HeroFilmLayer({ film }: { film: { video: number; poster: number } }) {
 
   return (
     <>
-      <View
-        style={StyleSheet.absoluteFill}
-        pointerEvents="none"
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-      >
+      <View style={StyleSheet.absoluteFill} pointerEvents="none" aria-hidden>
         <View ref={frame} style={StyleSheet.absoluteFill}>
           <VideoView
             player={player}

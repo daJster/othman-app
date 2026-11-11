@@ -6,7 +6,6 @@ import { useTranslation } from 'react-i18next';
 import { useColorScheme, View } from 'react-native';
 import { WEBSITE_URL } from '@/core/config';
 import { TABS } from '@/features/navigation/route-registry';
-import { useDirection } from '@/i18n';
 import { openHttpsLink } from '@/platform/browser';
 import { Icon } from '@/ui/icon';
 import { ListSectionHeader } from '@/ui/list-section-header';
@@ -35,11 +34,9 @@ import { Text } from '@/ui/text';
 export default function AboutScreen() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { isRTL } = useDirection();
   const scheme = useColorScheme();
 
   const title = t('nav.about');
-  const chevron = isRTL ? 'chevron-left' : 'chevron-right';
   const version = Constants.expoConfig?.version ?? '1.0.0';
   const year = new Date().getFullYear();
 
@@ -64,7 +61,7 @@ export default function AboutScreen() {
         <List testID="about-list">
           <RNHostView matchContents={{ vertical: true }}>
             <View className="gap-3 px-4 pt-6 pb-2">
-              <View className="h-14 w-14 items-center justify-center rounded-2xl bg-secondary">
+              <View className="h-14 w-14 items-center justify-center rounded-card border border-glass-edge bg-glass">
                 <Icon name="book-open" size={28} tone="primary" />
               </View>
 
@@ -91,7 +88,7 @@ export default function AboutScreen() {
               key={route.href}
               testID={`about-link:${route.href}`}
               leading={<Icon name={route.icon} />}
-              trailing={<Icon name={chevron} tone="muted" />}
+              trailing={<Icon name="chevron-right" tone="muted" />}
               supportingText={
                 route.descriptionKey ? t(route.descriptionKey) : undefined
               }

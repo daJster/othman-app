@@ -1,6 +1,7 @@
 import { Icon } from '@/components/ui/icon';
 import { NativeOnlyAnimatedView } from '@/components/ui/native-only-animated-view';
 import { cn } from '@/lib/utils';
+import { GlassFill } from '@/ui/glass';
 import * as DialogPrimitive from '@rn-primitives/dialog';
 import X from 'lucide-react-native/icons/x';
 import * as React from 'react';
@@ -85,7 +86,7 @@ function DialogContent({
       <DialogOverlay>
         <DialogPrimitive.Content
           className={cn(
-            'z-50 mx-auto flex w-full flex-col gap-4 rounded-lg border border-border bg-background p-6 shadow-lg shadow-black/5 sm:max-w-lg',
+            'relative z-50 mx-auto flex w-full flex-col gap-4 overflow-hidden rounded-card border border-glass-edge bg-glass-strong p-panel shadow-2xl shadow-black/15 sm:max-w-lg',
             Platform.select({
               web: 'animate-in fade-in-0 zoom-in-95 duration-200 web:max-w-[calc(100%-2rem)]',
             }),
@@ -93,6 +94,7 @@ function DialogContent({
           )}
           {...props}
         >
+          <GlassFill weight="overlay" radius="card" />
           <>{children}</>
           <DialogPrimitive.Close
             className={cn(

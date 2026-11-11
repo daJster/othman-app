@@ -15,10 +15,14 @@ import MeetingsScreen from '@/app/(tabs)/meetings';
  */
 const mockUseMeetingsByDate = jest.fn();
 const mockRefresh = jest.fn();
+let mockMarkedDays: ReadonlyMap<string, number> = new Map();
 
 jest.mock('@/features/meetings/use-meetings', () => ({
   useMeetingsByDate: (dateKey: string) => mockUseMeetingsByDate(dateKey),
   useRefreshMeetings: () => mockRefresh,
+  // The calendar's density marks are covered by their own test; the screen only
+  // needs the hook to exist, and one test below feeds it a next session.
+  useMeetingDays: () => mockMarkedDays,
 }));
 
 jest.mock('expo-router/head', () => () => null);
@@ -27,12 +31,22 @@ jest.mock('@/providers/auth-provider', () => ({
   useAuth: () => ({
     user: { uid: 'uid-1' },
     status: 'signed-in',
+    account: {
+      state: { status: 'ready', data: { uid: 'uid-1', role: 'user' } },
+    },
   }),
 }));
 
 jest.mock('expo-router', () => ({
   usePathname: () => '/meetings',
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn(), back: jest.fn() }),
   Redirect: () => null,
+}));
+
+// Meeting cards mount admin mutations; this screen test owns no QueryClient.
+jest.mock('@/api/hooks', () => ({
+  useApiMutation: () => ({ mutate: jest.fn(), isPending: false }),
+  useApiQuery: jest.fn(),
 }));
 
 const MEETING: Meeting = {
@@ -41,7 +55,7 @@ const MEETING: Meeting = {
   description: 'Weekly tafsir of Surah Al-Kahf.',
   date: '2026-04-02',
   time: '18:00',
-  duration: '60 min',
+  durationMinutes: 60,
   meetLink: 'https://meet.example.test/abc',
   status: 'upcoming',
   attendees: [{ name: 'Sara K.', avatar: '' }],
@@ -66,7 +80,7 @@ describe('MeetingsScreen', () => {
 
     expect(screen.getAllByTestId('meeting-skeleton')).toHaveLength(3);
     // "Empty" must never be shown while the answer is still unknown.
-    expect(screen.queryByText('No meetings')).toBeNull();
+    expect(screen.queryByText('No sessions')).toBeNull();
   });
 
   it("shows the selected day's meetings and how many there are", async () => {
@@ -77,7 +91,7 @@ describe('MeetingsScreen', () => {
 
     expect(screen.getByText('Tafsir circle')).toBeTruthy();
     expect(screen.getByText('Hifz circle')).toBeTruthy();
-    expect(screen.getByText('2 meetings')).toBeTruthy();
+    expect(screen.getByText('2 sessions')).toBeTruthy();
   });
 
   it('reports an empty day without inventing content', async () => {
@@ -85,8 +99,31 @@ describe('MeetingsScreen', () => {
 
     await render(<MeetingsScreen />);
 
-    expect(screen.getByText('No meetings on this day.')).toBeTruthy();
+    expect(screen.getByText('No sessions on this day.')).toBeTruthy();
     expect(screen.queryByTestId('meeting-skeleton')).toBeNull();
+  });
+
+  it('offers the next session from an empty day', async () => {
+    given({ status: 'empty' });
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowKey = formatDateKey(tomorrow);
+
+    mockMarkedDays = new Map([[tomorrowKey, 1]]);
+
+    try {
+      await render(<MeetingsScreen />);
+
+      const link = screen.getByTestId('meeting-next-session');
+      expect(link).toBeTruthy();
+
+      await fireEvent.press(link);
+
+      expect(mockUseMeetingsByDate).toHaveBeenCalledWith(tomorrowKey);
+    } finally {
+      mockMarkedDays = new Map();
+    }
   });
 
   it('offers the query retry when the day failed to load', async () => {

@@ -20,8 +20,30 @@
  */
 
 @theme {
-  /* Radius scale, expanded from the web's `--radius: 0.625rem` (= 10px).
-     Written as concrete values because `@theme` only accepts static values. */
+  /* ---------------------------------------------------------------------
+   * Ratio scale.
+   *
+   * Every length in the interface is a multiple of one 4px module. The named
+   * steps below are the only values component code should reach for; a raw
+   * `p-[23px]` is a decision nobody can reuse, while `p-panel` is the same
+   * decision on every surface. Tailwind's numeric scale (`p-1` … `p-16`)
+   * remains the fallback for one-off rhythm, and both resolve through the
+   * same module.
+   * ------------------------------------------------------------------- */
+  --spacing-gutter: 1rem; /* 4u — the page's outer margin on a phone */
+  --spacing-gutter-lg: 1.25rem; /* 5u — the same margin from `sm` up */
+  --spacing-panel: 1.5rem; /* 6u — inside a panel/card */
+  --spacing-control: 2.75rem; /* 11u — 44pt control floor */
+  --spacing-control-lg: 3rem; /* 12u — 48dp control floor */
+  --spacing-nav: 4rem; /* 16u — chrome row */
+  --spacing-section: 2.5rem; /* 10u — between page sections */
+
+  /* Radius follows the same module: 3u chip, 4u panel, 6u card. The card is
+     larger than the panel on purpose — material weight and curve move
+     together, so a big surface never reads as a stretched chip. */
+  --radius-chip: 0.75rem;
+  --radius-panel: 1rem;
+  --radius-card: 1.5rem;
   --radius-sm: 6px;
   --radius-md: 8px;
   --radius-lg: 10px;
@@ -103,6 +125,18 @@
       --color-input: oklch(0.92 0.008 85);
       --color-ring: oklch(0.708 0 0);
       --color-canopy: oklch(0.31 0.07 160);
+      /*
+       * Glass roles. The wash is baked with its alpha so `bg-glass` is the
+       * whole material colour, not a colour that still needs an opacity step
+       * at the call site. `glass` is the page-facing weight, `glass-strong`
+       * the overlay weight that has to hold text over arbitrary content, and
+       * `glass-dim` the chrome weight that sits over a film.
+       */
+      --color-glass: oklch(1 0 0 / 72%);
+      --color-glass-strong: oklch(1 0 0 / 88%);
+      --color-glass-dim: oklch(0.985 0.008 85 / 62%);
+      --color-glass-line: oklch(1 0 0 / 72%);
+      --color-glass-edge: oklch(0.45 0.02 85 / 16%);
       --color-sand: oklch(0.96 0.02 85);
       --color-brass: oklch(0.72 0.11 82);
       --color-brass-ink: oklch(0.51 0.09 82);
@@ -141,6 +175,16 @@
       --color-input: oklch(1 0 0 / 15%);
       --color-ring: oklch(0.45 0.15 160);
       --color-canopy: oklch(0.26 0.05 160);
+      /*
+       * Dark glass is a lifted green-black, not black at 50%: a pure black
+       * wash over a dark page reads as a hole, while a little of the canopy
+       * hue keeps the layer part of the same material family as the hero.
+       */
+      --color-glass: oklch(0.2 0.02 160 / 68%);
+      --color-glass-strong: oklch(0.23 0.025 160 / 86%);
+      --color-glass-dim: oklch(0.16 0.02 160 / 62%);
+      --color-glass-line: oklch(1 0 0 / 14%);
+      --color-glass-edge: oklch(1 0 0 / 12%);
       --color-sand: oklch(0.25 0.02 85);
       --color-brass: oklch(0.78 0.1 82);
       --color-brass-ink: oklch(0.82 0.1 82);
@@ -153,6 +197,34 @@
       --color-info-soft: oklch(0.22 0.04 245);
       --color-info-line: oklch(0.36 0.06 245);
     }
+  }
+}
+
+/*
+ * Browser surfaces, web only.
+ *
+ * The parts the interface does not draw still carry it: the scrollbar, form
+ * controls, the canvas behind an overscroll pull, and the selection highlight.
+ * `color-scheme` is the one declaration that makes the browser paint all of
+ * those in the app's appearance — without it a dark app gets a white scrollbar
+ * and a white overscroll flash.
+ *
+ * Selection uses `brass` rather than `canopy`: a wash of the line-work colour
+ * reads on both grounds, while a canopy block would swallow the canopy text on
+ * the hero card. `color: inherit` keeps the text colour the text already had.
+ */
+@layer base {
+  html {
+    color-scheme: light;
+  }
+
+  html.dark {
+    color-scheme: dark;
+  }
+
+  ::selection {
+    background-color: oklch(0.72 0.11 82 / 0.45);
+    color: inherit;
   }
 }
 

@@ -14,14 +14,14 @@ import { Icon } from '@/ui/icon';
 import { Text } from '@/ui/text';
 
 /**
- * Language control in the web bar: a ghost button with the globe-like icon and
- * the current language's own name ("English", "Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©").
+ * Language control in the web bar: a ghost button with the globe icon.
  *
- * It shows the full name, not the old `AR`/`EN` short code: the name is the
- * thing a reader recognises, and the short code only reads as a developer
- * label. From `sm` up the name sits beside the icon; below `sm` the four
- * labelled destinations leave ~90 px for the trailing controls, so the button
- * is icon-only there and the name travels in its `accessibilityLabel`.
+ * Icon-only at every width. The name used to sit beside it from `sm` up, which
+ * made the one control that is a *setting* the widest item in the trailing
+ * cluster and crowded the destinations it sits next to. The current name still
+ * reaches assistive tech through `accessibilityLabel`, and the open menu shows
+ * both options in full — the trigger only has to say "this is the language
+ * control", and a globe says that in every language.
  *
  * No border and no chevron: a ghost button opens a menu, it is not a `Select`.
  */
@@ -38,18 +38,15 @@ export function LanguageMenu() {
         <Button
           variant="ghost"
           size="md"
-          className={flatTrigger('h-11 min-w-11 justify-center gap-2 px-2')}
+          className={flatTrigger('h-11 min-w-11 justify-center px-2')}
           accessibilityLabel={`${t('language.title')}: ${currentName}`}
           testID="nav-language-trigger"
         >
           <Icon name="languages" size={20} />
-          <Text variant="label" className="hidden sm:block">
-            {currentName}
-          </Text>
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-48 bg-background">
+      <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuRadioGroup
           value={language}
           onValueChange={(next) => void select(next as Language)}

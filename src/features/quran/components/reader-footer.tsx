@@ -39,16 +39,21 @@ export function ReaderFooter({
   onNext,
 }: ReaderFooterProps) {
   const { t } = useTranslation();
-  const { language, isRTL } = useDirection();
+  const { language } = useDirection();
 
   const atStart = page <= firstPage;
   const atEnd = page >= lastPage;
-  const previousIcon = isRTL ? 'chevron-right' : 'chevron-left';
-  const nextIcon = isRTL ? 'chevron-left' : 'chevron-right';
+  /*
+   * A mushaf is read right to left, so its page sequence is fixed: the previous
+   * page lies to the right, the next one to the left, whatever the interface
+   * language. Reading order is content, not chrome.
+   */
+  const previousIcon = 'chevron-right';
+  const nextIcon = 'chevron-left';
 
   return (
     <View
-      className="flex-row items-center justify-between gap-2 border-t border-border bg-background px-2 pt-2 pb-safe"
+      className="flex-row items-center justify-between gap-2 border-t border-glass-edge bg-glass px-2 pt-2 pb-safe"
       testID="reader-footer"
     >
       <Button

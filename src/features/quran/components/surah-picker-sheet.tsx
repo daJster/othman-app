@@ -104,8 +104,8 @@ export function SurahPickerSheet({
                   <Pressable
                     className={
                       selected
-                        ? 'flex-row items-center gap-3 rounded-lg bg-muted px-3 py-2'
-                        : 'flex-row items-center gap-3 rounded-lg px-3 py-2'
+                        ? 'flex-row items-center gap-3 rounded-chip bg-accent px-3 py-2'
+                        : 'flex-row items-center gap-3 rounded-chip px-3 py-2'
                     }
                     accessibilityRole="button"
                     accessibilityState={{ selected }}
@@ -119,7 +119,8 @@ export function SurahPickerSheet({
                     <Text
                       variant="caption"
                       tone="muted"
-                      className="w-8 text-end tabular-nums"
+                      className="w-8 tabular-nums"
+                      align="end"
                     >
                       {formatReaderNumber(item.number, language)}
                     </Text>

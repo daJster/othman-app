@@ -91,7 +91,7 @@ export function ResumeBand({ onOpen }: ResumeBandProps) {
   return (
     <View
       testID="quran-resume-band"
-      className="border-b border-border py-7 md:py-8"
+      className="h-[40vh] border-b border-glass-edge py-7 md:py-8"
     >
       <Text variant="overline" tone="muted">
         {t('quran.resume.recent')}
@@ -101,13 +101,13 @@ export function ResumeBand({ onOpen }: ResumeBandProps) {
         <Animated.View
           entering={reducedMotion ? undefined : FadeInDown.duration(240)}
         >
-          <View className="mt-4 flex-row items-center gap-3 md:gap-4">
+          <View className="mt-4 flex-row items-center gap-1 md:gap-2">
             <ReadingSessionCard
               key={latest.day}
               entry={latest}
               compact
               latest
-              className="w-full max-w-[150px] md:max-w-[168px]"
+              className="w-full max-w-44 md:max-w-48"
               onPress={() => open(latest)}
             />
 
@@ -117,8 +117,8 @@ export function ResumeBand({ onOpen }: ResumeBandProps) {
                   <HizbGauge
                     value={read}
                     max={target}
-                    size={wide ? 104 : 84}
-                    strokeWidth={wide ? 10 : 9}
+                    size={wide ? 130 : 115}
+                    strokeWidth={wide ? 20 : 12}
                     centerLabel={formatReaderNumber(read, language)}
                     accessibilityLabel={t('quran.goal.progress', {
                       read: formatReaderNumber(read, language),
@@ -134,8 +134,8 @@ export function ResumeBand({ onOpen }: ResumeBandProps) {
                   <HizbGauge
                     value={0}
                     max={5}
-                    size={wide ? 104 : 84}
-                    strokeWidth={wide ? 10 : 9}
+                    size={wide ? 130 : 115}
+                    strokeWidth={wide ? 20 : 12}
                     centerLabel={formatReaderNumber(0, language)}
                     accessibilityLabel={t('quran.resume.metrics.progress', {
                       label: t('quran.resume.metrics.salat'),
@@ -153,8 +153,8 @@ export function ResumeBand({ onOpen }: ResumeBandProps) {
                   <HizbGauge
                     value={0}
                     max={3}
-                    size={wide ? 104 : 84}
-                    strokeWidth={wide ? 10 : 9}
+                    size={wide ? 130 : 115}
+                    strokeWidth={wide ? 20 : 12}
                     centerLabel={formatReaderNumber(0, language)}
                     accessibilityLabel={t('quran.resume.metrics.progress', {
                       label: t('quran.resume.metrics.duaa'),
@@ -170,8 +170,8 @@ export function ResumeBand({ onOpen }: ResumeBandProps) {
                   <HizbGauge
                     value={0}
                     max={1}
-                    size={wide ? 104 : 84}
-                    strokeWidth={wide ? 10 : 9}
+                    size={wide ? 130 : 115}
+                    strokeWidth={wide ? 20 : 12}
                     centerLabel={formatReaderNumber(0, language)}
                     accessibilityLabel={t('quran.resume.metrics.progress', {
                       label: t('quran.resume.metrics.nafila'),

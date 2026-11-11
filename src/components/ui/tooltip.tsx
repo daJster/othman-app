@@ -1,6 +1,7 @@
 import { NativeOnlyAnimatedView } from '@/components/ui/native-only-animated-view';
 import { TextClassContext } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
+import { GlassFill } from '@/ui/glass';
 import * as TooltipPrimitive from '@rn-primitives/tooltip';
 import * as React from 'react';
 import { Platform, StyleSheet } from 'react-native';
@@ -21,6 +22,7 @@ const FullWindowOverlay =
 
 function TooltipContent({
   className,
+  children,
   sideOffset = 4,
   portalHost,
   side = 'top',
@@ -50,11 +52,11 @@ function TooltipContent({
             exiting={FadeOut.reduceMotion(ReduceMotion.System)}
             as="Pressable"
           >
-            <TextClassContext.Provider value="text-xs text-primary-foreground">
+            <TextClassContext.Provider value="text-xs text-foreground">
               <TooltipPrimitive.Content
                 sideOffset={sideOffset}
                 className={cn(
-                  'z-50 rounded-md bg-primary px-3 py-2 sm:py-1.5',
+                  'relative z-50 overflow-hidden rounded-chip border border-glass-edge bg-glass-strong px-3 py-2 shadow-lg shadow-black/10 sm:py-1.5',
                   Platform.select({
                     web: cn(
                       'animate-in fade-in-0 zoom-in-95 w-fit origin-(--radix-tooltip-content-transform-origin) text-balance',
@@ -68,7 +70,10 @@ function TooltipContent({
                 )}
                 side={side}
                 {...props}
-              />
+              >
+                <GlassFill weight="overlay" radius="chip" />
+                {children}
+              </TooltipPrimitive.Content>
             </TextClassContext.Provider>
           </NativeOnlyAnimatedView>
         </TooltipPrimitive.Overlay>

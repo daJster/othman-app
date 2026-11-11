@@ -9,10 +9,13 @@ import { ResumeBand } from '@/features/quran/components/resume-band';
 import { StoryBand } from '@/features/quran/components/story-band';
 import { parseQuranLink } from '@/features/quran/links';
 import { useRestoreReader } from '@/features/quran/store/use-reader';
+import { Icon } from '@/ui/icon';
 import { useIsWide } from '@/ui/layout';
 import { Page } from '@/ui/page';
+import { Pressable } from '@/ui/pressable';
 import { Screen, ScreenView } from '@/ui/screen';
 import { ErrorState } from '@/ui/states';
+import { Text } from '@/ui/text';
 
 /**
  * Quran tab — the landing surface for the mushaf.
@@ -137,6 +140,28 @@ export default function QuranScreen() {
         >
           <ResumeBand onOpen={openEntry} />
         </View>
+
+        <View className="py-4" testID="quran-section-records">
+          <Pressable
+            testID="quran-records-entry"
+            accessibilityRole="button"
+            accessibilityLabel={`${t('quran.landing.records')} — ${t(
+              'quran.landing.recordsHint',
+            )}`}
+            onPress={() => router.push('/quran/records')}
+            className="min-h-14 flex-row items-center gap-3 border-y border-border py-3 active:opacity-70"
+          >
+            <Icon name="bookmark" size={18} tone="muted" />
+            <View className="min-w-0 flex-1 gap-0.5">
+              <Text variant="label">{t('quran.landing.records')}</Text>
+              <Text variant="caption" tone="muted">
+                {t('quran.landing.recordsHint')}
+              </Text>
+            </View>
+            <Icon name="chevron-right" size={18} tone="muted" />
+          </Pressable>
+        </View>
+
         <View testID="quran-section-activity">
           <ActivityBand />
         </View>

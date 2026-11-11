@@ -167,25 +167,24 @@ describe('LanguageProvider', () => {
     expect(storage.setItem).toHaveBeenCalledWith(STORAGE_KEYS.language, 'ar');
   });
 
-  it('reports a restart when the native RTL flag disagrees', async () => {
+  it('never touches the native layout direction', async () => {
     const forceRTL = jest.spyOn(I18nManager, 'forceRTL');
 
     await renderProvider();
     await screen.findByText('ready');
 
-    let restartRequired = false;
     await act(async () => {
-      ({ restartRequired } = await setLanguage('ar'));
+      await setLanguage('ar');
     });
 
-    expect(forceRTL).toHaveBeenCalledWith(true);
-    expect(restartRequired).toBe(true);
+    // One physical layout serves both languages, so the switch must not reach
+    // the native RTL flag — and with no flag there is no relaunch to ask for.
+    expect(forceRTL).not.toHaveBeenCalled();
   });
 
   it('is a no-op when the language is already active', async () => {
-    const result = await setLanguage('en');
+    await setLanguage('en');
 
-    expect(result.restartRequired).toBe(false);
     expect(storage.setItem).not.toHaveBeenCalled();
   });
 });

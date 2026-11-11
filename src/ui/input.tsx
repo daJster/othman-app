@@ -3,6 +3,7 @@ import type { TextInput } from 'react-native';
 import { tv, type VariantProps } from 'tailwind-variants';
 import { Input as RNRInput } from '@/components/ui/input';
 import { cn } from './cn';
+import { useTextDirectionStyle } from './text';
 import { useUiFontClass } from './font';
 
 /**
@@ -53,16 +54,26 @@ export function Input({
   placeholderTextColorClassName = 'accent-muted-foreground',
   selectionColorClassName = 'accent-primary',
   cursorColorClassName = 'accent-primary',
+  style,
   ...props
 }: InputProps) {
   // TextEntry does not inherit the Text default, so the family is explicit.
   const fontClass = useUiFontClass();
+  // ...and so is direction: the field is not inside a `Text`, so without this
+  // the caret and the placeholder would stay left-aligned in an Arabic UI.
+  const direction = useTextDirectionStyle();
   const ariaProps: InputAriaProps = invalid ? { 'aria-invalid': true } : {};
 
   return (
     <RNRInput
       ref={ref}
-      className={cn(input({ size, invalid }), fontClass, className)}
+      className={cn(
+        input({ size, invalid }),
+        fontClass,
+        'text-start',
+        className,
+      )}
+      style={[direction, style]}
       placeholderTextColorClassName={placeholderTextColorClassName}
       selectionColorClassName={selectionColorClassName}
       cursorColorClassName={cursorColorClassName}

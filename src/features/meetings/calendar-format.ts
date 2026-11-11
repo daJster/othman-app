@@ -125,3 +125,48 @@ export function formatLongDate(date: Date, language: Language): string {
     year: 'numeric',
   }).format(date);
 }
+
+/**
+ * `18:00` → the language's clock reading.
+ *
+ * The fixture stores a 24-hour clock because a display string ("2:00 PM")
+ * cannot be re-rendered in Arabic digits or with an Arabic meridiem. The
+ * anchor date is arbitrary; only the time of day is formatted.
+ */
+export function formatClockTime(time: string, language: Language): string {
+  const [hours, minutes] = time.split(':').map(Number);
+
+  return new Intl.DateTimeFormat(FORMAT_LOCALE[language], {
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(
+    new Date(
+      2000,
+      0,
+      1,
+      Number.isFinite(hours) ? hours : 0,
+      Number.isFinite(minutes) ? minutes : 0,
+    ),
+  );
+}
+
+/** Digits in the active locale, without grouping (durations, counts). */
+export function formatCount(value: number, language: Language): string {
+  return new Intl.NumberFormat(FORMAT_LOCALE[language], {
+    useGrouping: false,
+  }).format(value);
+}
+
+/**
+ * A compact day for a one-line affordance: `Tue, 10 Nov` / `الثلاثاء، ١٠ نوفمبر`.
+ *
+ * The empty state needs to name the next session without spending a whole line
+ * on a year the reader already knows.
+ */
+export function formatShortDate(date: Date, language: Language): string {
+  return new Intl.DateTimeFormat(FORMAT_LOCALE[language], {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  }).format(date);
+}

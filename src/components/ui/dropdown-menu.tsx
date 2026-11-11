@@ -2,6 +2,7 @@ import { Icon } from '@/components/ui/icon';
 import { NativeOnlyAnimatedView } from '@/components/ui/native-only-animated-view';
 import { TextClassContext } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
+import { GlassFill } from '@/ui/glass';
 import * as DropdownMenuPrimitive from '@rn-primitives/dropdown-menu';
 import Check from 'lucide-react-native/icons/check';
 import ChevronDown from 'lucide-react-native/icons/chevron-down';
@@ -82,14 +83,23 @@ function DropdownMenuSubContent({
     <NativeOnlyAnimatedView entering={FadeIn.reduceMotion(ReduceMotion.System)}>
       <DropdownMenuPrimitive.SubContent
         className={cn(
-          'bg-popover overflow-hidden rounded-md border border-border p-1 shadow-lg shadow-black/5',
+          'relative min-w-32 overflow-hidden rounded-panel border border-glass-edge bg-glass-strong p-1 shadow-xl shadow-black/10',
           Platform.select({
-            web: 'animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 fade-in-0 data-[state=closed]:zoom-out-95 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 min-w-[8rem] origin-(--radix-context-menu-content-transform-origin)',
+            web: 'animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 fade-in-0 data-[state=closed]:zoom-out-95 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 origin-(--radix-context-menu-content-transform-origin)',
           }),
           className,
         )}
         {...props}
-      />
+      >
+        <GlassFill weight="overlay" radius="panel" />
+        {/*
+          The primitive types `children` as nodes *or* a render function of the
+          pressable state. Every caller in this app passes nodes, and a function
+          child cannot be placed in the JSX tree directly; cast at the boundary
+          rather than rejecting the primitive's wider type.
+        */}
+        {props.children as React.ReactNode}
+      </DropdownMenuPrimitive.SubContent>
     </NativeOnlyAnimatedView>
   );
 }
@@ -102,6 +112,7 @@ function DropdownMenuContent({
   overlayClassName,
   overlayStyle,
   portalHost,
+  children,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Content> & {
   overlayStyle?: StyleProp<ViewStyle>;
@@ -131,7 +142,7 @@ function DropdownMenuContent({
             <TextClassContext.Provider value="text-popover-foreground">
               <DropdownMenuPrimitive.Content
                 className={cn(
-                  'bg-popover min-w-[8rem] overflow-hidden rounded-md border border-border p-1 shadow-lg shadow-black/5',
+                  'relative min-w-32 overflow-hidden rounded-panel border border-glass-edge bg-glass-strong p-1 shadow-xl shadow-black/10',
                   Platform.select({
                     web: cn(
                       'animate-in fade-in-0 zoom-in-95 z-50 max-h-(--radix-context-menu-content-available-height) origin-(--radix-context-menu-content-transform-origin) cursor-default',
@@ -142,7 +153,10 @@ function DropdownMenuContent({
                   className,
                 )}
                 {...props}
-              />
+              >
+                <GlassFill weight="overlay" radius="panel" />
+                {children as React.ReactNode}
+              </DropdownMenuPrimitive.Content>
             </TextClassContext.Provider>
           </NativeOnlyAnimatedView>
         </DropdownMenuPrimitive.Overlay>
@@ -202,7 +216,7 @@ function DropdownMenuCheckboxItem({
     <TextClassContext.Provider value="text-sm text-popover-foreground select-none group-active:text-accent-foreground">
       <DropdownMenuPrimitive.CheckboxItem
         className={cn(
-          'group relative flex flex-row items-center gap-2 rounded-sm py-2 ps-8 pe-2 active:bg-accent sm:py-1.5',
+          'group relative flex flex-row items-center gap-2 rounded-sm py-2 pr-2 pl-8 active:bg-accent sm:py-1.5',
           Platform.select({
             web: 'cursor-default outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none',
           }),
@@ -211,7 +225,7 @@ function DropdownMenuCheckboxItem({
         )}
         {...props}
       >
-        <View className="absolute start-2 flex h-3.5 w-3.5 items-center justify-center rtl:right-2 rtl:left-auto">
+        <View className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
           <DropdownMenuPrimitive.ItemIndicator>
             <Icon
               as={Check}
@@ -239,7 +253,7 @@ function DropdownMenuRadioItem({
     <TextClassContext.Provider value="text-sm text-popover-foreground select-none group-active:text-accent-foreground">
       <DropdownMenuPrimitive.RadioItem
         className={cn(
-          'group relative flex flex-row items-center gap-2 rounded-sm py-2 ps-8 pe-2 active:bg-accent sm:py-1.5',
+          'group relative flex flex-row items-center gap-2 rounded-sm py-2 pr-2 pl-8 active:bg-accent sm:py-1.5',
           Platform.select({
             web: 'cursor-default outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none',
           }),
@@ -248,7 +262,7 @@ function DropdownMenuRadioItem({
         )}
         {...props}
       >
-        <View className="absolute start-2 flex h-3.5 w-3.5 items-center justify-center rtl:right-2 rtl:left-auto">
+        <View className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
           <DropdownMenuPrimitive.ItemIndicator>
             <View className="h-2 w-2 rounded-full bg-foreground" />
           </DropdownMenuPrimitive.ItemIndicator>

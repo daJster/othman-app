@@ -446,7 +446,8 @@
       "title": "Delete your account?",
       "message": "Your profile, progress, bookmarks and notes will be removed. This cannot be undone.",
       "confirm": "Delete account",
-      "failed": "Couldn't delete your account."
+      "failed": "Couldn't delete your account.",
+      "deleted": "Your account was deleted"
     }
   },
   "meeting": {
@@ -696,7 +697,7 @@
       "email": "Email",
       "emailHint": "Used to sign in. It cannot be changed later.",
       "password": "Password",
-      "passwordHint": "At least 8 characters.",
+      "passwordHint": "At least 8 characters, with a letter and a number.",
       "displayName": "Display name",
       "displayNamePlaceholder": "The name the circle sees",
       "phone": "Phone",
@@ -717,9 +718,11 @@
       "deleteFailed": "Couldn't delete this member.",
       "validation": {
         "email": "Enter a valid email address.",
-        "password": "Use at least 8 characters.",
+        "password": "Use at least 8 characters, with a letter and a number.",
         "displayName": "Use between 2 and 60 characters."
-      }
+      },
+      "selfHint": "You cannot change your own role or disable your own sign-in.",
+      "create": "Create member"
     }
   },
   "records": {

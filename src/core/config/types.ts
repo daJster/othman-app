@@ -29,6 +29,7 @@ export const ICON_NAMES = [
   // UI states.
   'alert-circle',
   'inbox',
+  'bell',
   // Calendar and meeting cards.
   'calendar',
   'chevron-down',
@@ -47,6 +48,19 @@ export const ICON_NAMES = [
   'camera',
   'info',
   'logout',
+  // Account and progress additions (PanelUI surfaces).
+  'check',
+  'flame',
+  'monitor',
+  'moon',
+  'send',
+  'star',
+  'sun',
+  'target',
+  // CRUD surfaces.
+  'plus',
+  'trash',
+  'bookmark',
   // Reader chrome.
   'menu',
   'search',
@@ -81,7 +95,8 @@ export type StatusTone = 'positive' | 'info' | 'neutral';
 export type MeetingStatusLabelKey =
   | 'meeting.status.soon'
   | 'meeting.status.upcoming'
-  | 'meeting.status.scheduled';
+  | 'meeting.status.scheduled'
+  | 'meeting.status.past';
 
 export type MeetingStatusConfig = {
   /** Translation key, not display text. */

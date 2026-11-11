@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import { I18nManager, Platform } from 'react-native';
+import { Platform } from 'react-native';
 import {
   directionOf,
   getLanguageState,
@@ -18,13 +18,17 @@ import { STORAGE_KEYS, storageService } from '@/platform/storage';
  *
  * The i18next instance is initialised at module scope with the device language,
  * so `t()` works in any component with no provider. This provider owns the
- * three things the instance cannot do by itself:
+ * things the instance cannot do by itself:
  *
  *  1. reconcile the *stored* preference, which is async, before the splash
  *     lifts (exposed as `ready`);
- *  2. keep the native RTL flag in sync (`I18nManager`), which is a persisted
- *     native flag and therefore only fully applies on the next launch;
- *  3. keep `<html lang dir>` correct on web.
+ *  2. keep `<html lang>` correct on web.
+ *
+ * **Direction is deliberately not on this list.** The app keeps one physical
+ * layout for both languages, so the language may not touch `dir`,
+ * `I18nManager`, `LayoutDirection` or any logical utility — those are exactly
+ * what moved things around. `<html dir="ltr">` is fixed in `+html.tsx`, and
+ * Arabic text gets its direction from `@/ui/text` and `@/ui/input`.
  *
  * Changing the language is not a provider method: `setLanguage` is a module
  * function because it must also be callable from outside React (boot, tests,
@@ -33,54 +37,28 @@ import { STORAGE_KEYS, storageService } from '@/platform/storage';
 
 export type LanguageContextValue = {
   language: Language;
+  /** The writing direction of the *text*, not of the layout. */
   direction: Direction;
   isRTL: boolean;
   /** False until the stored language has been reconciled with storage. */
   ready: boolean;
-  setLanguage: (language: Language) => Promise<{ restartRequired: boolean }>;
+  setLanguage: (language: Language) => Promise<void>;
 };
 
-/**
- * Native direction.
- *
- * `I18nManager` is the only thing that flips React Native's own primitives —
- * text-input alignment, switch thumbs, alert button order. Uniwind's
- * `LayoutDirection` covers className variants and logical utilities, but it
- * cannot move a native control. `forceRTL` writes a flag the next process reads,
- * so a change is reported back to the caller to prompt for a restart. Nothing
- * here runs on web: the browser owns direction through `<html dir>`.
- */
-function applyNativeDirection(language: Language): {
-  restartRequired: boolean;
-} {
-  if (Platform.OS === 'web') return { restartRequired: false };
-
-  const rtl = isRTLLanguage(language);
-  I18nManager.allowRTL(true);
-
-  const restartRequired = I18nManager.isRTL !== rtl;
-  if (restartRequired) I18nManager.forceRTL(rtl);
-
-  return { restartRequired };
-}
-
-/** Web only: keep the document in step with the app. Guarded because Expo web
- * statically renders in Node, where `document` does not exist. */
+/** Web only: keep the document's language in step with the app. Guarded
+ * because Expo web statically renders in Node, where `document` does not exist.
+ * `dir` is not written here on purpose — it stays `ltr` for the life of the
+ * document. */
 function syncDocument(language: Language): void {
   if (Platform.OS !== 'web' || typeof document === 'undefined') return;
 
   document.documentElement.lang = language;
-  document.documentElement.dir = directionOf(language);
 }
 
-export async function setLanguage(
-  language: Language,
-): Promise<{ restartRequired: boolean }> {
+export async function setLanguage(language: Language): Promise<void> {
   if (language === getLanguageState().language) {
-    return { restartRequired: false };
+    return;
   }
-
-  const { restartRequired } = applyNativeDirection(language);
 
   // Awaited so the state update below cannot produce a render in which
   // `language` says `ar` but `t()` still returns English strings.
@@ -92,8 +70,6 @@ export async function setLanguage(
   // Persistence is fire-and-forget: the switch is already visible, and a failed
   // write is not a reason to refuse it. The next boot falls back to detection.
   void storageService.setItem(STORAGE_KEYS.language, language);
-
-  return { restartRequired };
 }
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
@@ -110,11 +86,6 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       if (cancelled) return;
 
       const next = isLanguage(stored) ? stored : getLanguageState().language;
-
-      // Written on every boot, so the native flag always ends up matching the
-      // language actually in use — including a switch that was interrupted
-      // before its restart. The current process keeps the flag it booted with.
-      applyNativeDirection(next);
 
       // Only await when it actually changes: on the common path the instance
       // already holds the detected language, and `changeLanguage` would emit a

@@ -1,9 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { useColorScheme, useWindowDimensions, View } from 'react-native';
+import { useWindowDimensions, View } from 'react-native';
 import type { SurahProgress } from '@/core/domain/progress/surah-progress';
-import { getHeatmapColor } from '@/core/utils/heatmap';
 import { useDirection } from '@/i18n';
 import { cn } from '@/ui/cn';
+import { FOCUS_RING } from '@/ui/focus';
 import { Pressable } from '@/ui/pressable';
 import { heatmapGeometry } from './heatmap-geometry';
 import { formatNumber, formatPercent } from './progress-format';
@@ -21,20 +21,40 @@ import { formatNumber, formatPercent } from './progress-format';
  * surah, read its detail sheet" — which a button with a spoken label does
  * exactly.
  *
+ * Colour now comes from the same five token steps as the legend and the week
+ * strip (a static opacity map), not from an interpolated RGB value. That keeps
+ * the grid inside the theme: a token change moves the whole ramp, and dark mode
+ * no longer carries a separate hard-coded green.
+ *
  * `data-selected` (via `dataSet`) is the web-facing hook the plan asks for; on
  * native it is inert, and the border plus `accessibilityState` carry the same
- * information. RTL needs no special case: `flex-row` starts at the inline start,
- * so surah 1 sits on the right under `LayoutDirection`.
- *
- * Colour comes from `core/utils/heatmap.ts`, so it is a computed ramp position
- * rather than a theme token and must travel through `style`. That is the single
- * documented exception to "no colours outside the token block".
+ * information. The grid is `flex-row`, so surah 1 sits at the left in both
+ * languages: the layout does not mirror, only the labels' direction follows the
+ * language.
  */
 export type SurahHeatmapProps = {
   rows: readonly SurahProgress[];
   selectedSurah: number | null;
   onSelect: (surahNumber: number) => void;
 };
+
+const LEVEL_CLASS = [
+  'bg-muted',
+  'bg-primary/20',
+  'bg-primary/40',
+  'bg-primary/65',
+  'bg-primary',
+] as const;
+
+/** Five steps, shared with `ProgressLegend` and `WeekStrip`. */
+export function heatmapLevel(percent: number): 0 | 1 | 2 | 3 | 4 {
+  if (percent <= 0) return 0;
+  if (percent < 25) return 1;
+  if (percent < 50) return 2;
+  if (percent < 75) return 3;
+
+  return 4;
+}
 
 export function SurahHeatmap({
   rows,
@@ -44,7 +64,6 @@ export function SurahHeatmap({
   const { t } = useTranslation();
   const { language } = useDirection();
   const { width } = useWindowDimensions();
-  const isDark = useColorScheme() === 'dark';
 
   const geometry = heatmapGeometry(width);
 
@@ -72,12 +91,14 @@ export function SurahHeatmap({
               onPress={() => onSelect(row.surahNumber)}
               className={cn(
                 'rounded-sm border-2 active:opacity-70',
+                LEVEL_CLASS[heatmapLevel(row.percent)],
                 selected ? 'border-foreground' : 'border-transparent',
+                FOCUS_RING,
               )}
+              hitSlop={6}
               style={{
                 width: geometry.cell,
                 height: geometry.cell,
-                backgroundColor: getHeatmapColor(row.percent, isDark),
               }}
             />
           );

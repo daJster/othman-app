@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { useColorScheme, View } from 'react-native';
+import { View } from 'react-native';
 import {
   summarizeProgress,
   type SurahProgress,
@@ -26,7 +26,6 @@ export type ProgressSummaryProps = {
 export function ProgressSummary({ rows }: ProgressSummaryProps) {
   const { t } = useTranslation();
   const { language } = useDirection();
-  const isDark = useColorScheme() === 'dark';
   const summary = summarizeProgress(rows);
   const average = formatPercent(summary.averagePercent, language);
 
@@ -42,7 +41,12 @@ export function ProgressSummary({ rows }: ProgressSummaryProps) {
               {average}
             </Text>
           </View>
-          <Text variant="caption" tone="muted" className="max-w-[50%] text-end">
+          <Text
+            variant="caption"
+            tone="muted"
+            className="max-w-[50%]"
+            align="end"
+          >
             {t('pages.account.progress.subtitle')}
           </Text>
         </View>
@@ -72,7 +76,6 @@ export function ProgressSummary({ rows }: ProgressSummaryProps) {
       </View>
 
       <ProgressLegend
-        isDark={isDark}
         lessLabel={t('pages.account.progress.legend.less')}
         moreLabel={t('pages.account.progress.legend.more')}
         className="pt-1"

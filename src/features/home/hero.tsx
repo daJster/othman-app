@@ -1,10 +1,19 @@
-import { Link } from 'expo-router';
-import { Pressable, View } from 'react-native';
-import type { AppHref } from '@/features/navigation/route-registry';
-import { BrandMark } from '@/features/brand/brand-mark';
-import { useDirection } from '@/i18n';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useCallback, useEffect, useRef, type ComponentRef } from 'react';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 import { cn } from '@/ui/cn';
+import { HEADING_ROLE, headingAriaLevel } from '@/ui/heading';
+import { useIsWide } from '@/ui/layout';
+import { HERO_BOX_CLASS } from '@/ui/ratio';
 import { Text } from '@/ui/text';
+import {
+  CARD_RADIUS_CLASS,
+  GlassSurface,
+  HeroCardBody,
+  type HeroCardCopy,
+} from './hero-card';
+import { HeroFilm } from './hero-film';
+import { HeroParticles } from './hero-particles';
 
 /**
  * Visually hidden but still in the accessibility tree. The hero's wordmark is
@@ -19,30 +28,45 @@ const visuallyHidden = {
 } as const;
 
 /**
- * Home hero: the study circle.
+ * Home hero: the landing film.
  *
- * The landing page is a halqa, not a feature catalogue. A deep canopy field
- * holds the basmalah, the wordmark and the cohort promise; a brass ring at the
- * right is the community diagram, with the Arabic word for "circle" at its
- * centre. On a phone the ring sits below the copy at a smaller size, so the
- * first viewport still reads as one composition rather than a cropped desktop
- * banner.
+ * The page opens on a window rather than a diagram. A single graded film runs
+ * edge to edge behind one frosted panel; the panel carries the basmalah, the
+ * wordmark, the cohort promise and the one filled control. The glass is
+ * neutral — very light grey, with no colour of its own — so the copy stays in
+ * canopy ink while the film's monochrome light passes underneath. Brass starts
+ * below the fold, where the circle lives.
  *
- * The primary action is a parchment capsule, the only high-contrast control in
- * the block. No photograph: there is no real cohort imagery, and a stock image
- * would lie about the people in this kuttab.
+ * The window is capped at the page column (`max-w-6xl`, the width the web
+ * navbar and `Page width="wide"` share) and centred: on a desktop the hero
+ * reads as the top of the grid instead of stretching to the edges of the
+ * monitor, while a phone below that width still gets a full-bleed film.
+ *
+ * The halqa ring is gone on purpose. It diagrammed a community the reader
+ * cannot yet see, and it cost half the phone viewport to do it. The film does
+ * the same work emotionally and the panel does it literally.
+ *
+ * Height is a ratio, not a step of fixed pixels: on the web it is 88% of the
+ * small viewport (so a collapsing mobile toolbar cannot push the panel below
+ * the fold), on native the film keeps a 9:16 window. The static web export
+ * never reads `useWindowDimensions`, so the first paint and the hydrated frame
+ * agree.
+ *
+ * The card rendered here is the layout ghost. `HeroScroll` measures it and
+ * puts the real, morphing card above the scroll viewport at the same rect; this
+ * copy is what keeps the first paint whole and reserves the composition.
  */
-export type HeroProps = {
-  /** The basmalah, in Arabic, in both languages. */
-  opening: string;
+export type HeroProps = HeroCardCopy & {
   title: string;
-  tagline: string;
-  /** One line naming the people around the reader. */
-  cohort: string;
-  ctaLabel: string;
-  ctaHref: AppHref;
-  /** Arabic word at the centre of the study ring. */
-  ringLabel: string;
+  /** The morph overlay has taken over; the ghost must stop intercepting. */
+  ghostHidden?: boolean;
+  /** Reports the card's window rect so the overlay can land on it. */
+  onCardRect?: (rect: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  }) => void;
 };
 
 export function Hero({
@@ -52,103 +76,80 @@ export function Hero({
   cohort,
   ctaLabel,
   ctaHref,
-  ringLabel,
+  ghostHidden = false,
+  onCardRect,
 }: HeroProps) {
-  const { isRTL } = useDirection();
+  const wide = useIsWide();
+  const cardRef = useRef<ComponentRef<typeof View>>(null);
+  const window = useWindowDimensions();
+
+  const report = useCallback(() => {
+    cardRef.current?.measureInWindow?.((x, y, width, height) => {
+      if (width <= 0 || height <= 0) return;
+
+      onCardRect?.({ x, y, width, height });
+    });
+  }, [onCardRect]);
+
+  // Orientation and browser resize move the card without changing its own
+  // layout, so the ghost re-reports whenever the viewport changes.
+  useEffect(() => {
+    report();
+  }, [report, window.width, window.height]);
 
   return (
-    <View className="relative overflow-hidden rounded-b-[2.5rem] bg-canopy px-5 pt-12 pb-14 md:px-10 md:pt-20 md:pb-20">
-      <View
-        className="absolute -top-28 -right-24 h-72 w-72 rounded-full border border-parchment/10"
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
+    <View
+      testID="hero-panel"
+      className={cn(
+        'relative mx-auto w-full max-w-6xl overflow-hidden rounded-b-card bg-canopy',
+        HERO_BOX_CLASS,
+      )}
+    >
+      <Text {...HEADING_ROLE} {...headingAriaLevel(1)} style={visuallyHidden}>
+        {title}
+      </Text>
+
+      <HeroFilm />
+
+      {/*
+       * A black scrim rather than a canopy one: it has to sit over
+       * footage whose grade is already close to the field, and a black
+       * fade never leaves a seam against a token that shifted by a point.
+       */}
+      <LinearGradient
+        colors={['rgba(3,10,7,0)', 'rgba(3,10,7,0.62)']}
+        locations={[0.3, 1]}
+        style={StyleSheet.absoluteFill}
+        pointerEvents="none"
       />
-      <View
-        className="absolute -bottom-20 -left-32 h-64 w-64 rounded-full border border-parchment/10"
-        accessibilityElementsHidden
-        importantForAccessibility="no-hide-descendants"
-      />
 
-      <View className="mx-auto w-full max-w-6xl gap-8 md:gap-10">
-        <Text
-          family="quran"
-          className="text-center text-2xl leading-relaxed text-brass md:text-3xl"
-        >
-          {opening}
-        </Text>
+      <HeroParticles count={wide ? 26 : 14} />
 
-        <View
-          className={cn(
-            'flex-col gap-10 md:items-center md:gap-16',
-            isRTL ? 'md:flex-row-reverse' : 'md:flex-row',
-          )}
-        >
-          <View className="flex-1 gap-5">
-            <View className="gap-2">
-              {/*
-               * The visible mark is artwork, so the heading stays in the tree
-               * as visually hidden text: screen readers still get a real h1
-               * with the product name, and the image never has to carry the
-               * heading role.
-               */}
-              <Text accessibilityRole="header" style={visuallyHidden}>
-                {title}
-              </Text>
-              <View
-                className={cn(
-                  'flex-row',
-                  isRTL ? 'justify-end' : 'justify-start',
-                )}
-              >
-                <BrandMark
-                  className="h-16 w-28 md:h-20 md:w-36"
-                  surface="onDark"
-                  accessible={false}
-                />
-              </View>
-              <Text className="max-w-xl text-lg text-parchment/80 md:text-xl">
-                {tagline}
-              </Text>
-            </View>
-
-            <Text className="max-w-md text-sm leading-relaxed text-parchment/65">
-              {cohort}
-            </Text>
-
-            <View className={isRTL ? 'flex-row-reverse' : 'flex-row'}>
-              <Link href={ctaHref} asChild>
-                <Pressable className="rounded-full bg-parchment px-6 py-3 active:opacity-80">
-                  <Text className="font-semibold text-canopy">{ctaLabel}</Text>
-                </Pressable>
-              </Link>
-            </View>
-          </View>
-
+      <View className="relative flex-1 justify-end px-gutter pb-section md:justify-center md:px-section md:py-section">
+        <View className="w-full md:mx-auto md:max-w-6xl">
           <View
-            className="relative aspect-square w-full max-w-[20rem] self-center md:max-w-[24rem]"
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
+            ref={cardRef}
+            testID="hero-card"
+            onLayout={report}
+            pointerEvents={ghostHidden ? 'none' : 'auto'}
+            aria-hidden={ghostHidden}
+            className={cn(
+              'w-full overflow-hidden border border-white/50 shadow-2xl shadow-black/20',
+              CARD_RADIUS_CLASS,
+              'md:mr-auto md:max-w-md',
+              ghostHidden && 'opacity-0',
+            )}
           >
-            <View className="absolute inset-0 rounded-full border border-brass/35" />
-            <View className="absolute inset-6 rounded-full border border-parchment/15" />
-            <View className="absolute inset-14 rounded-full border border-brass/20" />
+            <GlassSurface />
 
-            <View className="flex-1 items-center justify-center gap-1">
-              <Text family="quran" className="text-4xl text-brass">
-                {ringLabel}
-              </Text>
-              <Text
-                variant="overline"
-                className="tracking-[0.35em] text-parchment/70"
-              >
-                HALQA
-              </Text>
-            </View>
-
-            <View className="absolute top-0 left-1/2 -ml-1.5 h-3 w-3 rounded-full bg-brass" />
-            <View className="absolute bottom-0 left-1/2 -ml-1.5 h-3 w-3 rounded-full bg-clay" />
-            <View className="absolute top-1/2 left-0 -mt-1.5 h-3 w-3 rounded-full bg-brass" />
-            <View className="absolute top-1/2 right-0 -mt-1.5 h-3 w-3 rounded-full bg-brass" />
+            <HeroCardBody
+              opening={opening}
+              tagline={tagline}
+              cohort={cohort}
+              ctaLabel={ctaLabel}
+              ctaHref={ctaHref}
+              interactive={!ghostHidden}
+            />
           </View>
         </View>
       </View>

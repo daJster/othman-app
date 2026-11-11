@@ -133,8 +133,8 @@ function ReadingSessionCardView({
       onPress={onPress}
       testID="quran-session-card"
       className={cn(
-        'relative justify-end overflow-hidden rounded-xl border active:opacity-70',
-        latest ? 'border-brass/60' : 'border-border',
+        'relative justify-end overflow-hidden rounded-card border active:opacity-70',
+        latest ? 'border-brass/60' : 'border-glass-edge',
         // Border only: the hairline is the affordance, not a shadow or a lift.
         Platform.select({
           web: cn(
@@ -144,7 +144,7 @@ function ReadingSessionCardView({
         }),
         className,
       )}
-      style={{ aspectRatio: 3 / 4 }}
+      style={{ aspectRatio: 1 / 1.512 }}
     >
       {imageUrl ? (
         <Image

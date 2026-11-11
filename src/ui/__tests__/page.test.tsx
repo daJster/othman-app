@@ -8,8 +8,8 @@ describe('Page', () => {
     const className = screen.getByTestId('page').props.className;
     expect(className).toContain('mx-auto');
     expect(className).toContain('w-full');
-    expect(className).toContain('px-4');
-    expect(className).toContain('sm:px-5');
+    expect(className).toContain('px-gutter');
+    expect(className).toContain('sm:px-gutter-lg');
     expect(className).toContain('max-w-3xl');
   });
 

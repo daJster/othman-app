@@ -24,7 +24,6 @@ import {
   useSignOut,
 } from '@/features/account/use-current-account';
 import { flatTrigger } from '@/features/navigation/web/flat-trigger';
-import { useDirection } from '@/i18n';
 import { Avatar } from '@/ui/avatar';
 import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
@@ -46,7 +45,6 @@ import { Text } from '@/ui/text';
 export function NavMenu() {
   const { t } = useTranslation();
   const router = useRouter();
-  const { isRTL } = useDirection();
   const { authUser, state } = useCurrentAccount();
   const signOut = useSignOut();
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -96,13 +94,7 @@ export function NavMenu() {
           </Button>
         </DropdownMenuTrigger>
 
-        {/* Radix aligns physically; mirror the anchor side so the menu stays
-            attached to the avatar in RTL. */}
-        <DropdownMenuContent
-          align={isRTL ? 'start' : 'end'}
-          className="w-64 bg-background"
-          testID="nav-menu"
-        >
+        <DropdownMenuContent align="end" className="w-64" testID="nav-menu">
           <View className="p-2">
             <View className="flex-row items-center gap-3">
               <Avatar size="lg" src={photoURL} name={name} />

@@ -1,7 +1,9 @@
 import { Icon } from '@/components/ui/icon';
 import { NativeOnlyAnimatedView } from '@/components/ui/native-only-animated-view';
 import { TextClassContext } from '@/components/ui/text';
+import { useDirection } from '@/i18n';
 import { cn } from '@/lib/utils';
+import { GlassFill } from '@/ui/glass';
 import * as SelectPrimitive from '@rn-primitives/select';
 import Check from 'lucide-react-native/icons/check';
 import ChevronDown from 'lucide-react-native/icons/chevron-down';
@@ -75,16 +77,43 @@ function SelectTrigger({
 const FullWindowOverlay =
   Platform.OS === 'ios' ? RNFullWindowOverlay : React.Fragment;
 
+/**
+ * The listbox panel.
+ *
+ * It uses the app's `overlay` glass weight: a wash heavy enough to keep text
+ * at contrast on any backdrop, with the page still legible through it. Three
+ * things are load-bearing here.
+ *
+ *  - **`sideOffset` is 4 px and it is part of the collision maths.** A visual
+ *    `translate-y` would sit outside the flip/shift calculation, so the gap has
+ *    to come from the offset plugin.
+ *  - **`align` is physical.** floating-ui has no RTL handling (and Radix's
+ *    `shift` only moves on the main axis), so `start` is the physical left.
+ *    Passing the logical start means mirroring it for Arabic, or the menu hangs
+ *    off the wrong end of its trigger.
+ *  - **The glass layers sit outside the scroll container.** The panel clips, and
+ *    Radix's viewport (which is `overflow: hidden auto`) does the scrolling.
+ *    An absolutely positioned blur *inside* a scrolling box scrolls away with
+ *    the items.
+ */
+
 function SelectContent({
   className,
   children,
   position = 'popper',
+  side = 'bottom',
+  align = 'start',
+  sideOffset = 4,
+  alignOffset = 0,
+  avoidCollisions = true,
   portalHost,
+  style,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content> & {
   className?: string;
   portalHost?: string;
 }) {
+  const { isRTL } = useDirection();
   return (
     <SelectPrimitive.Portal hostName={portalHost}>
       <FullWindowOverlay>
@@ -98,41 +127,54 @@ function SelectContent({
             exiting={FadeOut.reduceMotion(ReduceMotion.System)}
             as="Pressable"
           >
-            <TextClassContext.Provider value="text-popover-foreground">
+            <TextClassContext.Provider value="text-foreground">
               <SelectPrimitive.Content
                 className={cn(
-                  'bg-popover relative z-50 min-w-[8rem] rounded-md border border-border shadow-md shadow-black/5',
+                  'relative z-50 min-w-32 overflow-hidden rounded-panel border border-glass-edge shadow-xl shadow-black/10',
                   Platform.select({
-                    web: cn(
-                      'animate-in fade-in-0 zoom-in-95 max-h-52 origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto',
-                      props.side === 'bottom' && 'slide-in-from-top-2',
-                      props.side === 'top' && 'slide-in-from-bottom-2',
-                    ),
+                    // The panel is capped by the room Radix measured for it,
+                    // not by a fixed 208 px that ignores the viewport. Clipping
+                    // lives here; Radix's viewport does the scrolling.
+                    web: 'max-h-(--radix-select-content-available-height)',
                     native: 'p-1',
                   }),
-                  position === 'popper' &&
-                    Platform.select({
-                      web: cn(
-                        props.side === 'bottom' && 'translate-y-1',
-                        props.side === 'top' && '-translate-y-1',
-                      ),
-                    }),
                   className,
                 )}
+                /*
+                 * Radix stamps `dir="ltr"` on its own content element (it reads
+                 * a DirectionProvider the app never installs), which would lay
+                 * the Arabic labels and the check mark out left-to-right inside
+                 * an RTL page. The wrapper view carries the real direction.
+                 */
+                style={
+                  StyleSheet.flatten([
+                    { direction: isRTL ? 'rtl' : 'ltr' } as const,
+                    style,
+                  ]) ?? undefined
+                }
                 position={position}
+                side={side}
+                align={align}
+                sideOffset={sideOffset}
+                alignOffset={alignOffset}
+                avoidCollisions={avoidCollisions}
                 {...props}
               >
+                {/* The material, then the scrolling viewport above it. */}
+                <GlassFill weight="overlay" radius="panel" />
+
                 <SelectScrollUpButton />
                 <SelectPrimitive.Viewport
                   className={cn(
                     'p-1',
                     position === 'popper' &&
-                      cn(
-                        'w-full',
-                        Platform.select({
-                          web: 'h-[var(--radix-select-trigger-height)] min-w-[var(--radix-select-trigger-width)]',
-                        }),
-                      ),
+                      Platform.select({
+                        // Match the trigger's width, never its height: the old
+                        // `h-[--radix-select-trigger-height]` pinned the list to
+                        // the row's 56 px, so a three-option menu scrolled
+                        // inside a 64 px box.
+                        web: 'w-full min-w-[var(--radix-select-trigger-width)]',
+                      }),
                   )}
                 >
                   {children}

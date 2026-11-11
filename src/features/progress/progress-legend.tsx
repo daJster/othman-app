@@ -1,31 +1,33 @@
 import { View } from 'react-native';
-import { getHeatmapColor } from '@/core/utils/heatmap';
 import { cn } from '@/ui/cn';
 import { Text } from '@/ui/text';
 
 /**
  * Heatmap key.
  *
- * Five swatches at the same stops the cells are coloured from, so the legend
- * cannot drift from the ramp. `backgroundColor` is computed by
- * `core/utils/heatmap.ts` — the one module allowed to produce colours outside
- * the token block — which is why the swatch uses `style`: the value is a
- * gradient position, not a theme token.
+ * Five swatches at the same token steps the cells use, so the legend cannot
+ * drift from the grid. Earlier this component interpolated RGB values in JS;
+ * the cells now read the same `primary` token through static opacity classes,
+ * which means the key follows a theme change without recomputing anything.
  *
  * Hidden from assistive tech: the cells carry their own labels, and five
  * unlabelled squares read as noise.
  */
-const STOPS = [0, 25, 50, 75, 100] as const;
+const LEVEL_CLASS = [
+  'bg-muted',
+  'bg-primary/20',
+  'bg-primary/40',
+  'bg-primary/65',
+  'bg-primary',
+] as const;
 
 export type ProgressLegendProps = {
-  isDark: boolean;
   lessLabel: string;
   moreLabel: string;
   className?: string;
 };
 
 export function ProgressLegend({
-  isDark,
   lessLabel,
   moreLabel,
   className,
@@ -40,12 +42,11 @@ export function ProgressLegend({
         {lessLabel}
       </Text>
 
-      {STOPS.map((stop) => (
+      {LEVEL_CLASS.map((level, index) => (
         <View
-          key={stop}
-          testID={`heatmap-legend:${stop}`}
-          className="h-4 w-4 rounded-sm border border-border"
-          style={{ backgroundColor: getHeatmapColor(stop, isDark) }}
+          key={level}
+          testID={`heatmap-legend:${index}`}
+          className={cn('h-4 w-4 rounded-sm border border-glass-edge', level)}
         />
       ))}
 

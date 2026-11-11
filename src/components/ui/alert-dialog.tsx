@@ -2,6 +2,7 @@ import { buttonTextVariants, buttonVariants } from '@/components/ui/button';
 import { NativeOnlyAnimatedView } from '@/components/ui/native-only-animated-view';
 import { TextClassContext } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
+import { GlassFill } from '@/ui/glass';
 import * as AlertDialogPrimitive from '@rn-primitives/alert-dialog';
 import * as React from 'react';
 import { Platform, View, type ViewProps } from 'react-native';
@@ -57,6 +58,7 @@ function AlertDialogOverlay({
 function AlertDialogContent({
   className,
   portalHost,
+  children,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
   portalHost?: string;
@@ -66,14 +68,17 @@ function AlertDialogContent({
       <AlertDialogOverlay>
         <AlertDialogPrimitive.Content
           className={cn(
-            'z-50 flex flex-col gap-4 rounded-lg border border-border bg-background p-6 shadow-lg shadow-black/5 sm:max-w-lg',
+            'relative z-50 flex flex-col gap-4 overflow-hidden rounded-card border border-glass-edge bg-glass-strong p-panel shadow-2xl shadow-black/15 sm:max-w-lg',
             Platform.select({
               web: 'animate-in fade-in-0 zoom-in-95 duration-200 web:max-w-[calc(100%-2rem)]',
             }),
             className,
           )}
           {...props}
-        />
+        >
+          <GlassFill weight="overlay" radius="card" />
+          {children}
+        </AlertDialogPrimitive.Content>
       </AlertDialogOverlay>
     </AlertDialogPortal>
   );

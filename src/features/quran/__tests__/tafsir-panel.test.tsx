@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import { StyleSheet } from 'react-native';
 import type {
   ContentBody,
   ContentSource,
@@ -184,7 +185,7 @@ describe('TafsirPanel', () => {
 
     expect(content).toBeTruthy();
     expect(text.props.selectable).toBe(true);
-    expect(text.props.style).toMatchObject({
+    expect(StyleSheet.flatten(text.props.style)).toMatchObject({
       writingDirection: 'rtl',
       textAlign: 'right',
     });
@@ -205,7 +206,9 @@ describe('TafsirPanel', () => {
 
     await render(<TafsirPanel ayah={AYAH} />);
 
-    expect(screen.getByText('English translation').props.style).toMatchObject({
+    expect(
+      StyleSheet.flatten(screen.getByText('English translation').props.style),
+    ).toMatchObject({
       writingDirection: 'ltr',
       textAlign: 'left',
     });

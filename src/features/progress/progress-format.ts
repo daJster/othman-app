@@ -34,3 +34,40 @@ export function formatReviewedDate(
     year: 'numeric',
   }).format(parseDateKey(dateKey));
 }
+
+/** `Sat` / `السبت` for the week strip. */
+export function formatWeekdayShort(date: Date, language: Language): string {
+  return new Intl.DateTimeFormat(language, { weekday: 'short' }).format(date);
+}
+
+/** `12 Oct` / `١٢ أكتوبر` for the week strip caption. */
+export function formatShortDay(date: Date, language: Language): string {
+  return new Intl.DateTimeFormat(language, {
+    day: 'numeric',
+    month: 'short',
+  }).format(date);
+}
+
+/** `12 Oct 2026` in the reader's locale, used by the activity rows. */
+export function formatActivityDay(
+  dateKey: DateKey,
+  language: Language,
+): string {
+  return new Intl.DateTimeFormat(language, {
+    day: 'numeric',
+    month: 'short',
+  }).format(parseDateKey(dateKey));
+}
+
+/**
+ * Arabic-Indic digits typed into the search field become ASCII digits before
+ * comparison. Without this, a reader with an Arabic keyboard searching "١١٢"
+ * gets no result for surah 112.
+ */
+export function normalizeSearchDigits(value: string): string {
+  return value.replace(/[\u0660-\u0669\u06f0-\u06f9]/g, (digit) => {
+    const code = digit.charCodeAt(0);
+
+    return String(code >= 0x06f0 ? code - 0x06f0 : code - 0x0660);
+  });
+}

@@ -68,9 +68,10 @@ export function AudioSheet({
   onNext,
 }: AudioSheetProps) {
   const { t } = useTranslation();
-  const { language, isRTL } = useDirection();
-  const previousIcon = isRTL ? 'chevron-right' : 'chevron-left';
-  const nextIcon = isRTL ? 'chevron-left' : 'chevron-right';
+  const { language } = useDirection();
+  // Ayah order is the mushaf's: previous to the right, next to the left.
+  const previousIcon = 'chevron-right';
+  const nextIcon = 'chevron-left';
   const position = selected
     ? t('reader.selectedAyah', {
         ayah: formatReaderNumber(selected.ayah, language),

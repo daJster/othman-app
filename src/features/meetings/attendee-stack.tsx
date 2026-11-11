@@ -1,9 +1,11 @@
 import { View } from 'react-native';
 import { ATTENDEE_LIST_CONFIG } from '@/core/config';
 import type { Attendee } from '@/core/types';
+import { useDirection } from '@/i18n';
 import { Avatar } from '@/ui/avatar';
 import { cn } from '@/ui/cn';
 import { Text } from '@/ui/text';
+import { attendeeName } from './meeting-display';
 
 /**
  * Overlapping attendee avatars.
@@ -15,12 +17,18 @@ import { Text } from '@/ui/text';
  *
  * Collapsing uses `-ms-2`, the logical start margin, so the stack overlaps
  * toward the inline end in both directions.
+ *
+ * No portraits are supplied, so the avatar falls back to initials — and the
+ * initials follow the active language, because an Arabic name's initials are
+ * Arabic letters, not the first two Latin glyphs of a transliteration.
  */
 export type AttendeeStackProps = {
   attendees: readonly Attendee[];
 };
 
 export function AttendeeStack({ attendees }: AttendeeStackProps) {
+  const { language } = useDirection();
+
   if (attendees.length === 0) return null;
 
   const visible = attendees.slice(0, ATTENDEE_LIST_CONFIG.maxVisible);
@@ -38,7 +46,7 @@ export function AttendeeStack({ attendees }: AttendeeStackProps) {
         >
           <Avatar
             src={attendee.avatar}
-            name={attendee.name}
+            name={attendeeName(attendee, language)}
             size={ATTENDEE_LIST_CONFIG.avatarSize}
           />
         </View>

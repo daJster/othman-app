@@ -115,7 +115,7 @@ describe('AccountScreen', () => {
 
     await renderScreen();
 
-    expect(screen.getByText('Loading…')).toBeTruthy();
+    expect(screen.getByTestId('account-loading')).toBeTruthy();
     // Signed out is a *different* state; it must not flash while loading.
     expect(screen.queryByText('You are signed out')).toBeNull();
   });
@@ -154,6 +154,43 @@ describe('AccountScreen', () => {
 
     await fireEvent.press(screen.getByTestId('account-about-row'));
     expect(mockPush).toHaveBeenCalledWith('/about');
+  });
+
+  it('opens the profile drawer with the details the header does not show', async () => {
+    await renderScreen();
+    await waitFor(() =>
+      expect(screen.getByText('Othman Al-Farsi')).toBeTruthy(),
+    );
+
+    await fireEvent.press(screen.getAllByLabelText('View details')[0]!);
+
+    expect(screen.getByTestId('account-details-drawer')).toBeTruthy();
+    expect(screen.getByText('+212612345678')).toBeTruthy();
+    expect(screen.getByText('Profile')).toBeTruthy();
+
+    await fireEvent.press(screen.getByTestId('account-details-close'));
+  });
+
+  it('saves feedback from the feedback dialog', async () => {
+    await renderScreen();
+    await waitFor(() =>
+      expect(screen.getByText('Othman Al-Farsi')).toBeTruthy(),
+    );
+
+    await fireEvent.press(screen.getByTestId('account-feedback-row'));
+
+    expect(screen.getByTestId('feedback-dialog')).toBeTruthy();
+
+    await fireEvent.press(screen.getByTestId('feedback-rating:4'));
+    await fireEvent.changeText(
+      screen.getByTestId('feedback-message'),
+      'The reader is calm and clear.',
+    );
+    await fireEvent.press(screen.getByTestId('feedback-submit'));
+
+    await waitFor(() =>
+      expect(screen.queryByTestId('feedback-dialog')).toBeNull(),
+    );
   });
 
   it('offers the query retry when the profile read fails', async () => {

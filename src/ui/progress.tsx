@@ -28,7 +28,7 @@ export function Progress({ value, className, ...props }: ProgressProps) {
       accessibilityRole="progressbar"
       accessibilityValue={{ min: 0, max: 100, now: rounded }}
       indicatorClassName="bg-primary"
-      className={cn('h-2 w-full rounded-full bg-muted', className)}
+      className={cn('h-2 w-full rounded-full bg-glass-edge', className)}
       {...props}
     />
   );

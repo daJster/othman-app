@@ -15,9 +15,16 @@ import { cn } from './cn';
  * different props. Screens pick `Screen` for lists/content and `ScreenView` for
  * centring a state or a form that manages its own keyboard avoidance.
  *
- * Neither applies safe-area insets. Insets are a layout concern owned by the
- * shell (native tabs / stack header, P3.2), and applying them here too would
- * double the gap under a tab bar.
+ * **Top inset.** Both own it through `pt-safe`, which Uniwind resolves from the
+ * insets `SafeAreaListener` pushes in. `contentInsetAdjustmentBehavior` alone
+ * is not enough: the native tabs shell has no header, so on both phones the
+ * status bar simply sat on top of the first row of every page. The padding goes
+ * on the container, not the scroll content, so scrolled content cannot slide
+ * back under the bar.
+ *
+ * The bottom is deliberately not owned here: the native tab bar already
+ * reserves the home indicator, and applying it twice would leave a gap the size
+ * of a second bar. Screens that need more room add their own bottom padding.
  */
 
 export type ScreenProps = ScrollViewProps & {
@@ -36,9 +43,9 @@ export function Screen({
 }: ScreenProps) {
   return (
     <ScrollView
-      className={cn('flex-1 bg-background', className)}
+      className={cn('flex-1 bg-background pt-safe', className)}
       contentContainerClassName={cn(
-        'grow gap-4 p-4 pb-8',
+        'grow gap-gutter p-gutter pb-section',
         contentContainerClassName,
       )}
       contentInsetAdjustmentBehavior={contentInsetAdjustmentBehavior}
@@ -58,7 +65,7 @@ export type ScreenViewProps = ViewProps & {
 
 export function ScreenView({ children, className, ...props }: ScreenViewProps) {
   return (
-    <View className={cn('flex-1 bg-background', className)} {...props}>
+    <View className={cn('flex-1 bg-background pt-safe', className)} {...props}>
       {children}
     </View>
   );

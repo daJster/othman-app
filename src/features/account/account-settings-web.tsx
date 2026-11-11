@@ -30,9 +30,10 @@ type SettingsRowProps = {
   label: string;
   description?: string;
   onPress: () => void;
-  isRTL: boolean;
   destructive?: boolean;
   showChevron?: boolean;
+  /** The row closes a grouped surface: no trailing hairline. */
+  last?: boolean;
 };
 
 function SettingsRow({
@@ -41,9 +42,9 @@ function SettingsRow({
   label,
   description,
   onPress,
-  isRTL,
   destructive = false,
   showChevron = true,
+  last = false,
 }: SettingsRowProps) {
   return (
     <Pressable
@@ -51,58 +52,71 @@ function SettingsRow({
       accessibilityRole="button"
       onPress={onPress}
       className={cn(
-        'min-h-14 w-full flex-row items-center gap-3 border-b border-border py-3 active:opacity-70',
+        'min-h-14 w-full flex-row items-center gap-3 py-3 active:opacity-70',
+        !last && 'border-b border-glass-edge',
         FOCUS_RING,
       )}
     >
       <Icon name={icon} tone={destructive ? 'destructive' : 'muted'} />
 
-      <View
-        className="min-w-0 flex-1 gap-0.5"
-        style={{ alignItems: isRTL ? 'flex-end' : 'flex-start' }}
-      >
-        <Text
-          variant="label"
-          tone={destructive ? 'destructive' : 'default'}
-          style={{ textAlign: isRTL ? 'right' : 'left' }}
-        >
+      <View className="min-w-0 flex-1 items-start gap-0.5">
+        <Text variant="label" tone={destructive ? 'destructive' : 'default'}>
           {label}
         </Text>
         {description ? (
-          <Text
-            variant="caption"
-            tone="muted"
-            style={{ textAlign: isRTL ? 'right' : 'left' }}
-          >
+          <Text variant="caption" tone="muted">
             {description}
           </Text>
         ) : null}
       </View>
 
       {showChevron ? (
-        <Icon name={isRTL ? 'chevron-left' : 'chevron-right'} tone="muted" />
+        <Icon name="chevron-right" size={18} tone="muted" />
       ) : null}
     </Pressable>
   );
 }
 
 export type AccountSettingsWebProps = {
-  isRTL: boolean;
   onProgress: () => void;
   onAbout: () => void;
+  onFeedback: () => void;
   onSignOut: () => void;
+  /** Administration only: the cohort's account list. */
+  onMembers?: () => void;
+  /** Real signed-in session only: self-service deletion is irreversible. */
+  onDeleteAccount?: () => void;
 };
 
 export function AccountSettingsWeb({
-  isRTL,
   onProgress,
   onAbout,
+  onFeedback,
   onSignOut,
+  onMembers,
+  onDeleteAccount,
 }: AccountSettingsWebProps) {
   const { t } = useTranslation();
 
   return (
     <View>
+      {onMembers ? (
+        <>
+          <ListSectionHeader
+            label={t('account.sections.manage')}
+            inset={false}
+          />
+          <SettingsRow
+            testID="account-members-row"
+            icon="users"
+            label={t('account.admin.members')}
+            description={t('account.admin.membersDescription')}
+            onPress={onMembers}
+            last
+          />
+        </>
+      ) : null}
+
       <ListSectionHeader label={t('account.sections.settings')} inset={false} />
 
       <SettingsRow
@@ -111,7 +125,6 @@ export function AccountSettingsWeb({
         label={t('pages.account.progress.title')}
         description={t('pages.account.progress.subtitle')}
         onPress={onProgress}
-        isRTL={isRTL}
       />
 
       <SettingsRow
@@ -120,7 +133,14 @@ export function AccountSettingsWeb({
         label={t('nav.about')}
         description={t('nav.aboutDesc')}
         onPress={onAbout}
-        isRTL={isRTL}
+      />
+
+      <SettingsRow
+        testID="account-feedback-row"
+        icon="send"
+        label={t('account.feedback.open')}
+        description={t('account.feedback.rowDescription')}
+        onPress={onFeedback}
       />
 
       <ListSectionHeader label={t('account.sections.session')} inset={false} />
@@ -130,10 +150,29 @@ export function AccountSettingsWeb({
         icon="logout"
         label={t('account.signOut.confirm')}
         onPress={onSignOut}
-        isRTL={isRTL}
         destructive
         showChevron={false}
+        last={!onDeleteAccount}
       />
+
+      {onDeleteAccount ? (
+        <>
+          <ListSectionHeader
+            label={t('account.sections.danger')}
+            inset={false}
+          />
+          <SettingsRow
+            testID="account-delete-row"
+            icon="trash"
+            label={t('account.danger.delete')}
+            description={t('account.danger.deleteDescription')}
+            onPress={onDeleteAccount}
+            destructive
+            showChevron={false}
+            last
+          />
+        </>
+      ) : null}
     </View>
   );
 }

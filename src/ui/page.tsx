@@ -1,6 +1,7 @@
 import type { ViewProps } from 'react-native';
 import { View } from 'react-native';
 import { cn } from './cn';
+import { GUTTER_CLASS } from './ratio';
 
 /**
  * The measured content column.
@@ -11,10 +12,10 @@ import { cn } from './cn';
  * override `px-*`. If a child list owns full-bleed rows, the child imports
  * `PAGE_GUTTER` instead of repeating a pixel value.
  *
- * The gutter is 16px on a phone and 20px from `sm` up; the web navbar's inline
- * padding uses the same scale.
+ * The gutter is one ratio step on a phone and the next one from `sm` up; the
+ * web navbar's inline padding uses the same vocabulary.
  */
-export const PAGE_GUTTER = 'px-4 sm:px-5';
+export const PAGE_GUTTER = GUTTER_CLASS;
 
 const WIDTHS = {
   default: 'max-w-3xl',

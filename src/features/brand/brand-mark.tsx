@@ -41,8 +41,7 @@ export function BrandMark({
       contentFit="contain"
       className={cn('shrink-0', className)}
       accessibilityLabel={accessible ? t('app.name') : undefined}
-      accessibilityElementsHidden={!accessible}
-      importantForAccessibility={accessible ? 'auto' : 'no-hide-descendants'}
+      aria-hidden={!accessible}
     />
   );
 }
