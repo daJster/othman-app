@@ -6,6 +6,7 @@ import {
 } from '@testing-library/react-native';
 import { PortalHost } from '@rn-primitives/portal';
 import type { QueryClient } from '@tanstack/react-query';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import type { AccountData, AuthUser } from '@/core/types';
 import AccountScreen from '@/app/(tabs)/account';
 import { profileService } from '@/services/profile';
@@ -23,6 +24,11 @@ import {
  * disabled query is `pending`, not `empty`), and faking the hook would hide
  * exactly that.
  */
+const SAFE_AREA = {
+  frame: { x: 0, y: 0, width: 900, height: 2000 },
+  insets: { top: 0, right: 0, bottom: 0, left: 0 },
+};
+
 const mockPush = jest.fn();
 const mockBack = jest.fn();
 const mockRedirect = jest.fn();
@@ -91,10 +97,12 @@ async function renderScreen(authUser: AuthUser | null = USER) {
   client = makeTestQueryClient();
 
   await render(
-    <TestProviders client={client} service={auth}>
-      <AccountScreen />
-      <PortalHost />
-    </TestProviders>,
+    <SafeAreaProvider initialMetrics={SAFE_AREA}>
+      <TestProviders client={client} service={auth}>
+        <AccountScreen />
+        <PortalHost />
+      </TestProviders>
+    </SafeAreaProvider>,
   );
 
   return auth;

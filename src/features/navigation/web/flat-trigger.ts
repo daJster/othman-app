@@ -20,3 +20,19 @@ export const FLAT_TRIGGER =
 export function flatTrigger(className?: string) {
   return cn(FLAT_TRIGGER, className);
 }
+
+/**
+ * The chrome cluster's resting weight.
+ *
+ * The controls are state, not destinations: half opacity at rest, full on hover
+ * or press, so the bar reads as one quiet strip and the tabs keep the ink they
+ * need. Nothing here shrinks the hit area — the 44 pt floor still holds, only
+ * the glyph and the ink step back.
+ */
+export const CHROME_REST =
+  'opacity-50 transition-opacity hover:opacity-100 active:opacity-100';
+
+/** `flatTrigger` with the chrome resting weight applied. */
+export function chromeTrigger(className?: string) {
+  return cn(FLAT_TRIGGER, CHROME_REST, className);
+}

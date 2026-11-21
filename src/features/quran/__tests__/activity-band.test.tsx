@@ -1,5 +1,11 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
-import { Dimensions, ScrollView } from 'react-native';
+import { act, fireEvent, screen } from '@testing-library/react-native';
+import { Dimensions } from 'react-native';
+import { State } from 'react-native-gesture-handler';
+import {
+  fireGestureHandler,
+  getByGestureTestId,
+} from 'react-native-gesture-handler/jest-utils';
+import { render } from '@/test-utils/render';
 import type { ContributionDay } from '@/components/catalogs/contribution-graph.native';
 import ContributionGraph from '@/components/catalogs/contribution-graph.native';
 import {
@@ -8,31 +14,26 @@ import {
 } from '@/features/quran/components/activity-band';
 import {
   buildSpanCells,
-  buildYearCells,
   currentMonthKey,
-  endOfMonth,
   formatMonthRange,
-  formatYearTitle,
   shiftMonthKey,
 } from '@/features/quran/components/use-monthly-activity';
 
 /**
- * The activity band is a glance at the span, not a report: these cases pin the
- * window each segment asks the grid for, the paging the toggles move through,
- * and the reset that switching segments performs.
+ * The activity band is a glance at the window, not a report: these cases pin
+ * the three-month window it asks the grid for, the paging the chevrons move
+ * through, and the header that names the window.
  *
  * The platform grid (SVG on web, views on native) is mocked at its boundary for
- * the band cases; the band's job is the span window, the geometry, the header
- * and the segment control. One case renders the native port directly to pin a
- * monthly cell count, which is the one number the band cannot show through the
- * mock.
+ * the band cases; the band's job is the window, the geometry, the header and
+ * the controls. One case renders the native port directly to pin a cell count,
+ * which is the one number the band cannot show through the mock.
  */
 type GridProps = {
   days: { day: string; count: number; level: 0 | 1 | 2 | 3 | 4 }[];
   columns: number;
   cellSize: number;
   weekStart?: number;
-  showMonthLabels?: boolean;
 };
 
 let mockGrid: GridProps | null = null;
@@ -42,6 +43,12 @@ jest.mock('@/features/quran/components/activity-grid', () => ({
     mockGrid = props;
     return null;
   },
+}));
+
+/** No stored practice days: the demo grid is the fixture for these cases. */
+jest.mock('@/api', () => ({
+  api: { practice: { history: { key: () => ['practice', 'history'] } } },
+  useApiQuery: () => ({ data: [], isPending: false }),
 }));
 
 function grid(): GridProps {
@@ -79,6 +86,16 @@ function isNextDisabled(): boolean {
     .disabled;
 }
 
+async function swipeActivity(translationX: number) {
+  await act(async () => {
+    fireGestureHandler(getByGestureTestId('quran-activity-swipe'), [
+      { state: State.BEGAN, translationX: 0 },
+      { state: State.ACTIVE, translationX },
+      { state: State.END, translationX, velocityX: 0 },
+    ]);
+  });
+}
+
 beforeEach(() => {
   mockGrid = null;
 });
@@ -98,24 +115,17 @@ describe('ActivityBand', () => {
     );
     expect(grid().days).toHaveLength(expected.length);
     expect(grid().columns).toBe(expected.length / 7);
-    expect(grid().showMonthLabels).toBe(false);
     expect(summary()).toBe(expectedSummary(grid().days));
     expect(isNextDisabled()).toBe(true);
   });
 
-  it('selects the active segment and shows both spans', async () => {
+  it('offers no span switch and no redundant window length', async () => {
     await render(<ActivityBand />);
 
-    expect(screen.getByText('3 months')).toBeTruthy();
-    expect(screen.getByText('Annual')).toBeTruthy();
-    expect(screen.queryByText('One-off')).toBeNull();
-    expect(
-      screen.getByTestId('quran-activity-span-monthly').props
-        .accessibilityState,
-    ).toMatchObject({ selected: true });
-    expect(
-      screen.getByTestId('quran-activity-span-annual').props.accessibilityState,
-    ).toMatchObject({ selected: false });
+    expect(screen.queryByText('3 months')).toBeNull();
+    expect(screen.queryByText('Annual')).toBeNull();
+    expect(screen.queryByTestId('quran-activity-span-monthly')).toBeNull();
+    expect(screen.queryByTestId('quran-activity-span-annual')).toBeNull();
   });
 
   it('pages three months at a time across a twelve-month history', async () => {
@@ -142,103 +152,57 @@ describe('ActivityBand', () => {
     expect(isPrevDisabled()).toBe(true);
   });
 
-  it('shows the rolling year on Annual and pages twelve months', async () => {
+  it('pages older on a rightward swipe and newer on a leftward swipe', async () => {
     await render(<ActivityBand />);
 
-    await fireEvent.press(screen.getByText('Annual'));
-
     const base = currentMonthKey();
-    expect(title()).toBe(formatYearTitle(base, 'en'));
-    expect(grid().columns).toBe(53);
-    expect(grid().days).toHaveLength(365);
-    expect(grid().showMonthLabels).toBe(true);
-    expect(grid().days.map((day) => day.day)).toEqual(
-      buildYearCells(endOfMonth(base)).map((day) => day.day),
+
+    await swipeActivity(120);
+    const older = shiftMonthKey(base, -3);
+    expect(title()).toBe(
+      formatMonthRange(shiftMonthKey(older, -2), older, 'en'),
     );
-    expect(summary()).toBe(expectedSummary(grid().days));
+    expect(isNextDisabled()).toBe(false);
+
+    await swipeActivity(-120);
+    expect(title()).toBe(formatMonthRange(shiftMonthKey(base, -2), base, 'en'));
     expect(isNextDisabled()).toBe(true);
-
-    await fireEvent.press(screen.getByTestId('quran-activity-prev'));
-
-    const previous = shiftMonthKey(base, -12);
-    expect(title()).toBe(formatYearTitle(previous, 'en'));
-    expect(isPrevDisabled()).toBe(true);
-
-    await fireEvent.press(screen.getByTestId('quran-activity-next'));
-    expect(title()).toBe(formatYearTitle(base, 'en'));
   });
 
-  it('resets to the current period when switching spans', async () => {
+  it('does nothing when swiped past either end of the history', async () => {
     await render(<ActivityBand />);
 
     const base = currentMonthKey();
 
-    await fireEvent.press(screen.getByTestId('quran-activity-prev'));
-    await fireEvent.press(screen.getByText('Annual'));
-    expect(title()).toBe(formatYearTitle(base, 'en'));
-
-    await fireEvent.press(screen.getByTestId('quran-activity-prev'));
-    await fireEvent.press(screen.getByText('3 months'));
+    await swipeActivity(-120);
     expect(title()).toBe(formatMonthRange(shiftMonthKey(base, -2), base, 'en'));
+
+    await fireEvent.press(screen.getByTestId('quran-activity-prev'));
+    await fireEvent.press(screen.getByTestId('quran-activity-prev'));
+    await fireEvent.press(screen.getByTestId('quran-activity-prev'));
+
+    const oldest = formatMonthRange(
+      shiftMonthKey(base, -11),
+      shiftMonthKey(base, -9),
+      'en',
+    );
+    expect(title()).toBe(oldest);
+
+    await swipeActivity(120);
+    expect(title()).toBe(oldest);
+    expect(isPrevDisabled()).toBe(true);
   });
 
-  it('keeps a day stable across every span that contains it', async () => {
-    await render(<ActivityBand />);
-
-    const monthly = new Map(grid().days.map((day) => [day.day, day]));
-
-    await fireEvent.press(screen.getByText('Annual'));
-
-    for (const day of grid().days) {
-      const twin = monthly.get(day.day);
-
-      // `outside` is positional (padding in one span, in-span in another);
-      // the demo value itself must be identical everywhere.
-      if (twin) {
-        expect({ day: day.day, count: day.count, level: day.level }).toEqual({
-          day: twin.day,
-          count: twin.count,
-          level: twin.level,
-        });
-      }
-    }
-  });
-
-  it('centers the monthly grid and left-pins the overflowing year', async () => {
+  it('centers the three-month map', async () => {
     const { width: windowWidth } = Dimensions.get('window');
 
     await render(<ActivityBand />);
 
     const monthly = activityBandGeometry(windowWidth, grid().columns);
     expect(monthly.width).toBeLessThanOrEqual(monthly.available);
-    expect(
-      screen.getByTestId('quran-activity-scroller').props.contentContainerStyle,
-    ).toMatchObject({ justifyContent: 'center' });
-
-    await fireEvent.press(screen.getByText('Annual'));
-
-    const annual = activityBandGeometry(windowWidth, grid().columns);
-    expect(annual.width).toBeGreaterThan(annual.available);
-    expect(
-      screen.getByTestId('quran-activity-scroller').props.contentContainerStyle,
-    ).toMatchObject({ justifyContent: 'flex-start' });
-  });
-
-  it('pins the scroller to the newest end when switching spans', async () => {
-    const spy = jest
-      .spyOn(ScrollView.prototype, 'scrollToEnd')
-      .mockImplementation(() => {});
-
-    try {
-      await render(<ActivityBand />);
-      spy.mockClear();
-
-      await fireEvent.press(screen.getByText('Annual'));
-
-      expect(spy).toHaveBeenCalledWith({ animated: false });
-    } finally {
-      spy.mockRestore();
-    }
+    expect(screen.getByTestId('quran-activity-map').props.style).toMatchObject({
+      alignItems: 'center',
+    });
   });
 
   it('replaces the five-step ramp with the two-state legend', async () => {

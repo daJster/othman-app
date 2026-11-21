@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 import Animated, {
   Easing,
@@ -16,17 +16,19 @@ import Animated, {
 } from 'react-native-reanimated';
 import type { AppHref } from '@/features/navigation/route-registry';
 import { cn } from '@/ui/cn';
+import type { GlassFillProps } from '@/ui/glass';
 import { useReducedMotion } from '@/ui/motion';
 import { PIN_GAP, PILL_GUTTER, PILL_HEIGHT, PILL_MAX_WIDTH } from '@/ui/ratio';
 import {
+  CARD_BORDER_COLOR,
   CARD_RADIUS_CLASS,
-  GlassGradient,
   GlassSurface,
   HeroCardBody,
   HeroCardPinned,
   type HeroCardCopy,
 } from './hero-card';
 import { MOTION } from './motion';
+import { NoticesBell } from './notices-bell';
 
 /**
  * The hero card, morphing into the pinned pill.
@@ -87,7 +89,6 @@ const SPRING = {
 const LIFT_IN_MS = MOTION.liftIn;
 const LIFT_OUT_MS = MOTION.liftOut;
 const LIFT_SCALE = 0.018;
-const SHEEN_MS = MOTION.sheen;
 
 /**
  * The card floats above the ScrollView, so on the web every non-interactive
@@ -114,6 +115,18 @@ export type HeroMorphCardProps = {
   scrollY: SharedValue<number>;
   frameWidth: number;
   pillWidth: number;
+  /** Native backdrop behind the card; the web uses CSS backdrop-filter. */
+  blurTarget?: GlassFillProps['blurTarget'];
+  /**
+   * Where the card stops, in frame coordinates. The web floats its bar over the
+   * page, so the pin line has to clear the bar or the pill parks underneath it;
+   * a phone has no top chrome and keeps the small optical gap.
+   */
+  pinTop?: number;
+  /** Reports the compact face so the floating inbox control can hand over. */
+  onCompactChange?: (compact: boolean) => void;
+  /** Shared 0…1 morph value, used to fade the floating inbox in step. */
+  morphProgress?: SharedValue<number>;
 };
 
 export function HeroMorphCard({
@@ -123,6 +136,10 @@ export function HeroMorphCard({
   scrollY,
   frameWidth,
   pillWidth,
+  blurTarget,
+  pinTop = PIN_GAP,
+  onCompactChange,
+  morphProgress,
 }: HeroMorphCardProps) {
   const reduced = useReducedMotion();
   const [compact, setCompact] = useState(false);
@@ -132,13 +149,11 @@ export function HeroMorphCard({
   const progress = useSharedValue(0);
   /** 0…1 anticipation scale, only on the way in. */
   const lift = useSharedValue(0);
-  /** 0…1 position of the glass sheen. */
-  const sheen = useSharedValue(0);
 
   useAnimatedReaction(
     () => scrollY.value,
     (y) => {
-      const start = rect.top - PIN_GAP;
+      const start = rect.top - pinTop;
 
       if (target.value === 0 && y >= start) {
         target.value = 1;
@@ -161,12 +176,6 @@ export function HeroMorphCard({
               reduceMotion: ReduceMotion.Never,
             }),
           );
-          sheen.value = 0;
-          sheen.value = withTiming(1, {
-            duration: SHEEN_MS,
-            easing: Easing.bezier(0.3, 0, 0.2, 1),
-            reduceMotion: ReduceMotion.Never,
-          });
           progress.value = withSpring(1, SPRING);
         }
       } else if (target.value === 1 && y < start - RELEASE_GAP) {
@@ -185,17 +194,11 @@ export function HeroMorphCard({
             easing: Easing.out(Easing.cubic),
             reduceMotion: ReduceMotion.Never,
           });
-          sheen.value = 0;
-          sheen.value = withTiming(1, {
-            duration: SHEEN_MS,
-            easing: Easing.bezier(0.3, 0, 0.2, 1),
-            reduceMotion: ReduceMotion.Never,
-          });
           progress.value = withSpring(0, SPRING);
         }
       }
     },
-    [rect.top, reduced],
+    [rect.top, reduced, pinTop],
   );
 
   // The accessible tree cannot be animated: flip it at the visual midpoint,
@@ -207,8 +210,16 @@ export function HeroMorphCard({
     },
   );
 
+  useEffect(() => {
+    onCompactChange?.(compact);
+  }, [compact, onCompactChange]);
+
   const geometry = useAnimatedStyle(() => ({
-    top: Math.max(rect.top - scrollY.value, PIN_GAP),
+    // Once the morph latches, the card owns one fixed pin line. Letting scroll
+    // keep moving the shell through the release gap left the compact pill
+    // hanging below its final position after a bounce.
+    top:
+      target.value === 1 ? pinTop : Math.max(rect.top - scrollY.value, pinTop),
     // No CLAMP: the under-damped spring is allowed to overshoot the pill by a
     // few percent. That squeeze is the landing.
     left: interpolate(
@@ -249,21 +260,23 @@ export function HeroMorphCard({
     };
   });
 
-  const sheenStyle = useAnimatedStyle(() => ({
-    transform: [
-      {
-        translateX: interpolate(sheen.value, [0, 1], [-180, rect.width + 180]),
-      },
-      { rotate: '16deg' },
-    ],
-  }));
+  // Mirror the spring into whichever outside control has to hand over.
+  useAnimatedReaction(
+    () => progress.value,
+    (value) => {
+      if (!morphProgress) return;
+      // eslint-disable-next-line react-hooks/immutability
+      morphProgress.value = value;
+    },
+    [morphProgress],
+  );
 
   return (
     <Animated.View
       testID="hero-morph"
       pointerEvents="box-none"
       className={cn(
-        'absolute z-10 overflow-hidden border border-white/50 shadow-2xl shadow-black/20',
+        'absolute z-10 overflow-hidden border shadow-2xl shadow-black/20',
         CARD_RADIUS_CLASS,
       )}
       // The static geometry is the measured rect, so the first paint lands on
@@ -274,31 +287,12 @@ export function HeroMorphCard({
           left: rect.left,
           width: rect.width,
           height: rect.height,
+          borderColor: CARD_BORDER_COLOR,
         },
         geometry,
       ]}
     >
-      <GlassSurface />
-
-      {/* A light pass along the glass, under the copy, clipped by the shell. */}
-      <Animated.View
-        pointerEvents="none"
-        className="absolute -top-12 -bottom-12 left-0 w-20"
-        style={sheenStyle}
-      >
-        <GlassGradient
-          colors={[
-            'rgba(132, 160, 170, 0)',
-            'rgba(132, 160, 170, 0.22)',
-            'rgba(255, 255, 255, 0.35)',
-            'rgba(132, 160, 170, 0.22)',
-            'rgba(132, 160, 170, 0)',
-          ]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          className="h-full w-full"
-        />
-      </Animated.View>
+      <GlassSurface blurTarget={blurTarget} />
 
       {/*
        * The full copy keeps its measured width while the shell narrows, so the
@@ -323,6 +317,9 @@ export function HeroMorphCard({
           label={pill.label}
           href={pill.href}
           interactive={compact}
+          leading={
+            Platform.OS === 'web' ? undefined : <NoticesBell variant="panel" />
+          }
         />
       </Animated.View>
     </Animated.View>

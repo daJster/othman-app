@@ -1,19 +1,19 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useCallback, useEffect, useRef, type ComponentRef } from 'react';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Platform, StyleSheet, View, useWindowDimensions } from 'react-native';
 import { cn } from '@/ui/cn';
 import { HEADING_ROLE, headingAriaLevel } from '@/ui/heading';
-import { useIsWide } from '@/ui/layout';
-import { HERO_BOX_CLASS } from '@/ui/ratio';
+import { HERO_BOX_CLASS, HERO_DOT_SCALE } from '@/ui/ratio';
 import { Text } from '@/ui/text';
 import {
+  CARD_BORDER_COLOR,
   CARD_RADIUS_CLASS,
   GlassSurface,
   HeroCardBody,
   type HeroCardCopy,
 } from './hero-card';
 import { HeroFilm } from './hero-film';
-import { HeroParticles } from './hero-particles';
+import { HeroFilmTreatment } from './hero-film-treatment';
 
 /**
  * Visually hidden but still in the accessibility tree. The hero's wordmark is
@@ -70,16 +70,15 @@ export type HeroProps = HeroCardCopy & {
 };
 
 export function Hero({
-  opening,
-  title,
-  tagline,
-  cohort,
+  verseTitle,
+  verseText,
+  verseReference,
   ctaLabel,
   ctaHref,
+  title,
   ghostHidden = false,
   onCardRect,
 }: HeroProps) {
-  const wide = useIsWide();
   const cardRef = useRef<ComponentRef<typeof View>>(null);
   const window = useWindowDimensions();
 
@@ -104,12 +103,27 @@ export function Hero({
         'relative mx-auto w-full max-w-6xl overflow-hidden rounded-b-card bg-canopy',
         HERO_BOX_CLASS,
       )}
+      /*
+       * Native has no viewport unit, so the same 70% the web gets from `svh` is
+       * measured here. `HERO_BOX_CLASS` is empty on a phone for that reason.
+       */
+      style={
+        Platform.OS === 'web' ? undefined : { height: window.height * 0.7 }
+      }
     >
       <Text {...HEADING_ROLE} {...headingAriaLevel(1)} style={visuallyHidden}>
         {title}
       </Text>
 
       <HeroFilm />
+
+      {/*
+       * The treatment sits directly over the footage and under everything the
+       * hero paints after it: the scrim, the dust, and — in the overlay above
+       * this panel — the card and the bar. Its own z-indexes are explicit, so a
+       * `<video>` never wins on paint order by accident.
+       */}
+      <HeroFilmTreatment scale={HERO_DOT_SCALE} />
 
       {/*
        * A black scrim rather than a canopy one: it has to sit over
@@ -123,8 +137,6 @@ export function Hero({
         pointerEvents="none"
       />
 
-      <HeroParticles count={wide ? 26 : 14} />
-
       <View className="relative flex-1 justify-end px-gutter pb-section md:justify-center md:px-section md:py-section">
         <View className="w-full md:mx-auto md:max-w-6xl">
           <View
@@ -134,18 +146,19 @@ export function Hero({
             pointerEvents={ghostHidden ? 'none' : 'auto'}
             aria-hidden={ghostHidden}
             className={cn(
-              'w-full overflow-hidden border border-white/50 shadow-2xl shadow-black/20',
+              'w-full overflow-hidden border shadow-2xl shadow-black/20',
               CARD_RADIUS_CLASS,
               'md:mr-auto md:max-w-md',
               ghostHidden && 'opacity-0',
             )}
+            style={{ borderColor: CARD_BORDER_COLOR }}
           >
             <GlassSurface />
 
             <HeroCardBody
-              opening={opening}
-              tagline={tagline}
-              cohort={cohort}
+              verseTitle={verseTitle}
+              verseText={verseText}
+              verseReference={verseReference}
               ctaLabel={ctaLabel}
               ctaHref={ctaHref}
               interactive={!ghostHidden}

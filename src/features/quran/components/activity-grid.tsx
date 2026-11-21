@@ -1,11 +1,7 @@
 import { useMemo } from 'react';
 import ContributionGraph from '@/components/catalogs/contribution-graph.native';
 import { useDirection } from '@/i18n';
-import {
-  formatDayLabel,
-  formatMonthShort,
-  type MonthlyActivity,
-} from './use-monthly-activity';
+import { formatDayLabel, type SpanActivity } from './use-monthly-activity';
 
 /**
  * The reading-activity board, as a native week grid.
@@ -15,10 +11,10 @@ import {
  * the same days onto the catalog's `Activity` calendar, so the band renders on
  * both platforms from one API.
  *
- * The band shows one month with a five-step demo ramp (0–4); the label each
- * cell exposes is the localized day plus its page count. The Annual heatmap
- * opts into GitHub-style month labels through `showMonthLabels`, fed by
- * `formatMonthShort` in the active language.
+ * The band shows the rolling three-month window with a five-step demo ramp
+ * (0–4); the label each cell exposes is the localized day plus its page count.
+ * The band header names the window, so the grid draws no month labels of its
+ * own.
  */
 export type ActivityLevel = 0 | 1 | 2 | 3 | 4;
 
@@ -29,6 +25,8 @@ export type ActivityDay = {
   count: number;
   /** Intensity step, 0 for nothing read up to 4 for a full day. */
   level: ActivityLevel;
+  /** The day's practice is complete: a golden cell. */
+  golden?: boolean;
   /** A cell from the neighbouring month, shown faded. */
   outside?: boolean;
 };
@@ -41,12 +39,7 @@ export type ActivityGridProps = {
   /** Cell edge in px, sized by the band to the page column. */
   cellSize: number;
   /** First day of the week column, Sunday = 0. */
-  weekStart?: MonthlyActivity['weekStart'];
-  /**
-   * Show month labels above the week columns, for the Annual heatmap.
-   * Defaults to false; the Monthly board names its month in the header.
-   */
-  showMonthLabels?: boolean;
+  weekStart?: SpanActivity['weekStart'];
 };
 
 export function ActivityGrid({
@@ -54,7 +47,6 @@ export function ActivityGrid({
   columns,
   cellSize,
   weekStart = 1,
-  showMonthLabels = false,
 }: ActivityGridProps) {
   const { language } = useDirection();
 
@@ -75,11 +67,6 @@ export function ActivityGrid({
       weekStart={weekStart}
       gap={6}
       radiusClass="rounded-[6px]"
-      monthLabel={
-        showMonthLabels
-          ? (day: string) => formatMonthShort(day, language)
-          : undefined
-      }
     />
   );
 }

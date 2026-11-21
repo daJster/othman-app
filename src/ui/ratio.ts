@@ -43,15 +43,24 @@ export const WIDE_CLASS = 'max-w-6xl';
 /**
  * The hero's first-viewport share.
  *
- * Web measures the small viewport (`svh`), so a mobile browser's collapsing
- * toolbar cannot push the panel below the fold. Native has no viewport unit in
- * the style system, so the same promise is kept with an aspect ratio: the film
- * is a portrait window on a phone and a wider window on a tablet.
+ * 70% of the screen, both platforms: enough for the footage and the verse panel
+ * to read as a window, and little enough that the reading sections begin on the
+ * same screen — which is what a laptop layout needs.
+ *
+ * The web measures the small viewport (`svh`), so a collapsing mobile toolbar
+ * cannot push the panel below the fold. Native has no viewport unit in the style
+ * system, so `Hero` reads the window height and applies the same 70% inline.
  */
-export const HERO_BOX_CLASS =
-  Platform.OS === 'web'
-    ? 'min-h-[88svh] md:min-h-[90svh]'
-    : 'aspect-[9/16] sm:aspect-[4/3]';
+export const HERO_BOX_CLASS = Platform.OS === 'web' ? 'h-[70svh]' : '';
+
+/**
+ * Dot-grid density over the film, 0–100.
+ *
+ * 0 is almost no pattern (wide spacing, hairline dots); 100 is a tight
+ * halftone. The grid is decoration on top of the film, not a texture that
+ * competes with it, so the default sits low.
+ */
+export const HERO_DOT_SCALE = 35;
 
 /** Pinned-card geometry, in modules. */
 export const PIN_GAP = MODULE * 3; /* 12 */
@@ -61,3 +70,12 @@ export const PILL_GUTTER = MODULE * 4; /* 16 */
 
 /** The radius every card and the pinned pill share. */
 export const CARD_RADIUS = MODULE * 6; /* 24 */
+
+/**
+ * The space the floating web bar occupies at the top of the viewport.
+ *
+ * Every screen clears it through the tab slot; Home cancels that inset so its
+ * film can run under the glass, and the pinned hero card uses it again as its
+ * own pin line so it parks *below* the bar instead of behind it.
+ */
+export const NAV_INSET = MODULE * 16; /* 64 */

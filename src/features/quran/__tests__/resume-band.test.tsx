@@ -42,6 +42,20 @@ let mockWide = false;
 
 const queryClient = new QueryClient();
 
+/**
+ * Practice is fetched through the API registry now. This suite is about the
+ * band's composition, so the query is pinned to an empty day and the mutation
+ * is a no-op: no QueryClient is needed for the cases that do not wrap one.
+ */
+jest.mock('@/api', () => ({
+  api: { practice: { byDay: { key: () => ['practice', 'day'] } } },
+  useApiQuery: () => ({
+    data: { day: '2026-11-20', salah: 0, duaa: 0, nafila: 0, pages: 0 },
+    isPending: false,
+  }),
+  useApiMutation: () => ({ mutate: jest.fn(), isPending: false }),
+}));
+
 jest.mock('@/ui/layout', () => ({
   useIsWide: () => mockWide,
 }));
@@ -110,7 +124,7 @@ function band() {
 }
 
 function gauges() {
-  return within(band()).getAllByTestId('quran-mini-gauge');
+  return within(band()).getAllByTestId(/^practice-gauge-/);
 }
 
 beforeEach(() => {
@@ -129,7 +143,7 @@ describe('ResumeBand', () => {
     const root = band();
     expect(within(root).getByText('Resume reading')).toBeTruthy();
     expect(within(root).getAllByTestId('quran-session-card')).toHaveLength(1);
-    expect(within(root).getAllByTestId('quran-mini-gauge')).toHaveLength(4);
+    expect(within(root).getAllByTestId(/^practice-gauge-/)).toHaveLength(4);
   });
 
   it("reads today's count in the first gauge's centre text", async () => {
@@ -140,7 +154,7 @@ describe('ResumeBand', () => {
     const [first] = gauges();
     expect(within(first).getByText('1')).toBeTruthy();
     expect(within(first).getByText('Pages')).toBeTruthy();
-    expect(screen.getByLabelText('1 of 1 page')).toBeTruthy();
+    expect(screen.getByLabelText('Pages: 1')).toBeTruthy();
   });
 
   it('shows zero in the first gauge when nothing was read today', async () => {
@@ -151,7 +165,7 @@ describe('ResumeBand', () => {
     const [first] = gauges();
     expect(within(first).getByText('0')).toBeTruthy();
     expect(within(first).getByText('Pages')).toBeTruthy();
-    expect(screen.getByLabelText('0 of 1 page')).toBeTruthy();
+    expect(screen.getByLabelText('Pages: 0')).toBeTruthy();
   });
 
   it('holds the other three gauges as zeroed Salah, Duaa and Nafila placeholders', async () => {
@@ -168,17 +182,20 @@ describe('ResumeBand', () => {
     expect(within(nafila).getByText('0')).toBeTruthy();
   });
 
-  it('gives the placeholder gauges no press target', async () => {
+  it('makes the practice gauges pressable and leaves pages a readout', async () => {
     setLog([entry(42, 2, 0)]);
 
     await render(<ResumeBand onOpen={mockOnOpen} />);
 
-    const [, ...rest] = gauges();
-    expect(rest).toHaveLength(3);
-    for (const cell of rest) {
-      expect(within(cell).queryByRole('button')).toBeNull();
+    expect(
+      screen.getByTestId('practice-gauge-pages').props.accessibilityRole,
+    ).toBeUndefined();
+
+    for (const id of ['salah', 'duaa', 'nafila']) {
+      expect(
+        screen.getByTestId(`practice-gauge-${id}`).props.accessibilityRole,
+      ).toBe('button');
     }
-    expect(mockOnOpen).not.toHaveBeenCalled();
   });
 
   it('marks the single card as the resume card', async () => {
@@ -237,21 +254,21 @@ describe('ResumeBand', () => {
     });
   });
 
-  it('shows the completion line once the one-page goal is done', async () => {
+  it('shows one of four gauges complete once the page goal is done', async () => {
     setLog([entry(42, 2, 0)]);
 
     await render(<ResumeBand onOpen={mockOnOpen} />);
 
-    expect(screen.getByTestId('quran-hizb-done')).toBeTruthy();
+    expect(screen.getByText('1 of 4 gauges complete')).toBeTruthy();
   });
 
-  it('hides the completion line while the goal is open', async () => {
+  it('counts the summary from zero while goals are open', async () => {
     // Yesterday alone leaves today empty, so the goal stays open.
     setLog([entry(604, 114, 1)]);
 
     await render(<ResumeBand onOpen={mockOnOpen} />);
 
-    expect(screen.queryByTestId('quran-hizb-done')).toBeNull();
+    expect(screen.getByText('0 of 4 gauges complete')).toBeTruthy();
   });
 
   it('shows one line instead of a labelled void when the log is empty', async () => {
@@ -260,17 +277,17 @@ describe('ResumeBand', () => {
     await render(<ResumeBand onOpen={mockOnOpen} />);
 
     expect(screen.queryByTestId('quran-session-card')).toBeNull();
-    expect(screen.queryByTestId('quran-mini-gauge')).toBeNull();
+    expect(screen.queryByTestId(/^practice-gauge-/)).toBeNull();
     expect(screen.getByText('Your last page will appear here')).toBeTruthy();
   });
 
-  it('shows the sample note and does not claim the seed as the current position', async () => {
+  it('shows the seed without a sample label or claiming it as the current position', async () => {
     setLog(SEED_READING_LOG);
 
     await render(<ResumeBand onOpen={mockOnOpen} />);
 
     expect(screen.getByText('Resume reading')).toBeTruthy();
-    expect(screen.getByText('Sample history')).toBeTruthy();
+    expect(screen.queryByText('Sample history')).toBeNull();
     // No block claims the reader is on the seed's last page.
     expect(screen.queryByText('Continue reading')).toBeNull();
 
@@ -282,10 +299,10 @@ describe('ResumeBand', () => {
     // The seed ends yesterday, so today still reads zero and stays open.
     const [first] = gauges();
     expect(within(first).getByText('0')).toBeTruthy();
-    expect(screen.queryByTestId('quran-hizb-done')).toBeNull();
+    expect(screen.getByText('0 of 4 gauges complete')).toBeTruthy();
   });
 
-  it('keeps the sample note after a real reading joins the seed', async () => {
+  it('stays label-free after a real reading joins the seed', async () => {
     setLog([entry(42, 2, 0), ...SEED_READING_LOG]);
 
     await render(<ResumeBand onOpen={mockOnOpen} />);
@@ -293,7 +310,7 @@ describe('ResumeBand', () => {
     const cards = screen.getAllByTestId('quran-session-card');
     expect(within(cards[0]).getByText('Page 42 · Today')).toBeTruthy();
     expect(within(cards[0]).getByText('Surah 2')).toBeTruthy();
-    expect(screen.getByText('Sample history')).toBeTruthy();
+    expect(screen.queryByText('Sample history')).toBeNull();
   });
 
   it('does not render the old hizb band', async () => {

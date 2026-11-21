@@ -59,6 +59,7 @@ export const ICON_NAMES = [
   'target',
   // CRUD surfaces.
   'plus',
+  'minus',
   'trash',
   'bookmark',
   // Reader chrome.

@@ -95,12 +95,11 @@ export function WebTabLink({
       // `data-testid` through react-native-web.
       testID={testID}
       className={cn(
-        // A chip, not an underline: the active destination is a material
-        // object on the bar rather than a rule that changes the row's height.
-        // The transparent border on the idle state keeps the box identical, so
-        // selecting a tab never nudges its neighbours.
-        'min-h-control min-w-11 flex-col items-center justify-center gap-0.5 rounded-chip border border-transparent px-2 py-1.5 active:opacity-80 sm:min-w-0 sm:flex-row sm:gap-2 sm:px-3',
-        isFocused && 'border-brass/25 bg-brass/15',
+        // Ghost, like every other control on the bar: no fill, no border and no
+        // rule at rest, so the glass reads as one material rather than a row of
+        // chips. The active destination is ink alone — full foreground against
+        // the others' muted tone — which is the only marker it needs.
+        'relative min-h-control min-w-11 flex-col items-center justify-center gap-0.5 rounded-chip px-2 py-1.5 active:opacity-80 sm:min-w-0 sm:flex-row sm:gap-2 sm:px-3',
         className,
       )}
     >

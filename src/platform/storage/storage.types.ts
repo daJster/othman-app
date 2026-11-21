@@ -14,6 +14,7 @@ export const STORAGE_KEYS = {
   quranNotes: 'quran:notes',
   quranReadingLog: 'quran:reading-log',
   homeNotices: 'home:notices-read',
+  homePractice: 'home:practice',
   backendSession: 'backend:session',
   progressHideEmpty: 'progress:hide-empty',
   accountFeedback: 'account:feedback',

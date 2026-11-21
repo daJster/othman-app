@@ -116,6 +116,42 @@
     "darkShort": "داكنة",
     "systemHint": "النظام يتبع إعداد المظهر في جهازك."
   },
+  "practice": {
+    "done": "تم",
+    "golden": "يوم ذهبي — كل المؤشرات مكتملة",
+    "summary": "{{done}} من {{target}} مؤشرات مكتملة",
+    "salah": {
+      "title": "صلوات اليوم",
+      "description": "اضغط مطولًا على كل صلاة من {{count}} حتى يمتلئ شريطها.",
+      "holdHint": "استمر ثانية واحدة. يمكن مسح صلاة مكتملة بالضغط عليها أو بالضغط المطوّل عليها مرة أخرى.",
+      "fajr": "الفجر",
+      "dhuhr": "الظهر",
+      "asr": "العصر",
+      "maghrib": "المغرب",
+      "isha": "العشاء"
+    },
+    "nafila": {
+      "title": "قيام الليل",
+      "description": "ركعة نافلة واحدة تملأ هذا المؤشر، ويمكن تسجيل حتى {{max}}.",
+      "decrease": "إنقاص",
+      "increase": "زيادة",
+      "valueLabel": "عدد النوافل، من 0 إلى {{max}}"
+    },
+    "duaa": {
+      "title": "أدعية اليوم",
+      "description": "{{done}} من {{target}} أدعية.",
+      "more": "قرأت {{done}} أدعية.",
+      "hold": "اضغط مطولًا لتسجيل القراءة",
+      "holdHint": "استمر بالضغط ثانية واحدة",
+      "phrases": {
+        "mashaallah": "ما شاء الله",
+        "alhamdulillah": "الحمد لله",
+        "subhanallah": "سبحان الله"
+      },
+      "finished": "سجّلت {{max}} دعاءً اليوم",
+      "finishedHint": "بلغ العدد الحد الأقصى لليوم."
+    }
+  },
   "quran": {
     "landing": {
       "hizb": "ورد اليوم",
@@ -137,14 +173,11 @@
       "more": "أكثر",
       "met": "قراءة",
       "missed": "لا قراءة",
-      "summary": "{{read}} من {{total}} أيام قراءة",
-      "monthly": "3 أشهر",
-      "annual": "سنوي"
+      "summary": "{{read}} من {{total}} أيام قراءة"
     },
     "resume": {
       "at": "{{surah}} · الآية {{ayah}}",
       "page": "الصفحة {{page}} من {{total}}",
-      "sample": "سجل تجريبي",
       "time": {
         "today": "اليوم",
         "yesterday": "أمس",
@@ -165,7 +198,8 @@
         "salat": "الصلاة",
         "duaa": "الدعاء",
         "nafila": "النافلة",
-        "progress": "{{label}}: {{read}} من {{target}}"
+        "progress": "{{label}}: {{read}} من {{target}}",
+        "value": "{{label}}: {{read}}"
       }
     },
     "story": {
@@ -339,6 +373,9 @@
     }
   },
   "account": {
+    "notifications": {
+      "hint": "إعلانات الحلقة وتذكيراتها"
+    },
     "sections": {
       "preferences": "التفضيلات",
       "settings": "الإعدادات",

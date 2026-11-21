@@ -6,18 +6,17 @@ import type { ActivityDay } from './activity-grid';
 /**
  * Seeded demo activity for the reading board.
  *
- * The board shows a Monthly (3-month) or Annual (year) span (Section 2 of the
- * Quran landing page). Real log data is not wired yet, so every day is filled from a PRNG seeded by its own date key: a
- * day renders the same value in every span and window that contains it, and
- * navigating away and back changes nothing. The return shape is the same
+ * The board shows a rolling three-month window (Recent activity on Home). Real
+ * log data is not wired yet, so every day is filled from a PRNG seeded by its
+ * own date key: a day renders the same value in every window that contains it,
+ * and navigating away and back changes nothing. The return shape is the same
  * `ActivityDay[]` the real `readingLogStore` mapping will produce, so swapping
  * the source is replacing the builders, not rewriting the grid.
  *
  * Month grids are week-aligned GitHub-style: full weeks only, so leading cells
  * can belong to the previous month and trailing cells to the next one. Those
- * carry `outside: true` and are excluded from the span totals; days after
- * today always read zero so the future never looks active. The year grid is a
- * plain 365-day window — the catalog pads its first week.
+ * carry `outside: true` and are excluded from the window totals; days after
+ * today always read zero so the future never looks active.
  */
 
 /** A calendar month. `month` is 0-based like `Date`. */
@@ -26,14 +25,11 @@ export type MonthKey = {
   month: number;
 };
 
-/** The three spans the segment control switches between. */
-export type ActivitySpan = 'monthly' | 'annual';
-
 /** How many months back the toggles reach, including the current one. */
 export const MONTH_HISTORY = 12;
 
-/** Year stops the Annual toggles visit: this year and the previous one. */
-export const YEAR_HISTORY = 2;
+/** Months shown per page of the board. */
+export const MONTHS_PER_PAGE = 3;
 
 export function currentMonthKey(now: Date = new Date()): MonthKey {
   return { year: now.getFullYear(), month: now.getMonth() };
@@ -45,11 +41,6 @@ export function shiftMonthKey(key: MonthKey, delta: number): MonthKey {
   const month = ((total % 12) + 12) % 12;
 
   return { year, month };
-}
-
-/** `2026-11` style id, for tests and stable keys. */
-export function monthKeyId(key: MonthKey): string {
-  return `${key.year}-${String(key.month + 1).padStart(2, '0')}`;
 }
 
 /** Last calendar day of the month, at noon. */
@@ -67,17 +58,6 @@ export function weekStartFor(language: Language): 6 | 1 {
   return language === 'ar' ? 6 : 1;
 }
 
-/** Abbreviated month (`Sep` / `سبتمبر`) for heatmap month labels. */
-export function formatMonthShort(day: string, language: Language): string {
-  const [year, month] = day.split('-').map(Number);
-
-  if (!year || !month) return '';
-
-  return new Intl.DateTimeFormat(language, { month: 'short' }).format(
-    new Date(year, month - 1, 1, 12),
-  );
-}
-
 /** `12 Nov` / `12 نوفمبر` style label for tooltips and accessibility names. */
 export function formatDayLabel(day: string, language: Language): string {
   const [year, month, date] = day.split('-').map(Number);
@@ -88,14 +68,6 @@ export function formatDayLabel(day: string, language: Language): string {
     day: 'numeric',
     month: 'short',
   }).format(new Date(year, month - 1, date, 12));
-}
-
-/** Localized `November 2026` title for the single-month header. */
-export function formatMonthTitle(key: MonthKey, language: Language): string {
-  return new Intl.DateTimeFormat(language, {
-    month: 'long',
-    year: 'numeric',
-  }).format(new Date(key.year, key.month, 1, 12));
 }
 
 /** Localized `Sep – Nov 2026` title for the three-month header. */
@@ -118,13 +90,6 @@ export function formatMonthRange(
   }
 
   return `${long.format(startDate)} – ${long.format(new Date(end.year, end.month, 1, 12))}`;
-}
-
-/** Localized `2026` title for the annual header. */
-export function formatYearTitle(key: MonthKey, language: Language): string {
-  return new Intl.DateTimeFormat(language, { year: 'numeric' }).format(
-    new Date(key.year, key.month, 1, 12),
-  );
 }
 
 function mulberry32(seed: number): () => number {
@@ -179,7 +144,7 @@ function countForLevel(level: ActivityDay['level'], jitter: number): number {
   }
 }
 
-/** The demo value of one day, stable in every span that contains it. */
+/** The demo value of one day, stable in every window that contains it. */
 function dayActivity(day: string): Pick<ActivityDay, 'count' | 'level'> {
   const random = mulberry32(hashDay(day));
   const level = levelFromRoll(random());
@@ -199,7 +164,7 @@ function atNoon(date: Date): Date {
  * months, oldest first, padded to full weeks.
  *
  * Always a multiple of 7. A day's value comes from its own date hash, so it
- * never shifts between spans; only its future/past state changes as time
+ * never shifts between windows; only its future/past state changes as time
  * passes, because days after today read zero.
  */
 export function buildSpanCells(
@@ -253,53 +218,6 @@ function isInSpan(date: Date, start: MonthKey, count: number): boolean {
   return index >= 0 && index < count;
 }
 
-/**
- * Every visible cell for one month, oldest first, padded to full weeks.
- *
- * Always a multiple of 7 (28, 35 or 42 cells).
- */
-export function buildMonthCells(
-  key: MonthKey,
-  weekStart: number,
-  now: Date = new Date(),
-): ActivityDay[] {
-  return buildSpanCells(key, 1, weekStart, now);
-}
-
-/**
- * The 365 days ending on `end` (inclusive), oldest first.
- *
- * The catalog pads the first week to `weekStart`; days after today read zero.
- */
-export function buildYearCells(
-  end: Date,
-  now: Date = new Date(),
-): ActivityDay[] {
-  const last = atNoon(end);
-  const today = atNoon(now);
-
-  return Array.from({ length: 365 }, (_, index) => {
-    const date = new Date(
-      last.getFullYear(),
-      last.getMonth(),
-      last.getDate() - (365 - 1 - index),
-      12,
-      0,
-      0,
-      0,
-    );
-    const day = formatDateKey(date);
-    const future = date.getTime() > today.getTime();
-    const { count: demoCount, level: demoLevel } = dayActivity(day);
-
-    return {
-      day,
-      count: future ? 0 : demoCount,
-      level: future ? 0 : demoLevel,
-    };
-  });
-}
-
 export type SpanActivity = {
   days: ActivityDay[];
   /** Week columns; month grids always satisfy `days.length === columns * 7`. */
@@ -307,9 +225,8 @@ export type SpanActivity = {
   weekStart: 6 | 1;
 };
 
-/** Seeded span grid for the band; stable across renders for one window. */
+/** Seeded three-month grid for the band; stable across renders for one window. */
 export function useSpanActivity(
-  span: ActivitySpan,
   end: MonthKey,
   language: Language,
 ): SpanActivity {
@@ -317,33 +234,8 @@ export function useSpanActivity(
 
   return useMemo(() => {
     const weekStart = weekStartFor(language);
-    const key = { year, month };
-
-    if (span === 'annual') {
-      const days = buildYearCells(endOfMonth(key));
-
-      return { days, columns: 53, weekStart };
-    }
-
-    const start = shiftMonthKey(key, -2);
-    const days = buildSpanCells(start, 3, weekStart);
-
-    return { days, columns: days.length / 7, weekStart };
-  }, [language, month, span, year]);
-}
-
-export type MonthlyActivity = SpanActivity;
-
-/** Single-month grid for callers that need one month outside the band. */
-export function useMonthlyActivity(
-  key: MonthKey,
-  language: Language,
-): MonthlyActivity {
-  const { year, month } = key;
-
-  return useMemo(() => {
-    const weekStart = weekStartFor(language);
-    const days = buildMonthCells({ year, month }, weekStart);
+    const start = shiftMonthKey({ year, month }, -(MONTHS_PER_PAGE - 1));
+    const days = buildSpanCells(start, MONTHS_PER_PAGE, weekStart);
 
     return { days, columns: days.length / 7, weekStart };
   }, [language, month, year]);

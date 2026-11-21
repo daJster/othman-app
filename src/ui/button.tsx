@@ -31,7 +31,7 @@ const button = tv({
       default: '',
       secondary: '',
       outline: '',
-      ghost: '',
+      ghost: 'bg-transparent',
       destructive: '',
       link: '',
     },

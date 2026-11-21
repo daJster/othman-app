@@ -46,6 +46,12 @@ export type ReadingSessionCardProps = {
   className?: string;
   /** Denser type and padding when the card sits beside the gauge. */
   compact?: boolean;
+  /**
+   * Width ÷ height. Portrait by default (a mushaf page); a phone gives it a
+   * wider, shorter window so the preview takes real width without towering
+   * over the gauges.
+   */
+  aspectRatio?: number;
   onPress: () => void;
 };
 
@@ -87,6 +93,7 @@ function ReadingSessionCardView({
   latest,
   className,
   compact = false,
+  aspectRatio = 1 / 1.512,
   onPress,
   metadata,
   edition,
@@ -144,12 +151,15 @@ function ReadingSessionCardView({
         }),
         className,
       )}
-      style={{ aspectRatio: 1 / 1.512 }}
+      style={{ aspectRatio }}
     >
       {imageUrl ? (
         <Image
           source={{ uri: imageUrl }}
           contentFit="cover"
+          // The scan is a portrait page: keep its top edge at the card's top.
+          // Centre-cover was showing the middle of the page in a landscape card.
+          contentPosition="top"
           style={StyleSheet.absoluteFill}
           accessible={false}
         />

@@ -49,6 +49,8 @@ export type ContributionDay = {
   count: number;
   /** Pre-computed accent step. Falls back to the count ramp when omitted. */
   level?: ContributionLevel;
+  /** The day's practice is complete: the cell paints gold, not white. */
+  golden?: boolean;
   /** A cell from the neighbouring month, shown faded. */
   outside?: boolean;
   /** Localised label. Falls back to `day: count` when omitted. */
@@ -209,7 +211,7 @@ export default function ContributionGraph({
                   accessibilityLabel={
                     entry.accessibilityLabel ?? `${entry.day}: ${entry.count}`
                   }
-                  className={`${radiusClass} ${RAMP[entry.level ?? levelFor(entry.count)]}${entry.outside ? 'opacity-30' : ''}`}
+                  className={`${radiusClass} ${entry.golden ? 'bg-brass' : RAMP[entry.level ?? levelFor(entry.count)]}${entry.outside ? 'opacity-30' : ''}`}
                   style={{ width: cell, height: cell }}
                 />
               ) : (

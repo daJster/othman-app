@@ -151,3 +151,22 @@ export type EventsResponse = { events: BackendEvent[]; cursor: number };
 
 /** Used by tests and by the profile repository's `update` bridge. */
 export type ProfilePatch = Partial<AccountProfile>;
+
+/** An inbox row from GET /v1/notices. Shaped like the CircleItem notice. */
+export type BackendNotice = {
+  id: string;
+  kind: 'notice';
+  date: string | null;
+  /** ISO timestamp behind the relative time ("12 min ago"). */
+  createdAt: string;
+  title: { ar: string; en: string };
+  body: { ar: string; en: string };
+  topic: 'shaykh' | 'halqa' | 'app' | null;
+};
+
+export type NoticesResponse = {
+  notices: BackendNotice[];
+  page: number;
+  hasMore: boolean;
+  total: number;
+};

@@ -7,7 +7,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useLanguageChoice } from '@/features/settings/use-language-choice';
-import { flatTrigger } from '@/features/navigation/web/flat-trigger';
+import { useExclusiveBarMenu } from '@/features/navigation/web/bar-menu';
+import { chromeTrigger } from '@/features/navigation/web/flat-trigger';
 import { LANGUAGES, type Language } from '@/i18n';
 import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
@@ -33,16 +34,16 @@ export function LanguageMenu() {
   const currentName = t(current.labelKey);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu {...useExclusiveBarMenu('language')}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
           size="md"
-          className={flatTrigger('h-11 min-w-11 justify-center px-2')}
+          className={chromeTrigger('h-11 min-w-11 justify-center px-2')}
           accessibilityLabel={`${t('language.title')}: ${currentName}`}
           testID="nav-language-trigger"
         >
-          <Icon name="languages" size={20} />
+          <Icon name="languages" size={18} />
         </Button>
       </DropdownMenuTrigger>
 

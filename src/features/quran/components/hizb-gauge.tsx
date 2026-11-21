@@ -6,7 +6,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
-import Svg, { Circle, Path } from 'react-native-svg';
+import Svg, { Circle } from 'react-native-svg';
 import { useCSSVariable } from 'uniwind';
 import { useReducedMotion } from '@/ui/motion';
 
@@ -36,7 +36,6 @@ import { useReducedMotion } from '@/ui/motion';
 const DEFAULT_SIZE = 136;
 const DEFAULT_STROKE_WIDTH = 10;
 const ARC_DURATION = 600;
-const CHECK_PATH = 'M20 6 9 17l-5-5';
 
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
@@ -49,7 +48,12 @@ export type HizbGaugeProps = {
   size?: number;
   /** Arc thickness in points. */
   strokeWidth?: number;
-  /** Centered primary readout while the goal is incomplete. */
+  /**
+   * Arc colour. `brass` is the resting gold; `success` marks this gauge's own
+   * target as met; `gold` is the day-wide state, when every gauge is full.
+   */
+  tone?: 'brass' | 'success' | 'gold' | 'white';
+  /** Centered readout: the count the ring is drawing. */
   centerLabel?: string;
   /** Accessible name for the gauge, announced as a progressbar. */
   accessibilityLabel?: string;
@@ -65,22 +69,30 @@ export function HizbGauge({
   max,
   size = DEFAULT_SIZE,
   strokeWidth = DEFAULT_STROKE_WIDTH,
+  tone = 'brass',
   centerLabel,
   accessibilityLabel,
 }: HizbGaugeProps) {
   const reducedMotion = useReducedMotion();
-  const [borderToken, brassToken, successToken] = useCSSVariable([
-    '--color-border',
-    '--color-brass',
-    '--color-success',
-  ]);
+  const [borderToken, brassToken, successToken, foregroundToken] =
+    useCSSVariable([
+      '--color-border',
+      '--color-brass',
+      '--color-success',
+      '--color-foreground',
+    ]);
+  const arcToken =
+    tone === 'success'
+      ? successToken
+      : tone === 'white'
+        ? foregroundToken
+        : brassToken;
 
   const safeMax = Number.isFinite(max) && max > 0 ? max : 1;
   const target = Number.isFinite(value)
     ? Math.min(safeMax, Math.max(0, value))
     : 0;
   const ratio = target / safeMax;
-  const complete = ratio >= 1;
 
   const radius = Math.max(0, (size - strokeWidth) / 2);
   const center = size / 2;
@@ -135,7 +147,7 @@ export function HizbGauge({
           cy={center}
           r={radius}
           fill="none"
-          stroke={svgColor(brassToken)}
+          stroke={svgColor(arcToken)}
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -144,20 +156,7 @@ export function HizbGauge({
         />
       </Svg>
 
-      {complete ? (
-        <View className="absolute inset-0 items-center justify-center">
-          <Svg width={size * 0.3} height={size * 0.3} viewBox="0 0 24 24">
-            <Path
-              d={CHECK_PATH}
-              fill="none"
-              stroke={svgColor(successToken)}
-              strokeWidth={2.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </Svg>
-        </View>
-      ) : centerLabel !== undefined ? (
+      {centerLabel !== undefined ? (
         <View className="absolute inset-0 items-center justify-center">
           <Text className="text-lg font-semibold text-foreground tabular-nums">
             {centerLabel}

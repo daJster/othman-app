@@ -2,15 +2,11 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import Head from 'expo-router/head';
 import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { View, useWindowDimensions } from 'react-native';
-import { ActivityBand } from '@/features/quran/components/activity-band';
+import { View } from 'react-native';
 import { HistoryBand } from '@/features/quran/components/history-band';
-import { ResumeBand } from '@/features/quran/components/resume-band';
 import { StoryBand } from '@/features/quran/components/story-band';
 import { parseQuranLink } from '@/features/quran/links';
-import { useRestoreReader } from '@/features/quran/store/use-reader';
 import { Icon } from '@/ui/icon';
-import { useIsWide } from '@/ui/layout';
 import { Page } from '@/ui/page';
 import { Pressable } from '@/ui/pressable';
 import { Screen, ScreenView } from '@/ui/screen';
@@ -22,27 +18,14 @@ import { Text } from '@/ui/text';
  *
  * The reader itself is a full-screen modal (`/reader/[page]`), not a tab: the
  * scan needs every pixel and the page-turn gesture would compete with the tab
- * bar. This screen is the front door: the resume band shows the last three
- * places the reading log recorded, and, as the supporting modules land, becomes
- * the place a reader starts their day — recent activity, history
- * and a suggested surah.
+ * bar. This screen is the front door to the mushaf: the history band keeps the
+ * last places read, the records entry opens bookmarks and notes, and the story
+ * band closes the page.
  *
- * The bands are a reading sequence, so the page stays a single column at every
- * width. On phones in portrait the landing page opens tightly positioned:
- * section 1 (history) locks to 30% of the viewport height and section 2
- * (resume) takes the remaining 70%. Everywhere else — tablets, desktops,
- * landscape — sections size to their content with the page's own rhythm. The
- * lock touches those two sections alone: the page keeps its own vertical
- * padding and the rest renders exactly as before.
- * Each module is optional; with none attached, the resume band alone is
- * a complete entry point.
- *
- * This screen owns where a position goes, not what it is: `openEntry()` is the
- * only navigation the band performs, and it always targets `/reader/[page]`
- * with the page and, when the session recorded one, the surah/ayah pair, so a
- * card restores the position it names rather than only its page.
- * `useRestoreReader` still runs here so the stored page is read once at the
- * front door; the reader keeps its own guarded restore for a direct deep link.
+ * **Resume reading and recent activity live on Home now.** They answer "what
+ * now" rather than "where in the mushaf", and Home is the surface a reader
+ * opens first; keeping a second copy here would make the two drift. This page
+ * stays about the book itself.
  *
  * A link such as `/quran?surah=2&ayah=255` forwards to the reader with the same
  * parameters. Validity is checked in two steps: the parser rejects malformed or
@@ -58,17 +41,6 @@ export default function QuranScreen() {
     surah?: string;
     ayah?: string;
   }>();
-  const { height: windowHeight, width: windowWidth } = useWindowDimensions();
-  // Phone-only lock: on a phone the landing page opens tightly positioned —
-  // history takes 30% of the viewport and resume the remaining 70%. Tablets,
-  // desktops and landscape keep natural heights.
-  const portrait = windowHeight >= windowWidth;
-  const wide = useIsWide();
-  const lock = portrait && !wide;
-  const s1 = Math.round(windowHeight * 0.3);
-  const s2 = Math.round(windowHeight * 0.7);
-
-  useRestoreReader();
 
   const link = useMemo(
     () => parseQuranLink(params),
@@ -102,24 +74,6 @@ export default function QuranScreen() {
     );
   }
 
-  const openEntry = (entry: {
-    page: number;
-    surah: number;
-    ayahKey: string | null;
-  }) => {
-    router.push({
-      pathname: '/reader/[page]',
-      params: {
-        page: String(entry.page),
-        // `surah` without an `ayah` is a surah-start link: `resolveQuranLink`
-        // would ignore the page. Send the pair together, or the page alone.
-        ...(entry.ayahKey
-          ? { surah: String(entry.surah), ayah: entry.ayahKey }
-          : {}),
-      },
-    });
-  };
-
   return (
     <Screen contentContainerClassName="gap-0 p-0">
       <Page width="default" className="pt-8 pb-10 md:pt-12">
@@ -127,19 +81,7 @@ export default function QuranScreen() {
           <title>{`${t('nav.quran')} · ${t('app.name')}`}</title>
         </Head>
 
-        <View
-          testID="quran-section-history"
-          style={{ height: lock ? s1 : undefined }}
-          className="justify-center"
-        >
-          <HistoryBand />
-        </View>
-        <View
-          testID="quran-section-resume"
-          style={{ height: lock ? s2 : undefined }}
-        >
-          <ResumeBand onOpen={openEntry} />
-        </View>
+        <HistoryBand />
 
         <View className="py-4" testID="quran-section-records">
           <Pressable
@@ -162,9 +104,6 @@ export default function QuranScreen() {
           </Pressable>
         </View>
 
-        <View testID="quran-section-activity">
-          <ActivityBand />
-        </View>
         <StoryBand />
       </Page>
     </Screen>

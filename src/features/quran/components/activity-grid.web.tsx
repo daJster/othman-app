@@ -9,11 +9,7 @@ import {
   ContributionGraphCalendar,
 } from '@/components/catalogs/contribution-graph.web';
 import { useDirection } from '@/i18n';
-import {
-  formatDayLabel,
-  formatMonthShort,
-  type MonthlyActivity,
-} from './use-monthly-activity';
+import { formatDayLabel, type SpanActivity } from './use-monthly-activity';
 
 /**
  * The reading-activity board, on the web catalog calendar.
@@ -23,11 +19,10 @@ import {
  * is computed by the band from the page column; the catalog's own horizontal
  * overflow is disabled so the band owns the scroll position on both platforms.
  *
- * Month labels are visible in Annual only (`showMonthLabels`); the Monthly
- * band header already names the month — and the week start follows the
- * language (Saturday for Arabic, Monday otherwise). Neighbouring-month cells
- * render faded and carry the same localized `date: count` accessible name as
- * native.
+ * The band header already names the month, so the catalog's own month labels
+ * stay hidden — and the week start follows the language (Saturday for Arabic,
+ * Monday otherwise). Neighbouring-month cells render faded and carry the same
+ * localized `date: count` accessible name as native.
  */
 export type ActivityLevel = 0 | 1 | 2 | 3 | 4;
 
@@ -38,6 +33,8 @@ export type ActivityDay = {
   count: number;
   /** Intensity step, 0 for nothing read up to 4 for a full day. */
   level: ActivityLevel;
+  /** The day's practice is complete: a golden cell. */
+  golden?: boolean;
   /** A cell from the neighbouring month, shown faded. */
   outside?: boolean;
 };
@@ -50,9 +47,7 @@ export type ActivityGridProps = {
   /** Cell edge in px, sized by the band to the page column. */
   cellSize: number;
   /** First day of the week column. */
-  weekStart?: MonthlyActivity['weekStart'];
-  /** Abbreviated month labels above the graph; Annual only. */
-  showMonthLabels?: boolean;
+  weekStart?: SpanActivity['weekStart'];
 };
 
 /**
@@ -68,18 +63,8 @@ export function ActivityGrid({
   columns,
   cellSize,
   weekStart = 1,
-  showMonthLabels = false,
 }: ActivityGridProps) {
   const { language } = useDirection();
-
-  // Fixed year avoids DST edges; mirrors the previous implementation.
-  const months = useMemo(
-    () =>
-      Array.from({ length: 12 }, (_, m) =>
-        formatMonthShort(`2026-${String(m + 1).padStart(2, '0')}-01`, language),
-      ),
-    [language],
-  );
 
   const data = useMemo<Activity[]>(() => {
     const columnCount = Number.isFinite(columns)
@@ -108,18 +93,14 @@ export function ActivityGrid({
       className="max-w-none"
       data={data}
       fontSize={12}
-      labels={{ months }}
       weekStart={weekStart as WeekDay}
     >
-      <ContributionGraphCalendar
-        hideMonthLabels={!showMonthLabels}
-        className="overflow-visible"
-      >
+      <ContributionGraphCalendar hideMonthLabels className="overflow-visible">
         {({ activity, dayIndex, weekIndex }) => (
           <ContributionGraphBlock
             activity={activity}
             aria-label={`${formatDayLabel(activity.date, language)}: ${activity.count}`}
-            className={`${CELL_CLASS}${meta.get(activity.date)?.outside ? 'opacity-30' : ''}`}
+            className={`${CELL_CLASS}${meta.get(activity.date)?.golden ? 'activity-cell-golden' : ''}${meta.get(activity.date)?.outside ? 'opacity-30' : ''}`}
             dayIndex={dayIndex}
             weekIndex={weekIndex}
           />

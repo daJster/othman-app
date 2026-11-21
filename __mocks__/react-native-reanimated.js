@@ -93,6 +93,14 @@ module.exports = {
   useAnimatedRef: () => ({ current: null }),
   useAnimatedReaction: () => undefined,
   useAnimatedScrollHandler: () => () => undefined,
+  /**
+   * Composes several worklet handlers into one. `ScrollFade` uses it so a
+   * caller's own scroll handler (Home's morph) runs alongside the fade
+   * tracking instead of replacing it. In a test the last handler is enough —
+   * nothing emits scroll events through the JS path here.
+   */
+  useComposedEventHandler: (handlers) =>
+    handlers.filter(Boolean).at(-1) ?? (() => undefined),
   useReducedMotion: () => false,
 
   /**

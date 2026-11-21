@@ -24,11 +24,42 @@ export const queryKeys = {
   /** Everything the app has cached. Sign-out clears this (P3.3). */
   all: ['othman'] as const,
 
+  notices: {
+    /** The inbox. Invalidated when a notice is marked read or the server list changes. */
+    root: ['othman', 'notices'] as const,
+    list: ['othman', 'notices', 'list'] as const,
+    /** One page of the inbox. */
+    page: (page: number, extended = false, limit?: number) => {
+      const key = ['othman', 'notices', 'page', page] as const;
+
+      if (extended && limit !== undefined) {
+        return [...key, 'extended', limit] as const;
+      }
+
+      if (extended) {
+        return [...key, 'extended'] as const;
+      }
+
+      if (limit !== undefined) {
+        return [...key, 'limit', limit] as const;
+      }
+
+      return key;
+    },
+  },
+
+  practice: {
+    /** Every practice day, for the activity calendar's overlay. */
+    history: ['othman', 'practice', 'history'] as const,
+    /** One day's gauges. */
+    day: (day: string) => ['othman', 'practice', day] as const,
+  },
+
   meetings: {
     /** Every day. Pull-to-refresh invalidates this. */
     root: ['othman', 'meetings'] as const,
-    /** One day's list. */
-    byDate: (date: DateKey) => ['othman', 'meetings', date] as const,
+    /** One day's list. */ byDate: (date: DateKey) =>
+      ['othman', 'meetings', date] as const,
     /** Every meeting inside the calendar's density window. */
     range: (from: DateKey, to: DateKey) =>
       ['othman', 'meetings', 'range', from, to] as const,

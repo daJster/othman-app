@@ -7,7 +7,8 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { THEME_OPTIONS } from '@/features/settings/theme-options';
-import { flatTrigger } from '@/features/navigation/web/flat-trigger';
+import { useExclusiveBarMenu } from '@/features/navigation/web/bar-menu';
+import { chromeTrigger } from '@/features/navigation/web/flat-trigger';
 import { useThemeMode, type ThemeMode } from '@/providers/theme-provider';
 import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
@@ -28,18 +29,23 @@ import { Text } from '@/ui/text';
 export function ThemeMenu() {
   const { t } = useTranslation();
   const { mode, setMode } = useThemeMode();
+  // The trigger shows the mode it is in: a sun in the light theme, a moon in
+  // the dark one, and the neutral system glyph when the OS decides. Two
+  // distinct Lucide marks read at a glance; one neutral glyph only said
+  // "appearance" and never told the reader which side they were on.
+  const current = THEME_OPTIONS.find((option) => option.mode === mode);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu {...useExclusiveBarMenu('theme')}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
           size="icon"
-          className={flatTrigger()}
+          className={chromeTrigger()}
           accessibilityLabel={t('theme.title')}
           testID="nav-theme-trigger"
         >
-          <Icon name="sun-moon" size={20} />
+          <Icon name={current?.icon ?? 'sun-moon'} size={18} />
         </Button>
       </DropdownMenuTrigger>
 
@@ -54,6 +60,7 @@ export function ThemeMenu() {
               value={option.mode}
               testID={`nav-theme-${option.mode}`}
             >
+              <Icon name={option.icon} size={16} tone="muted" />
               <Text variant="label">{t(option.labelKey)}</Text>
             </DropdownMenuRadioItem>
           ))}

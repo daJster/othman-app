@@ -29,9 +29,7 @@ import { getIconGlyph } from '@/ui/icon';
  *    once there are more than three destinations, so Android would show four
  *    unlabeled glyphs where iOS shows four labels. The bar is the only chrome
  *    on the screen; it keeps its labels.
- *  - `minimizeBehavior="never"` — iOS 26 can shrink the bar on scroll. Every
- *    screen here is a normal scrolling page, so hiding the destinations buys
- *    nothing and makes them chase the user.
+ *  - `minimizeBehavior="never"` — the destinations do not chase the page.
  *  - `testID`/`accessibilityLabel` per trigger — the same destination names the
  *    web anchors expose, so one device test can drive either shell.
  *

@@ -23,7 +23,8 @@ import {
   useCurrentAccount,
   useSignOut,
 } from '@/features/account/use-current-account';
-import { flatTrigger } from '@/features/navigation/web/flat-trigger';
+import { useExclusiveBarMenu } from '@/features/navigation/web/bar-menu';
+import { chromeTrigger } from '@/features/navigation/web/flat-trigger';
 import { Avatar } from '@/ui/avatar';
 import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
@@ -48,6 +49,9 @@ export function NavMenu() {
   const { authUser, state } = useCurrentAccount();
   const signOut = useSignOut();
   const [confirmOpen, setConfirmOpen] = useState(false);
+  // Called before the signed-out return: the hook order must not depend on the
+  // session, or signing out mid-render breaks every hook after it.
+  const accountMenu = useExclusiveBarMenu('account');
 
   const account = state.status === 'ready' ? state.data : null;
   const name = account?.displayName ?? authUser?.displayName ?? '';
@@ -67,6 +71,7 @@ export function NavMenu() {
   if (!signedIn) {
     return (
       <Button
+        variant="ghost"
         size="sm"
         label={t('action.signIn')}
         accessibilityLabel={t('action.signIn')}
@@ -79,14 +84,14 @@ export function NavMenu() {
 
   return (
     <>
-      <DropdownMenu>
+      <DropdownMenu {...accountMenu}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
             size="icon"
             // The avatar is the session menu's handle, not a button that wants
             // attention: no hover or press wash. Keyboard focus stays.
-            className={flatTrigger()}
+            className={chromeTrigger()}
             accessibilityLabel={name || t('nav.account')}
             testID="nav-menu-trigger"
           >

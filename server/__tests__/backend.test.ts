@@ -314,6 +314,41 @@ test('meetings: public reads, admin writes, student RSVP', async () => {
   assert.equal(removed.status, 204);
 });
 
+test('notices keep the web fixture and expose a paged phone archive', async () => {
+  const webPage = await api<{
+    notices: { id: string }[];
+    hasMore: boolean;
+    total: number;
+  }>('/v1/notices?page=1');
+
+  assert.equal(webPage.status, 200);
+  assert.equal(webPage.body.total, 14);
+  assert.equal(webPage.body.notices.length, 6);
+  assert.equal(webPage.body.hasMore, true);
+
+  const phonePage = await api<{
+    notices: { id: string }[];
+    hasMore: boolean;
+    total: number;
+  }>('/v1/notices?page=1&limit=12&extended=true');
+
+  assert.equal(phonePage.status, 200);
+  assert.equal(phonePage.body.total, 32);
+  assert.equal(phonePage.body.notices.length, 12);
+  assert.equal(phonePage.body.hasMore, true);
+
+  const phoneLastPage = await api<{
+    notices: { id: string }[];
+    hasMore: boolean;
+    total: number;
+  }>('/v1/notices?page=3&limit=12&extended=true');
+
+  assert.equal(phoneLastPage.status, 200);
+  assert.equal(phoneLastPage.body.total, 32);
+  assert.equal(phoneLastPage.body.notices.length, 8);
+  assert.equal(phoneLastPage.body.hasMore, false);
+});
+
 test('Qur’an catalog and ayahs are public and complete', async () => {
   const catalog = await api<{
     surahs: Record<string, { nameEnglish: string; ayahCount: number }>;

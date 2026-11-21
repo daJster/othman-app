@@ -1,31 +1,26 @@
 import { useTranslation } from 'react-i18next';
-import { useEffect, useMemo } from 'react';
-import { View, useWindowDimensions, Platform } from 'react-native';
-import type { TFunction } from 'i18next';
-import { useDirection, type Language } from '@/i18n';
+import { Platform, View, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { cn } from '@/ui/cn';
-import type { CircleItem } from '@/services/circle';
 import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { SheetHeader } from '@/ui/sheet-header';
 import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
-import { Text } from '@/ui/text';
-import { daysAway } from './circle-projection';
-import { formatDay, pickLocalized, topicLabel } from './circle-format';
-import { useCircle } from './use-circle';
-import { useReadNotices } from './notices-read';
+import { NoticesPanel } from './notices-panel';
+
+/** The drag handle and its breathing room sit above the native content host. */
+const SHEET_HANDLE_SPACE = 56;
+/** Vertical padding, header, and the gap above the tray. */
+const SHEET_HEADER_SPACE = 88;
 
 /**
- * The inbox.
+ * The phone inbox.
  *
- * One `@expo/ui` bottom sheet on native (real detents, drag, back-button) and
- * its `<dialog>` implementation on web — the only `@expo/ui` surface that
- * animates on both platforms. Inside, the rows are RN views from the app's own
- * tokens rather than `List`: the universal list hard-codes its own label
- * colours on web, which is why Account already forks there.
+ * The tray itself is shared with the web popover: newest-first paging, the same
+ * unread markers, and a row press that marks only that notice read. The sheet
+ * remains native chrome with its drag indicator and platform dismissal.
  *
- * Opening the sheet marks everything read. The dot is an invitation, not a
- * task list; a "mark all read" control would be a second job for a page that
- * has one.
+ * Opening the tray never clears unread state. A notice is marked read only when
+ * its row is pressed, so the bell dot and row marker stay in sync with web.
  */
 export type NoticesSheetProps = {
   open: boolean;
@@ -34,44 +29,28 @@ export type NoticesSheetProps = {
 
 export function NoticesSheet({ open, onClose }: NoticesSheetProps) {
   const { t } = useTranslation();
-  const { language } = useDirection();
-  const { items, now } = useCircle();
-  const { read, markRead } = useReadNotices();
   const window = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   // Native sheets host RN without a width; web dialogs already constrain it.
-  const sheetWidth =
-    Platform.OS === 'web' ? undefined : Math.max(0, window.width - 32);
-
-  const notices = useMemo(
-    () =>
-      items
-        .filter((item) => item.kind === 'notice')
-        .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? '')),
-    [items],
+  const native = Platform.OS !== 'web';
+  const sheetHeight = Math.max(
+    0,
+    window.height - insets.top - insets.bottom - SHEET_HANDLE_SPACE,
   );
-
-  const unreadIds = useMemo(
-    () => notices.filter((item) => !read.has(item.id)).map((item) => item.id),
-    [notices, read],
-  );
-
-  useEffect(() => {
-    if (open && unreadIds.length > 0) {
-      markRead(unreadIds);
-    }
-  }, [open, unreadIds, markRead]);
-
-  const today = notices.filter((item) => daysAway(item, now) === 0);
-  const earlier = notices.filter((item) => daysAway(item, now) !== 0);
+  const trayHeight = Math.max(0, sheetHeight - SHEET_HEADER_SPACE);
+  const sheetStyle = native
+    ? {
+        width: Math.max(0, window.width - 32),
+        height: sheetHeight,
+      }
+    : undefined;
 
   return (
     <ThemedBottomSheet
       isPresented={open}
       onDismiss={onClose}
       showDragIndicator={Platform.OS !== 'web'}
-      // A native sheet hosts RN content that cannot scroll itself, so it opens
-      // tall enough to hold the list rather than clipping the last notice. Web
-      // sizes the dialog to its content.
+      // Native fills the screen; web sizes its dialog to the tray's content.
       snapPoints={Platform.OS === 'web' ? undefined : ['full']}
       testID="notices-sheet"
     >
@@ -80,94 +59,25 @@ export function NoticesSheet({ open, onClose }: NoticesSheetProps) {
          * A native sheet host has no width to give its RN subtree: without an
          * explicit measure the text lays out at its intrinsic width and runs
          * off the right edge of the sheet. The window minus a gutter is the
-         * sheet's own width on both platforms.
+         * native sheet's width; the web dialog constrains itself separately.
          */}
         <View
-          style={sheetWidth ? { width: sheetWidth } : undefined}
+          style={sheetStyle}
           className={cn(
             'gap-5 p-4 pb-6',
+            native && 'flex-1',
             Platform.OS === 'web' && 'mx-auto w-full max-w-xl py-6',
           )}
         >
-          <SheetHeader
-            title={t('home.notices.title')}
-            onClose={onClose}
-            closeTestID="notices-close"
+          <SheetHeader title={t('home.notices.title')} />
+
+          <NoticesPanel
+            availableHeight={native ? trayHeight : undefined}
+            extended={native}
+            limit={native ? 12 : undefined}
           />
-
-          {notices.length === 0 ? (
-            <Text variant="caption" tone="muted">
-              {t('home.notices.empty')}
-            </Text>
-          ) : null}
-
-          {today.length > 0 ? (
-            <NoticeGroup
-              title={t('home.notices.today')}
-              items={today}
-              language={language}
-              now={now}
-              t={t}
-            />
-          ) : null}
-
-          {earlier.length > 0 ? (
-            <NoticeGroup
-              title={t('home.notices.thisWeek')}
-              items={earlier}
-              language={language}
-              now={now}
-              t={t}
-            />
-          ) : null}
         </View>
       </NativeSheetContent>
     </ThemedBottomSheet>
-  );
-}
-
-function NoticeGroup({
-  title,
-  items,
-  language,
-  now,
-  t,
-}: {
-  title: string;
-  items: readonly CircleItem[];
-  language: Language;
-  now: Date;
-  t: TFunction<'common'>;
-}) {
-  return (
-    <View className="gap-3">
-      <Text variant="overline" tone="muted" className="tracking-[0.2em]">
-        {title}
-      </Text>
-
-      {items.map((item) => (
-        <View key={item.id} className="gap-1">
-          <Text
-            variant="overline"
-            className="text-2xs tracking-[0.18em] text-brass-ink"
-          >
-            {[
-              topicLabel(item.topic ?? 'app', t),
-              formatDay(item, language, now, t),
-            ]
-              .filter(Boolean)
-              .join(' · ')}
-          </Text>
-
-          <Text variant="subtitle" className="text-base leading-snug">
-            {pickLocalized(item.title, language)}
-          </Text>
-
-          <Text variant="body" tone="muted" className="text-sm leading-relaxed">
-            {pickLocalized(item.body, language)}
-          </Text>
-        </View>
-      ))}
-    </View>
   );
 }

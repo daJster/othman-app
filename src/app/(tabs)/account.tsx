@@ -10,6 +10,7 @@ import { AccountSettingsWeb } from '@/features/account/account-settings-web';
 import { AccountSkeleton } from '@/features/account/account-skeleton';
 import { FeedbackDialog } from '@/features/account/feedback-dialog';
 import { LearningSnapshot } from '@/features/account/learning-snapshot';
+import { NoticesSheet } from '@/features/home/notices-sheet';
 import { ProfileCompleteness } from '@/features/account/profile-completeness';
 import { ProfileHeader } from '@/features/account/profile-header';
 import { PreferencesSection } from '@/features/settings/preferences-section';
@@ -88,6 +89,7 @@ function AccountContent() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const title = `${t('nav.account')} · ${t('app.name')}`;
   const openEdit = () => router.push('/account/edit');
@@ -242,6 +244,16 @@ function AccountContent() {
             <ListSectionHeader label={t('account.sections.settings')} />
 
             <ListItem
+              testID="account-notifications-row"
+              leading={<Icon name="bell" />}
+              trailing={<Icon name="chevron-right" tone="muted" />}
+              supportingText={t('account.notifications.hint')}
+              onPress={() => setNotificationsOpen(true)}
+            >
+              {t('home.notices.open')}
+            </ListItem>
+
+            <ListItem
               testID="account-progress-row"
               leading={<Icon name="chart-line" />}
               trailing={<Icon name="chevron-right" tone="muted" />}
@@ -326,6 +338,13 @@ function AccountContent() {
         open={feedbackOpen}
         onClose={() => setFeedbackOpen(false)}
       />
+
+      {Platform.OS !== 'web' ? (
+        <NoticesSheet
+          open={notificationsOpen}
+          onClose={() => setNotificationsOpen(false)}
+        />
+      ) : null}
 
       <AlertDialog open={signOutOpen} onOpenChange={setSignOutOpen}>
         <AlertDialogContent>

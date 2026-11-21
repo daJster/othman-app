@@ -13,6 +13,7 @@ import { FOCUS_RING } from '@/ui/focus';
 import { Icon } from '@/ui/icon';
 import { Image } from '@/ui/image';
 import { useReducedMotion } from '@/ui/motion';
+import { MODULE } from '@/ui/ratio';
 import { getHeroFilm } from './hero-media';
 
 /**
@@ -264,11 +265,16 @@ function HeroFilmLayer({ film }: { film: { video: number; poster: number } }) {
         )}
         onPress={toggle}
         className={cn(
-          'absolute top-4 right-4 z-10 h-11 w-11 items-center justify-center rounded-full',
+          // The film runs behind the floating bar on the web, so the control
+          // starts below it there. A phone has no top chrome, so it sits in the
+          // free top-right corner opposite the inbox bell. `top-20` compiled to
+          // nothing in this Uniwind build; the offset travels as a number.
+          'absolute right-4 z-10 h-11 w-11 items-center justify-center rounded-full',
           'border border-parchment/25 bg-canopy/80 shadow-lg shadow-black/25',
           'active:opacity-80',
           FOCUS_RING,
         )}
+        style={{ top: Platform.OS === 'web' ? MODULE * 20 : MODULE * 3 }}
       >
         <Icon name={playing ? 'pause' : 'play'} size={18} tone="parchment" />
       </Pressable>

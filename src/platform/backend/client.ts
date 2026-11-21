@@ -30,6 +30,7 @@ import {
   type MeetingResponse,
   type MeetingsResponse,
   type NoteResponse,
+  type NoticesResponse,
   type NotesResponse,
   type ProgressListResponse,
   type ProgressResponse,
@@ -287,6 +288,17 @@ export class BackendClient {
     query: { date?: string; from?: string; to?: string } = {},
   ): Promise<MeetingsResponse> {
     return this.request('GET', '/v1/meetings', { query });
+  }
+
+  /**
+   * The inbox, one page at a time. Deliberately the slowest read in the demo
+   * backend — the waiting state on the panel is a product surface, not an
+   * accident, and the paging spinner depends on it being slow.
+   */
+  listNotices(
+    query: { page?: number; limit?: number; extended?: boolean } = {},
+  ): Promise<NoticesResponse> {
+    return this.request('GET', '/v1/notices', { query });
   }
 
   getMeeting(id: number): Promise<MeetingResponse> {

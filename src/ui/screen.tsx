@@ -6,6 +6,7 @@ import {
   type ViewProps,
 } from 'react-native';
 import { cn } from './cn';
+import { usePageScrollReporter } from './scroll-state';
 
 /**
  * Screen containers.
@@ -15,12 +16,16 @@ import { cn } from './cn';
  * different props. Screens pick `Screen` for lists/content and `ScreenView` for
  * centring a state or a form that manages its own keyboard avoidance.
  *
- * **Top inset.** Both own it through `pt-safe`, which Uniwind resolves from the
- * insets `SafeAreaListener` pushes in. `contentInsetAdjustmentBehavior` alone
- * is not enough: the native tabs shell has no header, so on both phones the
- * status bar simply sat on top of the first row of every page. The padding goes
- * on the container, not the scroll content, so scrolled content cannot slide
- * back under the bar.
+ * **Top inset.** The native shell owns it through `pt-safe`, which Uniwind
+ * resolves from the insets `SafeAreaListener` pushes in. `contentInsetAdjustment
+ * Behavior` alone is not enough: the native tabs shell has no header, so on both
+ * phones the status bar simply sat on top of the first row of every page. The
+ * padding goes on the container, not the scroll content, so scrolled content
+ * cannot slide back under the bar.
+ *
+ * On the web the bar floats over the page, so the inset that matters is the
+ * chrome row — that one is applied once to the navigator's slot, not per screen,
+ * because Home deliberately runs its film underneath the glass.
  *
  * The bottom is deliberately not owned here: the native tab bar already
  * reserves the home indicator, and applying it twice would leave a gap the size
@@ -41,13 +46,20 @@ export function Screen({
   keyboardShouldPersistTaps = 'handled',
   ...props
 }: ScreenProps) {
+  const reportPageScroll = usePageScrollReporter();
+
   return (
     <ScrollView
-      className={cn('flex-1 bg-background pt-safe', className)}
+      className={cn(
+        'scrollbar-stable min-h-0 flex-1 bg-background pt-safe',
+        className,
+      )}
       contentContainerClassName={cn(
         'grow gap-gutter p-gutter pb-section',
         contentContainerClassName,
       )}
+      onScroll={reportPageScroll}
+      scrollEventThrottle={16}
       contentInsetAdjustmentBehavior={contentInsetAdjustmentBehavior}
       // Without this, the first tap on a button while the keyboard is open only
       // dismisses the keyboard and the user has to tap twice.
@@ -65,7 +77,10 @@ export type ScreenViewProps = ViewProps & {
 
 export function ScreenView({ children, className, ...props }: ScreenViewProps) {
   return (
-    <View className={cn('flex-1 bg-background pt-safe', className)} {...props}>
+    <View
+      className={cn('scroll-balanced flex-1 bg-background pt-safe', className)}
+      {...props}
+    >
       {children}
     </View>
   );

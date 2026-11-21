@@ -11,7 +11,10 @@
  *
  * Deliberately not ported: `--sidebar-*` and `--chart-*` (no sidebar, no
  * charts), `--popover-*` (sheets and menus are native, not floating panels),
- * `tw-animate-css` and the `slideIn/Out` keyframes (Reanimated owns motion).
+ * `tw-animate-css` and its `slideIn/Out` keyframes. Reanimated owns motion —
+ * with one exception at the end of this file: overlay entrances, because Radix
+ * holds an overlay's unmount on a CSS animation and has no other way to know
+ * when the exit is finished.
  *
  * Colors stay in `oklch()`: Uniwind parses it for `className`. Anything that
  * has to reach a JS prop (Reanimated, gradients, native tints) must go through
@@ -95,48 +98,57 @@
   --reader-max-width: 720;
   --motion-page-turn: 260;
   --motion-press: 120;
+  /*
+   * Overlay entrance. Short on purpose: a menu that takes longer than a glance
+   * reads as lag, not as polish. `--motion-pop-out` is faster still, because
+   * leaving should cost less attention than arriving.
+   */
+  --motion-pop: 130;
+  --motion-pop-out: 90;
 }
 
 @layer theme {
   :root {
     @variant light {
       /*
-       * The ground is warm paper, not white. Pure white made `card` (also
-       * white) invisible: the calendar's rounded corners were nothing but a
-       * hairline, and every panel in the app read as a hole in the page. One
-       * step of warmth on the ground, kept off the cards, restores the surface
-       * without changing a single component.
+       * Monochrome for now. Every surface and ink role below is neutral — no
+       * canopy hue, no warm paper — because the theme colour is being decided
+       * separately and will return on the sections that own it. `brass`,
+       * `clay` and the status triples keep their hue: they are accents, not the
+       * base the interface is built out of.
        */
-      --color-background: oklch(0.985 0.008 85);
+      --color-background: oklch(0.985 0 0);
       --color-foreground: oklch(0.145 0 0);
       --color-card: oklch(1 0 0);
       --color-card-foreground: oklch(0.145 0 0);
-      --color-primary: oklch(0.5 0.15 160);
+      --color-primary: oklch(0.25 0 0);
       --color-primary-foreground: oklch(0.985 0 0);
-      --color-secondary: oklch(0.96 0.04 160);
+      --color-secondary: oklch(0.96 0 0);
       --color-secondary-foreground: oklch(0.205 0 0);
-      --color-muted: oklch(0.962 0.01 85);
+      --color-muted: oklch(0.962 0 0);
       --color-muted-foreground: oklch(0.52 0 0);
-      --color-accent: oklch(0.95 0.06 160);
+      --color-accent: oklch(0.95 0 0);
       --color-accent-foreground: oklch(0.205 0 0);
       --color-destructive: oklch(0.577 0.245 27.325);
       --color-destructive-foreground: oklch(0.985 0 0);
-      --color-border: oklch(0.92 0.008 85);
-      --color-input: oklch(0.92 0.008 85);
+      --color-border: oklch(0.92 0 0);
+      --color-input: oklch(0.92 0 0);
       --color-ring: oklch(0.708 0 0);
-      --color-canopy: oklch(0.31 0.07 160);
+      --color-canopy: oklch(0.31 0 0);
       /*
-       * Glass roles. The wash is baked with its alpha so `bg-glass` is the
-       * whole material colour, not a colour that still needs an opacity step
-       * at the call site. `glass` is the page-facing weight, `glass-strong`
-       * the overlay weight that has to hold text over arbitrary content, and
-       * `glass-dim` the chrome weight that sits over a film.
+       * Glass keeps only what the material does to what is behind it — blur and
+       * the lit edge — plus the thinnest scrim of the theme's own ground. That
+       * scrim is not decoration: with no wash at all, dark ink over a bright
+       * frame has no contrast to spend, and a menu becomes unreadable. It is
+       * the page's own nuance (white here, black in the dark theme) at the
+       * lowest alpha that still holds text, so the surface reads as clear
+       * rather than as tinted.
        */
-      --color-glass: oklch(1 0 0 / 72%);
-      --color-glass-strong: oklch(1 0 0 / 88%);
-      --color-glass-dim: oklch(0.985 0.008 85 / 62%);
-      --color-glass-line: oklch(1 0 0 / 72%);
-      --color-glass-edge: oklch(0.45 0.02 85 / 16%);
+      --color-glass: oklch(1 0 0 / 14%);
+      --color-glass-strong: oklch(1 0 0 / 16%);
+      --color-glass-dim: oklch(1 0 0 / 14%);
+      --color-glass-line: oklch(1 0 0 / 60%);
+      --color-glass-edge: oklch(0 0 0 / 12%);
       --color-sand: oklch(0.96 0.02 85);
       --color-brass: oklch(0.72 0.11 82);
       --color-brass-ink: oklch(0.51 0.09 82);
@@ -151,39 +163,49 @@
     }
 
     @variant dark {
-      /* Page ground is a near-black green with little chroma; canopy is a
-         lifted green field. The old pair (0.18 vs 0.2, both chroma 0.04/0.1)
-         left the hero's rounded edge at ~1.09:1, so the two fields merged.
-         This pair measures ~1.32:1 — the same separation the card already
-         has from the ground (1.34:1) — while body text stays at 17.6:1 on
-         background and 13.4:1 on canopy. */
-      --color-background: oklch(0.13 0.015 160);
-      --color-foreground: oklch(0.95 0.04 160);
-      --color-card: oklch(0.18 0.03 160);
-      --color-card-foreground: oklch(0.95 0.04 160);
-      --color-primary: oklch(0.6 0.15 160);
-      --color-primary-foreground: oklch(0.2 0.1 160);
-      --color-secondary: oklch(0.21 0.035 160);
-      --color-secondary-foreground: oklch(0.95 0.04 160);
-      --color-muted: oklch(0.21 0.035 160);
-      --color-muted-foreground: oklch(0.68 0.05 160);
-      --color-accent: oklch(0.22 0.04 160);
-      --color-accent-foreground: oklch(0.95 0.04 160);
+      /*
+       * Monochrome, the dark half: a true black page ground, neutral lifted
+       * surfaces and neutral ink. The old pair leaned on a green field to keep
+       * the hero's rounded edge separated from the page; the same separation is
+       * kept here with lightness alone (1.09:1 → 1.32:1 at the hero edge), so
+       * nothing depends on the theme colour.
+       *
+       * The ground is `oklch(0 0 0)` — the darkest value the system has, so
+       * nothing in the interface can be darker than the page, and every glass
+       * wash reads as light rather than as a grey film.
+       */
+      --color-background: oklch(0 0 0);
+      --color-foreground: oklch(0.96 0 0);
+      --color-card: oklch(0.16 0 0);
+      --color-card-foreground: oklch(0.96 0 0);
+      --color-primary: oklch(0.9 0 0);
+      --color-primary-foreground: oklch(0.2 0 0);
+      --color-secondary: oklch(0.19 0 0);
+      --color-secondary-foreground: oklch(0.96 0 0);
+      --color-muted: oklch(0.19 0 0);
+      --color-muted-foreground: oklch(0.7 0 0);
+      --color-accent: oklch(0.2 0 0);
+      --color-accent-foreground: oklch(0.96 0 0);
       --color-destructive: oklch(0.704 0.191 22.216);
-      --color-destructive-foreground: oklch(0.2 0.1 160);
+      --color-destructive-foreground: oklch(0.2 0 0);
       --color-border: oklch(1 0 0 / 10%);
       --color-input: oklch(1 0 0 / 15%);
-      --color-ring: oklch(0.45 0.15 160);
-      --color-canopy: oklch(0.26 0.05 160);
+      --color-ring: oklch(0.55 0 0);
+      --color-canopy: oklch(0.2 0 0);
       /*
-       * Dark glass is a lifted green-black, not black at 50%: a pure black
-       * wash over a dark page reads as a hole, while a little of the canopy
-       * hue keeps the layer part of the same material family as the hero.
+       * Dark glass is neutral black, and just as transparent as the light one.
+       * A pure black wash over a dark page can read as a hole, so it keeps a
+       * little lift in lightness instead of borrowing the canopy hue.
        */
-      --color-glass: oklch(0.2 0.02 160 / 68%);
-      --color-glass-strong: oklch(0.23 0.025 160 / 86%);
-      --color-glass-dim: oklch(0.16 0.02 160 / 62%);
-      --color-glass-line: oklch(1 0 0 / 14%);
+      /*
+       * Same rule in the dark theme, on the other ground: a thin black scrim,
+       * because the page is true black and the text is near-white. Menus take a
+       * little more than the bar does — they hold text over arbitrary footage.
+       */
+      --color-glass: oklch(0 0 0 / 22%);
+      --color-glass-strong: oklch(0 0 0 / 26%);
+      --color-glass-dim: oklch(0 0 0 / 22%);
+      --color-glass-line: oklch(1 0 0 / 16%);
       --color-glass-edge: oklch(1 0 0 / 12%);
       --color-sand: oklch(0.25 0.02 85);
       --color-brass: oklch(0.78 0.1 82);
@@ -254,6 +276,20 @@
   fill: var(--color-primary);
 }
 
+/*
+ * Page scrollers reserve the scrollbar on *both* sides, so the content column
+ * centres inside the same width the floating bar centres in. Without it the
+ * screen's content sits half a scrollbar to the left of the bar.
+ */
+.scrollbar-stable {
+  scrollbar-gutter: stable both-edges;
+}
+
+/* A completed practice day: gold outranks every reading level. */
+.activity-cell.activity-cell-golden {
+  fill: var(--color-brass);
+}
+
 .activity-legend[data-level='0'] {
   fill: var(--color-muted);
 }
@@ -268,4 +304,209 @@
 }
 .activity-legend[data-level='4'] {
   fill: color-mix(in oklch, var(--color-muted-foreground) 80%, transparent);
+}
+
+/*
+ * Overlay entrances, web only.
+ *
+ * Radix owns the mount and the unmount of every menu on the web, and it holds
+ * a closing surface on screen only for as long as a CSS animation runs — which
+ * is why these are keyframes here while the native side uses a Reanimated
+ * `entering` preset. The `animate-in fade-in-0 zoom-in-95` utilities this
+ * replaces were inert: `tw-animate-css` was never installed, so the classes
+ * resolved to nothing and every popover appeared with no transition at all.
+ *
+ * `data-state` is the attribute Radix writes, so a surface opts in with one
+ * class and nothing else. Duration and curve come from the motion tokens, so a
+ * caller can retune either with a single arbitrary class.
+ *
+ * **Why the selectors look doubled.** On the web, react-native-primitives puts
+ * our `className` on an inner View and leaves `data-state` on the Radix
+ * content root that wraps it — so a rule keyed on both never matches. The
+ * `>` half reaches the inner View from the root that carries the state, and
+ * the plain half covers any surface that does carry both on one node. Only the
+ * inner View is animated: doing both doubles the transform.
+ *
+ * The exit is Radix's own: this primitive unmounts the content as soon as it
+ * closes rather than waiting for `animationend`, so a closed-state rule would
+ * be dead weight. The open keyframes carry `both`, which keeps the surface at
+ * its end state for as long as it lives.
+ */
+@keyframes overlay-pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.96);
+  }
+}
+
+@keyframes overlay-pop-out {
+  to {
+    opacity: 0;
+    transform: translateY(-2px) scale(0.97);
+  }
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes overlay-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/*
+ * One notification row arriving. Rows are staggered by an inline
+ * `animation-delay`, so the list lands as a list rather than as a block that
+ * appears. Short for the same reason the surface is short: the wait is the
+ * spinner's job, not the rows'.
+ */
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.notice-enter {
+  animation: notice-in calc(var(--motion-pop) * 1ms) cubic-bezier(0.2, 0, 0, 1)
+    both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .notice-enter {
+    animation: none;
+  }
+}
+
+/*
+ * The spinner, web only.
+ *
+ * One look, one set of keyframes, declared once here instead of shipping an
+ * inline `<style>` with every mounted instance. `--panelui-spinner-pace` is the
+ * single knob: reduced motion sets it to 3, so the spinner slows to a third of
+ * its speed rather than stopping — a spinner that stands still reads as frozen.
+ */
+@keyframes spinner-turn {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+[data-slot='spinner'] {
+  --panelui-spinner-pace: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-slot='spinner'] {
+    --panelui-spinner-pace: 3;
+  }
+}
+
+/*
+ * Balanced scrollbar gutter, web only.
+ *
+ * The marquee content column is centred inside a scroll region, and on Windows
+ * a classic scrollbar takes 15px out of that region's width. Centring on the
+ * remaining space put every page's column ~7.5px left of the bar above it,
+ * which centres on the full viewport — the hero film and its play button were
+ * visibly off the nav's axis. Reserving the same gutter on both edges keeps the
+ * content centred on the window while leaving the scrollbar where it belongs.
+ */
+.scroll-balanced {
+  scrollbar-gutter: stable both-edges;
+}
+
+/*
+ * Popover blur, web only.
+ *
+ * The menu surface cannot blur from inside the popper. Radix positions the
+ * content by putting `transform: translate(x, y)` on
+ * `[data-radix-popper-content-wrapper]`, and a `backdrop-filter` inside a
+ * transformed ancestor samples that ancestor's layer — which is empty — instead
+ * of the page. The menu then paints its scrim over a sharp backdrop and reads
+ * as a flat panel.
+ *
+ * Filtering the wrapper fixes it at the layer that actually has the page behind
+ * it. The radius is repeated here because the wrapper is a square box: without
+ * it the blurred rectangle would poke out past the panel's rounded corners.
+ */
+[data-radix-popper-content-wrapper] {
+  border-radius: var(--radius-panel);
+  backdrop-filter: saturate(1.6) blur(24px);
+  -webkit-backdrop-filter: saturate(1.6) blur(24px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner-rotate {
+    animation: spinner-pulse 900ms ease-in-out infinite;
+  }
+}
+
+.overlay-pop[data-state='open'],
+[data-state='open'] > .overlay-pop {
+  animation: overlay-pop-in calc(var(--motion-pop) * 1ms)
+    cubic-bezier(0.2, 0, 0, 1) both;
+}
+
+.overlay-fade[data-state='open'],
+[data-state='open'] > .overlay-fade {
+  animation: overlay-fade-in calc(var(--motion-pop) * 1ms) linear both;
+}
+
+/*
+ * Reduced motion keeps the state change and drops the travel: the surface
+ * still fades, quickly enough to read as instant, and never scales.
+ */
+@media (prefers-reduced-motion: reduce) {
+  .overlay-pop[data-state='open'],
+  .overlay-pop[data-state='closed'],
+  [data-state='open']:has(> .overlay-pop),
+  [data-state='closed']:has(> .overlay-pop),
+  .overlay-fade[data-state='open'],
+  .overlay-fade[data-state='closed'],
+  [data-state='open']:has(> .overlay-fade),
+  [data-state='closed']:has(> .overlay-fade) {
+    animation-duration: calc(var(--motion-pop-out) * 1ms);
+    animation-timing-function: linear;
+  }
+
+  .overlay-pop[data-state='open'],
+  [data-state='open']:has(> .overlay-pop) {
+    animation-name: overlay-fade-in;
+  }
+
+  .overlay-pop[data-state='closed'],
+  [data-state='closed']:has(> .overlay-pop) {
+    animation-name: overlay-fade-out;
+  }
+}
+
+/*
+ * Theme crossfade.
+ *
+ * Adding `.theme-transition` to <body> for one switch lets every surface cross
+ * over together instead of cutting. It is applied from `ThemeProvider` only on
+ * a user-chosen mode, never during hydration, and removed when the fade ends.
+ *
+ * Colour properties only: animating layout or opacity would make the whole
+ * interface move for a change that is about ink, not structure. The duration
+ * matches `THEME_TRANSITION_MS` in the provider. `!important` is deliberate —
+ * it has to outrank the per-component `transition-colors` utilities for those
+ * 240 ms, or half the page would ignore the crossfade.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  .theme-transition,
+  .theme-transition *,
+  .theme-transition *::before,
+  .theme-transition *::after {
+    transition-property:
+      background-color, color, border-color, outline-color, fill, stroke !important;
+    transition-duration: 240ms !important;
+    transition-timing-function: cubic-bezier(0.2, 0, 0, 1) !important;
+    transition-delay: 0s !important;
+  }
 }

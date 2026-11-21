@@ -8,13 +8,15 @@ import { Text } from './text';
 /**
  * The header shared by every sheet.
  *
- * A sheet dismisses with one X control, labelled for a screen reader. The
- * visible title carries the context, and `end` holds a trailing detail (for
- * example a status badge) without adding a second action row.
+ * A sheet may dismiss with one X control, labelled for a screen reader; when it
+ * has a drag indicator or a backdrop, pass no `onClose` and the header keeps the
+ * title alone. The visible title carries the context, and `end` holds a trailing
+ * detail (for example a status badge) without adding a second action row.
  */
 export type SheetHeaderProps = {
   title: string;
-  onClose: () => void;
+  /** Omit to render the title without a close control. */
+  onClose?: () => void;
   /** Keeps each sheet's existing test ID. */
   closeTestID?: string;
   /** Optional trailing detail before the close control. */
@@ -35,15 +37,17 @@ export function SheetHeader({
         {title}
       </Text>
       {end}
-      <Button
-        variant="ghost"
-        size="icon"
-        accessibilityLabel={t('action.close')}
-        onPress={onClose}
-        testID={closeTestID}
-      >
-        <Icon name="close" size={20} tone="muted" />
-      </Button>
+      {onClose ? (
+        <Button
+          variant="ghost"
+          size="icon"
+          accessibilityLabel={t('action.close')}
+          onPress={onClose}
+          testID={closeTestID}
+        >
+          <Icon name="close" size={20} tone="muted" />
+        </Button>
+      ) : null}
     </View>
   );
 }

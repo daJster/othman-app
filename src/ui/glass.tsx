@@ -7,6 +7,7 @@ import {
   useColorScheme,
   type ViewProps,
 } from 'react-native';
+import type { ComponentRef, RefObject } from 'react';
 import { cn } from './cn';
 import { useReducedTransparency } from './motion';
 
@@ -28,11 +29,8 @@ import { useReducedTransparency } from './motion';
  *
  * **Platform materials, not one fake blur.** The web gets real
  * `backdrop-filter`; iOS gets the system material through `expo-blur`; Android
- * gets a tonal glass (wash + sheen) because the platform blur needs a
- * `blurTarget` view wired to the exact content behind it, and the current
- * `BlurView` silently falls back to no blur when that is missing. A tonal
- * surface is the honest Material 3 answer, and it keeps the frame budget on
- * low-end devices.
+ * uses `expo-blur` when a surface is given the exact `BlurTargetView` behind it,
+ * and keeps the tonal wash + sheen when no target is available.
  *
  * `prefers-reduced-transparency` is a separate preference from reduced motion:
  * the material becomes opaque but keeps its shape, its hairline and its ink.
@@ -62,16 +60,22 @@ const WASH_CLASS: Record<GlassWeight, string> = {
 };
 
 /**
+ * Height of the lighting bands, in points: a 2px offset with a 4px blur reads
+ * as roughly this much falloff on a surface edge.
+ */
+const EDGE_BAND = 6;
+
+/**
  * Blur intensity is a ratio of the surface's weight: thin chrome keeps the
  * page legible, an overlay erases it. iOS maps these onto system material
  * tints; the numbers are calibrated against the hero film, the busiest
  * backdrop in the product.
  */
 const BLUR_INTENSITY: Record<GlassWeight, number> = {
-  chrome: 18,
-  panel: 22,
-  overlay: 40,
-  chip: 16,
+  chrome: 14,
+  panel: 14,
+  overlay: 24,
+  chip: 14,
 };
 
 export type GlassFillProps = {
@@ -79,6 +83,15 @@ export type GlassFillProps = {
   radius?: GlassRadius;
   /** Extra classes for the wash layer (e.g. a tint or an opacity step). */
   className?: string;
+  /**
+   * A calmer card material: stronger frost, weaker rim and edge light.
+   *
+   * For content that sits *on* another glass surface, where the standard rim
+   * would double against the parent's own edge and read as glare.
+   */
+  quiet?: boolean;
+  /** Exact background to blur on Android; omitted surfaces keep the tonal fallback. */
+  blurTarget?: RefObject<ComponentRef<typeof View> | null>;
 };
 
 /**
@@ -89,10 +102,16 @@ export function GlassFill({
   weight = 'panel',
   radius = 'card',
   className,
+  quiet = false,
+  blurTarget,
 }: GlassFillProps) {
   const scheme = useColorScheme();
   const reducedTransparency = useReducedTransparency();
   const radiusPx = GLASS_RADIUS_PX[radius];
+  const hasAndroidBlurTarget = Platform.OS === 'android' && blurTarget != null;
+  const intensity = quiet
+    ? Math.min(100, BLUR_INTENSITY[weight] + 30)
+    : BLUR_INTENSITY[weight];
 
   if (reducedTransparency) {
     return (
@@ -111,15 +130,42 @@ export function GlassFill({
   return (
     <>
       {/*
-       * iOS owns a real material. Android gets the tonal wash below instead:
-       * `BlurView` without a `blurTarget` degrades to `none` (and warns), so
-       * asking for it there would be a lie with a frame cost.
+       * Android has no reliable backdrop blur (BlurView degrades to `none`
+       * without a blurTarget), so an adapted solid ground goes underneath the
+       * wash. Without it the translucent glass lets the page show through the
+       * copy and the text loses its surface.
        */}
-      {Platform.OS === 'ios' ? (
+      {Platform.OS !== 'ios' && !hasAndroidBlurTarget ? (
+        <View
+          className={cn('absolute inset-0 bg-card', RADIUS_CLASS[radius])}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+      ) : null}
+
+      {/*
+       * iOS can sample the content behind it directly. Android needs the
+       * explicit target from the surface's owning scroller; without that target
+       * the branch above paints the dependable tonal ground instead.
+       */}
+      {Platform.OS === 'ios' || hasAndroidBlurTarget ? (
         <BlurView
-          intensity={BLUR_INTENSITY[weight]}
+          blurTarget={hasAndroidBlurTarget ? blurTarget : undefined}
+          blurMethod={
+            hasAndroidBlurTarget ? 'dimezisBlurViewSdk31Plus' : undefined
+          }
+          blurReductionFactor={4}
+          intensity={
+            Platform.OS === 'android' ? Math.min(100, intensity * 4) : intensity
+          }
           tint={
-            scheme === 'dark' ? 'systemThinMaterialDark' : 'systemThinMaterial'
+            scheme === 'dark'
+              ? Platform.OS === 'android'
+                ? 'systemUltraThinMaterialDark'
+                : 'systemThinMaterialDark'
+              : Platform.OS === 'android'
+                ? 'systemUltraThinMaterialLight'
+                : 'systemThinMaterial'
           }
           style={[StyleSheet.absoluteFill, { borderRadius: radiusPx }]}
           pointerEvents="none"
@@ -137,17 +183,43 @@ export function GlassFill({
         pointerEvents="none"
       />
 
-      {/* The light catches the top edge of a real material. */}
+      {/*
+       * The lighting pass, per the glass spec: a white inner highlight on the
+       * top edge (40% white, offset 2, blur 4) and a black inner shadow on the
+       * bottom edge (25% black, mirrored). Web draws these as `inset`
+       * box-shadows; native has no such thing, so each is a fixed six-pixel
+       * band with a gradient — fixed, not a percentage, because a percentage
+       * band would grow with the surface and stop reading as an edge.
+       */}
       <LinearGradient
         colors={
           scheme === 'dark'
-            ? ['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0)']
-            : ['rgba(255, 255, 255, 0.5)', 'rgba(255, 255, 255, 0)']
+            ? [
+                `rgba(255, 255, 255, ${quiet ? 0.025 : 0.05})`,
+                'rgba(255, 255, 255, 0)',
+              ]
+            : [
+                `rgba(255, 255, 255, ${quiet ? 0.04 : 0.08})`,
+                'rgba(255, 255, 255, 0)',
+              ]
         }
-        locations={[0, 0.24]}
         style={[
           StyleSheet.absoluteFill,
-          { borderRadius: radiusPx, opacity: 0.9 },
+          { borderRadius: radiusPx, height: EDGE_BAND },
+        ]}
+        pointerEvents="none"
+      />
+
+      <LinearGradient
+        colors={['rgba(0, 0, 0, 0)', `rgba(0, 0, 0, ${quiet ? 0.05 : 0.1})`]}
+        style={[
+          StyleSheet.absoluteFill,
+          {
+            borderRadius: radiusPx,
+            height: EDGE_BAND,
+            top: undefined,
+            bottom: 0,
+          },
         ]}
         pointerEvents="none"
       />

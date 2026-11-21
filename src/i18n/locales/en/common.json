@@ -116,6 +116,42 @@
     "darkShort": "Dark",
     "systemHint": "System follows your device's appearance setting."
   },
+  "practice": {
+    "done": "Done",
+    "golden": "A golden day — every gauge is full",
+    "summary": "{{done}} of {{target}} gauges complete",
+    "salah": {
+      "title": "Today's prayers",
+      "description": "Hold each of the {{count}} prayers until its bar fills.",
+      "holdHint": "Hold for one second. A filled prayer can be tapped or held again to clear.",
+      "fajr": "Fajr",
+      "dhuhr": "Dhuhr",
+      "asr": "Asr",
+      "maghrib": "Maghrib",
+      "isha": "Isha"
+    },
+    "nafila": {
+      "title": "Night prayer",
+      "description": "One night prayer fills this gauge; record up to {{max}}.",
+      "decrease": "Decrease",
+      "increase": "Increase",
+      "valueLabel": "Nafila count, 0 to {{max}}"
+    },
+    "duaa": {
+      "title": "Today's duaas",
+      "description": "{{done}} of {{target}} duaas.",
+      "more": "{{done}} duaas read.",
+      "hold": "Hold to mark as read",
+      "holdHint": "Keep holding for one second",
+      "phrases": {
+        "mashaallah": "Mashaallah",
+        "alhamdulillah": "Alhamdulillah",
+        "subhanallah": "Subhan Allah"
+      },
+      "finished": "You have recorded {{max}} duaas today",
+      "finishedHint": "The count is capped for today."
+    }
+  },
   "quran": {
     "landing": {
       "hizb": "Today's hizb",
@@ -137,14 +173,11 @@
       "more": "More",
       "met": "Read",
       "missed": "No reading",
-      "summary": "{{read}} of {{total}} days read",
-      "monthly": "3 months",
-      "annual": "Annual"
+      "summary": "{{read}} of {{total}} days read"
     },
     "resume": {
       "at": "{{surah}} · ayah {{ayah}}",
       "page": "Page {{page}} of {{total}}",
-      "sample": "Sample history",
       "time": {
         "today": "Today",
         "yesterday": "Yesterday",
@@ -161,7 +194,8 @@
         "salat": "Salah",
         "duaa": "Duaa",
         "nafila": "Nafila",
-        "progress": "{{label}}: {{read}} of {{target}}"
+        "progress": "{{label}}: {{read}} of {{target}}",
+        "value": "{{label}}: {{read}}"
       }
     },
     "story": {
@@ -335,6 +369,9 @@
     }
   },
   "account": {
+    "notifications": {
+      "hint": "Circle announcements and reminders"
+    },
     "sections": {
       "preferences": "Preferences",
       "settings": "Settings",

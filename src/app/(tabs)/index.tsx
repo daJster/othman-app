@@ -5,50 +5,49 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import { useDirection } from '@/i18n';
 import { isAppHref } from '@/features/navigation/route-registry';
-import { CircleRail } from '@/features/home/circle-rail';
 import {
   formatCount,
   formatWhen,
   pickLocalized,
 } from '@/features/home/circle-format';
-import { DestinationStrip } from '@/features/home/destination-strip';
 import { HeroScroll } from '@/features/home/hero-scroll';
-import { VerseCard } from '@/features/home/verse-card';
 import { useCircle } from '@/features/home/use-circle';
+import { ActivityBand } from '@/features/quran/components/activity-band';
+import { ResumeBand } from '@/features/quran/components/resume-band';
 import { useReaderPage } from '@/features/quran/store/use-reader';
-import { useAuth } from '@/providers/auth-provider';
-import { Button } from '@/ui/button';
 import { Page } from '@/ui/page';
-import { Section } from '@/ui/section';
 
 /**
- * Home: the study circle.
+ * Home: the study circle and the reader's day.
  *
- * The page answers three questions in reading order: where was I, what is the
- * circle doing, where can I go. The hero film and its frosted panel open it and
- * hand over to the verse; the circle rail carries the week's real dates; the
- * destination strip closes it as shortcuts. The pinned pill reports the next
- * timed item, or the page the reader left off on, so the one surface that is
- * always in view is never a repeat of the CTA behind it.
+ * The page opens on the film and its frosted panel, hands over to the verse,
+ * then continues with the two reading sections that moved here from the Quran
+ * tab: the resume card beside today's goal, and the recent-activity board. They
+ * answer "what now", which is this page's question — the Quran tab answers
+ * "where in the mushaf".
  *
- * Everything below the hero is demo content from `services/circle`, flagged as
- * demo by the fixture itself. No photography of people, no testimonials and no
- * live statistics are invented — the film is unattributed atmosphere, not
- * evidence.
+ * The hero film and its frosted panel open it and hand over to the verse. The
+ * pinned pill reports the next timed item, or the page the reader left off on,
+ * so the one surface that is always in view is never a repeat of the CTA behind
+ * it.
+ *
+ * Everything below the hero is demo content from `services/circle` and the
+ * reading log's seed, flagged as demo by the fixtures themselves. No
+ * photography of people, no testimonials and no live statistics are invented —
+ * the film is unattributed atmosphere, not evidence.
  */
 export default function HomeScreen() {
   const { t } = useTranslation();
-  const router = useRouter();
-  const { user } = useAuth();
   const { language } = useDirection();
   const circle = useCircle();
   const page = useReaderPage();
+  const router = useRouter();
 
   const hero = {
-    opening: t('home.hero.opening'),
     title: t('app.name'),
-    tagline: t('app.tagline'),
-    cohort: t('home.halqa.cohort'),
+    verseTitle: t('home.verse.title'),
+    verseText: t('home.verse.text'),
+    verseReference: t('home.verse.reference'),
     ctaLabel: t('home.halqa.continue'),
     ctaHref: '/quran' as const,
   };
@@ -83,6 +82,30 @@ export default function HomeScreen() {
     };
   }, [circle.nextUp, circle.now, language, page, t]);
 
+  /**
+   * Opens the reader at the position a session recorded.
+   *
+   * Owned by the screen, not the band: the band knows what a session is, the
+   * route is the page's business. `surah` without an `ayah` is a surah-start
+   * link, which `resolveQuranLink` would use to override the page, so the pair
+   * travels together or not at all.
+   */
+  const openEntry = (entry: {
+    page: number;
+    surah: number;
+    ayahKey: string | null;
+  }) => {
+    router.push({
+      pathname: '/reader/[page]',
+      params: {
+        page: String(entry.page),
+        ...(entry.ayahKey
+          ? { surah: String(entry.surah), ayah: entry.ayahKey }
+          : {}),
+      },
+    });
+  };
+
   return (
     <HeroScroll hero={hero} pill={pill} scrollLabel={t('home.scroll.region')}>
       <Head>
@@ -90,53 +113,32 @@ export default function HomeScreen() {
       </Head>
 
       {/*
-       * The verse moves up, directly under the hero. It is the page's one
-       * piece of scripture and the calmest thing on it, so it earns the
-       * transition from the film into the week rather than closing a list of
-       * links. Capped to a reading measure; the hairlines stay the band.
+       * The two reading sections moved here from the Quran tab: they answer
+       * "what now", which is Home's question. They share the hero's own column
+       * (`WIDE_CLASS`), and from `lg` stand side by side between hairlines: at
+       * the measured reading width each one is a narrow island with dead space
+       * on both sides, which reads as an unfinished page rather than a calm
+       * one. Stacked, they keep the full measure a phone needs.
        */}
-      <Page width="wide" className="pt-8 md:pt-12">
-        <View className="mx-auto w-full max-w-xl">
-          <VerseCard
-            title={t('home.verse.title')}
-            text={t('home.verse.text')}
-            reference={t('home.verse.reference')}
-          />
-        </View>
-      </Page>
+      <Page width="wide" className="py-section">
+        <View className="border-y border-glass-edge">
+          <View className="flex-col xl:flex-row xl:items-stretch">
+            <View testID="home-section-resume" className="xl:w-1/2 xl:pe-10">
+              <ResumeBand onOpen={openEntry} />
+            </View>
 
-      {/*
-       * The circle: one column, capped so a chevron stays beside its label.
-       * Sign in shares the heading row so it never floats between sections.
-       */}
-      <Page width="wide" className="pb-14 md:pb-20">
-        <View className="mx-auto w-full max-w-xl pt-10 md:pt-12">
-          <View className="flex-row items-end justify-between gap-4">
-            <Section
-              title={t('home.circle.title')}
-              titleVariant="heading"
-              descriptionVariant="caption"
-              level={2}
-              className="flex-1"
-            />
+            {/* A rule between the pair: horizontal when stacked, vertical
+                when side by side. It belongs to the composition, not to
+                either band, so it can never double up with a band's own. */}
+            <View className="h-px w-full bg-glass-edge xl:h-auto xl:w-px xl:self-stretch" />
 
-            {!user ? (
-              <Button
-                variant="link"
-                size="sm"
-                className="shrink-0"
-                label={t('action.signIn')}
-                onPress={() => router.push('/auth/sign-in')}
-                testID="home-sign-in"
-              />
-            ) : null}
+            <View
+              testID="home-section-activity"
+              className="xl:min-w-0 xl:flex-1 xl:ps-10"
+            >
+              <ActivityBand />
+            </View>
           </View>
-
-          <View className="mt-6">
-            <CircleRail />
-          </View>
-
-          <DestinationStrip />
         </View>
       </Page>
     </HeroScroll>

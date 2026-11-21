@@ -1,6 +1,7 @@
 import { accountFunctions } from './accounts.ts';
 import { authFunctions } from './auth.ts';
 import { meetingFunctions } from './meetings.ts';
+import { noticeFunctions } from './notices.ts';
 import { quranFunctions } from './quran.ts';
 import { systemFunctions } from './system.ts';
 import type { FunctionRegistry } from './types.ts';
@@ -21,6 +22,7 @@ export function createFunctionRegistry(): FunctionRegistry {
     ...authFunctions,
     ...accountFunctions,
     ...meetingFunctions,
+    ...noticeFunctions,
     ...quranFunctions,
     ...systemFunctions,
   };

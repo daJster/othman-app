@@ -1,18 +1,17 @@
-import { fireEvent, render, screen } from '@testing-library/react-native';
+import { screen, within } from '@testing-library/react-native';
 import type { ReactNode } from 'react';
 import HomeScreen from '@/app/(tabs)/index';
 import type { CircleItem } from '@/services/circle';
-import { HOME_LINKS } from '@/features/home/feature-links';
+import { render } from '@/test-utils/render';
 
-const mockPush = jest.fn();
 const mockNow = new Date('2026-11-08T09:00:00');
 
 /**
  * `Link` needs a mounted Expo Router container, and `Head` needs a navigation
  * object for `useIsFocused`. Neither is what this test is about: the screen's
- * job is to choose the content and the destinations. The mock turns each link
- * into a testable node keyed by its `href`, which is exactly the contract the
- * screen is responsible for.
+ * job is to choose the content. The mock turns each link into a testable node
+ * keyed by its `href`, which is exactly the contract the screen is responsible
+ * for.
  */
 jest.mock('expo-router', () => {
   const React = require('react');
@@ -21,11 +20,53 @@ jest.mock('expo-router', () => {
   return {
     Link: ({ href, children }: { href: string; children: ReactNode }) =>
       React.createElement(View, { testID: `link:${href}` }, children),
-    useRouter: () => ({ push: mockPush }),
+    useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
   };
 });
 
 jest.mock('expo-router/head', () => () => null);
+
+jest.mock('react-native-safe-area-context', () => ({
+  useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
+}));
+
+/**
+ * The bell asks for page one of the inbox so its dot is honest; the screen test
+ * has no query client, so it gets an empty first page — the screen's own
+ * composition is what this file is about.
+ */
+jest.mock('@/api', () => {
+  const emptyHistory: unknown[] = [];
+  const emptyResponse = {
+    notices: [],
+    page: 1,
+    hasMore: false,
+    total: 0,
+    day: '2026-11-20',
+    salah: 0,
+    duaa: 0,
+    nafila: 0,
+    pages: 0,
+  };
+
+  return {
+    api: {
+      notices: { page: { key: () => ['othman', 'notices', 'page', 1] } },
+      practice: {
+        byDay: { key: () => ['othman', 'practice', 'day'] },
+        history: { key: () => ['othman', 'practice', 'history'] },
+      },
+    },
+    useApiQuery: (endpoint: { key: () => readonly unknown[] }) => ({
+      // Keep query data referentially stable: NoticesPanel accumulates pages
+      // when a response changes, just as TanStack Query does in the app.
+      data: endpoint.key().includes('history') ? emptyHistory : emptyResponse,
+      isPending: false,
+      isFetching: false,
+    }),
+    useApiMutation: () => ({ mutate: jest.fn(), isPending: false }),
+  };
+});
 
 jest.mock('@/providers/auth-provider', () => ({
   useAuth: () => ({ user: null }),
@@ -104,26 +145,22 @@ const ITEMS: readonly CircleItem[] = [
   },
 ];
 
-const mockRetry = jest.fn();
-let mockCircleMode: 'ready' | 'pending' | 'error' = 'ready';
-
+/**
+ * A fixed week, injected rather than queried: the point of the screen test is
+ * the composition, and the projection rules have their own pure tests. `now`
+ * is pinned so "Today" and "In 5 days" are deterministic in every timezone.
+ *
+ * Only the ready shape is needed now — the rail's pending and error states left
+ * Home with the circle section.
+ */
 jest.mock('@/features/home/use-circle', () => ({
   useCircle: () => ({
-    state:
-      mockCircleMode === 'pending'
-        ? { status: 'pending' as const }
-        : mockCircleMode === 'error'
-          ? {
-              status: 'error' as const,
-              error: new Error('offline'),
-              retry: mockRetry,
-            }
-          : { status: 'ready' as const, data: ITEMS },
-    items: mockCircleMode === 'ready' ? ITEMS : [],
-    nextUp: mockCircleMode === 'ready' ? ITEMS[0] : null,
-    nextHalqa: mockCircleMode === 'ready' ? ITEMS[0] : null,
-    nextExam: mockCircleMode === 'ready' ? ITEMS[1] : null,
-    newestNotice: mockCircleMode === 'ready' ? ITEMS[2] : null,
+    state: { status: 'ready' as const, data: ITEMS },
+    items: ITEMS,
+    nextUp: ITEMS[0],
+    nextHalqa: ITEMS[0],
+    nextExam: ITEMS[1],
+    newestNotice: ITEMS[2],
     now: mockNow,
   }),
 }));
@@ -136,24 +173,16 @@ describe('HomeScreen', () => {
   it('opens with the app identity', async () => {
     await render(<HomeScreen />);
 
+    // The h1 is the app name; the card itself is the day's verse, so the
+    // old tagline no longer appears anywhere on the page.
     expect(screen.getByText('Othman')).toBeTruthy();
-    expect(screen.getByText('Contemplate the Book of Allah')).toBeTruthy();
+    expect(screen.queryByText('Contemplate the Book of Allah')).toBeNull();
   });
 
-  it('opens the sign-in page from Home while signed out', async () => {
+  it('keeps the continue control in the hero card', async () => {
     await render(<HomeScreen />);
 
-    await fireEvent.press(screen.getByTestId('home-sign-in'));
-
-    expect(mockPush).toHaveBeenCalledWith('/auth/sign-in');
-  });
-
-  it('shows the basmalah in the hero', async () => {
-    await render(<HomeScreen />);
-
-    expect(
-      screen.getByText('بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ'),
-    ).toBeTruthy();
+    expect(screen.getByText('Continue reading')).toBeTruthy();
   });
 
   it('shows the featured verse with its reference', async () => {
@@ -168,84 +197,43 @@ describe('HomeScreen', () => {
     expect(screen.getByText('Al-Isra 9')).toBeTruthy();
   });
 
-  it('carries the circle week: session, exam and news', async () => {
+  it('offers the inbox from a sticky control on a phone, not the hero card', async () => {
     await render(<HomeScreen />);
 
-    expect(screen.getByText('Next session')).toBeTruthy();
-    expect(screen.getByText('Juz 3 session')).toBeTruthy();
-
-    expect(screen.getByText('Next exam')).toBeTruthy();
-    expect(screen.getByText('Juz 3 exam')).toBeTruthy();
-    expect(screen.getByText(/In 5 days/)).toBeTruthy();
-
-    expect(screen.getByText('Shaykh')).toBeTruthy();
-    // The rail carries the newest notice and the inbox repeats it, so the copy
-    // appears twice by design.
+    // Phones have no bar: the bell is pinned over the film instead.
+    expect(screen.getByTestId('home-notices-sticky')).toBeTruthy();
     expect(
-      screen.getAllByText('Session time changed').length,
-    ).toBeGreaterThanOrEqual(1);
+      within(screen.getByTestId('hero-card')).queryByTestId(
+        'notices-bell-panel',
+      ),
+    ).toBeNull();
   });
 
-  it('expands the exam in place instead of leaving Home', async () => {
+  it('carries the reading sections that left the Quran tab', async () => {
     await render(<HomeScreen />);
 
-    expect(screen.queryByText('All of Juz 3')).toBeNull();
-
-    await fireEvent.press(screen.getByLabelText('Next exam: Juz 3 exam'));
-
-    expect(screen.getByText('All of Juz 3')).toBeTruthy();
+    // Resume reading and recent activity live here now; the Quran tab keeps
+    // only the book's own surfaces.
+    expect(screen.getByTestId('home-section-resume')).toBeTruthy();
+    expect(screen.getByTestId('home-section-activity')).toBeTruthy();
+    expect(screen.getByTestId('quran-resume-band')).toBeTruthy();
+    expect(screen.getByTestId('quran-activity-band')).toBeTruthy();
   });
 
-  it('links to every destination in the registry list', async () => {
+  /**
+   * The circle section and the destination strip were removed on request: for
+   * now the page is the hero and the verse. This test is the guard against
+   * either drifting back in without a decision.
+   */
+  it('carries only the hero and the verse below the fold', async () => {
     await render(<HomeScreen />);
 
-    // Four strip destinations, the hero CTA, and the rail's next-session row.
-    expect(screen.getAllByTestId(/^link:/)).toHaveLength(HOME_LINKS.length + 2);
-
-    for (const route of HOME_LINKS) {
-      expect(
-        screen.getAllByTestId(`link:${route.href}`).length,
-      ).toBeGreaterThan(0);
-    }
-  });
-
-  it('labels each destination with the same name as its tab', async () => {
-    await render(<HomeScreen />);
-
-    // The descriptions moved off Home with the old list; the strip carries the
-    // name only, and the tab it points at carries the rest.
-    expect(screen.queryByText('Read the mushaf page by page')).toBeNull();
-    expect(screen.getByText('Quran')).toBeTruthy();
-    expect(screen.getByText('Meetings')).toBeTruthy();
-    expect(screen.getByText('Account')).toBeTruthy();
-    expect(screen.getByText('About')).toBeTruthy();
-  });
-
-  it('offers the inbox from the hero panel', async () => {
-    await render(<HomeScreen />);
-
-    expect(screen.getByTestId('notices-bell-panel')).toBeTruthy();
-  });
-
-  it('holds the rail open while its first answer is pending', async () => {
-    mockCircleMode = 'pending';
-    await render(<HomeScreen />);
-
-    expect(screen.getByLabelText('Loading your circle…')).toBeTruthy();
-    expect(screen.queryByText('Juz 3 session')).toBeNull();
-
-    mockCircleMode = 'ready';
-  });
-
-  it('offers a retry when the circle read fails', async () => {
-    mockCircleMode = 'error';
-    await render(<HomeScreen />);
-
-    expect(screen.getByText("Couldn't load your circle.")).toBeTruthy();
-    await fireEvent.press(screen.getByText('Try again'));
-
-    expect(mockRetry).toHaveBeenCalled();
-    mockCircleMode = 'ready';
+    expect(screen.queryByTestId('home-sign-in')).toBeNull();
+    expect(screen.queryByTestId('home-link-quran')).toBeNull();
+    expect(screen.queryByText('Your circle')).toBeNull();
+    expect(
+      screen.queryByText('Match with your shaykh and classmates'),
+    ).toBeNull();
   });
 
   it('no longer opens on the halqa ring', async () => {

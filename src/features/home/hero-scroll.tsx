@@ -12,15 +12,25 @@ import {
   useWindowDimensions,
   type ScrollViewProps,
 } from 'react-native';
+import { BlurTargetView } from 'expo-blur';
 import Animated, {
+  Extrapolation,
+  interpolate,
+  runOnJS,
   useAnimatedScrollHandler,
+  useAnimatedStyle,
   useSharedValue,
 } from 'react-native-reanimated';
 import type { AppHref } from '@/features/navigation/route-registry';
+import { NAV_INSET } from '@/ui/ratio';
+import { GlassFill } from '@/ui/glass';
+import { setPageScrolled } from '@/ui/scroll-state';
 import { Hero } from './hero';
+import { NoticesBell } from './notices-bell';
 import type { HeroCardCopy } from './hero-card';
 import {
   HeroMorphCard,
+  PIN_GAP,
   PILL_GUTTER,
   PILL_MAX_WIDTH,
   type HeroMorphRect,
@@ -63,12 +73,17 @@ export function HeroScroll({
   children,
 }: HeroScrollProps) {
   const scrollY = useSharedValue(0);
+  /** Mirrors the card's own spring so the floating bell fades on its clock. */
+  const pillMorph = useSharedValue(0);
   const frameRef = useRef<ComponentRef<typeof View>>(null);
+  const blurTargetRef = useRef<ComponentRef<typeof View>>(null);
   const frameOrigin = useRef<{ x: number; y: number } | null>(null);
   const cardWindow = useRef<WindowRect | null>(null);
   const [rect, setRect] = useState<HeroMorphRect | null>(null);
   const [ghostHidden, setGhostHidden] = useState(false);
   const [frameWidth, setFrameWidth] = useState(0);
+  /** The pinned pill owns the inbox control once the card has morphed. */
+  const [pillCompact, setPillCompact] = useState(false);
   const window = useWindowDimensions();
 
   /**
@@ -115,15 +130,53 @@ export function HeroScroll({
     measureFrame();
   }, [measureFrame, window.width, window.height]);
 
+  useEffect(() => {
+    setPageScrolled(false);
+  }, []);
+
+  const pageAwayFromTop = useSharedValue(false);
   const onScroll = useAnimatedScrollHandler((event) => {
     // Shared values are mutable by design; the React Compiler's immutability
     // rule cannot see into a Reanimated worklet.
     // eslint-disable-next-line react-hooks/immutability
     scrollY.value = event.contentOffset.y;
+
+    const next = event.contentOffset.y > 8;
+    if (next !== pageAwayFromTop.value) {
+      pageAwayFromTop.value = next;
+      runOnJS(setPageScrolled)(next);
+    }
   });
 
   const available = (frameWidth || window.width) - PILL_GUTTER * 2;
   const pillWidth = Math.min(PILL_MAX_WIDTH, Math.max(0, available));
+  const pinTop = Platform.OS === 'web' ? NAV_INSET : PIN_GAP;
+
+  const stickyBellStyle = useAnimatedStyle(() => {
+    if (!rect) {
+      return { opacity: 1, transform: [{ scale: 1 }] };
+    }
+
+    /*
+     * Leave before the card starts morphing: the last 80 px of approach clear
+     * the floating bell. The reverse is tied to the card's spring again, so it
+     * returns only as the card expands back into place.
+     */
+    const start = rect.top - pinTop;
+    const approached = interpolate(
+      scrollY.value,
+      [start - 96, start - 16],
+      [0, 1],
+      Extrapolation.CLAMP,
+    );
+    const handoff = Math.max(approached, pillMorph.value);
+    const t = 1 - handoff;
+
+    return {
+      opacity: t,
+      transform: [{ scale: 0.86 + 0.14 * t }],
+    };
+  });
 
   /**
    * Keyboard scrolling on web.
@@ -143,7 +196,15 @@ export function HeroScroll({
       : {};
 
   return (
-    <View className="flex-1 bg-background pt-safe">
+    <View
+      className="flex-1 bg-background pt-safe"
+      /*
+       * Home opts out of the bar's inset: the slot reserves the chrome row for
+       * every other screen, and this pulls the film back up so it runs behind
+       * the glass. Web only — on a phone the tabs are at the bottom.
+       */
+      style={Platform.OS === 'web' ? { marginTop: -NAV_INSET } : undefined}
+    >
       <View ref={frameRef} className="flex-1" onLayout={measureFrame}>
         {/*
          * The overlay is rendered *before* the scroll view on purpose: the
@@ -159,12 +220,50 @@ export function HeroScroll({
             scrollY={scrollY}
             frameWidth={frameWidth || window.width}
             pillWidth={pillWidth}
+            blurTarget={blurTargetRef}
+            onCompactChange={setPillCompact}
+            morphProgress={pillMorph}
+            /*
+             * The web bar floats above this frame at `z-20`. Parking the pill
+             * at the optical gap put it directly behind the glass, where it
+             * vanished; the pin line is the bar's own inset, so the collapsed
+             * card holds just below it.
+             */
+            pinTop={pinTop}
           />
+        ) : null}
+
+        {/*
+         * Phones have no top bar, so the inbox needs a control of its own. It
+         * sits outside the scroller: pinned to the film at the top-left, it
+         * stays reachable as the page moves. Once the hero card becomes the
+         * pinned pill, the bell moves inside that card instead. Web already has
+         * the bar bell, so this never renders there.
+         */}
+        {Platform.OS !== 'web' ? (
+          <Animated.View
+            testID="home-notices-sticky"
+            pointerEvents={pillCompact ? 'none' : 'box-none'}
+            aria-hidden={pillCompact}
+            style={[
+              { position: 'absolute', top: 12, left: 16, zIndex: 25 },
+              stickyBellStyle,
+            ]}
+          >
+            <View className="relative h-11 w-11 overflow-hidden rounded-full">
+              <GlassFill
+                weight="chip"
+                radius="chip"
+                blurTarget={blurTargetRef}
+              />
+              <NoticesBell variant="panel" />
+            </View>
+          </Animated.View>
         ) : null}
 
         <Animated.ScrollView
           testID="home-scroll"
-          className="flex-1"
+          className="scrollbar-stable flex-1 overscroll-contain"
           contentContainerClassName="grow"
           contentInsetAdjustmentBehavior="automatic"
           keyboardShouldPersistTaps="handled"
@@ -172,12 +271,14 @@ export function HeroScroll({
           scrollEventThrottle={16}
           {...regionProps}
         >
-          <Hero
-            {...hero}
-            ghostHidden={ghostHidden}
-            onCardRect={handleCardRect}
-          />
-          {children}
+          <BlurTargetView ref={blurTargetRef} style={{ flexGrow: 1 }}>
+            <Hero
+              {...hero}
+              ghostHidden={ghostHidden}
+              onCardRect={handleCardRect}
+            />
+            {children}
+          </BlurTargetView>
         </Animated.ScrollView>
       </View>
     </View>

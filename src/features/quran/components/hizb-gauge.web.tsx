@@ -25,9 +25,9 @@ import { useReducedMotion } from '@/ui/motion';
  * Every later value change reuses the same transition. Under reduced motion
  * the value is read directly and the transition is switched off, which snaps.
  *
- * The centre is silent until the goal is complete, then shows the same check
- * as the native port. The fraction beside the gauge is the metric; the ring is
- * hidden from assistive technology so progress is not announced twice.
+ * The centre always shows the count the ring is drawing; the arc colour, not a
+ * check, carries completion. That keeps a night-prayer count visible after the
+ * gauge is full.
  */
 export type HizbGaugeProps = {
   /** Pages read today, in the same unit as `max`. */
@@ -38,13 +38,17 @@ export type HizbGaugeProps = {
   size?: number;
   /** Arc thickness in points. */
   strokeWidth?: number;
-  /** Centered primary readout while the goal is incomplete. */
+  /**
+   * Arc colour. `brass` is the resting gold; `success` marks this gauge's own
+   * target as met; `gold` is the day-wide state, when every gauge is full.
+   */
+  tone?: 'brass' | 'success' | 'gold' | 'white';
+  /** Centered readout: the count the ring is drawing. */
   centerLabel?: string;
   /** Accessible name for the gauge, announced as a meter. */
   accessibilityLabel?: string;
 };
 
-const CHECK_PATH = 'M20 6 9 17l-5-5';
 const DEFAULT_SIZE = 136;
 const DEFAULT_STROKE_WIDTH = 10;
 const ARC_DURATION = 600;
@@ -60,6 +64,7 @@ export function HizbGauge({
   max,
   size = DEFAULT_SIZE,
   strokeWidth = DEFAULT_STROKE_WIDTH,
+  tone = 'brass',
   centerLabel,
   accessibilityLabel,
 }: HizbGaugeProps) {
@@ -68,7 +73,6 @@ export function HizbGauge({
   const target = Number.isFinite(value)
     ? Math.min(safeMax, Math.max(0, value))
     : 0;
-  const complete = target >= safeMax;
 
   // Empty on the first paint, filled one frame later, so the CSS transition
   // has a painted starting value to move from.
@@ -103,7 +107,13 @@ export function HizbGauge({
       <GaugeIndicator>
         <GaugeTrack className="text-border" />
         <GaugeRange
-          className="text-brass"
+          className={
+            tone === 'success'
+              ? 'text-success'
+              : tone === 'white'
+                ? 'text-foreground'
+                : 'text-brass'
+          }
           style={{
             transition: reducedMotion
               ? 'none'
@@ -112,24 +122,7 @@ export function HizbGauge({
         />
       </GaugeIndicator>
 
-      {complete ? (
-        <GaugeValueText>
-          <svg
-            aria-hidden="true"
-            className="text-success"
-            fill="none"
-            height={size * 0.3}
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2.5}
-            viewBox="0 0 24 24"
-            width={size * 0.3}
-          >
-            <path d={CHECK_PATH} />
-          </svg>
-        </GaugeValueText>
-      ) : centerLabel !== undefined ? (
+      {centerLabel !== undefined ? (
         <GaugeValueText className="text-lg font-semibold text-foreground tabular-nums">
           {centerLabel}
         </GaugeValueText>

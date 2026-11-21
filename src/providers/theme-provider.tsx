@@ -4,10 +4,11 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
-import { useColorScheme } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 import { Uniwind } from 'uniwind';
 import { STORAGE_KEYS, storageService } from '@/platform/storage';
 
@@ -33,6 +34,15 @@ const THEME_MODES = ['light', 'dark', 'system'] as const;
  * unknown system value falls back to it rather than to a white flash. */
 const DEFAULT_MODE: ThemeMode = 'system';
 
+/**
+ * How long the web crossfades a theme change.
+ *
+ * Slightly longer than the interface's 100 ms hover, because this repaints the
+ * whole page: at 100 the eye reads a cut, at 400 it reads as a slow fade. The
+ * value lives here and in `global.css` (`.theme-transition`); they must match.
+ */
+const THEME_TRANSITION_MS = 240;
+
 export function isThemeMode(value: unknown): value is ThemeMode {
   return (
     typeof value === 'string' &&
@@ -56,6 +66,25 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>(DEFAULT_MODE);
   const [hydrated, setHydrated] = useState(false);
   const systemScheme = useColorScheme();
+  /**
+   * The class is added for one switch and removed a frame or two after it
+   * finishes. On `<body>`, not `<html>`: Uniwind rewrites the root's theme class
+   * and would take ours with it.
+   */
+  const transitionTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (transitionTimer.current !== null) {
+        clearTimeout(transitionTimer.current);
+      }
+
+      if (Platform.OS === 'web' && typeof document !== 'undefined') {
+        document.body.classList.remove('theme-transition');
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -82,6 +111,30 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setMode = useCallback((next: ThemeMode) => {
+    /*
+     * A theme change repaints every surface at once. Without a transition the
+     * switch reads as a flash cut; with one on every element the page crosses
+     * over as a single material. Only the user-initiated switch asks for it —
+     * hydration applies the stored theme while the splash still covers the
+     * app, where animating would be wasted and could flash.
+     */
+    if (Platform.OS === 'web' && typeof document !== 'undefined') {
+      document.body.classList.add('theme-transition');
+
+      if (transitionTimer.current !== null) {
+        clearTimeout(transitionTimer.current);
+      }
+
+      /*
+       * Removed a beat after the fade, not on it: the class has to outlive the
+       * longest transition it starts, or the last frames snap when it goes.
+       */
+      transitionTimer.current = setTimeout(() => {
+        document.body.classList.remove('theme-transition');
+        transitionTimer.current = null;
+      }, THEME_TRANSITION_MS + 80);
+    }
+
     // The switch is synchronous and local: the UI must not wait for storage.
     Uniwind.setTheme(next);
     setModeState(next);

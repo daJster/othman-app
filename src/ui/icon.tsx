@@ -29,6 +29,7 @@ import Layers from 'lucide-react-native/icons/layers';
 import LogOut from 'lucide-react-native/icons/log-out';
 import MapPin from 'lucide-react-native/icons/map-pin';
 import Menu from 'lucide-react-native/icons/menu';
+import Minus from 'lucide-react-native/icons/minus';
 import Monitor from 'lucide-react-native/icons/monitor';
 import Moon from 'lucide-react-native/icons/moon';
 import Palette from 'lucide-react-native/icons/palette';
@@ -107,6 +108,7 @@ const ICON_COMPONENTS = {
   sun: Sun,
   target: Target,
   plus: Plus,
+  minus: Minus,
   trash: Trash,
   bookmark: Bookmark,
   menu: Menu,
@@ -127,6 +129,8 @@ const TONE_CLASS = {
   muted: 'text-muted-foreground',
   primary: 'text-primary',
   'primary-foreground': 'text-primary-foreground',
+  brass: 'text-brass',
+  success: 'text-success',
   destructive: 'text-destructive',
   parchment: 'text-parchment',
 } as const;

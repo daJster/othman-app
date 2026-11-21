@@ -3,6 +3,12 @@ import { NativeOnlyAnimatedView } from '@/components/ui/native-only-animated-vie
 import { TextClassContext } from '@/components/ui/text';
 import { cn } from '@/lib/utils';
 import { GlassFill } from '@/ui/glass';
+import {
+  usePageStaysClickable,
+  usePopperBackdropBlur,
+  withOverlayAnimation,
+  type OverlayAnimation,
+} from '@/ui/overlay-motion';
 import * as DropdownMenuPrimitive from '@rn-primitives/dropdown-menu';
 import Check from 'lucide-react-native/icons/check';
 import ChevronDown from 'lucide-react-native/icons/chevron-down';
@@ -55,12 +61,12 @@ function DropdownMenuSubTrigger({
     >
       <DropdownMenuPrimitive.SubTrigger
         className={cn(
-          'group flex flex-row items-center justify-between rounded-sm px-2 py-2 active:bg-accent sm:py-1.5',
+          'group flex flex-row items-center justify-between rounded-sm px-2 py-2 active:bg-foreground/10 sm:py-1.5',
           Platform.select({
-            web: 'cursor-default outline-none focus:bg-accent focus:text-accent-foreground [&_svg]:pointer-events-none',
+            web: 'cursor-default outline-none focus:bg-foreground/10 [&_svg]:pointer-events-none',
           }),
           className,
-          open && 'bg-accent',
+          open && 'bg-foreground/10',
           inset && 'pl-8',
         )}
         {...props}
@@ -83,9 +89,10 @@ function DropdownMenuSubContent({
     <NativeOnlyAnimatedView entering={FadeIn.reduceMotion(ReduceMotion.System)}>
       <DropdownMenuPrimitive.SubContent
         className={cn(
-          'relative min-w-32 overflow-hidden rounded-panel border border-glass-edge bg-glass-strong p-1 shadow-xl shadow-black/10',
+          'relative min-w-32 overflow-hidden rounded-panel border border-glass-edge p-1 shadow-xl shadow-black/10',
+          withOverlayAnimation('pop'),
           Platform.select({
-            web: 'animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 fade-in-0 data-[state=closed]:zoom-out-95 zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 origin-(--radix-context-menu-content-transform-origin)',
+            web: 'z-50 origin-(--radix-context-menu-content-transform-origin)',
           }),
           className,
         )}
@@ -112,13 +119,23 @@ function DropdownMenuContent({
   overlayClassName,
   overlayStyle,
   portalHost,
+  animation = 'pop',
   children,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Content> & {
   overlayStyle?: StyleProp<ViewStyle>;
   overlayClassName?: string;
   portalHost?: string;
+  /**
+   * How the surface arrives. `pop` is the menu default; `fade` for surfaces
+   * that do not originate from a control; `none` when the content is already
+   * where the eye is and any travel would be noise.
+   */
+  animation?: OverlayAnimation;
 }) {
+  usePageStaysClickable();
+  const backdropRef = usePopperBackdropBlur(24);
+
   return (
     <DropdownMenuPrimitive.Portal hostName={portalHost}>
       <FullWindowOverlay>
@@ -132,30 +149,54 @@ function DropdownMenuContent({
                 ])
               : StyleSheet.absoluteFill,
           })}
-          className={overlayClassName}
+          /*
+           * The overlay exists to give native taps something to land on. On
+           * the web it only steals them: it covers the whole viewport, so the
+           * first click on a *different* trigger dismissed the open menu and
+           * was consumed — switching menus took two clicks. Radix's own
+           * `DismissableLayer` listens on the document for the outside
+           * pointerdown, so the overlay can stay transparent to the pointer
+           * here and a single click both closes this menu and opens the next.
+           */
+          className={cn(
+            Platform.OS === 'web' && 'pointer-events-none',
+            overlayClassName,
+          )}
           asChild={Platform.OS !== 'web'}
         >
           <NativeOnlyAnimatedView
-            entering={FadeIn.reduceMotion(ReduceMotion.System)}
+            entering={
+              animation === 'none'
+                ? undefined
+                : FadeIn.reduceMotion(ReduceMotion.System)
+            }
             as="Pressable"
           >
             <TextClassContext.Provider value="text-popover-foreground">
               <DropdownMenuPrimitive.Content
                 className={cn(
-                  'relative min-w-32 overflow-hidden rounded-panel border border-glass-edge bg-glass-strong p-1 shadow-xl shadow-black/10',
+                  'relative min-w-32 overflow-hidden rounded-panel border border-glass-edge p-1 shadow-xl shadow-black/10',
+                  withOverlayAnimation(animation),
                   Platform.select({
-                    web: cn(
-                      'animate-in fade-in-0 zoom-in-95 z-50 max-h-(--radix-context-menu-content-available-height) origin-(--radix-context-menu-content-transform-origin) cursor-default',
-                      props.side === 'bottom' && 'slide-in-from-top-2',
-                      props.side === 'top' && 'slide-in-from-bottom-2',
-                    ),
+                    web: 'z-50 max-h-(--radix-context-menu-content-available-height) origin-(--radix-context-menu-content-transform-origin) cursor-default',
                   }),
                   className,
                 )}
+                /* Inherited `pointer-events: none` would make every item
+                 * unclickable; the sheet has no `pointer-events-auto` utility,
+                 * so the opt-in is an inner view. */
                 {...props}
               >
                 <GlassFill weight="overlay" radius="panel" />
-                {children as React.ReactNode}
+                {/* Probe: walks up to the popper wrapper and blurs it. */}
+                <View ref={backdropRef} style={{ width: 0, height: 0 }} />
+                {Platform.OS === 'web' ? (
+                  <View style={{ pointerEvents: 'auto' }}>
+                    {children as React.ReactNode}
+                  </View>
+                ) : (
+                  (children as React.ReactNode)
+                )}
               </DropdownMenuPrimitive.Content>
             </TextClassContext.Provider>
           </NativeOnlyAnimatedView>
@@ -185,10 +226,10 @@ function DropdownMenuItem({
     >
       <DropdownMenuPrimitive.Item
         className={cn(
-          'group relative flex flex-row items-center gap-2 rounded-sm px-2 py-2 active:bg-accent sm:py-1.5',
+          'group relative flex flex-row items-center gap-2 rounded-sm px-2 py-2 active:bg-foreground/10 sm:py-1.5',
           Platform.select({
             web: cn(
-              'cursor-default outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none',
+              'cursor-default outline-none focus:bg-foreground/10 data-[disabled]:pointer-events-none',
               variant === 'destructive' &&
                 'focus:bg-destructive/10 dark:focus:bg-destructive/20',
             ),
@@ -216,9 +257,9 @@ function DropdownMenuCheckboxItem({
     <TextClassContext.Provider value="text-sm text-popover-foreground select-none group-active:text-accent-foreground">
       <DropdownMenuPrimitive.CheckboxItem
         className={cn(
-          'group relative flex flex-row items-center gap-2 rounded-sm py-2 pr-2 pl-8 active:bg-accent sm:py-1.5',
+          'group relative flex flex-row items-center gap-2 rounded-sm py-2 pr-2 pl-8 active:bg-foreground/10 sm:py-1.5',
           Platform.select({
-            web: 'cursor-default outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none',
+            web: 'cursor-default outline-none focus:bg-foreground/10 data-[disabled]:pointer-events-none',
           }),
           props.disabled && 'opacity-50',
           className,
@@ -253,9 +294,9 @@ function DropdownMenuRadioItem({
     <TextClassContext.Provider value="text-sm text-popover-foreground select-none group-active:text-accent-foreground">
       <DropdownMenuPrimitive.RadioItem
         className={cn(
-          'group relative flex flex-row items-center gap-2 rounded-sm py-2 pr-2 pl-8 active:bg-accent sm:py-1.5',
+          'group relative flex flex-row items-center gap-2 rounded-sm py-2 pr-2 pl-8 active:bg-foreground/10 sm:py-1.5',
           Platform.select({
-            web: 'cursor-default outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none',
+            web: 'cursor-default outline-none focus:bg-foreground/10 data-[disabled]:pointer-events-none',
           }),
           props.disabled && 'opacity-50',
           className,

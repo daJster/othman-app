@@ -46,6 +46,8 @@ export const ROUTES: readonly Route[] = [
   { method: 'DELETE', path: '/v1/accounts/:uid', name: 'accounts.remove' },
 
   { method: 'GET', path: '/v1/meetings', name: 'meetings.list' },
+  // The inbox. Answers slowly on purpose — the waiting state is the point.
+  { method: 'GET', path: '/v1/notices', name: 'notices.list' },
   { method: 'POST', path: '/v1/meetings', name: 'meetings.create' },
   { method: 'GET', path: '/v1/meetings/:id', name: 'meetings.get' },
   { method: 'PATCH', path: '/v1/meetings/:id', name: 'meetings.update' },

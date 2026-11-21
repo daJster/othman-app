@@ -1,5 +1,6 @@
 import type { AccountProfile } from '@/core/domain/account/merge-profile';
 import type { QuranNote } from '@/core/domain/notes/notes';
+import type { PracticeEntry } from '@/core/domain/practice/practice';
 import type { SurahProgress } from '@/core/domain/progress/surah-progress';
 import type {
   AccountData,
@@ -36,7 +37,13 @@ import type {
 } from '@/platform/backend';
 import { circleService, type CircleItem } from '@/services/circle';
 import { meetingsService } from '@/services/meetings';
+import {
+  noticesService,
+  type Notice,
+  type NoticesPage,
+} from '@/services/notices/notices.service';
 import { notesService } from '@/services/notes';
+import { practiceService } from '@/services/practice';
 import { profileService } from '@/services/profile';
 import { progressService } from '@/services/progress';
 import { queryKeys } from '@/services/query';
@@ -172,7 +179,57 @@ export const api = {
     }),
   },
 
+  notices: {
+    list: query<NoParams, Notice[]>({
+      id: 'notices.list',
+      policy: 'live',
+      key: () => queryKeys.notices.list,
+      run: () => noticesService.list().then((page) => page.notices),
+    }),
+    /** One page. The panel asks for the next one as the list reaches its end. */
+    page: query<
+      { page: number; extended?: boolean; limit?: number },
+      NoticesPage
+    >({
+      id: 'notices.page',
+      policy: 'live',
+      key: ({ page, extended, limit }) =>
+        queryKeys.notices.page(page, extended === true, limit),
+      run: ({ page, extended, limit }) =>
+        noticesService.list(page, extended === true, limit),
+    }),
+  },
+
   /* ── progress ──────────────────────────────────────────────────────── */
+
+  practice: {
+    byDay: query<{ day: string }, PracticeEntry>({
+      id: 'practice.byDay',
+      policy: 'session',
+      key: ({ day }) => queryKeys.practice.day(day),
+      run: ({ day }) => practiceService.get(day),
+    }),
+
+    /** Every stored day, for the calendar's golden overlay. */
+    history: query<NoParams, PracticeEntry[]>({
+      id: 'practice.history',
+      policy: 'session',
+      key: () => queryKeys.practice.history,
+      run: () => practiceService.list(),
+    }),
+
+    save: mutation<
+      { day: string; patch: Partial<Omit<PracticeEntry, 'day'>> },
+      PracticeEntry
+    >({
+      id: 'practice.save',
+      run: ({ day, patch }) => practiceService.save(day, patch),
+      invalidates: ({ day }) => [
+        queryKeys.practice.day(day),
+        queryKeys.practice.history,
+      ],
+    }),
+  },
 
   progress: {
     surah: query<NoParams, SurahProgress[]>({
