@@ -61,7 +61,14 @@ export type HeroCardCopy = {
 export function GlassSurface({
   blurTarget,
 }: Pick<GlassFillProps, 'blurTarget'> = {}) {
-  return <GlassFill weight="panel" radius="card" blurTarget={blurTarget} />;
+  return (
+    <GlassFill
+      weight="panel"
+      radius="card"
+      translucent
+      blurTarget={blurTarget}
+    />
+  );
 }
 
 export function HeroCta({

@@ -8,7 +8,7 @@ import { cn } from './cn';
 import { useTextDirectionStyle } from './text';
 
 /**
- * Colour intent for the three meeting statuses.
+ * Colour intent for status-like surfaces.
  *
  * Each tone is a semantic triple: a text-safe label colour, a soft surface and
  * a line. The values come from `global.css`; no raw Tailwind palette name is

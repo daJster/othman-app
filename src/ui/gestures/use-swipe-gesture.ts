@@ -1,4 +1,5 @@
 import { Gesture } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 import {
   resolveSwipe,
   SWIPE_DISTANCE,
@@ -50,9 +51,7 @@ export function useSwipeGesture({
   // the attached handler, so a fresh closure updates behaviour without a
   // reattach. Memoising would also hide the current `enabled` value from the
   // gesture after a boundary change.
-  // Gesture-handler owns touch bookkeeping; the callback itself is deliberately
-  // JS-side, because the consumers update React state and page models.
-  const pan = Gesture.Pan().enabled(enabled).runOnJS(true);
+  const pan = Gesture.Pan().enabled(enabled);
 
   if (axis === 'horizontal') {
     pan
@@ -69,6 +68,8 @@ export function useSwipeGesture({
   }
 
   return pan.onEnd((event) => {
+    'worklet';
+
     const direction = resolveSwipe(
       event.translationX,
       event.translationY,
@@ -80,7 +81,7 @@ export function useSwipeGesture({
     );
 
     if (direction) {
-      onSwipe(direction);
+      runOnJS(onSwipe)(direction);
     }
   });
 }

@@ -1,6 +1,6 @@
 import type { TFunction } from 'i18next';
 import { parseDateKey } from '@/core/domain/meetings/date-key';
-import type { Language } from '@/i18n';
+import { numberLocale, type Language } from '@/i18n';
 import type { CircleItem, Localized, NoticeTopic } from '@/services/circle';
 import { daysAway } from './circle-projection';
 
@@ -25,7 +25,7 @@ export function pickLocalized(
 }
 
 export function formatCount(value: number, language: Language): string {
-  return new Intl.NumberFormat(language).format(value);
+  return new Intl.NumberFormat(numberLocale(language)).format(value);
 }
 
 /** `18:00` → the language's clock reading. */
@@ -41,7 +41,7 @@ export function formatTime(
 
   const anchor = new Date(2000, 0, 1, hours, minutes);
 
-  return new Intl.DateTimeFormat(language, {
+  return new Intl.DateTimeFormat(numberLocale(language), {
     hour: 'numeric',
     minute: '2-digit',
   }).format(anchor);
@@ -61,9 +61,9 @@ export function formatDay(
   if (away === 1) return t('home.rail.tomorrow');
 
   if (item.date) {
-    return new Intl.DateTimeFormat(language, { weekday: 'long' }).format(
-      parseDateKey(item.date),
-    );
+    return new Intl.DateTimeFormat(numberLocale(language), {
+      weekday: 'long',
+    }).format(parseDateKey(item.date));
   }
 
   return '';

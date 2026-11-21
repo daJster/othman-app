@@ -90,6 +90,11 @@ export type GlassFillProps = {
    * would double against the parent's own edge and read as glare.
    */
   quiet?: boolean;
+  /**
+   * Keep the surface see-through when no exact blur target exists: the fallback
+   * becomes the page's own ground at partial opacity instead of an opaque card.
+   */
+  translucent?: boolean;
   /** Exact background to blur on Android; omitted surfaces keep the tonal fallback. */
   blurTarget?: RefObject<ComponentRef<typeof View> | null>;
 };
@@ -103,11 +108,14 @@ export function GlassFill({
   radius = 'card',
   className,
   quiet = false,
+  translucent = false,
   blurTarget,
 }: GlassFillProps) {
   const scheme = useColorScheme();
   const reducedTransparency = useReducedTransparency();
   const radiusPx = GLASS_RADIUS_PX[radius];
+  const dark = scheme === 'dark';
+  const groundClass = translucent ? 'bg-background/70' : 'bg-card';
   const hasAndroidBlurTarget = Platform.OS === 'android' && blurTarget != null;
   const intensity = quiet
     ? Math.min(100, BLUR_INTENSITY[weight] + 30)
@@ -117,7 +125,8 @@ export function GlassFill({
     return (
       <View
         className={cn(
-          'absolute inset-0 bg-card',
+          'absolute inset-0',
+          translucent ? 'bg-background' : 'bg-card',
           RADIUS_CLASS[radius],
           className,
         )}
@@ -137,7 +146,7 @@ export function GlassFill({
        */}
       {Platform.OS !== 'ios' && !hasAndroidBlurTarget ? (
         <View
-          className={cn('absolute inset-0 bg-card', RADIUS_CLASS[radius])}
+          className={cn('absolute inset-0', groundClass, RADIUS_CLASS[radius])}
           style={StyleSheet.absoluteFill}
           pointerEvents="none"
         />
@@ -159,7 +168,7 @@ export function GlassFill({
             Platform.OS === 'android' ? Math.min(100, intensity * 4) : intensity
           }
           tint={
-            scheme === 'dark'
+            dark
               ? Platform.OS === 'android'
                 ? 'systemUltraThinMaterialDark'
                 : 'systemThinMaterialDark'

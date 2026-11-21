@@ -14,7 +14,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { api, useApiQuery } from '@/api';
-import { useDirection, type Language } from '@/i18n';
+import { useDirection, numberLocale, type Language } from '@/i18n';
 import type { Notice } from '@/services/notices/notices.service';
 import { Spinner } from '@/ui/spinner';
 import { Text } from '@/ui/text';
@@ -364,13 +364,13 @@ function relativeTime(iso: string, language: Language, now: Date): string {
   const minutes = Math.round((now.getTime() - at.getTime()) / 60_000);
 
   if (minutes < 60 && typeof Intl.RelativeTimeFormat === 'function') {
-    return new Intl.RelativeTimeFormat(language, {
+    return new Intl.RelativeTimeFormat(numberLocale(language), {
       numeric: 'auto',
       style: 'short',
     }).format(-Math.max(minutes, 1), 'minute');
   }
 
-  return new Intl.DateTimeFormat(language, {
+  return new Intl.DateTimeFormat(numberLocale(language), {
     day: 'numeric',
     month: 'short',
   }).format(at);

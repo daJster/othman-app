@@ -29,6 +29,8 @@ import { getIconGlyph } from '@/ui/icon';
  *    once there are more than three destinations, so Android would show four
  *    unlabeled glyphs where iOS shows four labels. The bar is the only chrome
  *    on the screen; it keeps its labels.
+ *  - A solid `bg-background` bar with no blur and no transparent edge state:
+ *    page content never shows through the destinations on either platform.
  *  - `minimizeBehavior="never"` — the destinations do not chase the page.
  *  - `testID`/`accessibilityLabel` per trigger — the same destination names the
  *    web anchors expose, so one device test can drive either shell.
@@ -44,6 +46,8 @@ export default function NativeTabsLayout() {
   return (
     <NativeTabs
       backgroundColor={bar.backgroundColor}
+      blurEffect="none"
+      disableTransparentOnScrollEdge
       iconColor={{ default: idleIcon.color, selected: activeIcon.color }}
       labelStyle={{ selected: { color: activeIcon.color } }}
       labelVisibilityMode="labeled"

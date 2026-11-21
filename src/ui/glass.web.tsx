@@ -134,6 +134,8 @@ export type GlassFillProps = {
    */
   quiet?: boolean;
   /** Present in the shared native API; CSS backdrop-filter owns the web blur. */
+  translucent?: boolean;
+  /** Present in the shared native API; CSS backdrop-filter owns the web blur. */
   blurTarget?: RefObject<ComponentRef<typeof View> | null>;
 };
 
@@ -144,6 +146,7 @@ export function GlassFill({
   quiet = false,
 }: GlassFillProps) {
   const reducedTransparency = useReducedTransparency();
+  const washClass = WASH_CLASS[weight];
   const radiusPx = GLASS_RADIUS_PX[radius];
 
   if (reducedTransparency) {
@@ -174,7 +177,7 @@ export function GlassFill({
       />
 
       <View
-        className={cn(WASH_CLASS[weight], RADIUS_CLASS[radius])}
+        className={cn(washClass, RADIUS_CLASS[radius])}
         style={[
           StyleSheet.absoluteFill,
           {

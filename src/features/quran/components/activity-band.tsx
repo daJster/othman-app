@@ -168,6 +168,7 @@ export function ActivityBand() {
   };
   const swipe = useSwipeTransition({
     onSwipe,
+    transitionKey: page,
     enabled: canOlder || canNewer,
     allowedDirections: { left: canNewer, right: canOlder },
     testID: 'quran-activity-swipe',
@@ -250,11 +251,7 @@ export function ActivityBand() {
         style={{ alignItems: centered ? 'center' : 'flex-start' }}
       >
         <GestureDetector gesture={swipe.gesture}>
-          <Animated.View
-            key={`quran-activity-${page}`}
-            entering={swipe.entering}
-            exiting={swipe.exiting}
-          >
+          <Animated.View style={swipe.style}>
             <ActivityGrid
               days={days}
               columns={columns}

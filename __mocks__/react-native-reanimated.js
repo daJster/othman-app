@@ -134,6 +134,7 @@ module.exports = {
     linear: (value) => value,
     ease: (value) => value,
     inOut: (value) => value,
+    out: (value) => value,
     bezier: () => (value) => value,
   },
   ReduceMotion: { System: 'system', Always: 'always', Never: 'never' },

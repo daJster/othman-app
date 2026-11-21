@@ -8,6 +8,7 @@ export {
   type Direction,
   type Language,
 } from './languages';
+export { numberLocale } from './format';
 export {
   getLanguageState,
   setLanguageState,

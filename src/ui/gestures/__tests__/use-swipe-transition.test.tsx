@@ -12,19 +12,22 @@ import { useSwipeTransition } from '../use-swipe-transition';
 
 /**
  * The transition manager keeps the physical swipe contract and adds the
- * entering/exiting pair. In Jest the animation builders are inert, so these
+ * shared-value entrance. In Jest the animation builders are inert, so these
  * cases pin the part that matters: which swipes are allowed to start a page
  * change and which boundary directions are refused.
  */
-function Harness(props: Omit<SwipeTransitionOptions, 'testID'>) {
-  const { gesture, entering, exiting } = useSwipeTransition({
+function Harness(
+  props: Omit<SwipeTransitionOptions, 'testID' | 'transitionKey'>,
+) {
+  const { gesture, style } = useSwipeTransition({
     ...props,
+    transitionKey: 0,
     testID: 'transition-swipe',
   });
 
   return (
     <GestureDetector gesture={gesture}>
-      <Animated.View entering={entering} exiting={exiting}>
+      <Animated.View style={style}>
         <Text>map</Text>
       </Animated.View>
     </GestureDetector>
