@@ -120,7 +120,7 @@ function ReadingSessionCardView({
         ayah: formatReaderNumber(Number(entry.ayahKey), language),
       })
     : relativeDay(entry.at, now, t);
-  // "Page" travels through the locale, never hardcoded: "Page 12" / "صفحة ١٢".
+  // "Page" travels through the locale, never hardcoded: "Page 12" / "صفحة 12".
   const pageLine = t('quran.resume.pageLabel', { page });
 
   // The visible labels already carry their own unit ("Page", "Ayah"), so the

@@ -1,6 +1,6 @@
 import { isAyahInSurah, isSurahNumber } from '@/core/domain/quran/surah';
 import type { SurahMetadata } from '@/core/types';
-import type { Language } from '@/i18n';
+import { numberLocale, type Language } from '@/i18n';
 
 /**
  * Qur'an record helpers.
@@ -62,9 +62,7 @@ export function ayahReference(
   ayah: number,
   language: Language,
 ): string {
-  const digits = new Intl.NumberFormat(
-    language === 'ar' ? 'ar-EG-u-nu-arab' : 'en',
-  ).format(ayah);
+  const digits = new Intl.NumberFormat(numberLocale(language)).format(ayah);
 
   return language === 'ar'
     ? `${surahName} · الآية ${digits}`

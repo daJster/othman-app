@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { formatDateKey } from '@/core/domain/meetings/date-key';
-import type { Language } from '@/i18n';
+import { numberLocale, type Language } from '@/i18n';
 import type { ActivityDay } from './activity-grid';
 
 /**
@@ -64,7 +64,7 @@ export function formatDayLabel(day: string, language: Language): string {
 
   if (!year || !month || !date) return day;
 
-  return new Intl.DateTimeFormat(language, {
+  return new Intl.DateTimeFormat(numberLocale(language), {
     day: 'numeric',
     month: 'short',
   }).format(new Date(year, month - 1, date, 12));
@@ -76,8 +76,10 @@ export function formatMonthRange(
   end: MonthKey,
   language: Language,
 ): string {
-  const short = new Intl.DateTimeFormat(language, { month: 'short' });
-  const long = new Intl.DateTimeFormat(language, {
+  const short = new Intl.DateTimeFormat(numberLocale(language), {
+    month: 'short',
+  });
+  const long = new Intl.DateTimeFormat(numberLocale(language), {
     month: 'long',
     year: 'numeric',
   });

@@ -1,14 +1,14 @@
-import type { Language } from '@/i18n';
+import { numberLocale, type Language } from '@/i18n';
 
 /**
  * Reader labels.
  *
- * Numbers go through `Intl` so Arabic gets its own digits. The reader is the
- * one place where digits sit next to Arabic text constantly (page, ayah, surah
+ * Numbers keep Latin digits in every language, next to Arabic reader copy. The
+ * reader is where digits sit beside Arabic text constantly (page, ayah, surah
  * numbers), so this is shared rather than re-derived per component.
  */
 export function formatReaderNumber(value: number, language: Language): string {
-  return new Intl.NumberFormat(language).format(value);
+  return new Intl.NumberFormat(numberLocale(language)).format(value);
 }
 
 /**

@@ -55,10 +55,10 @@ describe('Qur’an record coordinates', () => {
     expect(surahLabel(surahs['2'], 2, 'en')).toBe('Al-Baqarah');
   });
 
-  it('formats a reference with the language’s digits', () => {
+  it('formats a reference with Latin digits in every language', () => {
     expect(ayahReference('Al-Baqarah', 255, 'en')).toBe(
       'Al-Baqarah · Ayah 255',
     );
-    expect(ayahReference('البقرة', 255, 'ar')).toContain('٢٥٥');
+    expect(ayahReference('البقرة', 255, 'ar')).toBe('البقرة · الآية 255');
   });
 });

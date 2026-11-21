@@ -1,18 +1,20 @@
 import { parseDateKey } from '@/core/domain/meetings/date-key';
 import type { DateKey } from '@/core/types';
 import type { Language } from '@/i18n';
+import { numberLocale } from '@/i18n';
 
 /**
  * Labels for the progress screen.
  *
- * Numbers and dates go through `Intl` so Arabic gets its own digits and month
- * names. The percent sign is produced by `style: 'percent'` rather than appended
- * with `+ '%'`: Arabic writes it before the number, and the formatter is the
- * only thing that knows that.
+ * Dates go through `Intl` so Arabic keeps its month and weekday names, while
+ * the shared number locale keeps every digit Latin. The percent sign is
+ * produced by `style: 'percent'` rather than appended with `+ '%'`: Arabic
+ * writes it before the number, and the formatter is the only thing that knows
+ * that.
  */
 
 export function formatPercent(percent: number, language: Language): string {
-  return new Intl.NumberFormat(language, {
+  return new Intl.NumberFormat(numberLocale(language), {
     style: 'percent',
     maximumFractionDigits: 0,
   }).format(percent / 100);
@@ -20,7 +22,7 @@ export function formatPercent(percent: number, language: Language): string {
 
 /** Surah numbers and counts share the same formatter. */
 export function formatNumber(value: number, language: Language): string {
-  return new Intl.NumberFormat(language).format(value);
+  return new Intl.NumberFormat(numberLocale(language)).format(value);
 }
 
 /** Short review date — a weekday and year are noise in a detail sheet. */
@@ -28,7 +30,7 @@ export function formatReviewedDate(
   dateKey: DateKey,
   language: Language,
 ): string {
-  return new Intl.DateTimeFormat(language, {
+  return new Intl.DateTimeFormat(numberLocale(language), {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -37,12 +39,14 @@ export function formatReviewedDate(
 
 /** `Sat` / `السبت` for the week strip. */
 export function formatWeekdayShort(date: Date, language: Language): string {
-  return new Intl.DateTimeFormat(language, { weekday: 'short' }).format(date);
+  return new Intl.DateTimeFormat(numberLocale(language), {
+    weekday: 'short',
+  }).format(date);
 }
 
-/** `12 Oct` / `١٢ أكتوبر` for the week strip caption. */
+/** `12 Oct` / `12 أكتوبر` for the week strip caption. */
 export function formatShortDay(date: Date, language: Language): string {
-  return new Intl.DateTimeFormat(language, {
+  return new Intl.DateTimeFormat(numberLocale(language), {
     day: 'numeric',
     month: 'short',
   }).format(date);
@@ -53,7 +57,7 @@ export function formatActivityDay(
   dateKey: DateKey,
   language: Language,
 ): string {
-  return new Intl.DateTimeFormat(language, {
+  return new Intl.DateTimeFormat(numberLocale(language), {
     day: 'numeric',
     month: 'short',
   }).format(parseDateKey(dateKey));

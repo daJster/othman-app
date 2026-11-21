@@ -137,10 +137,8 @@ describe('ReaderHeader', () => {
 
     await renderHeader({ ayahKey: '255' }).view;
 
-    const ar = (value: number) => new Intl.NumberFormat('ar').format(value);
-
     expect(screen.getByText('البقرة')).toBeTruthy();
-    expect(screen.getByText(`صفحة ${ar(12)} · الآية ${ar(255)}`)).toBeTruthy();
+    expect(screen.getByText('صفحة 12 · الآية 255')).toBeTruthy();
     expect(screen.getByTestId('reader-back').props.accessibilityLabel).toBe(
       'الخروج من المصحف',
     );

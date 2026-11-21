@@ -91,11 +91,11 @@ const BASE_NOTICES: readonly NoticeRow[] = [
     38,
     'app',
     {
-      ar: 'تسميع هذا الأسبوع: من الآية ١٢٠ إلى ١٨٠',
+      ar: 'تسميع هذا الأسبوع: من الآية 120 إلى 180',
       en: 'This week’s recitation: ayah 120 to 180',
     },
     {
-      ar: 'نبدأ من الآية ١٢٠ ونقف عند ١٨٠، من أتمّ الحفظ مبكرًا ينتقل إلى المراجعة.',
+      ar: 'نبدأ من الآية 120 ونقف عند 180، من أتمّ الحفظ مبكرًا ينتقل إلى المراجعة.',
       en: 'We start at ayah 120 and stop at 180; early finishers move on to review.',
     },
   ),
