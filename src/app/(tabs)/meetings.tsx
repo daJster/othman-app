@@ -17,7 +17,6 @@ import {
 import type { Meeting } from '@/core/types';
 import { MeetingCalendar } from '@/features/meetings/meeting-calendar';
 import { MeetingCard } from '@/features/meetings/meeting-card';
-import { MeetingCardSkeleton } from '@/features/meetings/meeting-card-skeleton';
 import { RequireAuth } from '@/features/auth/require-auth';
 import { useSessionRole } from '@/features/auth/use-session-role';
 import {
@@ -34,6 +33,7 @@ import { Button, ButtonText } from '@/ui/button';
 import { Icon } from '@/ui/icon';
 import { Page } from '@/ui/page';
 import { Section } from '@/ui/section';
+import { Spinner } from '@/ui/spinner';
 import { ErrorState } from '@/ui/states';
 import { Text } from '@/ui/text';
 
@@ -45,8 +45,8 @@ import { Text } from '@/ui/text';
  * list keeps FlatList's virtualisation and pull-to-refresh.
  *
  * Four states, in the order the user can meet them:
- *  - pending — skeleton cards under the calendar (the calendar must not vanish
- *    when a day is loading);
+ *  - pending — the shared spinner under the calendar (the calendar must not
+ *    vanish when a day is loading);
  *  - error — `ErrorState` with the query's own retry;
  *  - empty — the selected day has no meetings;
  *  - ready — the cards.
@@ -145,7 +145,6 @@ function MeetingsContent() {
               <View className="flex-row items-start justify-between gap-3">
                 <Section
                   title={t('page.meetings.header.title')}
-                  description={t('page.meetings.header.description')}
                   className="flex-1"
                 />
 
@@ -185,10 +184,11 @@ function MeetingsContent() {
           }
           ListEmptyComponent={
             state.status === 'pending' ? (
-              <View className="gap-3">
-                {[0, 1, 2].map((index) => (
-                  <MeetingCardSkeleton key={index} />
-                ))}
+              <View
+                testID="meetings-loading"
+                className="items-center justify-center py-16"
+              >
+                <Spinner size="lg" label={t('home.rail.loading')} />
               </View>
             ) : state.status === 'error' ? (
               <ErrorState

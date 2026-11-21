@@ -572,11 +572,13 @@ export const api = {
         demo: true,
       }),
 
-      rsvp: mutation<{ id: number; going: boolean }, MeetingResponse>({
+      rsvp: mutation<{ id: number; going: boolean | null }, MeetingResponse>({
         id: 'demo.meetings.rsvp',
         run: ({ id, going }) =>
           meetingWrite(
-            going ? backendClient.rsvp(id) : backendClient.unrsvp(id),
+            going === null
+              ? backendClient.unrsvp(id)
+              : backendClient.rsvp(id, going),
           ),
         invalidates: ({ id }) => [
           queryKeys.backend.meeting(id),

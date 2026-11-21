@@ -5,6 +5,7 @@ import BookOpen from 'lucide-react-native/icons/book-open';
 import Bell from 'lucide-react-native/icons/bell';
 import Bookmark from 'lucide-react-native/icons/bookmark';
 import Calendar from 'lucide-react-native/icons/calendar';
+import CalendarCheck from 'lucide-react-native/icons/calendar-check';
 import Camera from 'lucide-react-native/icons/camera';
 import ChartLine from 'lucide-react-native/icons/chart-line';
 import Check from 'lucide-react-native/icons/check';
@@ -14,13 +15,19 @@ import ChevronRight from 'lucide-react-native/icons/chevron-right';
 import ChevronUp from 'lucide-react-native/icons/chevron-up';
 import CircleAlert from 'lucide-react-native/icons/circle-alert';
 import CircleCheck from 'lucide-react-native/icons/circle-check';
+import CircleChevronsRight from 'lucide-react-native/icons/circle-chevrons-right';
+import CircleQuestionMark from 'lucide-react-native/icons/circle-question-mark';
+import CircleSlash from 'lucide-react-native/icons/circle-slash';
+import CircleX from 'lucide-react-native/icons/circle-x';
 import Clock from 'lucide-react-native/icons/clock';
+import ClockCheck from 'lucide-react-native/icons/clock-check';
 import ExternalLink from 'lucide-react-native/icons/external-link';
 import Eye from 'lucide-react-native/icons/eye';
 import EyeOff from 'lucide-react-native/icons/eye-off';
 import FileText from 'lucide-react-native/icons/file-text';
 import Flame from 'lucide-react-native/icons/flame';
 import Globe from 'lucide-react-native/icons/globe';
+import GraduationCap from 'lucide-react-native/icons/graduation-cap';
 import House from 'lucide-react-native/icons/house';
 import Inbox from 'lucide-react-native/icons/inbox';
 import Info from 'lucide-react-native/icons/info';
@@ -85,11 +92,18 @@ const ICON_COMPONENTS = {
   inbox: Inbox,
   bell: Bell,
   calendar: Calendar,
+  'calendar-check': CalendarCheck,
   'chevron-down': ChevronDown,
   'chevron-left': ChevronLeft,
   'chevron-right': ChevronRight,
   'chevron-up': ChevronUp,
+  'circle-chevrons-right': CircleChevronsRight,
+  'circle-question': CircleQuestionMark,
+  'circle-slash': CircleSlash,
+  'circle-x': CircleX,
   clock: Clock,
+  'clock-check': ClockCheck,
+  'graduation-cap': GraduationCap,
   'map-pin': MapPin,
   users: Users,
   palette: Palette,
@@ -131,6 +145,7 @@ const TONE_CLASS = {
   'primary-foreground': 'text-primary-foreground',
   brass: 'text-brass',
   success: 'text-success',
+  info: 'text-info',
   destructive: 'text-destructive',
   parchment: 'text-parchment',
 } as const;

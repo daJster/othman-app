@@ -32,11 +32,18 @@ export const ICON_NAMES = [
   'bell',
   // Calendar and meeting cards.
   'calendar',
+  'calendar-check',
   'chevron-down',
   'chevron-left',
   'chevron-right',
   'chevron-up',
+  'circle-chevrons-right',
+  'circle-question',
+  'circle-slash',
+  'circle-x',
   'clock',
+  'clock-check',
+  'graduation-cap',
   'map-pin',
   'users',
   // Settings rows.
@@ -86,7 +93,7 @@ export type IconRegistry<Component> = Readonly<Record<IconName, Component>>;
 export type StatusTone = 'positive' | 'info' | 'neutral';
 
 /**
- * Translation keys for the three meeting statuses.
+ * Translation keys for the meeting statuses.
  *
  * Declared as literals, not `string`: the UI passes this value straight to
  * `t()`, and the typed `t()` rejects a widened string. Adding a status to
@@ -94,16 +101,22 @@ export type StatusTone = 'positive' | 'info' | 'neutral';
  * `MEETING_STATUS_CONFIG` both gain the entry.
  */
 export type MeetingStatusLabelKey =
+  | 'meeting.status.now'
   | 'meeting.status.soon'
-  | 'meeting.status.upcoming'
   | 'meeting.status.scheduled'
-  | 'meeting.status.past';
+  | 'meeting.status.past'
+  | 'meeting.status.canceled';
 
 export type MeetingStatusConfig = {
   /** Translation key, not display text. */
   readonly labelKey: MeetingStatusLabelKey;
   readonly tone: StatusTone;
-  /** Render the status dot with a pulse, to signal urgency. */
+  /**
+   * Logical icon for the inline marker. `null` means "not an icon": the live
+   * state draws a pulsing dot with a fading wave instead.
+   */
+  readonly icon: IconName | null;
+  /** Animate the marker while the state is live (`soon`, `now`). */
   readonly pulse: boolean;
 };
 

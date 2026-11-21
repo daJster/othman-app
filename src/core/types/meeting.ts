@@ -1,5 +1,14 @@
 import type { DateKey } from './date';
 
+/**
+ * How an attendee answered the invitation.
+ *
+ * `invited` means "no answer yet" and is what the UI calls *unknown*; the
+ * server stores that literal, so the card and the dialog can map one field to
+ * the three states without inventing a fourth.
+ */
+export type AttendeeStatus = 'invited' | 'going' | 'declined';
+
 export type Attendee = {
   name: string;
   /** Arabic name for the Arabic interface; `name` is the fallback. */
@@ -20,9 +29,11 @@ export type Attendee = {
    * met. The avatar falls back to initials.
    */
   avatar?: string;
+  /** The invitation answer. Missing is treated as `invited` (`unknown`). */
+  status?: AttendeeStatus;
 };
 
-export type MeetingStatus = 'soon' | 'upcoming' | 'scheduled' | 'past';
+export type MeetingStatus = 'canceled' | 'past' | 'now' | 'soon' | 'scheduled';
 
 export type Meeting = {
   id: number;
@@ -47,6 +58,14 @@ export type Meeting = {
   durationMinutes: number;
   meetLink: string;
   status: MeetingStatus;
+  /**
+   * The organiser called the session off.
+   *
+   * Separate from `status`: cancellation is a stored fact, while the status is
+   * derived from the clock. A canceled session stays canceled even after its
+   * intended end time, so the card can never claim it "ended" as if it ran.
+   */
+  canceled?: boolean;
   attendees: Attendee[];
   organizer: string;
   location: string;

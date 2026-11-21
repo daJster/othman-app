@@ -489,10 +489,11 @@
   },
   "meeting": {
     "status": {
-      "soon": "Starting soon",
-      "upcoming": "Today",
+      "now": "Now",
+      "soon": "Soon",
       "scheduled": "Scheduled",
-      "past": "Ended"
+      "past": "Ended",
+      "canceled": "Canceled"
     },
     "duration": "{{minutes}} min",
     "attendees_one": "{{count}} attendee",
@@ -510,8 +511,16 @@
     },
     "nextSession": "Next session: {{date}}",
     "details": "Details",
-    "less": "Less",
-    "organizedBy": "Organized by {{name}}",
+    "attendeesTitle": "Attendees",
+    "attendance": {
+      "unknown": "No response",
+      "accepted": "Accepted",
+      "declined": "Declined"
+    },
+    "roles": {
+      "organizer": "Organizer",
+      "attendee": "Attendee"
+    },
     "create": "New session",
     "edit": "Edit session",
     "form": {
@@ -550,10 +559,13 @@
       "saving": "Saving…"
     },
     "rsvp": {
-      "attend": "Attend",
-      "attending": "You're attending",
-      "failed": "Couldn't update your attendance.",
+      "accept": "Accept",
+      "decline": "Decline",
+      "failed": "Couldn't update your response.",
       "pastHint": "This session has ended."
+    },
+    "response": {
+      "label": "Your response"
     },
     "delete": {
       "action": "Delete",
@@ -566,8 +578,7 @@
   "page": {
     "meetings": {
       "header": {
-        "title": "Meetings",
-        "description": "Sessions with your shaykh and classmates"
+        "title": "Meetings"
       },
       "list": {
         "empty": "No sessions on this day."

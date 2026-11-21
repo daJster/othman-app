@@ -1,5 +1,6 @@
 import type { CalendarMonth } from '@/core/utils/calendar';
 import type { Language } from '@/i18n';
+import { numberLocale } from '@/i18n';
 
 /**
  * Date labels for the meetings calendar.
@@ -46,22 +47,6 @@ const HIJRI_MONTH_NAMES: Readonly<Record<Language, readonly string[]>> = {
   ],
 };
 
-/**
- * The BCP 47 tag each app language formats with.
- *
- * A bare `ar` is ambiguous: its numbering system depends on the ICU data and
- * the host (`ar` resolves to Latin digits on Node and in some browsers), which
- * is exactly how the Arabic calendar ended up printing "1 2 3" inside
- * "نوفمبر ٢٠٢٦". `ar-EG` is an Arabic-locale default with `arab` digits, and
- * the `-u-nu-arab` extension pins that even where the host would fall back to
- * `latn`. This affects formatting only — the Gregorian/Hijri conversion never
- * sees it.
- */
-const FORMAT_LOCALE: Readonly<Record<Language, string>> = {
-  ar: 'ar-EG-u-nu-arab',
-  en: 'en',
-};
-
 const WEEKDAY_CACHE = new Map<Language, readonly string[]>();
 
 /** Narrow weekday labels, Sunday first. */
@@ -70,7 +55,7 @@ export function weekdayLabels(language: Language): readonly string[] {
   if (cached) return cached;
 
   const labels = Array.from({ length: 7 }, (_, index) =>
-    new Intl.DateTimeFormat(FORMAT_LOCALE[language], {
+    new Intl.DateTimeFormat(numberLocale(language), {
       weekday: 'narrow',
     }).format(
       // 7 January 2024 is a Sunday; any Sunday would do.
@@ -83,7 +68,7 @@ export function weekdayLabels(language: Language): readonly string[] {
 }
 
 export function formatDayNumber(day: number, language: Language): string {
-  return new Intl.NumberFormat(FORMAT_LOCALE[language]).format(day);
+  return new Intl.NumberFormat(numberLocale(language)).format(day);
 }
 
 /**
@@ -93,7 +78,7 @@ export function formatDayNumber(day: number, language: Language): string {
  * written; days are ≤ 31 and unaffected either way.
  */
 export function formatYear(year: number, language: Language): string {
-  return new Intl.NumberFormat(FORMAT_LOCALE[language], {
+  return new Intl.NumberFormat(numberLocale(language), {
     useGrouping: false,
   }).format(year);
 }
@@ -104,7 +89,7 @@ export function formatMonthLabel(
   language: Language,
 ): string {
   if (month.system === 'gregorian') {
-    return new Intl.DateTimeFormat(FORMAT_LOCALE[language], {
+    return new Intl.DateTimeFormat(numberLocale(language), {
       month: 'long',
       year: 'numeric',
     }).format(new Date(month.year, month.month - 1, 1, 12));
@@ -118,7 +103,7 @@ export function formatMonthLabel(
 
 /** Long date for the selected-day line and for each cell's accessible name. */
 export function formatLongDate(date: Date, language: Language): string {
-  return new Intl.DateTimeFormat(FORMAT_LOCALE[language], {
+  return new Intl.DateTimeFormat(numberLocale(language), {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -136,7 +121,7 @@ export function formatLongDate(date: Date, language: Language): string {
 export function formatClockTime(time: string, language: Language): string {
   const [hours, minutes] = time.split(':').map(Number);
 
-  return new Intl.DateTimeFormat(FORMAT_LOCALE[language], {
+  return new Intl.DateTimeFormat(numberLocale(language), {
     hour: 'numeric',
     minute: '2-digit',
   }).format(
@@ -152,21 +137,34 @@ export function formatClockTime(time: string, language: Language): string {
 
 /** Digits in the active locale, without grouping (durations, counts). */
 export function formatCount(value: number, language: Language): string {
-  return new Intl.NumberFormat(FORMAT_LOCALE[language], {
+  return new Intl.NumberFormat(numberLocale(language), {
     useGrouping: false,
   }).format(value);
 }
 
 /**
- * A compact day for a one-line affordance: `Tue, 10 Nov` / `الثلاثاء، ١٠ نوفمبر`.
+ * A compact day for a one-line affordance: `Tue, 10 Nov` / `الثلاثاء، 10 نوفمبر`.
  *
  * The empty state needs to name the next session without spending a whole line
  * on a year the reader already knows.
  */
 export function formatShortDate(date: Date, language: Language): string {
-  return new Intl.DateTimeFormat(FORMAT_LOCALE[language], {
+  return new Intl.DateTimeFormat(numberLocale(language), {
     weekday: 'short',
     day: 'numeric',
     month: 'short',
   }).format(date);
+}
+
+/**
+ * A short date and a clock reading on one line, for the dialog's start/end
+ * pair: `Sat, 21 Nov · 9:00 PM` / `السبت، 21 نوفمبر · 9:00 م`.
+ */
+export function formatDateTime(date: Date, language: Language): string {
+  const time = new Intl.DateTimeFormat(numberLocale(language), {
+    hour: 'numeric',
+    minute: '2-digit',
+  }).format(date);
+
+  return `${formatShortDate(date, language)} · ${time}`;
 }

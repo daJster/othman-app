@@ -26,6 +26,7 @@ type RawAttendee = {
   name: string;
   nameAr?: string;
   avatar?: string;
+  status?: 'invited' | 'going' | 'declined';
 };
 
 type RawMeeting = {
@@ -38,6 +39,7 @@ type RawMeeting = {
   description: string;
   descriptionAr?: string;
   meetLink: string;
+  canceled?: boolean;
   attendees: RawAttendee[];
   organizer: string;
   organizerAr?: string;
@@ -89,6 +91,7 @@ const seeds = parseRows(meetingsData.meetings as RawMeeting[]);
 
 function materialize(seed: Seed, now: Date): Meeting {
   const date = dateFor(seed.dayOffset);
+  const canceled = seed.canceled ?? false;
 
   return {
     id: seed.id,
@@ -101,9 +104,15 @@ function materialize(seed: Seed, now: Date): Meeting {
     durationMinutes: seed.durationMinutes,
     meetLink: seed.meetLink,
     status: meetingStatusAt(
-      { date, time: seed.time, durationMinutes: seed.durationMinutes },
+      {
+        date,
+        time: seed.time,
+        durationMinutes: seed.durationMinutes,
+        canceled,
+      },
       now,
     ),
+    canceled,
     attendees: seed.attendees as Attendee[],
     organizer: seed.organizer,
     organizerAr: seed.organizerAr,

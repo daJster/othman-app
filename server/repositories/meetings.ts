@@ -25,6 +25,7 @@ type MeetingRow = {
   time: string;
   duration_minutes: number;
   meet_link: string;
+  canceled: number;
   organizer: string;
   organizer_ar: string | null;
   location: string;
@@ -51,6 +52,7 @@ export type MeetingInput = {
   time: string;
   durationMinutes: number;
   meetLink?: string;
+  canceled?: boolean;
   organizer?: string;
   organizerAr?: string | null;
   location?: string;
@@ -77,9 +79,16 @@ function parseDateKey(key: DateKey): Date {
 }
 
 export function meetingStatusAt(
-  meeting: { date: DateKey; time: string; durationMinutes: number },
+  meeting: {
+    date: DateKey;
+    time: string;
+    durationMinutes: number;
+    canceled?: boolean;
+  },
   now: Date,
 ): MeetingStatus {
+  if (meeting.canceled) return 'canceled';
+
   const day = parseDateKey(meeting.date);
   const [hours, minutes] = meeting.time.split(':').map(Number);
   const start = new Date(
@@ -93,14 +102,10 @@ export function meetingStatusAt(
   const at = now.getTime();
 
   if (at >= end) return 'past';
+  if (at >= start) return 'now';
   if (start - at <= SOON_WINDOW_MS) return 'soon';
 
-  const sameDay =
-    day.getFullYear() === now.getFullYear() &&
-    day.getMonth() === now.getMonth() &&
-    day.getDate() === now.getDate();
-
-  return sameDay ? 'upcoming' : 'scheduled';
+  return 'scheduled';
 }
 
 function toAttendee(row: AttendeeRow): AttendeeRecord {
@@ -130,6 +135,8 @@ export function createMeetingsRepository(db: DatabaseSync) {
   }
 
   function toMeeting(row: MeetingRow, now = new Date()): MeetingRecord {
+    const canceled = row.canceled === 1;
+
     return {
       id: row.id,
       title: row.title,
@@ -145,9 +152,11 @@ export function createMeetingsRepository(db: DatabaseSync) {
           date: row.date,
           time: row.time,
           durationMinutes: row.duration_minutes,
+          canceled,
         },
         now,
       ),
+      canceled,
       attendees: attendeesFor(row.id),
       organizer: row.organizer,
       ...(row.organizer_ar ? { organizerAr: row.organizer_ar } : {}),
@@ -218,9 +227,9 @@ export function createMeetingsRepository(db: DatabaseSync) {
         .prepare(
           `INSERT INTO meetings (
              title, title_ar, description, description_ar, date, time,
-             duration_minutes, meet_link, organizer, organizer_ar, location,
-             location_ar, created_at, updated_at
-           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             duration_minutes, meet_link, canceled, organizer, organizer_ar,
+             location, location_ar, created_at, updated_at
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         )
         .run(
           input.title,
@@ -231,6 +240,7 @@ export function createMeetingsRepository(db: DatabaseSync) {
           input.time,
           input.durationMinutes,
           input.meetLink ?? '',
+          input.canceled ? 1 : 0,
           input.organizer ?? '',
           input.organizerAr ?? null,
           input.location ?? '',
@@ -276,6 +286,9 @@ export function createMeetingsRepository(db: DatabaseSync) {
         push('duration_minutes', patch.durationMinutes);
       }
       if (patch.meetLink !== undefined) push('meet_link', patch.meetLink);
+      if (patch.canceled !== undefined) {
+        push('canceled', patch.canceled ? 1 : 0);
+      }
       if (patch.organizer !== undefined) push('organizer', patch.organizer);
       if (patch.organizerAr !== undefined) {
         push('organizer_ar', patch.organizerAr);

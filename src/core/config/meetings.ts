@@ -2,9 +2,10 @@
  * Meeting presentation config.
  *
  * Both tables here describe how a status or an attendee stack *presents*, not
- * how it behaves: the config carries intent (`tone`, `bordered`, `avatarSize`)
- * and nothing else. Binding that intent to concrete Tailwind classes is a UI
- * concern and lives in `src/ui` — `core/` must stay free of class strings.
+ * how it behaves: the config carries intent (`tone`, `icon`, `pulse`,
+ * `bordered`, `avatarSize`) and nothing else. Binding that intent to concrete
+ * Tailwind classes is a UI concern and lives in `src/ui` — `core/` must stay
+ * free of class strings.
  */
 
 import type { MeetingStatus } from '../types';
@@ -17,25 +18,46 @@ import { defineConfig, defineTable } from './primitives';
  *
  * `labelKey` is a translation key, not display text. `core/` has no i18n and
  * must not have any.
+ *
+ * The icon carries the meaning at a glance; the label stays as the accessible,
+ * translated text beside it. `now` has no icon: a live session gets a pulsing
+ * dot and a fading wave instead.
  */
 export const MEETING_STATUS_CONFIG = defineTable({
-  soon: { labelKey: 'meeting.status.soon', tone: 'positive', pulse: true },
-  upcoming: { labelKey: 'meeting.status.upcoming', tone: 'info', pulse: false },
+  now: {
+    labelKey: 'meeting.status.now',
+    tone: 'positive',
+    icon: null,
+    pulse: true,
+  },
+  soon: {
+    labelKey: 'meeting.status.soon',
+    tone: 'positive',
+    icon: 'circle-chevrons-right',
+    pulse: true,
+  },
   scheduled: {
     labelKey: 'meeting.status.scheduled',
-    tone: 'neutral',
+    tone: 'info',
+    icon: 'calendar-check',
     pulse: false,
   },
-  /*
-   * Browsing back is normal on a calendar, so the day before yesterday is a
-   * real state rather than a mislabelled "scheduled". Neutral, like scheduled:
-   * both mean "not the thing to act on now", and the label carries the rest.
-   */
-  past: { labelKey: 'meeting.status.past', tone: 'neutral', pulse: false },
+  past: {
+    labelKey: 'meeting.status.past',
+    tone: 'neutral',
+    icon: 'clock-check',
+    pulse: false,
+  },
+  canceled: {
+    labelKey: 'meeting.status.canceled',
+    tone: 'neutral',
+    icon: 'circle-slash',
+    pulse: false,
+  },
 } satisfies Record<MeetingStatus, MeetingStatusConfig>);
 
 export const ATTENDEE_LIST_CONFIG = defineConfig({
-  maxVisible: 4,
+  maxVisible: 5,
   avatarSize: 'sm',
   bordered: true,
   interactive: false,

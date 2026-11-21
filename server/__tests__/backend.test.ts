@@ -307,6 +307,21 @@ test('meetings: public reads, admin writes, student RSVP', async () => {
     ),
   );
 
+  const declined = await api<{
+    meeting: { attendees: { userId: string | null; status: string }[] };
+  }>(`/v1/meetings/${id}/rsvp`, {
+    method: 'POST',
+    token: student,
+    body: { going: false },
+  });
+
+  assert.equal(declined.status, 200);
+  assert.ok(
+    declined.body.meeting.attendees.some(
+      (attendee) => attendee.userId !== null && attendee.status === 'declined',
+    ),
+  );
+
   const removed = await api(`/v1/meetings/${id}`, {
     method: 'DELETE',
     token: admin,

@@ -8,13 +8,13 @@
       "title": "Juz 3 session",
       "titleAr": "حلقة الجزء الثالث",
       "description": "Recitation of Al-Baqarah, ayah 120 to 180, then a review of the repeated mistakes.",
-      "descriptionAr": "تسميع سورة البقرة، من الآية ١٢٠ إلى ١٨٠، ثم مراجعة الأخطاء المتكررة.",
+      "descriptionAr": "تسميع سورة البقرة، من الآية 120 إلى 180، ثم مراجعة الأخطاء المتكررة.",
       "meetLink": "https://meet.google.com/oth-man-hij",
       "attendees": [
-        { "name": "Yusuf H.", "nameAr": "يوسف ح." },
-        { "name": "Maryam S.", "nameAr": "مريم س." },
-        { "name": "Omar A.", "nameAr": "عمر أ." },
-        { "name": "Salma T.", "nameAr": "سلمى ت." }
+        { "name": "Yusuf H.", "nameAr": "يوسف ح.", "status": "going" },
+        { "name": "Maryam S.", "nameAr": "مريم س.", "status": "declined" },
+        { "name": "Omar A.", "nameAr": "عمر أ.", "status": "invited" },
+        { "name": "Salma T.", "nameAr": "سلمى ت.", "status": "going" }
       ],
       "organizer": "Shaykh Abdulrahman",
       "organizerAr": "الشيخ عبد الرحمن",
@@ -91,7 +91,7 @@
       "title": "Juz 2 session",
       "titleAr": "حلقة الجزء الثاني",
       "description": "Recitation of Al-Baqarah, ayah 60 to 120, with the mistakes logged for review.",
-      "descriptionAr": "تسميع سورة البقرة، من الآية ٦٠ إلى ١٢٠، مع تسجيل الأخطاء للمراجعة.",
+      "descriptionAr": "تسميع سورة البقرة، من الآية 60 إلى 120، مع تسجيل الأخطاء للمراجعة.",
       "meetLink": "https://meet.google.com/oth-man-hij",
       "attendees": [
         { "name": "Yusuf H.", "nameAr": "يوسف ح." },
@@ -121,6 +121,162 @@
       "organizerAr": "الشيخ عبد الرحمن",
       "location": "Remote · Google Meet",
       "locationAr": "عن بعد · Google Meet"
+    },
+    {
+      "id": 7,
+      "dayOffset": 0,
+      "time": "08:30",
+      "durationMinutes": 30,
+      "title": "Fajr review",
+      "titleAr": "مراجعة الفجر",
+      "description": "A quiet early review of yesterday's page before the day starts.",
+      "descriptionAr": "مراجعة هادئة لصفحة الأمس في أول النهار.",
+      "meetLink": "https://meet.google.com/oth-man-hij",
+      "attendees": [
+        { "name": "Yusuf H.", "nameAr": "يوسف ح." },
+        { "name": "Khadija M.", "nameAr": "خديجة م." }
+      ],
+      "organizer": "Shaykh Abdulrahman",
+      "organizerAr": "الشيخ عبد الرحمن",
+      "location": "Remote · Google Meet",
+      "locationAr": "عن بعد · Google Meet"
+    },
+    {
+      "id": 8,
+      "dayOffset": 0,
+      "time": "12:15",
+      "durationMinutes": 45,
+      "title": "Noon recitation",
+      "titleAr": "تسميع الظهر",
+      "description": "Short recitation over the midday break, one page per student.",
+      "descriptionAr": "تسميع قصير في استراحة الظهر، صفحة لكل طالب.",
+      "meetLink": "https://meet.google.com/oth-man-hij",
+      "attendees": [
+        { "name": "Maryam S.", "nameAr": "مريم س." },
+        { "name": "Omar A.", "nameAr": "عمر أ." },
+        { "name": "Salma T.", "nameAr": "سلمى ت." }
+      ],
+      "organizer": "Shaykh Abdulrahman",
+      "organizerAr": "الشيخ عبد الرحمن",
+      "location": "At the kuttab",
+      "locationAr": "في الكُتّاب"
+    },
+    {
+      "id": 9,
+      "dayOffset": 0,
+      "time": "21:00",
+      "durationMinutes": 30,
+      "title": "Night revision",
+      "titleAr": "مراجعة الليل",
+      "description": "A short closing circle before sleep: the day's portion, then dua.",
+      "descriptionAr": "حلقة ختامية قصيرة قبل النوم: ورد اليوم ثم دعاء.",
+      "meetLink": "https://meet.google.com/oth-man-hij",
+      "attendees": [
+        { "name": "Yusuf H.", "nameAr": "يوسف ح." },
+        { "name": "Omar A.", "nameAr": "عمر أ." },
+        { "name": "Khadija M.", "nameAr": "خديجة م." },
+        { "name": "Salma T.", "nameAr": "سلمى ت." }
+      ],
+      "organizer": "Shaykh Abdulrahman",
+      "organizerAr": "الشيخ عبد الرحمن",
+      "location": "Remote · Google Meet",
+      "locationAr": "عن بعد · Google Meet"
+    },
+    {
+      "id": 10,
+      "dayOffset": 1,
+      "time": "09:00",
+      "durationMinutes": 30,
+      "title": "Morning tajweed",
+      "titleAr": "تجويد الصباح",
+      "description": "A focused tajweed drill: madd, ghunnah and the articulation points covered last week.",
+      "descriptionAr": "تدريب مركّز على التجويد: المد والغنّة ومخارج الحروف السابقة.",
+      "meetLink": "https://meet.google.com/oth-man-hij",
+      "attendees": [
+        { "name": "Maryam S.", "nameAr": "مريم س." },
+        { "name": "Salma T.", "nameAr": "سلمى ت." }
+      ],
+      "organizer": "Shaykh Abdulrahman",
+      "organizerAr": "الشيخ عبد الرحمن",
+      "location": "At the kuttab",
+      "locationAr": "في الكُتّاب"
+    },
+    {
+      "id": 11,
+      "dayOffset": 1,
+      "time": "13:30",
+      "durationMinutes": 20,
+      "title": "One-to-one correction",
+      "titleAr": "تصحيح فردي",
+      "description": "Fifteen minutes of individual recitation with notes for the next session.",
+      "descriptionAr": "خمس عشرة دقيقة من التسميع الفردي مع ملاحظات للحلقة القادمة.",
+      "meetLink": "https://meet.google.com/oth-man-hij",
+      "attendees": [{ "name": "Omar A.", "nameAr": "عمر أ." }],
+      "organizer": "Shaykh Abdulrahman",
+      "organizerAr": "الشيخ عبد الرحمن",
+      "location": "Remote · Google Meet",
+      "locationAr": "عن بعد · Google Meet"
+    },
+    {
+      "id": 12,
+      "dayOffset": 1,
+      "time": "20:00",
+      "durationMinutes": 90,
+      "title": "Qira'at workshop",
+      "titleAr": "ورشة القراءات",
+      "description": "A longer workshop comparing two recitations on the same page, with a group listen.",
+      "descriptionAr": "ورشة أطول تقارن بين روايتين في الصفحة نفسها مع استماع جماعي.",
+      "meetLink": "https://meet.google.com/oth-man-hij",
+      "attendees": [
+        { "name": "Yusuf H.", "nameAr": "يوسف ح." },
+        { "name": "Maryam S.", "nameAr": "مريم س." },
+        { "name": "Omar A.", "nameAr": "عمر أ." },
+        { "name": "Khadija M.", "nameAr": "خديجة م." }
+      ],
+      "organizer": "Shaykh Abdulrahman",
+      "organizerAr": "الشيخ عبد الرحمن",
+      "location": "At the kuttab",
+      "locationAr": "في الكُتّاب"
+    },
+    {
+      "id": 13,
+      "dayOffset": 0,
+      "time": "17:00",
+      "durationMinutes": 45,
+      "title": "Tafsir reading",
+      "titleAr": "قراءة التفسير",
+      "description": "Reading the tafsir of Surah Al-Kahf together; the shaykh called this one off.",
+      "descriptionAr": "قراءة تفسير سورة الكهف معًا؛ ألغى الشيخ هذه الحلقة.",
+      "meetLink": "https://meet.google.com/oth-man-hij",
+      "canceled": true,
+      "attendees": [
+        { "name": "Yusuf H.", "nameAr": "يوسف ح.", "status": "going" },
+        { "name": "Salma T.", "nameAr": "سلمى ت.", "status": "declined" }
+      ],
+      "organizer": "Shaykh Abdulrahman",
+      "organizerAr": "الشيخ عبد الرحمن",
+      "location": "Remote · Google Meet",
+      "locationAr": "عن بعد · Google Meet"
+    },
+    {
+      "id": 14,
+      "dayOffset": 1,
+      "time": "11:00",
+      "durationMinutes": 30,
+      "title": "Hifz check-in",
+      "titleAr": "متابعة الحفظ",
+      "description": "A short check-in on the week's memorisation; canceled while the shaykh travels.",
+      "descriptionAr": "متابعة قصيرة لحفظ الأسبوع؛ أُلغيت لسفر الشيخ.",
+      "meetLink": "https://meet.google.com/oth-man-hij",
+      "canceled": true,
+      "attendees": [
+        { "name": "Maryam S.", "nameAr": "مريم س." },
+        { "name": "Omar A.", "nameAr": "عمر أ." }
+      ],
+      "organizer": "Shaykh Abdulrahman",
+      "organizerAr": "الشيخ عبد الرحمن",
+      "location": "At the kuttab",
+      "locationAr": "في الكُتّاب"
     }
   ]
 }

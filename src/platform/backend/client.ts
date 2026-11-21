@@ -324,8 +324,10 @@ export class BackendClient {
     return this.request('DELETE', `/v1/meetings/${id}`);
   }
 
-  rsvp(id: number): Promise<MeetingResponse> {
-    return this.request('POST', `/v1/meetings/${id}/rsvp`);
+  rsvp(id: number, going = true): Promise<MeetingResponse> {
+    return this.request('POST', `/v1/meetings/${id}/rsvp`, {
+      body: { going },
+    });
   }
 
   unrsvp(id: number): Promise<MeetingResponse> {

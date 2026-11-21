@@ -57,7 +57,7 @@ const MEETING: Meeting = {
   time: '18:00',
   durationMinutes: 60,
   meetLink: 'https://meet.example.test/abc',
-  status: 'upcoming',
+  status: 'scheduled',
   attendees: [{ name: 'Sara K.', avatar: '' }],
   organizer: 'Shaykh Ahmad',
   location: 'Online',
@@ -73,12 +73,12 @@ beforeEach(() => {
 });
 
 describe('MeetingsScreen', () => {
-  it('shows skeleton cards while the first read is in flight', async () => {
+  it('shows the shared spinner while the first read is in flight', async () => {
     given({ status: 'pending' });
 
     await render(<MeetingsScreen />);
 
-    expect(screen.getAllByTestId('meeting-skeleton')).toHaveLength(3);
+    expect(screen.getByTestId('meetings-loading')).toBeTruthy();
     // "Empty" must never be shown while the answer is still unknown.
     expect(screen.queryByText('No sessions')).toBeNull();
   });
@@ -100,7 +100,7 @@ describe('MeetingsScreen', () => {
     await render(<MeetingsScreen />);
 
     expect(screen.getByText('No sessions on this day.')).toBeTruthy();
-    expect(screen.queryByTestId('meeting-skeleton')).toBeNull();
+    expect(screen.queryByTestId('meetings-loading')).toBeNull();
   });
 
   it('offers the next session from an empty day', async () => {

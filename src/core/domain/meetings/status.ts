@@ -10,11 +10,15 @@ import type { DateKey, MeetingStatus } from '../../types';
  * the card prints, so browsing yesterday shows "ended" and opening the app two
  * minutes before a session shows "starts soon".
  *
+ * Cancellation is the one exception: it is a fact the organiser stored, not a
+ * clock reading, so it wins over every time rule.
+ *
  * Rules:
+ *  - `canceled`  — the organiser called it off (stored flag);
  *  - `past`      — its end time has passed;
+ *  - `now`       — its start has passed and its end has not;
  *  - `soon`      — starts within two hours;
- *  - `upcoming`  — later today;
- *  - `scheduled` — any later day.
+ *  - `scheduled` — any later start.
  */
 const SOON_WINDOW_MS = 2 * 60 * 60 * 1000;
 
@@ -32,26 +36,35 @@ export function meetingStart(date: DateKey, time: string): Date {
   );
 }
 
+/** The session's local end, from its start and stored duration. */
+export function meetingEnd(
+  date: DateKey,
+  time: string,
+  durationMinutes: number,
+): Date {
+  const start = meetingStart(date, time);
+
+  return new Date(start.getTime() + Math.max(0, durationMinutes) * 60_000);
+}
+
 export function meetingStatusAt(
   meeting: {
     date: DateKey;
     time: string;
     durationMinutes: number;
+    canceled?: boolean;
   },
   now: Date,
 ): MeetingStatus {
+  if (meeting.canceled) return 'canceled';
+
   const start = meetingStart(meeting.date, meeting.time).getTime();
   const end = start + Math.max(0, meeting.durationMinutes) * 60_000;
   const at = now.getTime();
 
   if (at >= end) return 'past';
+  if (at >= start) return 'now';
   if (start - at <= SOON_WINDOW_MS) return 'soon';
 
-  const day = parseDateKey(meeting.date);
-  const sameDay =
-    day.getFullYear() === now.getFullYear() &&
-    day.getMonth() === now.getMonth() &&
-    day.getDate() === now.getDate();
-
-  return sameDay ? 'upcoming' : 'scheduled';
+  return 'scheduled';
 }

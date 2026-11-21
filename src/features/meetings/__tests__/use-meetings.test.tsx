@@ -38,7 +38,7 @@ const MEETING: Meeting = {
   time: '18:00',
   durationMinutes: 60,
   meetLink: 'https://example.test/meet',
-  status: 'upcoming',
+  status: 'scheduled',
   attendees: [],
   organizer: 'Shaykh',
   location: 'Online',

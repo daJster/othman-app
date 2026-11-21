@@ -72,7 +72,13 @@ type RawMeeting = {
   description: string;
   descriptionAr?: string;
   meetLink: string;
-  attendees: { name: string; nameAr?: string; avatar?: string }[];
+  canceled?: boolean;
+  attendees: {
+    name: string;
+    nameAr?: string;
+    avatar?: string;
+    status?: 'invited' | 'going' | 'declined';
+  }[];
   organizer: string;
   organizerAr?: string;
   location: string;
@@ -262,6 +268,7 @@ function seedMeetings(db: DatabaseSync): void {
       time: row.time,
       durationMinutes: row.durationMinutes,
       meetLink: row.meetLink,
+      canceled: row.canceled ?? false,
       organizer: row.organizer,
       organizerAr: row.organizerAr ?? null,
       location: row.location,
@@ -271,7 +278,7 @@ function seedMeetings(db: DatabaseSync): void {
         nameAr: attendee.nameAr ?? null,
         avatar: attendee.avatar ?? null,
         userId: null,
-        status: 'invited' as const,
+        status: attendee.status ?? 'invited',
       })),
     });
   }

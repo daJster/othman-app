@@ -3,6 +3,7 @@ import { createMeetingsRepository } from '../repositories/meetings.ts';
 import { ApiError } from '../lib/errors.ts';
 import {
   asObject,
+  optionalBoolean,
   optionalInteger,
   optionalNullableString,
   optionalString,
@@ -92,6 +93,7 @@ const create = defineFunction((event, context): FunctionResult => {
       max: 24 * 60,
     }),
     meetLink: optionalString(body, 'meetLink', { max: 2_048 }) ?? '',
+    canceled: optionalBoolean(body, 'canceled'),
     organizer: optionalString(body, 'organizer', { max: 200 }) ?? '',
     organizerAr: optionalNullableString(body, 'organizerAr', { max: 200 }),
     location: optionalString(body, 'location', { max: 200 }) ?? '',
@@ -123,6 +125,7 @@ const update = defineFunction((event, context): FunctionResult => {
       max: 24 * 60,
     }),
     meetLink: optionalString(body, 'meetLink', { max: 2_048 }),
+    canceled: optionalBoolean(body, 'canceled'),
     organizer: optionalString(body, 'organizer', { max: 200 }),
     organizerAr: optionalNullableString(body, 'organizerAr', { max: 200 }),
     location: optionalString(body, 'location', { max: 200 }),
@@ -173,18 +176,24 @@ const rsvp = defineFunction((event, context): FunctionResult => {
 
   if (!repo.get(id)) throw ApiError.notFound(`Meeting ${id} does not exist`);
 
+  const body = event.body == null ? {} : asObject(event.body);
+  const going = optionalBoolean(body, 'going') ?? true;
+  const status = going ? 'going' : 'declined';
+
   // Remove first so a display-name change cannot leave two rows for one user.
+  // A decline is stored as a row, not a deletion: "no answer" and "said no"
+  // are different answers the card must be able to tell apart.
   repo.removeAttendee(id, auth.user.uid);
   repo.addAttendee(id, {
     userId: auth.user.uid,
     name: auth.user.displayName ?? auth.user.email,
-    status: 'going',
+    status,
   });
 
   context.events.publish('meetings.rsvp', {
     id,
     uid: auth.user.uid,
-    status: 'going',
+    status,
   });
 
   return ok({ meeting: repo.get(id) });

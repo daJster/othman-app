@@ -41,28 +41,12 @@ export function MeetingCardActions({ meeting }: { meeting: Meeting }) {
   const router = useRouter();
   const toast = useToast();
   const session = useSessionRole();
-  const rsvp = useApiMutation(api.demo.meetings.rsvp);
   const remove = useApiMutation(api.demo.meetings.remove);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
-  const isPast = meeting.status === 'past';
-  const attending =
-    session.uid !== null &&
-    meeting.attendees.some((attendee) => attendee.userId === session.uid);
-  const showRsvp = session.canWrite && !isPast;
   const showAdmin = session.isAdmin;
 
-  if (!showRsvp && !showAdmin) return null;
-
-  const toggleAttendance = () => {
-    rsvp.mutate(
-      { id: meeting.id, going: !attending },
-      {
-        onError: (error) =>
-          toast.show(t(backendMessageKey(error)), { tone: 'error' }),
-      },
-    );
-  };
+  if (!showAdmin) return null;
 
   const removeMeeting = () => {
     remove.mutate(
@@ -80,66 +64,42 @@ export function MeetingCardActions({ meeting }: { meeting: Meeting }) {
 
   return (
     <>
-      {showRsvp ? (
+      <View className="flex-row items-center gap-1 border-t border-glass-edge pt-2">
         <Button
-          variant={attending ? 'secondary' : 'outline'}
-          onPress={toggleAttendance}
-          disabled={rsvp.isPending}
-          accessibilityState={{ checked: attending }}
-          testID={`meeting-rsvp:${meeting.id}`}
+          variant="ghost"
+          size="sm"
+          onPress={() =>
+            router.push({
+              pathname: '/meetings/edit',
+              params: { id: String(meeting.id) },
+            })
+          }
+          testID={`meeting-edit:${meeting.id}`}
         >
-          <Icon
-            name={attending ? 'check' : 'users'}
-            size={16}
-            tone={attending ? 'primary' : 'muted'}
-          />
+          <Icon name="pencil" size={16} tone="muted" />
           <ButtonText
-            variant={attending ? 'secondary' : 'outline'}
-            className={attending ? undefined : 'text-foreground'}
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground"
           >
-            {attending ? t('meeting.rsvp.attending') : t('meeting.rsvp.attend')}
+            {t('action.edit')}
           </ButtonText>
         </Button>
-      ) : null}
 
-      {showAdmin ? (
-        <View className="flex-row items-center gap-1 border-t border-glass-edge pt-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onPress={() =>
-              router.push({
-                pathname: '/meetings/edit',
-                params: { id: String(meeting.id) },
-              })
-            }
-            testID={`meeting-edit:${meeting.id}`}
-          >
-            <Icon name="pencil" size={16} tone="muted" />
-            <ButtonText
-              variant="ghost"
-              size="sm"
-              className="text-muted-foreground"
-            >
-              {t('action.edit')}
-            </ButtonText>
-          </Button>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            className="ms-auto"
-            onPress={() => setConfirmOpen(true)}
-            disabled={remove.isPending}
-            testID={`meeting-delete:${meeting.id}`}
-          >
-            <Icon name="trash" size={16} tone="destructive" />
-            <ButtonText variant="ghost" size="sm" className="text-destructive">
-              {t('action.delete')}
-            </ButtonText>
-          </Button>
-        </View>
-      ) : null}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="ms-auto"
+          onPress={() => setConfirmOpen(true)}
+          disabled={remove.isPending}
+          testID={`meeting-delete:${meeting.id}`}
+        >
+          <Icon name="trash" size={16} tone="destructive" />
+          <ButtonText variant="ghost" size="sm" className="text-destructive">
+            {t('action.delete')}
+          </ButtonText>
+        </Button>
+      </View>
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent>

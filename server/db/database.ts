@@ -139,8 +139,18 @@ function migrate(db: DatabaseSync): void {
     db.exec('PRAGMA user_version = 1;');
   }
 
+  if (version < 2) {
+    // Cancellation is a stored fact, not a clock reading, so it can outlive the
+    // session's time slot. Added rather than folded into SCHEMA_V1: existing
+    // developer databases are migrated in place instead of being dropped.
+    db.exec(
+      'ALTER TABLE meetings ADD COLUMN canceled INTEGER NOT NULL DEFAULT 0;',
+    );
+    db.exec('PRAGMA user_version = 2;');
+  }
+
   // Future migrations:
-  // if (version < 2) { db.exec('ALTER TABLE …'); db.exec('PRAGMA user_version = 2;'); }
+  // if (version < 3) { db.exec('ALTER TABLE …'); db.exec('PRAGMA user_version = 3;'); }
 }
 
 /**

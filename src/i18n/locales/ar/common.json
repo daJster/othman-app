@@ -493,10 +493,11 @@
   },
   "meeting": {
     "status": {
-      "soon": "تبدأ قريبًا",
-      "upcoming": "اليوم",
+      "now": "الآن",
+      "soon": "قريبًا",
       "scheduled": "مجدولة",
-      "past": "انتهت"
+      "past": "انتهت",
+      "canceled": "أُلغيت"
     },
     "duration": "{{minutes}} دقيقة",
     "attendees_zero": "لا حاضرين",
@@ -521,8 +522,16 @@
     },
     "nextSession": "أقرب حلقة: {{date}}",
     "details": "التفاصيل",
-    "less": "أقل",
-    "organizedBy": "بإشراف {{name}}",
+    "attendeesTitle": "الحاضرون",
+    "attendance": {
+      "unknown": "بلا رد",
+      "accepted": "قَبِل",
+      "declined": "اعتذر"
+    },
+    "roles": {
+      "organizer": "المنظّم",
+      "attendee": "حاضر"
+    },
     "create": "حلقة جديدة",
     "edit": "تعديل الحلقة",
     "form": {
@@ -561,10 +570,13 @@
       "saving": "جارٍ الحفظ…"
     },
     "rsvp": {
-      "attend": "سأحضر",
-      "attending": "أنت حاضر",
-      "failed": "تعذّر تحديث حضورك.",
+      "accept": "قبول",
+      "decline": "رفض",
+      "failed": "تعذّر تحديث ردّك.",
       "pastHint": "انتهت هذه الحلقة."
+    },
+    "response": {
+      "label": "ردّك"
     },
     "delete": {
       "action": "حذف",
@@ -577,8 +589,7 @@
   "page": {
     "meetings": {
       "header": {
-        "title": "الحلقات",
-        "description": "حلقاتك مع شيخك وزملائك"
+        "title": "الحلقات"
       },
       "list": {
         "empty": "لا توجد حلقات في هذا اليوم."

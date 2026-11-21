@@ -54,7 +54,7 @@ export type AttendeeRecord = {
   status: 'invited' | 'going' | 'declined';
 };
 
-export type MeetingStatus = 'soon' | 'upcoming' | 'scheduled' | 'past';
+export type MeetingStatus = 'canceled' | 'past' | 'now' | 'soon' | 'scheduled';
 
 export type MeetingRecord = {
   id: number;
@@ -67,6 +67,7 @@ export type MeetingRecord = {
   durationMinutes: number;
   meetLink: string;
   status: MeetingStatus;
+  canceled: boolean;
   attendees: AttendeeRecord[];
   organizer: string;
   organizerAr?: string;
