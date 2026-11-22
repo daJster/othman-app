@@ -1,6 +1,7 @@
 import type { Meeting } from '@/core/types';
 import {
   createEmptyDraft,
+  DURATION_STEPS,
   isMeetingDraftDirty,
   toMeetingDraft,
   toMeetingInput,
@@ -18,7 +19,7 @@ const meeting: Meeting = {
   durationMinutes: 60,
   meetLink: 'https://meet.google.com/abc',
   status: 'scheduled',
-  attendees: [],
+  attendees: [{ name: 'Othman', userId: 'demo-student', status: 'invited' }],
   organizer: 'Shaykh',
   organizerAr: 'الشيخ',
   location: 'Kuttab',
@@ -40,6 +41,9 @@ describe('meeting form', () => {
       time: '25:00',
       durationMinutes: '0',
       meetLink: 'meet.google.com/abc',
+      attendees: [
+        { userId: 'demo-student', name: 'Othman', status: 'invited' },
+      ],
     });
 
     expect(Object.keys(errors).sort()).toEqual([
@@ -48,6 +52,19 @@ describe('meeting form', () => {
       'meetLink',
       'time',
     ]);
+  });
+
+  it('requires at least one invitation', () => {
+    const errors = validateMeetingDraft({
+      ...createEmptyDraft(),
+      title: 'Weekly review',
+    });
+
+    expect(errors.attendees).toBe('meeting.form.validation.attendees');
+  });
+
+  it('cycles the duration through the five planned lengths', () => {
+    expect(DURATION_STEPS).toEqual([30, 60, 90, 120, 1440]);
   });
 
   it('prefills the language the reader is looking at', () => {

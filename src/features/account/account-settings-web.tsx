@@ -1,137 +1,54 @@
 import { useTranslation } from 'react-i18next';
-import { Pressable, View } from 'react-native';
-import type { IconName } from '@/core/config';
-import { cn } from '@/ui/cn';
-import { FOCUS_RING } from '@/ui/focus';
-import { Icon } from '@/ui/icon';
+import { View } from 'react-native';
 import { ListSectionHeader } from '@/ui/list-section-header';
-import { Text } from '@/ui/text';
+import { SettingsRow } from './settings-row';
 
 /**
  * Account settings rows — web only.
  *
- * `@expo/ui`'s `List` is the right choice on iOS/Android: it is a real SwiftUI
- * List / Compose LazyColumn with the platform's separators and pressed states.
- * Its web fallback, however, paints its row labels with a hard-coded dark
- * colour, which on a dark background measured 1.23:1. Rather than theme a
- * third-party fallback we do not control, the web path renders the same rows
- * from the app's own primitives so every colour comes from a token.
+ * `@expo/ui`'s `List` is the right choice on iOS/Android, but its web fallback
+ * paints row labels with a hard-coded dark colour that measured 1.23:1 on the
+ * dark ground. The web path renders the same rows from the app's own primitives
+ * instead, so every colour comes from a token.
  *
- * Grammar follows the rest of the app: hairlines, not boxes; a leading glyph,
- * a label with one quiet supporting line, and a directional chevron. Rows are
- * 56px tall, which also clears the 44px tap target. The row uses `flex-row`:
- * under `dir="rtl"` CSS already reverses the inline axis, so an additional
- * `flex-row-reverse` would put the leading glyph on the wrong side.
+ * Two groups only: the things that are not preferences and not the person —
+ * About and feedback — and the way out. The session rows share one header: the
+ * destructive row is marked by its icon and colour, not by a second "Account"
+ * heading that repeats the page title.
  */
-
-type SettingsRowProps = {
-  testID: string;
-  icon: IconName;
-  label: string;
-  description?: string;
-  onPress: () => void;
-  destructive?: boolean;
-  showChevron?: boolean;
-  /** The row closes a grouped surface: no trailing hairline. */
-  last?: boolean;
-};
-
-function SettingsRow({
-  testID,
-  icon,
-  label,
-  description,
-  onPress,
-  destructive = false,
-  showChevron = true,
-  last = false,
-}: SettingsRowProps) {
-  return (
-    <Pressable
-      testID={testID}
-      accessibilityRole="button"
-      onPress={onPress}
-      className={cn(
-        'min-h-14 w-full flex-row items-center gap-3 py-3 active:opacity-70',
-        !last && 'border-b border-glass-edge',
-        FOCUS_RING,
-      )}
-    >
-      <Icon name={icon} tone={destructive ? 'destructive' : 'muted'} />
-
-      <View className="min-w-0 flex-1 items-start gap-0.5">
-        <Text variant="label" tone={destructive ? 'destructive' : 'default'}>
-          {label}
-        </Text>
-        {description ? (
-          <Text variant="caption" tone="muted">
-            {description}
-          </Text>
-        ) : null}
-      </View>
-
-      {showChevron ? (
-        <Icon name="chevron-right" size={18} tone="muted" />
-      ) : null}
-    </Pressable>
-  );
-}
-
 export type AccountSettingsWebProps = {
-  onProgress: () => void;
   onAbout: () => void;
   onFeedback: () => void;
   onSignOut: () => void;
   /** Administration only: the cohort's account list. */
   onMembers?: () => void;
+  /** Superadmin only: the remote feature switchboard. */
+  onFeatures?: () => void;
+  /** Development only: opens the seeded-account switcher. */
+  onSwitchAccount?: () => void;
   /** Real signed-in session only: self-service deletion is irreversible. */
   onDeleteAccount?: () => void;
 };
 
 export function AccountSettingsWeb({
-  onProgress,
   onAbout,
   onFeedback,
   onSignOut,
   onMembers,
+  onFeatures,
+  onSwitchAccount,
   onDeleteAccount,
 }: AccountSettingsWebProps) {
   const { t } = useTranslation();
 
   return (
     <View>
-      {onMembers ? (
-        <>
-          <ListSectionHeader
-            label={t('account.sections.manage')}
-            inset={false}
-          />
-          <SettingsRow
-            testID="account-members-row"
-            icon="users"
-            label={t('account.admin.members')}
-            description={t('account.admin.membersDescription')}
-            onPress={onMembers}
-            last
-          />
-        </>
-      ) : null}
-
-      <ListSectionHeader label={t('account.sections.settings')} inset={false} />
-
-      <SettingsRow
-        testID="account-progress-row"
-        icon="chart-line"
-        label={t('pages.account.progress.title')}
-        description={t('pages.account.progress.subtitle')}
-        onPress={onProgress}
-      />
+      <ListSectionHeader label={t('account.sections.more')} inset={false} />
 
       <SettingsRow
         testID="account-about-row"
         icon="info"
         label={t('nav.about')}
-        description={t('nav.aboutDesc')}
         onPress={onAbout}
       />
 
@@ -139,11 +56,47 @@ export function AccountSettingsWeb({
         testID="account-feedback-row"
         icon="send"
         label={t('account.feedback.open')}
-        description={t('account.feedback.rowDescription')}
         onPress={onFeedback}
+        last={!onMembers && !onFeatures}
       />
 
+      {onMembers || onFeatures ? (
+        <>
+          <ListSectionHeader
+            label={t('account.sections.manage')}
+            inset={false}
+          />
+          {onMembers ? (
+            <SettingsRow
+              testID="account-members-row"
+              icon="users"
+              label={t('account.admin.members')}
+              onPress={onMembers}
+              last={!onFeatures}
+            />
+          ) : null}
+          {onFeatures ? (
+            <SettingsRow
+              testID="account-features-row"
+              icon="layers"
+              label={t('account.admin.features')}
+              onPress={onFeatures}
+              last
+            />
+          ) : null}
+        </>
+      ) : null}
+
       <ListSectionHeader label={t('account.sections.session')} inset={false} />
+
+      {onSwitchAccount ? (
+        <SettingsRow
+          testID="account-switch-row"
+          icon="users"
+          label={t('auth.dev.switchAccount')}
+          onPress={onSwitchAccount}
+        />
+      ) : null}
 
       <SettingsRow
         testID="account-sign-out-row"
@@ -156,22 +109,15 @@ export function AccountSettingsWeb({
       />
 
       {onDeleteAccount ? (
-        <>
-          <ListSectionHeader
-            label={t('account.sections.danger')}
-            inset={false}
-          />
-          <SettingsRow
-            testID="account-delete-row"
-            icon="trash"
-            label={t('account.danger.delete')}
-            description={t('account.danger.deleteDescription')}
-            onPress={onDeleteAccount}
-            destructive
-            showChevron={false}
-            last
-          />
-        </>
+        <SettingsRow
+          testID="account-delete-row"
+          icon="trash"
+          label={t('account.danger.delete')}
+          onPress={onDeleteAccount}
+          destructive
+          showChevron={false}
+          last
+        />
       ) : null}
     </View>
   );

@@ -18,6 +18,8 @@ import {
   type BackendAccountPatch,
   type BackendBookmark,
   type BackendErrorCode,
+  type BackendFeatureChange,
+  type BackendFeatureConfig,
   type BackendHealth,
   type BackendNote,
   type BackendRequestOptions,
@@ -429,6 +431,24 @@ export class BackendClient {
 
   health(): Promise<BackendHealth> {
     return this.request('GET', '/health', { auth: false, timeoutMs: 4_000 });
+  }
+
+  /* ── remote feature control ───────────────────────────────────────── */
+
+  /**
+   * The flag document.
+   *
+   * Unauthenticated on purpose: a kill switch has to apply before sign-in, and
+   * a signed-out client must be able to learn that sign-in itself is paused.
+   */
+  getFeatureConfig(): Promise<BackendFeatureConfig> {
+    return this.request('GET', '/v1/config/features', { auth: false });
+  }
+
+  saveFeatureChanges(
+    changes: readonly BackendFeatureChange[],
+  ): Promise<BackendFeatureConfig> {
+    return this.request('PUT', '/v1/config/features', { body: { changes } });
   }
 
   /**

@@ -137,8 +137,6 @@ describe('AccountScreen', () => {
 
     expect(screen.getByText('othman@kuttab.test')).toBeTruthy();
     expect(screen.getByText('Student')).toBeTruthy();
-    expect(screen.getByText('Progress')).toBeTruthy();
-    expect(screen.getByText('Your memorisation over time')).toBeTruthy();
     expect(screen.getByText('Sign out')).toBeTruthy();
     // The demo affordance is gone from the production screen.
     expect(
@@ -148,7 +146,7 @@ describe('AccountScreen', () => {
     ).toBeNull();
   });
 
-  it('opens the edit sheet, the progress screen and about', async () => {
+  it('opens the edit sheet and about', async () => {
     await renderScreen();
     await waitFor(() =>
       expect(screen.getByText('Othman Al-Farsi')).toBeTruthy(),
@@ -156,9 +154,6 @@ describe('AccountScreen', () => {
 
     await fireEvent.press(screen.getByTestId('account-edit-button'));
     expect(mockPush).toHaveBeenCalledWith('/account/edit');
-
-    await fireEvent.press(screen.getByTestId('account-progress-row'));
-    expect(mockPush).toHaveBeenCalledWith('/account/progress');
 
     await fireEvent.press(screen.getByTestId('account-about-row'));
     expect(mockPush).toHaveBeenCalledWith('/about');
@@ -232,15 +227,19 @@ describe('AccountScreen', () => {
     await fireEvent.press(screen.getByTestId('account-sign-out-confirm'));
 
     expect(auth.signOutCalls).toHaveBeenCalledTimes(1);
-    // Development mode keeps the mock profile available after sign-out.
-    await waitFor(() => expect(screen.getByText('عثمان الفارسي')).toBeTruthy());
+    // A real sign-out leaves the real signed-out screen; it must not fall back
+    // to the development mock profile.
+    await waitFor(() =>
+      expect(screen.getByText('You are signed out')).toBeTruthy(),
+    );
+    expect(screen.getByText('Sign in')).toBeTruthy();
   });
 
-  it('renders the mock profile while gating is disabled', async () => {
+  it('shows the signed-out state when there is no session', async () => {
     await renderScreen(null);
 
-    expect(screen.getByText('عثمان الفارسي')).toBeTruthy();
-    expect(screen.getByText('othman@kuttab.test')).toBeTruthy();
-    expect(screen.getByTestId('account-edit-button')).toBeTruthy();
+    expect(screen.getByText('You are signed out')).toBeTruthy();
+    expect(screen.getByText('Sign in')).toBeTruthy();
+    expect(screen.queryByText('othman@kuttab.test')).toBeNull();
   });
 });

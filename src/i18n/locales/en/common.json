@@ -62,6 +62,7 @@
     "clear": "Clear",
     "close": "Close",
     "continue": "Continue",
+    "done": "Done",
     "edit": "Edit",
     "goBackHome": "Back to home",
     "join": "Join",
@@ -353,6 +354,13 @@
       "tryAgain": "Try again",
       "back": "Use a different email"
     },
+    "dev": {
+      "switchAccount": "Switch account",
+      "switchHint": "Development only. Signs in with a seeded demo account.",
+      "accountsTitle": "Demo accounts",
+      "accountsHint": "Development only — one tap signs you in.",
+      "switchFailed": "Could not switch account. Try again."
+    },
     "error": {
       "invalid-credential": "Email or password is incorrect.",
       "email-already-in-use": "An account already exists with this email.",
@@ -377,6 +385,7 @@
       "settings": "Settings",
       "session": "Session",
       "manage": "Manage",
+      "more": "More",
       "danger": "Account"
     },
     "completeness": {
@@ -475,7 +484,8 @@
     },
     "admin": {
       "members": "Members",
-      "membersDescription": "Accounts, roles and access"
+      "membersDescription": "Accounts, roles and access",
+      "features": "Feature control"
     },
     "danger": {
       "delete": "Delete my account",
@@ -526,7 +536,7 @@
     "form": {
       "createTitle": "New session",
       "editTitle": "Edit session",
-      "createDescription": "Pick a day and time; the calendar updates as soon as you save.",
+      "createDescription": "Set the session, its time, and who it is for.",
       "editDescription": "Changes apply to everyone in the circle.",
       "title": "Title",
       "titlePlaceholder": "e.g. Weekly review",
@@ -534,7 +544,32 @@
       "dateHint": "YYYY-MM-DD",
       "time": "Start",
       "timeHint": "24-hour, HH:mm",
-      "duration": "Minutes",
+      "duration": "Duration",
+      "duration30": "30 min",
+      "duration60": "1 hour",
+      "duration90": "1 h 30",
+      "duration120": "2 hours",
+      "duration1440": "All day",
+      "durationCustom": "{{count}} min",
+      "addDuration": "Longer",
+      "sections": {
+        "session": "Session",
+        "schedule": "Schedule",
+        "people": "People"
+      },
+      "attendees": "Invite people",
+      "invite": "Invite members",
+      "inviteHint": "Only invited people will see this session.",
+      "noAttendees": "No one invited yet",
+      "searchMembers": "Search members",
+      "noMembers": "No members found",
+      "pickDate": "Choose a date",
+      "pickTime": "Choose a time",
+      "today": "Today",
+      "dateSwipeHint": "Swipe to pick a day, then tap Done.",
+      "timeSwipeHint": "Swipe to set the hour.",
+      "hour": "Hour",
+      "minute": "Minute",
       "location": "Location",
       "locationPlaceholder": "e.g. In the kuttab, or Google Meet",
       "meetLink": "Meeting link",
@@ -553,7 +588,8 @@
         "date": "Use a real date in YYYY-MM-DD form.",
         "time": "Use a 24-hour time such as 18:00.",
         "duration": "Use a whole number of minutes between 1 and 1440.",
-        "link": "Use an http:// or https:// link, or leave it empty."
+        "link": "Use an http:// or https:// link, or leave it empty.",
+        "attendees": "Invite at least one person."
       },
       "languageHint": "The same text appears in Arabic and English.",
       "saving": "Saving…"
@@ -582,6 +618,10 @@
       },
       "list": {
         "empty": "No sessions on this day."
+      },
+      "signedOut": {
+        "title": "Sign in to see your meetings",
+        "description": "Meetings are shown only to the people invited to them."
       }
     }
   },
@@ -842,6 +882,168 @@
       "deleteMessage": "This note will be removed from your account.",
       "validation": "Choose a valid surah and ayah, then write the note.",
       "open": "Open the ayah"
+    }
+  },
+  "features": {
+    "state": {
+      "on": "On",
+      "readOnly": "Read only",
+      "maintenance": "Maintenance",
+      "off": "Off"
+    },
+    "notice": {
+      "eyebrow": "Temporarily unavailable",
+      "maintenance": {
+        "title": "{{feature}} is paused",
+        "body": "We're fixing something here. Nothing is lost - try again in a little while."
+      },
+      "off": {
+        "title": "{{feature}} is unavailable",
+        "body": "This part of the app has been switched off while we work on it."
+      },
+      "retry": "Try again",
+      "home": "Go home",
+      "controls": "Open feature control",
+      "readOnly": {
+        "title": "{{feature}} is read only",
+        "body": "Editing is paused for now. Everything is still readable."
+      }
+    },
+    "console": {
+      "title": "Feature control",
+      "description": "Switch any part of the app on, off, read-only or into maintenance. Changes reach every device within seconds.",
+      "global": "These switches are global. Every signed-in person is affected, so use the narrowest one that contains the problem.",
+      "level": {
+        "app": "App",
+        "area": "Area",
+        "page": "Page",
+        "capability": "Action"
+      },
+      "stateHint": {
+        "on": "Everything works.",
+        "readOnly": "Content stays readable. Creating, editing and deleting are hidden.",
+        "maintenance": "The page is replaced by a short notice. Writes are refused.",
+        "off": "The page is unreachable and its tab is removed. Writes are refused."
+      },
+      "inherited": "Restricted by {{source}}",
+      "configured": "Set here",
+      "default": "Default",
+      "alwaysOn": "Always on",
+      "unsaved": "Unsaved",
+      "staged_one": "{{count}} unsaved change",
+      "staged_other": "{{count}} unsaved changes",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "saved": "Switches updated",
+      "discard": "Discard",
+      "resetAll": "Reset every switch",
+      "resetAllTitle": "Reset every switch?",
+      "resetAllBody": "Every feature returns to its default state: on. This is the fastest way back after an outage.",
+      "reset": "Reset to default",
+      "apply": "Apply",
+      "exemptLabel": "Keep it available to superadmins",
+      "exemptHint": "Your own account keeps working so you can verify the fix.",
+      "noteLabel": "Note",
+      "notePlaceholder": "Why it is off, or when it comes back",
+      "noteHint": "Only superadmins read this. It is never shown to users.",
+      "updated": "Last changed {{when}} by {{who}}",
+      "never": "Never changed",
+      "lockedHint": "The switchboard cannot switch itself off.",
+      "errorTitle": "Could not load the switches",
+      "retry": "Try again",
+      "changedBySystem": "the system"
+    },
+    "app": {
+      "label": "The whole app",
+      "description": "Every screen, tab and request."
+    },
+    "home": {
+      "label": "Home",
+      "description": "The landing tab: verse of the day, resume band and shortcuts."
+    },
+    "quran": {
+      "label": "Qur'an",
+      "description": "The Qur’an tab, its records and the reader.",
+      "reader": {
+        "label": "Reader",
+        "description": "The mushaf reader, page turns and its tools."
+      },
+      "history": {
+        "label": "Mushaf history",
+        "description": "The timeline of pages read and the minutes spent on them."
+      },
+      "records": {
+        "label": "Records",
+        "description": "Memorisation, bookmarks and notes."
+      },
+      "bookmarks": {
+        "label": "Bookmarks",
+        "description": "Saving, editing and deleting bookmarks."
+      },
+      "notes": {
+        "label": "Notes",
+        "description": "Saving, editing and deleting ayah notes."
+      }
+    },
+    "meetings": {
+      "label": "Meetings",
+      "description": "The calendar, the day’s sessions and attendance.",
+      "create": {
+        "label": "Create sessions",
+        "description": "The New session button and its form."
+      },
+      "edit": {
+        "label": "Edit sessions",
+        "description": "Changing a session’s title, time or people."
+      },
+      "delete": {
+        "label": "Delete sessions",
+        "description": "Removing a session for everyone."
+      },
+      "rsvp": {
+        "label": "Responses",
+        "description": "Accepting, declining or clearing an answer."
+      }
+    },
+    "account": {
+      "label": "Account",
+      "description": "Profile, preferences and session controls.",
+      "edit": {
+        "label": "Edit profile",
+        "description": "Changing name, photo and contact details."
+      },
+      "progress": {
+        "label": "Progress",
+        "description": "The progress overview and its surah breakdown."
+      }
+    },
+    "admin": {
+      "label": "Administration",
+      "description": "Cohort management and the switchboard.",
+      "members": {
+        "label": "Members",
+        "description": "The list of accounts and their roles.",
+        "edit": {
+          "label": "Add or edit a member",
+          "description": "Creating an account or changing a role."
+        }
+      },
+      "features": {
+        "label": "Feature control",
+        "description": "This screen. It cannot be switched off."
+      }
+    },
+    "about": {
+      "label": "About",
+      "description": "The about page."
+    },
+    "auth": {
+      "label": "Authentication",
+      "description": "Signing in and signing out.",
+      "sign-in": {
+        "label": "Sign in",
+        "description": "The sign-in screen and new sessions."
+      }
     }
   }
 }

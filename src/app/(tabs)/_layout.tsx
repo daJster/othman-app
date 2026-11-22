@@ -1,6 +1,7 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { useTranslation } from 'react-i18next';
 import { useResolveClassNames } from 'uniwind';
+import { useFeatures } from '@/features/flags/provider';
 import { TABS } from '@/features/navigation/route-registry';
 import { getIconGlyph } from '@/ui/icon';
 
@@ -39,6 +40,7 @@ import { getIconGlyph } from '@/ui/icon';
  */
 export default function NativeTabsLayout() {
   const { t } = useTranslation();
+  const flags = useFeatures();
   const bar = useResolveClassNames('bg-background');
   const idleIcon = useResolveClassNames('text-muted-foreground');
   const activeIcon = useResolveClassNames('text-primary');
@@ -61,6 +63,7 @@ export default function NativeTabsLayout() {
           <NativeTabs.Trigger
             key={tab.tab}
             name={tab.tab}
+            hidden={!flags.tabVisible(tab.tab)}
             testID={`tab-${tab.tab}`}
             accessibilityLabel={label}
           >

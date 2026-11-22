@@ -7,15 +7,18 @@ import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
 import { Drawer } from '@/ui/panel';
 import { Text } from '@/ui/text';
+import { ProfileCompleteness, profileCompletion } from './profile-completeness';
 import { roleLabelKey } from './role-label';
 
 /**
  * The full profile, in the drawer.
  *
  * The header shows what fits on one line — name, email, role. The drawer is
- * where the rest lives: the phone number, the fact that an email is verified,
- * and the account identifier. It is reference material, so the only action is
- * Edit, and it sits in the footer where a thumb expects it.
+ * where the rest lives: how complete the profile is, the phone number and the
+ * role again as reference. It is a reference surface, so the only action is in
+ * the footer where a thumb expects it, and its label follows the one thing the
+ * reader would do next: finish the profile while a field is missing, otherwise
+ * edit it.
  *
  * The avatar is repeated rather than moved: a drawer can open from anywhere in
  * the account screen, and a panel with no identity would read as generic
@@ -35,6 +38,7 @@ export function AccountDetailsDrawer({
   onEdit,
 }: AccountDetailsDrawerProps) {
   const { t } = useTranslation();
+  const { complete } = profileCompletion(account);
 
   return (
     <Drawer
@@ -46,7 +50,9 @@ export function AccountDetailsDrawer({
       footer={
         <Button
           variant="outline"
-          label={t('account.details.edit')}
+          label={t(
+            complete ? 'account.details.edit' : 'account.completeness.action',
+          )}
           onPress={onEdit}
           testID="account-details-edit"
         />
@@ -70,6 +76,13 @@ export function AccountDetailsDrawer({
           className="self-center"
         />
       </View>
+
+      <ProfileCompleteness
+        account={account}
+        onEdit={onEdit}
+        showAction={false}
+        className="border-b-0 px-0 py-0"
+      />
 
       <View className="gap-4 border-t border-border pt-4">
         <DetailRow

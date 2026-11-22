@@ -2,6 +2,7 @@ import { TabList, TabSlot, TabTrigger, Tabs } from 'expo-router/ui';
 import { useTranslation } from 'react-i18next';
 import { View, type ViewStyle } from 'react-native';
 import { TABS } from '@/features/navigation/route-registry';
+import { useFeatures } from '@/features/flags/provider';
 import { WebNavControls } from '@/features/navigation/web/nav-controls';
 import { WebTabLink } from '@/features/navigation/web/tab-link';
 import { BrandMark } from '@/features/brand/brand-mark';
@@ -45,6 +46,7 @@ import { usePageScrolled } from '@/ui/scroll-state';
 export default function WebTabsLayout() {
   const { t } = useTranslation();
   const scrolled = usePageScrolled();
+  const flags = useFeatures();
 
   /*
    * Top of the page: an opaque black bar, so the chrome sits on solid ground.
@@ -145,7 +147,7 @@ export default function WebTabsLayout() {
             <WebTabLink
               label={t(tab.titleKey)}
               icon={tab.icon}
-              hidden={tab.hiddenOnWeb === true}
+              hidden={tab.hiddenOnWeb === true || !flags.tabVisible(tab.tab)}
               testID={`nav-tab-${tab.tab}`}
             />
           </TabTrigger>

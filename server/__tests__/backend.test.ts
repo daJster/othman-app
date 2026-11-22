@@ -252,7 +252,7 @@ test('admin account CRUD, including role changes and deletion', async () => {
   assert.equal(missing.status, 404);
 });
 
-test('meetings: public reads, admin writes, student RSVP', async () => {
+test('meetings: scoped reads, admin writes, student RSVP', async () => {
   const admin = await login('shaykh@kuttab.test');
   const student = await login();
 
@@ -267,8 +267,11 @@ test('meetings: public reads, admin writes, student RSVP', async () => {
         date: '2030-01-15',
         time: '18:00',
         durationMinutes: 60,
-        meetLink: 'https://meet.google.com/test',
-        attendees: [{ name: 'Student' }],
+        meetLink: '',
+        description: '',
+        location: '',
+        organizer: '',
+        attendees: [{ name: 'Student', userId: 'demo-student' }],
       },
     },
   );
@@ -278,18 +281,76 @@ test('meetings: public reads, admin writes, student RSVP', async () => {
 
   const id = created.body.meeting.id;
 
-  const listed = await api<{ meetings: { id: number }[] }>(
+  const other = await api<{ meeting: { id: number } }>('/v1/meetings', {
+    method: 'POST',
+    token: admin,
+    body: {
+      title: 'Another cohort',
+      date: '2030-01-16',
+      time: '18:00',
+      durationMinutes: 30,
+      attendees: [{ name: 'Somebody else' }],
+    },
+  });
+
+  assert.equal(other.status, 201);
+  const otherId = other.body.meeting.id;
+
+  // Anonymous reads keep the public list: the app's sign-in surface can still
+  // show what the cohort has scheduled.
+  const publicListed = await api<{ meetings: { id: number }[] }>(
     '/v1/meetings?date=2030-01-15',
   );
-  assert.equal(listed.status, 200);
-  assert.equal(listed.body.meetings.length, 1);
+  assert.equal(publicListed.status, 200);
+  assert.equal(publicListed.body.meetings.length, 1);
+
+  // A signed-in student only sees the meeting they belong to, on the day and
+  // in the calendar range the tab actually requests.
+  const mineListed = await api<{ meetings: { id: number }[]; total: number }>(
+    '/v1/meetings?date=2030-01-15',
+    { token: student },
+  );
+  assert.equal(mineListed.status, 200);
+  assert.deepEqual(
+    mineListed.body.meetings.map((meeting) => meeting.id),
+    [id],
+  );
+  assert.equal(mineListed.body.total, 1);
+
+  const otherDay = await api<{ meetings: unknown[] }>(
+    '/v1/meetings?date=2030-01-16',
+    { token: student },
+  );
+  assert.equal(otherDay.status, 200);
+  assert.equal(otherDay.body.meetings.length, 0);
+
+  const range = await api<{ meetings: { id: number }[] }>(
+    '/v1/meetings?from=2030-01-15&to=2030-01-16',
+    { token: student },
+  );
+  assert.equal(range.status, 200);
+  assert.deepEqual(
+    range.body.meetings.map((meeting) => meeting.id),
+    [id],
+  );
+
+  // The shaykh manages the whole calendar, so his view is not narrowed.
+  const adminView = await api<{ meetings: { id: number }[] }>(
+    '/v1/meetings?date=2030-01-16',
+    { token: admin },
+  );
+  assert.equal(adminView.status, 200);
+  assert.deepEqual(
+    adminView.body.meetings.map((meeting) => meeting.id),
+    [otherId],
+  );
 
   const studentCreate = await api('/v1/meetings', {
     method: 'POST',
     token: student,
     body: {
       title: 'Not allowed',
-      date: '2030-01-16',
+      date: '2030-01-17',
       time: '18:00',
       durationMinutes: 30,
     },
@@ -322,11 +383,13 @@ test('meetings: public reads, admin writes, student RSVP', async () => {
     ),
   );
 
-  const removed = await api(`/v1/meetings/${id}`, {
-    method: 'DELETE',
-    token: admin,
-  });
-  assert.equal(removed.status, 204);
+  for (const meetingId of [id, otherId]) {
+    const removed = await api(`/v1/meetings/${meetingId}`, {
+      method: 'DELETE',
+      token: admin,
+    });
+    assert.equal(removed.status, 204);
+  }
 });
 
 test('notices keep the web fixture and expose a paged phone archive', async () => {
@@ -566,4 +629,256 @@ test('unknown routes and functions return a structured 404', async () => {
   assert.equal(fn.status, 404);
   assert.equal(route.body.error.code, 'not-found');
   assert.equal(fn.body.error.code, 'not-found');
+});
+
+type FeatureFlag = {
+  state: string;
+  note: string | null;
+  exemptRoles: string[];
+  updatedAt: string | null;
+  updatedBy: string | null;
+};
+
+type FeatureResponse = {
+  flags: Record<string, FeatureFlag>;
+  updatedAt: string | null;
+  updatedBy: string | null;
+};
+
+async function writeFeatures(
+  token: string,
+  changes: unknown[],
+): Promise<ApiResponse<FeatureResponse>> {
+  return api<FeatureResponse>('/v1/config/features', {
+    method: 'PUT',
+    token,
+    body: { changes },
+  });
+}
+
+test('feature config is public and empty on a fresh database', async () => {
+  const response = await api<FeatureResponse>('/v1/config/features');
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(response.body.flags, {});
+  assert.equal(response.body.updatedAt, null);
+  assert.equal(response.body.updatedBy, null);
+});
+
+test('only a superadmin can write feature config', async () => {
+  const guest = await api('/v1/config/features', {
+    method: 'PUT',
+    body: { changes: [] },
+  });
+  assert.equal(guest.status, 401);
+
+  const admin = await login('shaykh@kuttab.test');
+  const denied = await writeFeatures(admin, []);
+  assert.equal(denied.status, 403);
+});
+
+test('superadmin writes, reads back and removes an override', async () => {
+  const superadmin = await login('admin@kuttab.test');
+
+  const written = await writeFeatures(superadmin, [
+    {
+      key: 'meetings',
+      state: 'maintenance',
+      note: 'Fixing the calendar crash',
+      exemptRoles: ['superadmin'],
+    },
+  ]);
+
+  assert.equal(written.status, 200);
+  assert.equal(written.body.flags.meetings.state, 'maintenance');
+  assert.equal(written.body.flags.meetings.note, 'Fixing the calendar crash');
+  assert.deepEqual(written.body.flags.meetings.exemptRoles, ['superadmin']);
+  assert.equal(written.body.flags.meetings.updatedBy, 'admin@kuttab.test');
+  assert.ok(written.body.flags.meetings.updatedAt);
+  assert.equal(written.body.updatedBy, 'admin@kuttab.test');
+
+  const fetched = await api<FeatureResponse>('/v1/config/features');
+  assert.equal(fetched.status, 200);
+  assert.equal(fetched.body.flags.meetings.state, 'maintenance');
+  assert.equal(fetched.body.updatedBy, 'admin@kuttab.test');
+
+  const removed = await writeFeatures(superadmin, [
+    { key: 'meetings', state: null },
+  ]);
+
+  assert.equal(removed.status, 200);
+  assert.equal(removed.body.flags.meetings, undefined);
+});
+
+test('feature writes reject malformed bodies and the locked switchboard', async () => {
+  const superadmin = await login('admin@kuttab.test');
+
+  const malformed: unknown[] = [
+    [],
+    {},
+    { changes: 'nope' },
+    { changes: [{ key: 'Meetings', state: 'off' }] },
+    { changes: [{ key: 'meetings', state: 'disabled' }] },
+    { changes: [{ key: 'meetings', state: 'off', note: 'x'.repeat(501) }] },
+    {
+      changes: [{ key: 'meetings', state: 'off', exemptRoles: ['guest'] }],
+    },
+    {
+      changes: [{ key: 'meetings', state: 'off', exemptRoles: ['wizard'] }],
+    },
+    {
+      changes: Array.from({ length: 101 }, (_, index) => ({
+        key: `meetings.item${index}`,
+        state: 'off',
+      })),
+    },
+  ];
+
+  for (const body of malformed) {
+    const response = await api<{ error: { code: string } }>(
+      '/v1/config/features',
+      { method: 'PUT', token: superadmin, body },
+    );
+
+    assert.equal(response.status, 400);
+    assert.equal(response.body.error.code, 'invalid-argument');
+  }
+
+  const locked = await writeFeatures(superadmin, [
+    { key: 'admin.features', state: 'off' },
+  ]);
+
+  assert.equal(locked.status, 412);
+});
+
+test('a maintenance area blocks writes but not reads', async () => {
+  const superadmin = await login('admin@kuttab.test');
+
+  const exempt = await writeFeatures(superadmin, [
+    {
+      key: 'meetings',
+      state: 'maintenance',
+      note: 'Fixing the calendar crash',
+      exemptRoles: ['superadmin'],
+    },
+  ]);
+  assert.equal(exempt.status, 200);
+
+  const created = await api<{ meeting: { id: number } }>('/v1/meetings', {
+    method: 'POST',
+    token: superadmin,
+    body: {
+      title: 'Allowed during maintenance',
+      date: '2032-03-01',
+      time: '18:00',
+      durationMinutes: 30,
+    },
+  });
+  assert.equal(created.status, 201);
+
+  await api(`/v1/meetings/${created.body.meeting.id}`, {
+    method: 'DELETE',
+    token: superadmin,
+  });
+
+  const unrestricted = await writeFeatures(superadmin, [
+    { key: 'meetings', state: 'maintenance' },
+  ]);
+  assert.equal(unrestricted.status, 200);
+
+  const admin = await login('shaykh@kuttab.test');
+  const blocked = await api<{ error: { code: string; message: string } }>(
+    '/v1/meetings',
+    {
+      method: 'POST',
+      token: admin,
+      body: {
+        title: 'Blocked write',
+        date: '2032-03-02',
+        time: '18:00',
+        durationMinutes: 30,
+      },
+    },
+  );
+
+  assert.equal(blocked.status, 503);
+  assert.equal(blocked.body.error.code, 'unavailable');
+  assert.match(blocked.body.error.message, /meetings is in maintenance/);
+
+  const read = await api('/v1/meetings?date=2032-03-02');
+  assert.equal(read.status, 200);
+
+  const cleared = await writeFeatures(superadmin, [
+    { key: 'meetings', state: null },
+  ]);
+  assert.equal(cleared.status, 200);
+});
+
+test('quran off blocks bookmark writes but keeps the catalog readable', async () => {
+  const superadmin = await login('admin@kuttab.test');
+  const student = await login();
+
+  const off = await writeFeatures(superadmin, [{ key: 'quran', state: 'off' }]);
+  assert.equal(off.status, 200);
+
+  const blocked = await api<{ error: { code: string } }>(
+    '/v1/quran/bookmarks',
+    {
+      method: 'POST',
+      token: student,
+      body: { surah: 1, ayah: 1, absoluteNumber: 1 },
+    },
+  );
+  assert.equal(blocked.status, 503);
+  assert.equal(blocked.body.error.code, 'unavailable');
+
+  const catalog = await api('/v1/quran/catalog');
+  assert.equal(catalog.status, 200);
+
+  await writeFeatures(superadmin, [{ key: 'quran', state: null }]);
+});
+
+test('app off blocks a user write while a superadmin stays exempt', async () => {
+  const superadmin = await login('admin@kuttab.test');
+  const student = await login();
+
+  const off = await writeFeatures(superadmin, [{ key: 'app', state: 'off' }]);
+  assert.equal(off.status, 200);
+
+  const blocked = await api<{ error: { code: string; message: string } }>(
+    '/v1/meetings',
+    {
+      method: 'POST',
+      token: student,
+      body: {
+        title: 'Blocked by app off',
+        date: '2032-04-01',
+        time: '18:00',
+        durationMinutes: 30,
+      },
+    },
+  );
+
+  assert.equal(blocked.status, 503);
+  assert.equal(blocked.body.error.code, 'unavailable');
+  assert.match(blocked.body.error.message, /meetings is off/);
+
+  const created = await api<{ meeting: { id: number } }>('/v1/meetings', {
+    method: 'POST',
+    token: superadmin,
+    body: {
+      title: 'Superadmin during app off',
+      date: '2032-04-01',
+      time: '19:00',
+      durationMinutes: 30,
+    },
+  });
+  assert.equal(created.status, 201);
+
+  await api(`/v1/meetings/${created.body.meeting.id}`, {
+    method: 'DELETE',
+    token: superadmin,
+  });
+
+  await writeFeatures(superadmin, [{ key: 'app', state: null }]);
 });

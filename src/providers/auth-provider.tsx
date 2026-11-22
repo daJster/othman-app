@@ -13,6 +13,7 @@ import { readerStore } from '@/features/quran/store/reader-store.instance';
 import { authService } from '@/platform/auth';
 import type { AuthService } from '@/platform/auth/auth.types';
 import { queryKeys } from '@/services/query';
+import { meetingsService } from '@/services/meetings';
 import {
   AuthContext,
   type AuthContextValue,
@@ -94,13 +95,21 @@ export function AuthProvider({
         // here is what makes that impossible rather than merely unlikely.
         if (previousUid.current !== null) clearPrivateData();
         previousUid.current = nextUid;
+
+        // Meeting days also live in a date-keyed domain cache outside TanStack,
+        // and the server now scopes the list by caller. Clear the day and range
+        // caches, and any query data, so a day read before this identity
+        // existed (auth gating is off in development) cannot answer for it.
+        meetingsService.invalidate();
+        void client.cancelQueries({ queryKey: queryKeys.meetings.root });
+        client.removeQueries({ queryKey: queryKeys.meetings.root });
       }
 
       setUser(next);
       setRestoring(false);
       setSessionError(null);
     },
-    [clearPrivateData],
+    [clearPrivateData, client],
   );
 
   useEffect(() => {

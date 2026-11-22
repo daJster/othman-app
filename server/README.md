@@ -8,7 +8,7 @@ without a Firebase project, emulator, or network.
 ```
 npm run mock        # API only, http://localhost:9000
 npm run dev         # API + Metro together (web + native)
-npm run test:server # 13 integration tests, Node's own runner
+npm run test:server # 22 integration tests, Node's own runner
 ```
 
 `npm run dev` starts the server on **:9000**, waits for `/health`, then starts
@@ -119,19 +119,26 @@ superadmin cannot be demoted or deleted.
 
 ### Meetings
 
-| Method   | Path                     | Auth  |
-| -------- | ------------------------ | ----- |
-| `GET`    | `/v1/meetings?date=`     | —     |
-| `GET`    | `/v1/meetings?from=&to=` | —     |
-| `GET`    | `/v1/meetings/:id`       | —     |
-| `POST`   | `/v1/meetings`           | admin |
-| `PATCH`  | `/v1/meetings/:id`       | admin |
-| `DELETE` | `/v1/meetings/:id`       | admin |
-| `POST`   | `/v1/meetings/:id/rsvp`  | ✓     |
-| `DELETE` | `/v1/meetings/:id/rsvp`  | ✓     |
+| Method   | Path                     | Auth     |
+| -------- | ------------------------ | -------- |
+| `GET`    | `/v1/meetings?date=`     | optional |
+| `GET`    | `/v1/meetings?from=&to=` | optional |
+| `GET`    | `/v1/meetings/:id`       | —        |
+| `POST`   | `/v1/meetings`           | admin    |
+| `PATCH`  | `/v1/meetings/:id`       | admin    |
+| `DELETE` | `/v1/meetings/:id`       | admin    |
+| `POST`   | `/v1/meetings/:id/rsvp`  | ✓        |
+| `DELETE` | `/v1/meetings/:id/rsvp`  | ✓        |
 
 `status` is derived on read from the day, clock and duration; it is never
 stored.
+
+The two list reads are **scoped by the caller** when a token is present: an
+ordinary user only receives meetings they have an attendee row for, in both the
+day page and the calendar range. Admins receive the full calendar because they
+manage it, and an anonymous read keeps the public list for the sign-in/landing
+surface. Filtering happens in SQL before pagination, so `total` matches the
+reader's scope.
 
 ### Qur'an
 
@@ -167,6 +174,54 @@ another's rows even if a handler forgot a filter.
 `POST /v1/functions/:name` calls any registered function with a Firebase-callable
 body (`{ "data": … }`) and returns `{ "result": … }`. The REST routes and the
 callable endpoint share one registry, so they cannot drift.
+
+### Feature control
+
+Remote switches live in one document, `server/data/documents/config/features.json`
+(collection `config`, id `features`). Delete it or clear a flag to restore the
+default. It can be edited by hand — unknown fields are ignored and an invalid
+`state` is treated as "no override" rather than breaking every request.
+
+| Method | Path                  | Auth       | Notes                       |
+| ------ | --------------------- | ---------- | --------------------------- |
+| `GET`  | `/v1/config/features` | —          | public, applies before auth |
+| `PUT`  | `/v1/config/features` | superadmin | `{ changes: [...] }`        |
+
+```json
+{
+  "flags": {
+    "meetings": {
+      "state": "maintenance",
+      "note": "Fixing the calendar crash",
+      "exemptRoles": ["superadmin"],
+      "updatedAt": "2026-11-22T12:00:00.000Z",
+      "updatedBy": "admin@kuttab.test"
+    }
+  },
+  "updatedAt": "2026-11-22T12:00:00.000Z",
+  "updatedBy": "admin@kuttab.test"
+}
+```
+
+States, most permissive to most restrictive: `on`, `read-only`, `maintenance`,
+`off`. **Hierarchy is the dotted key**: `meetings.create` inherits from
+`meetings`, which inherits from `app`; the chain for `a.b.c` is
+`['app', 'a', 'a.b', 'a.b.c']`. No parent is stored. The effective state is the
+most restrictive entry on the chain, skipping a node's override for a role in
+its `exemptRoles`. `admin.features` is always `on` and cannot be written.
+
+`PUT` changes are upserts with `state: null` removing the override; `note` and
+`exemptRoles` are optional and keep their previous value when omitted. Unknown
+keys that match the dotted pattern are accepted on purpose, so a new gate does
+not need a server deploy.
+
+**Write lock.** The transport (`server/http/request-handler.ts`) refuses any
+non-`GET` call in an area whose effective state is not `on`, returning `503`
+(`unavailable`) naming the feature and state. It maps `meetings.*` to
+`meetings`, `quran.*` to `quran`, account-management calls to `admin.members`,
+and self-service profile calls to `account`. A signed-in superadmin is always
+allowed, so the person fixing an outage is never locked out. Reads, auth and
+`system.*` are unaffected.
 
 ## Frontend entrypoint
 

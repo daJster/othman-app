@@ -1,44 +1,85 @@
+import { ListItem } from '@expo/ui';
 import { useTranslation } from 'react-i18next';
-import { Platform, View } from 'react-native';
-import { cn } from '@/ui/cn';
+import { Platform } from 'react-native';
+import { SettingsRow } from '@/features/account/settings-row';
+import { useThemeMode } from '@/providers/theme-provider';
 import { Icon } from '@/ui/icon';
-import { ThemeSelector } from '@/ui/panel';
-import { Text } from '@/ui/text';
-import { LanguageDropdown } from './language-dropdown';
+import { useLanguageChoice } from './use-language-choice';
 
 /**
- * The shared preferences block.
+ * The two preferences, as rows that state their current value.
  *
- * Rendered inside the Account list on every platform: a section header is
- * supplied by the screen, and the controls own their rows. Theme is the one
- * preference worth showing in full — three segments make "System" legible and
- * remove a menu from the most common setting. Language keeps its dropdown,
- * because two names in a segmented control would compete with theme for the
- * same visual weight.
+ * Theme used to be a three-segment control with a permanently visible
+ * explanation under it, and language a filled dropdown card — three different
+ * row grammars on a screen where every other line is a native list row. Both
+ * are set-once choices, so the page only has to answer "what is it now?" and
+ * open the chooser. The value sits in the supporting line on iOS/Android (the
+ * platform's own secondary style) and in the description on web.
  *
- * The web navbar exposes the same settings as compact menus; this is the
- * reading surface, not a second source of truth.
+ * The choosers are sheets (`preferences-sheets.tsx`); this component owns the
+ * rows, not the overlay, so the screen keeps one place for open state.
  */
-export function PreferencesSection() {
+export type PreferencesSectionProps = {
+  onAppearance: () => void;
+  onLanguage: () => void;
+};
+
+export function PreferencesSection({
+  onAppearance,
+  onLanguage,
+}: PreferencesSectionProps) {
   const { t } = useTranslation();
+  const { mode } = useThemeMode();
+  const { language } = useLanguageChoice();
+
+  const appearance = t(`theme.${mode}`);
+  const languageName =
+    language === 'ar' ? t('language.arabic') : t('language.english');
+
+  if (Platform.OS === 'web') {
+    return (
+      <>
+        <SettingsRow
+          testID="account-appearance-row"
+          icon="palette"
+          label={t('theme.title')}
+          description={appearance}
+          onPress={onAppearance}
+        />
+
+        <SettingsRow
+          testID="account-language-row"
+          icon="languages"
+          label={t('language.title')}
+          description={languageName}
+          onPress={onLanguage}
+          last
+        />
+      </>
+    );
+  }
 
   return (
-    <View
-      testID="preferences-section"
-      className={cn(
-        'gap-4 border-b border-glass-edge py-4',
-        Platform.OS !== 'web' && 'px-4',
-      )}
-    >
-      <View className="gap-2">
-        <View className="flex-row items-center gap-2">
-          <Icon name="palette" size={18} tone="muted" />
-          <Text variant="label">{t('theme.title')}</Text>
-        </View>
-        <ThemeSelector testID="theme-selector" />
-      </View>
+    <>
+      <ListItem
+        testID="account-appearance-row"
+        leading={<Icon name="palette" />}
+        supportingText={appearance}
+        trailing={<Icon name="chevron-right" tone="muted" />}
+        onPress={onAppearance}
+      >
+        {t('theme.title')}
+      </ListItem>
 
-      <LanguageDropdown />
-    </View>
+      <ListItem
+        testID="account-language-row"
+        leading={<Icon name="languages" />}
+        supportingText={languageName}
+        trailing={<Icon name="chevron-right" tone="muted" />}
+        onPress={onLanguage}
+      >
+        {t('language.title')}
+      </ListItem>
+    </>
   );
 }

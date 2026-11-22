@@ -23,6 +23,10 @@ export const ROUTES: readonly Route[] = [
   { method: 'GET', path: '/v1/system/stats', name: 'system.stats' },
   { method: 'GET', path: '/v1/events', name: 'system.events' },
 
+  // Feature flags are public: a gate has to apply before sign-in.
+  { method: 'GET', path: '/v1/config/features', name: 'features.get' },
+  { method: 'PUT', path: '/v1/config/features', name: 'features.update' },
+
   { method: 'POST', path: '/v1/auth/register', name: 'auth.register' },
   { method: 'POST', path: '/v1/auth/login', name: 'auth.login' },
   { method: 'POST', path: '/v1/auth/logout', name: 'auth.logout' },

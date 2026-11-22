@@ -1,10 +1,10 @@
-import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import type { Meeting } from '@/core/types';
 import { api, backendMessageKey, useApiMutation } from '@/api';
 import { useSessionRole } from '@/features/auth/use-session-role';
+import { useFeatures } from '@/features/flags/provider';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -36,17 +36,27 @@ import { Text } from '@/ui/text';
  * Signed-out visitors see nothing here. The card is still readable (reads are
  * public), but a write control with no session behind it is a dead end.
  */
-export function MeetingCardActions({ meeting }: { meeting: Meeting }) {
+export function MeetingCardActions({
+  meeting,
+  onEdit,
+}: {
+  meeting: Meeting;
+  /** Close the details and open the edit dialog. */
+  onEdit?: () => void;
+}) {
   const { t } = useTranslation();
-  const router = useRouter();
   const toast = useToast();
   const session = useSessionRole();
+  const flags = useFeatures();
   const remove = useApiMutation(api.demo.meetings.remove);
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const showAdmin = session.isAdmin;
+  const canEdit = flags.view('meetings.edit').writable;
+  const canDelete = flags.view('meetings.delete').writable;
+  const canEditMeeting = Boolean(onEdit) && canEdit;
 
-  if (!showAdmin) return null;
+  if (!showAdmin || (!canEditMeeting && !canDelete)) return null;
 
   const removeMeeting = () => {
     remove.mutate(
@@ -65,40 +75,39 @@ export function MeetingCardActions({ meeting }: { meeting: Meeting }) {
   return (
     <>
       <View className="flex-row items-center gap-1 border-t border-glass-edge pt-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onPress={() =>
-            router.push({
-              pathname: '/meetings/edit',
-              params: { id: String(meeting.id) },
-            })
-          }
-          testID={`meeting-edit:${meeting.id}`}
-        >
-          <Icon name="pencil" size={16} tone="muted" />
-          <ButtonText
+        {canEditMeeting ? (
+          <Button
             variant="ghost"
             size="sm"
-            className="text-muted-foreground"
+            onPress={onEdit}
+            testID={`meeting-edit:${meeting.id}`}
           >
-            {t('action.edit')}
-          </ButtonText>
-        </Button>
+            <Icon name="pencil" size={16} tone="muted" />
+            <ButtonText
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground"
+            >
+              {t('action.edit')}
+            </ButtonText>
+          </Button>
+        ) : null}
 
-        <Button
-          variant="ghost"
-          size="sm"
-          className="ms-auto"
-          onPress={() => setConfirmOpen(true)}
-          disabled={remove.isPending}
-          testID={`meeting-delete:${meeting.id}`}
-        >
-          <Icon name="trash" size={16} tone="destructive" />
-          <ButtonText variant="ghost" size="sm" className="text-destructive">
-            {t('action.delete')}
-          </ButtonText>
-        </Button>
+        {canDelete ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className={canEditMeeting ? 'ms-auto' : undefined}
+            onPress={() => setConfirmOpen(true)}
+            disabled={remove.isPending}
+            testID={`meeting-delete:${meeting.id}`}
+          >
+            <Icon name="trash" size={16} tone="destructive" />
+            <ButtonText variant="ghost" size="sm" className="text-destructive">
+              {t('action.delete')}
+            </ButtonText>
+          </Button>
+        ) : null}
       </View>
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>

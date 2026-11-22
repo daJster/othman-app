@@ -1,22 +1,5 @@
-import type { AccountData, AuthUser } from '@/core/types';
-import { AUTH_GATING_ENABLED } from '@/features/auth/auth-policy';
+import type { AuthUser } from '@/core/types';
 import { useAuth } from '@/providers/auth-provider';
-import type { AsyncPresentResult } from '@/features/query/async-state';
-import mockAccountProfile from '@/data/mock/mockAccountProfile.json';
-
-const MOCK_ACCOUNT = mockAccountProfile as AccountData;
-
-const MOCK_AUTH_USER: AuthUser = {
-  uid: MOCK_ACCOUNT.uid,
-  email: MOCK_ACCOUNT.email,
-  displayName: MOCK_ACCOUNT.displayName,
-  photoURL: MOCK_ACCOUNT.photoURL,
-};
-
-const MOCK_ACCOUNT_RESULT: AsyncPresentResult<AccountData> = {
-  state: { status: 'ready', data: MOCK_ACCOUNT },
-  isFetching: false,
-};
 
 /**
  * The current session, as the account feature sees it.
@@ -25,6 +8,14 @@ const MOCK_ACCOUNT_RESULT: AsyncPresentResult<AccountData> = {
  * or null" and for the merged account, and nothing here owns state. The
  * profile is the provider's `useAccount` query, so there is exactly one cached
  * account per uid.
+ *
+ * It used to substitute `src/data/mock/mockAccountProfile.json` while auth
+ * gating was off. That made a signed-out device look signed in as
+ * `othman@kuttab.test`: the Account screen showed a profile, Sign out had no
+ * session to clear, and every request (including the meeting list) went out
+ * anonymously. Development now gets the same honest state as production —
+ * signed out means signed out — and the demo accounts are reachable from the
+ * sign-in screen instead of being disguised as a session.
  */
 export function useCurrentAuthUser(): AuthUser | null {
   return useAuth().user;
@@ -38,17 +29,6 @@ export function useCurrentAuthUser(): AuthUser | null {
  */
 export function useCurrentAccount() {
   const { user, account, sessionError } = useAuth();
-
-  // Development mode: the Account screen is built and reviewed before auth is
-  // enforced, so a signed-out device renders `src/data/mock/mockAccountProfile`.
-  // Flipping `AUTH_GATING_ENABLED` restores the real session-only path.
-  if (!AUTH_GATING_ENABLED && !user) {
-    return {
-      authUser: MOCK_AUTH_USER,
-      ...MOCK_ACCOUNT_RESULT,
-      sessionError,
-    };
-  }
 
   return { authUser: user, ...account, sessionError };
 }

@@ -23,6 +23,8 @@ import type {
   AccountsResponse,
   AyahResponse,
   BackendAccountPatch,
+  BackendFeatureChange,
+  BackendFeatureConfig,
   BackendHealth,
   BookmarkResponse,
   BookmarksResponse,
@@ -36,6 +38,7 @@ import type {
   SurahResponse,
 } from '@/platform/backend';
 import { circleService, type CircleItem } from '@/services/circle';
+import { configService } from '@/services/config';
 import { meetingsService } from '@/services/meetings';
 import {
   noticesService,
@@ -384,6 +387,35 @@ export const api = {
       invalidates: ({ namespace, note }) => [
         queryKeys.notes.byAyah(namespace, note.ayah.absoluteNumber),
       ],
+    }),
+  },
+
+  /* ── remote feature control ────────────────────────────────────────── */
+
+  /**
+   * The switchboard.
+   *
+   * `features` is read by `FeatureFlagsProvider` on every launch and after every
+   * `feature.updated` event; no screen calls it directly. It is deliberately not
+   * a `demo` command: the kill switch must answer before sign-in, and a build
+   * without the mock backend gets an empty document from the service instead of
+   * a disabled query.
+   */
+  config: {
+    features: query<NoParams, BackendFeatureConfig>({
+      id: 'config.features',
+      policy: 'live',
+      key: () => queryKeys.config.features,
+      run: () => configService.features(),
+    }),
+
+    saveFeatures: mutation<
+      readonly BackendFeatureChange[],
+      BackendFeatureConfig
+    >({
+      id: 'config.features.save',
+      run: (changes) => configService.saveFeatures(changes),
+      invalidates: () => [queryKeys.config.features],
     }),
   },
 

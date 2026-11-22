@@ -142,6 +142,29 @@ export function formatCount(value: number, language: Language): string {
   }).format(value);
 }
 
+/** A compact day and month for a form trigger: `23 Nov` / `23 نوفمبر`. */
+export function formatDayMonth(date: Date, language: Language): string {
+  return new Intl.DateTimeFormat(numberLocale(language), {
+    day: 'numeric',
+    month: 'short',
+  }).format(date);
+}
+
+/** Short weekday for a date carousel cell: `Sun` / `الأحد`. */
+export function formatWeekdayShort(date: Date, language: Language): string {
+  return new Intl.DateTimeFormat(numberLocale(language), {
+    weekday: 'short',
+  }).format(date);
+}
+
+/** The month and year above a date carousel: `November 2026`. */
+export function formatMonthYear(date: Date, language: Language): string {
+  return new Intl.DateTimeFormat(numberLocale(language), {
+    month: 'long',
+    year: 'numeric',
+  }).format(date);
+}
+
 /**
  * A compact day for a one-line affordance: `Tue, 10 Nov` / `الثلاثاء، 10 نوفمبر`.
  *

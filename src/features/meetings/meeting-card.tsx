@@ -14,6 +14,7 @@ import { Text } from '@/ui/text';
 import { AttendeeStack } from './attendee-stack';
 import { formatCount, formatDateTime } from './calendar-format';
 import { MeetingDetailsDialog } from './meeting-dialog';
+import { MeetingFormDialog } from './meeting-form-dialog';
 import { meetingTitle } from './meeting-display';
 import {
   DeclinedMark,
@@ -48,7 +49,7 @@ export type MeetingCardProps = {
 export function MeetingCard({ meeting }: MeetingCardProps) {
   const { t } = useTranslation();
   const { language } = useDirection();
-  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<'closed' | 'details' | 'edit'>('closed');
   const response = useMeetingResponse(meeting);
 
   const title = meetingTitle(meeting, language);
@@ -69,7 +70,7 @@ export function MeetingCard({ meeting }: MeetingCardProps) {
         accessibilityLabel={title}
         accessibilityHint={t('meeting.details')}
         testID="meeting-card"
-        onPress={() => setOpen(true)}
+        onPress={() => setMode('details')}
         className={cn('rounded-card active:opacity-90', FOCUS_RING)}
       >
         <Card className="gap-2.5" testID="meeting-card-surface">
@@ -123,9 +124,18 @@ export function MeetingCard({ meeting }: MeetingCardProps) {
 
       <MeetingDetailsDialog
         meeting={meeting}
-        open={open}
-        onOpenChange={setOpen}
+        open={mode === 'details'}
+        onOpenChange={(next) => setMode(next ? 'details' : 'closed')}
+        onEdit={() => setMode('edit')}
       />
+
+      {mode === 'edit' ? (
+        <MeetingFormDialog
+          open
+          meeting={meeting}
+          onClose={() => setMode('closed')}
+        />
+      ) : null}
     </Animated.View>
   );
 }

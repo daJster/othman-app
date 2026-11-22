@@ -1,5 +1,6 @@
 import { accountFunctions } from './accounts.ts';
 import { authFunctions } from './auth.ts';
+import { featureFunctions } from './features.ts';
 import { meetingFunctions } from './meetings.ts';
 import { noticeFunctions } from './notices.ts';
 import { quranFunctions } from './quran.ts';
@@ -24,6 +25,7 @@ export function createFunctionRegistry(): FunctionRegistry {
     ...meetingFunctions,
     ...noticeFunctions,
     ...quranFunctions,
+    ...featureFunctions,
     ...systemFunctions,
   };
 }

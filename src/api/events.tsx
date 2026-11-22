@@ -93,6 +93,13 @@ export function invalidateForEvent(
     return;
   }
 
+  if (type.startsWith('feature.')) {
+    // One document is the whole switchboard: refetching it is cheaper than
+    // deciding which screens the new state invalidates.
+    void client.invalidateQueries({ queryKey: queryKeys.config.root });
+    return;
+  }
+
   void client.invalidateQueries({ queryKey: queryKeys.backend.root });
 }
 

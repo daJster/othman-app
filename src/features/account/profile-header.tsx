@@ -22,8 +22,9 @@ import { roleLabelKey } from './role-label';
  *
  * The identity column is itself the "open profile" control: a separate button
  * beside Edit would crowd a 375 px row and split the same intent across two
- * targets. The chevron and the "View details" line make the drawer discoverable
- * without turning the whole header into an unlabeled link.
+ * targets. A chevron beside the name is the whole affordance — the old
+ * "View details" line repeated the label under the email and cost a line for
+ * nothing.
  *
  * The identity is a hairline block, not a rounded card. Its text column is
  * capped (`max-w-md`) so at 1440 the name, email and role stay next to the
@@ -32,7 +33,8 @@ import { roleLabelKey } from './role-label';
  */
 export type ProfileHeaderProps = {
   account: AccountData;
-  onEdit: () => void;
+  /** Omitted when `account.edit` is switched off: the header then has no action. */
+  onEdit?: () => void;
   onDetails: () => void;
 };
 
@@ -46,7 +48,7 @@ export function ProfileHeader({
   return (
     <View
       className={cn(
-        'flex-row items-start gap-4 py-4',
+        'flex-row items-start gap-4 py-3',
         // The web page wraps this block in one glass panel; the native list is
         // not inside that panel, so it keeps the platform inset itself.
         Platform.OS !== 'web' && 'px-4',
@@ -79,9 +81,14 @@ export function ProfileHeader({
           Platform.OS === 'web' && 'md:max-w-md',
         )}
       >
-        <Text variant="subtitle">
-          {account.displayName ?? t('account.profile.anonymous')}
-        </Text>
+        <View className="w-full min-w-0 flex-row items-start gap-1">
+          <Text variant="subtitle" className="shrink">
+            {account.displayName ?? t('account.profile.anonymous')}
+          </Text>
+          <View className="pt-1.5">
+            <Icon name="chevron-right" size={16} tone="muted" />
+          </View>
+        </View>
         <Text variant="caption" tone="muted">
           {account.email ?? t('account.profile.noEmail')}
         </Text>
@@ -90,23 +97,18 @@ export function ProfileHeader({
           label={t(roleLabelKey(account.role))}
           className="mt-1 self-start"
         />
-
-        <View className="flex-row items-center gap-1 pt-1">
-          <Text variant="caption" tone="muted">
-            {t('account.details.open')}
-          </Text>
-          <Icon name="chevron-right" size={14} tone="muted" />
-        </View>
       </Pressable>
 
-      <Button
-        variant="outline"
-        size="md"
-        label={t('action.edit')}
-        accessibilityLabel={t('account.a11y.edit')}
-        onPress={onEdit}
-        testID="account-edit-button"
-      />
+      {onEdit ? (
+        <Button
+          variant="outline"
+          size="md"
+          label={t('action.edit')}
+          accessibilityLabel={t('account.a11y.edit')}
+          onPress={onEdit}
+          testID="account-edit-button"
+        />
+      ) : null}
     </View>
   );
 }

@@ -59,12 +59,15 @@ export type MeetingDetailsDialogProps = {
   meeting: Meeting;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Close this dialog and open the edit dialog. */
+  onEdit?: () => void;
 };
 
 export function MeetingDetailsDialog({
   meeting,
   open,
   onOpenChange,
+  onEdit,
 }: MeetingDetailsDialogProps) {
   const { width } = useWindowDimensions();
   const dialogWidth = Math.min(width - 24, 512);
@@ -76,13 +79,19 @@ export function MeetingDetailsDialog({
         className="max-w-lg"
         style={{ width: dialogWidth }}
       >
-        <MeetingDetails meeting={meeting} />
+        <MeetingDetails meeting={meeting} onEdit={onEdit} />
       </DialogContent>
     </Dialog>
   );
 }
 
-export function MeetingDetails({ meeting }: { meeting: Meeting }) {
+export function MeetingDetails({
+  meeting,
+  onEdit,
+}: {
+  meeting: Meeting;
+  onEdit?: () => void;
+}) {
   const { t } = useTranslation();
   const { language } = useDirection();
   const response = useMeetingResponse(meeting);
@@ -131,12 +140,14 @@ export function MeetingDetails({ meeting }: { meeting: Meeting }) {
         onRespond={response.respond}
       />
 
-      <View className="gap-1.5">
-        <Text variant="label">{t('meeting.details')}</Text>
-        <Text variant="caption" className="leading-relaxed">
-          {meetingDescription(meeting, language)}
-        </Text>
-      </View>
+      {meetingDescription(meeting, language).trim() ? (
+        <View className="gap-1.5">
+          <Text variant="label">{t('meeting.details')}</Text>
+          <Text variant="caption" className="leading-relaxed">
+            {meetingDescription(meeting, language)}
+          </Text>
+        </View>
+      ) : null}
 
       <View className="gap-2">
         <Text variant="label">{t('meeting.attendeesTitle')}</Text>
@@ -177,7 +188,7 @@ export function MeetingDetails({ meeting }: { meeting: Meeting }) {
         </Button>
       ) : null}
 
-      <MeetingCardActions meeting={meeting} />
+      <MeetingCardActions meeting={meeting} onEdit={onEdit} />
     </View>
   );
 }

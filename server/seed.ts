@@ -85,6 +85,47 @@ type RawMeeting = {
   locationAr?: string;
 };
 
+/**
+ * Which demo accounts are invited to which fixture meeting (fixture ids, not
+ * database ids). A fresh database needs real memberships or the authenticated
+ * meeting list — which the server scopes to the reader — would be empty on the
+ * first launch. Statuses are mixed so the card shows both an unanswered
+ * invitation and an accepted one.
+ *
+ * These are only written while seeding an empty database; a developer's own
+ * RSVPs are never overwritten.
+ */
+const DEMO_MEETING_MEMBERS: Readonly<
+  Record<
+    number,
+    readonly {
+      userId: string;
+      status: 'invited' | 'going' | 'declined';
+    }[]
+  >
+> = {
+  1: [{ userId: 'demo-student', status: 'invited' }],
+  2: [{ userId: 'demo-google', status: 'invited' }],
+  3: [{ userId: 'demo-student', status: 'going' }],
+  4: [
+    { userId: 'demo-student', status: 'invited' },
+    { userId: 'demo-google', status: 'going' },
+  ],
+  5: [{ userId: 'demo-google', status: 'going' }],
+  6: [{ userId: 'demo-student', status: 'going' }],
+  7: [{ userId: 'demo-google', status: 'invited' }],
+  8: [{ userId: 'demo-student', status: 'invited' }],
+  9: [{ userId: 'demo-google', status: 'invited' }],
+  10: [{ userId: 'demo-student', status: 'going' }],
+  11: [{ userId: 'demo-google', status: 'invited' }],
+  12: [
+    { userId: 'demo-student', status: 'going' },
+    { userId: 'demo-google', status: 'invited' },
+  ],
+  13: [{ userId: 'demo-student', status: 'going' }],
+  14: [{ userId: 'demo-google', status: 'declined' }],
+};
+
 type RawSurah = {
   name: string;
   name_en: string;
@@ -255,11 +296,14 @@ function seedMeetings(db: DatabaseSync): void {
     fixturePath('data', 'mock', 'MeetingsMock.json'),
   );
   const repo = createMeetingsRepository(db);
+  const accounts = new Map(
+    SEED_ACCOUNTS.map((account) => [account.uid, account]),
+  );
 
   for (const row of fixture?.meetings ?? []) {
     if (!Number.isFinite(row.dayOffset)) continue;
 
-    repo.create({
+    const meeting = repo.create({
       title: row.title,
       titleAr: row.titleAr ?? null,
       description: row.description,
@@ -281,6 +325,17 @@ function seedMeetings(db: DatabaseSync): void {
         status: attendee.status ?? 'invited',
       })),
     });
+
+    for (const member of DEMO_MEETING_MEMBERS[row.id] ?? []) {
+      const account = accounts.get(member.userId);
+      if (!account) continue;
+
+      repo.addAttendee(meeting.id, {
+        userId: account.uid,
+        name: account.displayName,
+        status: member.status,
+      });
+    }
   }
 }
 

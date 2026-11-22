@@ -14,6 +14,12 @@ import type { Language } from '@/i18n';
  * the user is halfway through clearing would otherwise become `0` under their
  * cursor.
  */
+export type DraftAttendee = {
+  userId: string | null;
+  name: string;
+  status: 'invited' | 'going' | 'declined';
+};
+
 export type MeetingDraft = {
   title: string;
   date: string;
@@ -23,6 +29,16 @@ export type MeetingDraft = {
   meetLink: string;
   organizer: string;
   description: string;
+  /**
+   * The invitation list. Rows created by an admin start as `invited`; rows read
+   * from an existing meeting keep their answer so an edit does not silently
+   * reset everyone who already replied.
+   *
+   * `userId` is null for a guest an admin typed in by hand in an older record.
+   * Those rows are preserved on save but are not selectable in the member
+   * picker.
+   */
+  attendees: DraftAttendee[];
 };
 
 export type MeetingField = keyof MeetingDraft;
@@ -32,7 +48,8 @@ export type MeetingErrorKey =
   | 'meeting.form.validation.date'
   | 'meeting.form.validation.time'
   | 'meeting.form.validation.duration'
-  | 'meeting.form.validation.link';
+  | 'meeting.form.validation.link'
+  | 'meeting.form.validation.attendees';
 
 export type MeetingErrors = Partial<Record<MeetingField, MeetingErrorKey>>;
 
@@ -60,8 +77,20 @@ export function createEmptyDraft(today: Date = new Date()): MeetingDraft {
     meetLink: '',
     organizer: '',
     description: '',
+    attendees: [],
   };
 }
+
+/**
+ * The durations the form offers as a choice.
+ *
+ * A session is half an hour to a full day; arbitrary minute counts invite
+ * typos and produce sessions nobody planned for. `1440` is the backend's
+ * maximum, so "whole day" is a real value rather than a label for an invalid
+ * one. A stored duration outside the list keeps its own row so an old meeting
+ * never silently changes length.
+ */
+export const DURATION_STEPS = [30, 60, 90, 120, 1440] as const;
 
 export function toMeetingDraft(
   meeting: Meeting,
@@ -82,6 +111,11 @@ export function toMeetingDraft(
     description: ar
       ? (meeting.descriptionAr ?? meeting.description)
       : meeting.description,
+    attendees: meeting.attendees.map((attendee) => ({
+      userId: attendee.userId ?? null,
+      name: attendee.name,
+      status: attendee.status ?? 'invited',
+    })),
   };
 }
 
@@ -118,6 +152,10 @@ export function validateMeetingDraft(draft: MeetingDraft): MeetingErrors {
     errors.meetLink = 'meeting.form.validation.link';
   }
 
+  if (draft.attendees.length === 0) {
+    errors.attendees = 'meeting.form.validation.attendees';
+  }
+
   return errors;
 }
 
@@ -146,6 +184,7 @@ export type MeetingInput = {
   organizerAr: string;
   description: string;
   descriptionAr: string;
+  attendees: DraftAttendee[];
 };
 
 export function toMeetingInput(draft: MeetingDraft): MeetingInput {
@@ -167,12 +206,34 @@ export function toMeetingInput(draft: MeetingDraft): MeetingInput {
     organizerAr: organizer,
     description,
     descriptionAr: description,
+    attendees: draft.attendees,
   };
 }
 
 function sameText(a: string, b: string): boolean {
   return a.trim() === b.trim();
 }
+
+function attendeeKey(attendees: readonly DraftAttendee[]): string {
+  return attendees
+    .map(
+      (attendee) =>
+        `${attendee.userId ?? ''}:${attendee.name}:${attendee.status}`,
+    )
+    .sort()
+    .join('|');
+}
+
+const TEXT_FIELDS = [
+  'title',
+  'date',
+  'time',
+  'durationMinutes',
+  'location',
+  'meetLink',
+  'organizer',
+  'description',
+] as const satisfies readonly Exclude<MeetingField, 'attendees'>[];
 
 export function isMeetingDraftDirty(
   draft: MeetingDraft,
@@ -182,14 +243,16 @@ export function isMeetingDraftDirty(
   if (!meeting) {
     // A user who has only cleared the prefilled fields has not changed anything.
     const empty = createEmptyDraft();
-    return (Object.keys(draft) as MeetingField[]).some(
-      (field) => !sameText(draft[field], empty[field]),
+    return (
+      TEXT_FIELDS.some((field) => !sameText(draft[field], empty[field])) ||
+      draft.attendees.length > 0
     );
   }
 
   const original = toMeetingDraft(meeting, language);
 
-  return (Object.keys(draft) as MeetingField[]).some(
-    (field) => !sameText(draft[field], original[field]),
+  return (
+    TEXT_FIELDS.some((field) => !sameText(draft[field], original[field])) ||
+    attendeeKey(draft.attendees) !== attendeeKey(original.attendees)
   );
 }

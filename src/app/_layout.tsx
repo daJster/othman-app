@@ -12,6 +12,7 @@ import {
 } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useMemo } from 'react';
+import { View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import {
   SafeAreaListener,
@@ -19,6 +20,10 @@ import {
 } from 'react-native-safe-area-context';
 import { Uniwind, useResolveClassNames } from 'uniwind';
 import { isPrivateAppPath } from '@/features/navigation/private-path';
+import { featureForPath } from '@/features/flags/registry';
+import { FeatureOverlay } from '@/features/flags/gates';
+import { FeatureFlagsProvider, useFeatures } from '@/features/flags/provider';
+import { useSessionRole } from '@/features/auth/use-session-role';
 import { ApiEventsBridge } from '@/api';
 import { AUTH_GATING_ENABLED } from '@/features/auth/auth-policy';
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
@@ -120,13 +125,15 @@ function AppShell() {
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <BootProvider>
-            <ToastProvider>
-              <RootNavigator />
-              <ApiEventsBridge />
-              <PortalHost />
-            </ToastProvider>
-          </BootProvider>
+          <FeatureFlagsProvider>
+            <BootProvider>
+              <ToastProvider>
+                <RootNavigator />
+                <ApiEventsBridge />
+                <PortalHost />
+              </ToastProvider>
+            </BootProvider>
+          </FeatureFlagsProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
@@ -144,9 +151,11 @@ function AppShell() {
  * The root stack holds the tab group (the app), the account sub-screens, About
  * and the reader. The reader is a sibling rather than a tab child so it can
  * present full-screen over the tab bar, which is the point of a mushaf view. The
- * edit sheet is a `formSheet`: it is a task, not a destination, so it must not
- * become a tab or a pushed page. Sign-in is a `modal` for the same reason: it
- * is an interruption, and it keeps its own close/back affordances.
+ * account edit sheet is a `formSheet`: it is a task, not a destination, so it
+ * must not become a tab or a pushed page. Sign-in is a `modal` for the same
+ * reason: it is an interruption, and it keeps its own close/back affordances.
+ * Sessions are created and edited in a dialog on the Meetings screen, so they
+ * have no route of their own to keep in this stack.
  */
 function RootNavigator() {
   const contentStyle = useResolveClassNames('bg-background');
@@ -154,6 +163,31 @@ function RootNavigator() {
   const pathname = usePathname();
   const router = useRouter();
   const { isDark } = useThemeMode();
+  const flags = useFeatures();
+  const session = useSessionRole();
+
+  /*
+   * The remote gate sits here, above every screen, so a switch covers routes
+   * that do not exist yet and a deep link cannot walk around a hidden tab.
+   *
+   * Two invariants:
+   *  - the switchboard stays reachable for a superadmin even while the app is
+   *    off, or one bad toggle would need a database edit to undo;
+   *  - the notice is painted *over* a mounted navigator, so returning from it
+   *    does not rebuild navigation state.
+   */
+  const pageKey = featureForPath(pathname);
+  const appState = flags.state('app');
+  const pageState = pageKey === null ? 'on' : flags.state(pageKey);
+  const appBlocked = appState === 'off' || appState === 'maintenance';
+  const pageBlocked = pageState === 'off' || pageState === 'maintenance';
+  const consoleOpen = pathname.startsWith('/admin/features');
+  const consoleAllowed = consoleOpen && session.isSuperadmin;
+  const blocked =
+    flags.status !== 'loading' &&
+    (appBlocked || pageBlocked) &&
+    !consoleAllowed;
+  const blockedState = appBlocked ? appState : pageState;
 
   /**
    * React Navigation paints its own root behind every screen, from the theme it
@@ -193,59 +227,76 @@ function RootNavigator() {
 
   return (
     <NavigationThemeProvider value={navigationTheme}>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle,
-        }}
-      >
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen
-          name="account/edit"
-          options={{
-            presentation: 'formSheet',
-            // Nearly full height, expandable: the form is taller than a compact
-            // sheet, and the user can still pull it down when nothing is saving.
-            sheetAllowedDetents: [0.9, 1],
-            sheetInitialDetentIndex: 0,
-            sheetGrabberVisible: true,
-            sheetCornerRadius: 24,
+      <View className="flex-1">
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            contentStyle,
           }}
-        />
-        <Stack.Screen
-          name="meetings/edit"
-          options={{
-            presentation: 'formSheet',
-            sheetAllowedDetents: [0.9, 1],
-            sheetInitialDetentIndex: 0,
-            sheetGrabberVisible: true,
-            sheetCornerRadius: 24,
-          }}
-        />
-        <Stack.Screen name="account/progress" />
-        <Stack.Screen name="admin/members" options={{ presentation: 'card' }} />
-        <Stack.Screen
-          name="admin/members/edit"
-          options={{
-            presentation: 'formSheet',
-            sheetAllowedDetents: [0.9, 1],
-            sheetInitialDetentIndex: 0,
-            sheetGrabberVisible: true,
-            sheetCornerRadius: 24,
-          }}
-        />
-        <Stack.Screen name="quran/history" />
-        <Stack.Screen name="quran/records" />
-        <Stack.Screen name="about" />
-        <Stack.Screen
-          name="auth/sign-in"
-          options={{ presentation: 'modal', headerShown: false }}
-        />
-        <Stack.Screen
-          name="reader/[page]"
-          options={{ presentation: 'fullScreenModal', headerShown: false }}
-        />
-      </Stack>
+        >
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen
+            name="account/edit"
+            options={{
+              presentation: 'formSheet',
+              // Nearly full height, expandable: the form is taller than a compact
+              // sheet, and the user can still pull it down when nothing is saving.
+              sheetAllowedDetents: [0.9, 1],
+              sheetInitialDetentIndex: 0,
+              sheetGrabberVisible: true,
+              sheetCornerRadius: 24,
+            }}
+          />
+          <Stack.Screen name="account/progress" />
+          <Stack.Screen
+            name="admin/members"
+            options={{ presentation: 'card' }}
+          />
+          <Stack.Screen
+            name="admin/members/edit"
+            options={{
+              presentation: 'formSheet',
+              sheetAllowedDetents: [0.9, 1],
+              sheetInitialDetentIndex: 0,
+              sheetGrabberVisible: true,
+              sheetCornerRadius: 24,
+            }}
+          />
+          <Stack.Screen
+            name="admin/features"
+            options={{ presentation: 'card' }}
+          />
+          <Stack.Screen name="quran/history" />
+          <Stack.Screen name="quran/records" />
+          <Stack.Screen name="about" />
+          <Stack.Screen
+            name="auth/sign-in"
+            options={{ presentation: 'modal', headerShown: false }}
+          />
+          <Stack.Screen
+            name="reader/[page]"
+            options={{ presentation: 'fullScreenModal', headerShown: false }}
+          />
+        </Stack>
+
+        {blocked ? (
+          <FeatureOverlay
+            feature={appBlocked ? null : pageKey}
+            state={blockedState}
+            onRetry={flags.retry}
+            onHome={
+              pathname !== '/' && flags.open('/')
+                ? () => router.replace('/')
+                : undefined
+            }
+            onControls={
+              session.isSuperadmin && !consoleOpen
+                ? () => router.push('/admin/features')
+                : undefined
+            }
+          />
+        ) : null}
+      </View>
     </NavigationThemeProvider>
   );
 }

@@ -4,6 +4,7 @@ import { View } from 'react-native';
 import { api, backendMessageKey, useApiMutation } from '@/api';
 import type { Meeting } from '@/core/types';
 import { useSessionRole } from '@/features/auth/use-session-role';
+import { useFeatures } from '@/features/flags/provider';
 import { Button } from '@/ui/button';
 import { cn } from '@/ui/cn';
 import { Icon } from '@/ui/icon';
@@ -42,6 +43,7 @@ export function attendanceAnswer(
 export function useMeetingResponse(meeting: Meeting) {
   const { t } = useTranslation();
   const session = useSessionRole();
+  const flags = useFeatures();
   const toast = useToast();
   const rsvp = useApiMutation(api.demo.meetings.rsvp);
   /*
@@ -58,7 +60,8 @@ export function useMeetingResponse(meeting: Meeting) {
   const serverAnswer = attendanceAnswer(meeting, session.uid);
   const answer = override?.meeting === meeting ? override.answer : serverAnswer;
   const closed = meeting.status === 'past' || meeting.status === 'canceled';
-  const canRespond = session.canWrite && !closed;
+  const canRespond =
+    session.canWrite && !closed && flags.view('meetings.rsvp').writable;
 
   const respond = (next: AttendanceAnswer) => {
     if (!canRespond) return;

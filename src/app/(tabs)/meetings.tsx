@@ -1,5 +1,5 @@
 import Head from 'expo-router/head';
-import { useRouter } from 'expo-router';
+import { useRouter, usePathname } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -17,6 +17,7 @@ import {
 import type { Meeting } from '@/core/types';
 import { MeetingCalendar } from '@/features/meetings/meeting-calendar';
 import { MeetingCard } from '@/features/meetings/meeting-card';
+import { MeetingFormDialog } from '@/features/meetings/meeting-form-dialog';
 import { RequireAuth } from '@/features/auth/require-auth';
 import { useSessionRole } from '@/features/auth/use-session-role';
 import {
@@ -29,13 +30,16 @@ import {
   formatLongDate,
 } from '@/features/meetings/calendar-format';
 import { useDirection } from '@/i18n';
+import { useAuth } from '@/providers/auth-context';
 import { Button, ButtonText } from '@/ui/button';
 import { Icon } from '@/ui/icon';
 import { Page } from '@/ui/page';
+import { ScreenView } from '@/ui/screen';
 import { Section } from '@/ui/section';
 import { Spinner } from '@/ui/spinner';
-import { ErrorState } from '@/ui/states';
+import { EmptyState, ErrorState } from '@/ui/states';
 import { Text } from '@/ui/text';
+import { FeatureGate } from '@/features/flags/gates';
 
 /**
  * Meetings tab.
@@ -58,17 +62,65 @@ import { Text } from '@/ui/text';
 export default function MeetingsScreen() {
   return (
     <RequireAuth>
-      <MeetingsContent />
+      <MeetingsGate />
     </RequireAuth>
   );
+}
+
+/**
+ * Real session, not the development identity.
+ *
+ * Gating is off while the app is being built, so the tab stays reachable
+ * without a session. The list endpoint scopes a signed-in reader to their own
+ * invitations but keeps a public read for an anonymous caller; showing that
+ * public list inside "my meetings" is exactly the confusion this gate removes.
+ * Signing in is the only way to see a meeting list here, and the sign-in screen
+ * carries the one-tap demo accounts.
+ */
+function MeetingsGate() {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { user, status } = useAuth();
+
+  if (status === 'restoring') {
+    return (
+      <ScreenView>
+        <Spinner size="lg" label={t('action.loading')} />
+      </ScreenView>
+    );
+  }
+
+  if (!user) {
+    return (
+      <ScreenView>
+        <Head>
+          <title>{`${t('nav.meetings')} · ${t('app.name')}`}</title>
+        </Head>
+        <EmptyState
+          title={t('page.meetings.signedOut.title')}
+          description={t('page.meetings.signedOut.description')}
+          actionLabel={t('account.signedOut.action')}
+          onAction={() =>
+            router.push({
+              pathname: '/auth/sign-in',
+              params: { returnTo: pathname },
+            })
+          }
+        />
+      </ScreenView>
+    );
+  }
+
+  return <MeetingsContent />;
 }
 
 function MeetingsContent() {
   const { t } = useTranslation();
   const { language } = useDirection();
-  const router = useRouter();
   const session = useSessionRole();
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
+  const [createOpen, setCreateOpen] = useState(false);
 
   const dateKey = formatDateKey(selectedDate);
   const { state, isFetching } = useMeetingsByDate(dateKey);
@@ -149,15 +201,17 @@ function MeetingsContent() {
                 />
 
                 {session.isAdmin ? (
-                  <Button
-                    size="sm"
-                    className="shrink-0"
-                    testID="meeting-create"
-                    onPress={() => router.push('/meetings/edit')}
-                  >
-                    <Icon name="plus" size={16} tone="primary-foreground" />
-                    <ButtonText size="sm">{t('meeting.create')}</ButtonText>
-                  </Button>
+                  <FeatureGate feature="meetings.create">
+                    <Button
+                      size="sm"
+                      className="shrink-0"
+                      testID="meeting-create"
+                      onPress={() => setCreateOpen(true)}
+                    >
+                      <Icon name="plus" size={16} tone="primary-foreground" />
+                      <ButtonText size="sm">{t('meeting.create')}</ButtonText>
+                    </Button>
+                  </FeatureGate>
                 ) : null}
               </View>
 
@@ -169,12 +223,17 @@ function MeetingsContent() {
 
               {/* The empty state carries the date itself as its overline. */}
               {state.status !== 'empty' ? (
-                <View className="gap-0.5">
-                  <Text variant="subtitle">
+                <View className="flex-row items-baseline justify-between gap-3">
+                  <Text variant="subtitle" className="min-w-0 flex-1">
                     {formatLongDate(selectedDate, language)}
                   </Text>
                   {state.status === 'ready' ? (
-                    <Text variant="caption" tone="muted">
+                    <Text
+                      variant="caption"
+                      tone="muted"
+                      className="shrink-0"
+                      align="end"
+                    >
                       {t('meeting.found', { count: meetings.length })}
                     </Text>
                   ) : null}
@@ -227,6 +286,14 @@ function MeetingsContent() {
           }
         />
       </Page>
+
+      {createOpen ? (
+        <MeetingFormDialog
+          open
+          meeting={null}
+          onClose={() => setCreateOpen(false)}
+        />
+      ) : null}
     </>
   );
 }

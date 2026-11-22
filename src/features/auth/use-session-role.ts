@@ -5,11 +5,10 @@ import { useAuth } from '@/providers/auth-context';
 /**
  * The *real* session role.
  *
- * `useCurrentAccount` deliberately falls back to a demo profile while auth
- * gating is off, which is the right call for a screen that only displays an
- * identity. It is the wrong call for anything that writes: a CRUD form must
- * never offer a save button backed by an invented session. This hook reads the
- * provider only, so "no session" stays "no session".
+ * `useCurrentAccount` reports the real session only, and this hook reads the
+ * same provider directly so "no session" stays "no session". That matters for
+ * anything that writes: a CRUD form must never offer a save button backed by an
+ * invented session.
  *
  * `role` is `null` until the merged profile resolves. Screens treat that as
  * "loading", not as "not an admin": the difference is one frame versus a

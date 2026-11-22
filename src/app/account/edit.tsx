@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { EditProfileForm } from '@/features/account/edit-profile-form';
 import { useCurrentAccount } from '@/features/account/use-current-account';
 import { RequireAuth } from '@/features/auth/require-auth';
+import { FeatureScreen } from '@/features/flags/gates';
 import { EmptyState, ErrorState, Loading } from '@/ui/states';
 import { ScreenView } from '@/ui/screen';
 // Expo Router 57 does not re-export this hook yet (it becomes public in SDK 58),
@@ -28,7 +29,9 @@ import { usePreventRemove } from 'expo-router/build/react-navigation/core/usePre
 export default function EditAccountScreen() {
   return (
     <RequireAuth>
-      <EditAccountContent />
+      <FeatureScreen feature="account.edit">
+        <EditAccountContent />
+      </FeatureScreen>
     </RequireAuth>
   );
 }

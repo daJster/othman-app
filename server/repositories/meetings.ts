@@ -181,6 +181,8 @@ export function createMeetingsRepository(db: DatabaseSync) {
       to?: DateKey;
       limit: number;
       offset: number;
+      /** Only meetings this user is an attendee of. Omit for the admin view. */
+      attendeeUid?: string;
     }): { rows: MeetingRecord[]; total: number } {
       const clauses: string[] = [];
       const values: (string | number)[] = [];
@@ -196,6 +198,19 @@ export function createMeetingsRepository(db: DatabaseSync) {
       if (options.to) {
         clauses.push('date <= ?');
         values.push(options.to);
+      }
+      if (options.attendeeUid) {
+        // Membership is the definition of "my meeting": the row exists because
+        // an admin invited this user or the user answered an invitation. The
+        // indexed subquery keeps `total` and the page in the same scope.
+        clauses.push(
+          `EXISTS (
+             SELECT 1 FROM meeting_attendees attendee
+             WHERE attendee.meeting_id = meetings.id
+               AND attendee.user_id = ?
+           )`,
+        );
+        values.push(options.attendeeUid);
       }
 
       const where = clauses.length > 0 ? `WHERE ${clauses.join(' AND ')}` : '';

@@ -91,6 +91,32 @@ export type BackendHealth = {
   time: string;
 };
 
+/* ── remote feature control ─────────────────────────────────────────────── */
+
+export type BackendFeatureState = 'on' | 'read-only' | 'maintenance' | 'off';
+
+export type BackendFeatureOverride = {
+  state: BackendFeatureState;
+  note: string | null;
+  exemptRoles: Exclude<UserRole, 'guest'>[];
+  updatedAt: string | null;
+  updatedBy: string | null;
+};
+
+export type BackendFeatureConfig = {
+  flags: Record<string, BackendFeatureOverride>;
+  updatedAt: string | null;
+  updatedBy: string | null;
+};
+
+/** One staged edit. `state: null` removes the override. */
+export type BackendFeatureChange = {
+  key: string;
+  state: BackendFeatureState | null;
+  note?: string | null;
+  exemptRoles?: readonly Exclude<UserRole, 'guest'>[];
+};
+
 export type BackendErrorCode =
   | 'invalid-argument'
   | 'unauthenticated'

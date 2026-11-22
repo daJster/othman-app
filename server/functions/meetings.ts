@@ -15,18 +15,26 @@ import {
   requiredInteger,
   requiredString,
 } from '../lib/validation.ts';
-import { requireAuth, requireRole } from './guards.ts';
+import { isAdmin, requireAuth, requireRole } from './guards.ts';
 import { created, defineFunction, noContent, ok } from './types.ts';
 import type { FunctionResult } from './types.ts';
 
 /**
  * Meeting CRUD + RSVP.
  *
- * Reads are public: Home and the landing page show the next session before a
- * reader signs in. Writes are admin-only. RSVP is the one mutation a normal user
- * owns, and it is scoped to their own attendee row.
+ * List reads are personalised on the server: a signed-in reader only sees the
+ * meetings they belong to (an attendee row with their uid), so the Meetings tab
+ * is their cohort's schedule, not every meeting in the database. Admins keep
+ * the full calendar because they manage it, and anonymous reads keep the public
+ * list for the sign-in/landing surface. The client never filters: a page or a
+ * calendar range is scoped before it is serialised, so `total` matches what the
+ * reader can see.
+ *
+ * Writes are admin-only. RSVP is the one mutation a normal user owns, and it is
+ * scoped to their own attendee row.
  */
 
+/** Read the optional attendee array from a create or update body. */
 function parseAttendees(
   body: Record<string, unknown>,
 ): AttendeeInput[] | undefined {
@@ -54,6 +62,7 @@ function parseAttendees(
 const list = defineFunction((event, context): FunctionResult => {
   const repo = createMeetingsRepository(context.db);
   const { date, from, to } = event.query;
+  const auth = context.auth;
 
   const { rows, total } = repo.list({
     date,
@@ -61,6 +70,7 @@ const list = defineFunction((event, context): FunctionResult => {
     to,
     limit: parseLimit(event.query, 100, 500),
     offset: parseOffset(event.query),
+    attendeeUid: auth && !isAdmin(auth.user) ? auth.user.uid : undefined,
   });
 
   return ok({ meetings: rows, total });
@@ -81,10 +91,15 @@ const create = defineFunction((event, context): FunctionResult => {
 
   const meeting = createMeetingsRepository(context.db).create({
     title: requiredString(body, 'title', { max: 200 }),
-    titleAr: optionalNullableString(body, 'titleAr', { max: 200 }),
-    description: optionalString(body, 'description', { max: 5_000 }) ?? '',
+    titleAr: optionalNullableString(body, 'titleAr', { max: 200, min: 0 }),
+    description:
+      optionalString(body, 'description', {
+        max: 5_000,
+        min: 0,
+      }) ?? '',
     descriptionAr: optionalNullableString(body, 'descriptionAr', {
       max: 5_000,
+      min: 0,
     }),
     date: requiredDateKey(body, 'date'),
     time: requiredClock(body, 'time'),
@@ -92,12 +107,18 @@ const create = defineFunction((event, context): FunctionResult => {
       min: 1,
       max: 24 * 60,
     }),
-    meetLink: optionalString(body, 'meetLink', { max: 2_048 }) ?? '',
+    meetLink: optionalString(body, 'meetLink', { max: 2_048, min: 0 }) ?? '',
     canceled: optionalBoolean(body, 'canceled'),
-    organizer: optionalString(body, 'organizer', { max: 200 }) ?? '',
-    organizerAr: optionalNullableString(body, 'organizerAr', { max: 200 }),
-    location: optionalString(body, 'location', { max: 200 }) ?? '',
-    locationAr: optionalNullableString(body, 'locationAr', { max: 200 }),
+    organizer: optionalString(body, 'organizer', { max: 200, min: 0 }) ?? '',
+    organizerAr: optionalNullableString(body, 'organizerAr', {
+      max: 200,
+      min: 0,
+    }),
+    location: optionalString(body, 'location', { max: 200, min: 0 }) ?? '',
+    locationAr: optionalNullableString(body, 'locationAr', {
+      max: 200,
+      min: 0,
+    }),
     attendees: parseAttendees(body),
   });
 
@@ -113,10 +134,14 @@ const update = defineFunction((event, context): FunctionResult => {
 
   const patch: MeetingPatch = {
     title: optionalString(body, 'title', { max: 200 }),
-    titleAr: optionalNullableString(body, 'titleAr', { max: 200 }),
-    description: optionalString(body, 'description', { max: 5_000 }),
+    titleAr: optionalNullableString(body, 'titleAr', { max: 200, min: 0 }),
+    description: optionalString(body, 'description', {
+      max: 5_000,
+      min: 0,
+    }),
     descriptionAr: optionalNullableString(body, 'descriptionAr', {
       max: 5_000,
+      min: 0,
     }),
     date: body.date === undefined ? undefined : requiredDateKey(body, 'date'),
     time: body.time === undefined ? undefined : requiredClock(body, 'time'),
@@ -124,12 +149,18 @@ const update = defineFunction((event, context): FunctionResult => {
       min: 1,
       max: 24 * 60,
     }),
-    meetLink: optionalString(body, 'meetLink', { max: 2_048 }),
+    meetLink: optionalString(body, 'meetLink', { max: 2_048, min: 0 }),
     canceled: optionalBoolean(body, 'canceled'),
-    organizer: optionalString(body, 'organizer', { max: 200 }),
-    organizerAr: optionalNullableString(body, 'organizerAr', { max: 200 }),
-    location: optionalString(body, 'location', { max: 200 }),
-    locationAr: optionalNullableString(body, 'locationAr', { max: 200 }),
+    organizer: optionalString(body, 'organizer', { max: 200, min: 0 }),
+    organizerAr: optionalNullableString(body, 'organizerAr', {
+      max: 200,
+      min: 0,
+    }),
+    location: optionalString(body, 'location', { max: 200, min: 0 }),
+    locationAr: optionalNullableString(body, 'locationAr', {
+      max: 200,
+      min: 0,
+    }),
     attendees: parseAttendees(body),
   };
 

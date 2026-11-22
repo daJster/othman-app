@@ -48,6 +48,7 @@ import { Screen, ScreenView } from '@/ui/screen';
 import { ErrorState, Loading } from '@/ui/states';
 import { Text } from '@/ui/text';
 import { Textarea } from '@/ui/textarea';
+import { useFeatures } from '@/features/flags/provider';
 import {
   absoluteAyahNumber,
   ayahReference,
@@ -475,12 +476,14 @@ function BookmarksSection({
   const { language } = useDirection();
   const router = useRouter();
   const toast = useToast();
+  const flags = useFeatures();
   const query = useApiQuery(api.demo.bookmarks.list);
   const create = useApiMutation(api.demo.bookmarks.create);
   const update = useApiMutation(api.demo.bookmarks.update);
   const remove = useApiMutation(api.demo.bookmarks.remove);
   const [editing, setEditing] = useState<BackendBookmark | 'new' | null>(null);
   const [confirming, setConfirming] = useState<BackendBookmark | null>(null);
+  const canWrite = flags.view('quran.bookmarks').writable;
 
   const rows = [...(query.data?.bookmarks ?? [])].sort((a, b) =>
     b.createdAt.localeCompare(a.createdAt),
@@ -518,7 +521,7 @@ function BookmarksSection({
         description={t('records.bookmarks.description')}
         actionLabel={t('records.bookmarks.add')}
         onAction={() => setEditing('new')}
-        showAction={rows.length > 0}
+        showAction={rows.length > 0 && canWrite}
         testID="records-bookmarks-add"
       />
 
@@ -536,8 +539,8 @@ function BookmarksSection({
         <EmptyState
           title={t('records.bookmarks.empty.title')}
           description={t('records.bookmarks.empty.description')}
-          actionLabel={t('records.bookmarks.add')}
-          onAction={() => setEditing('new')}
+          actionLabel={canWrite ? t('records.bookmarks.add') : undefined}
+          onAction={canWrite ? () => setEditing('new') : undefined}
         />
       ) : null}
 
@@ -583,24 +586,28 @@ function BookmarksSection({
                   >
                     <Icon name="book-open" size={16} tone="muted" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    accessibilityLabel={t('records.bookmarks.edit')}
-                    onPress={() => setEditing(bookmark)}
-                    testID={`bookmark-edit:${bookmark.id}`}
-                  >
-                    <Icon name="pencil" size={16} tone="muted" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    accessibilityLabel={t('action.delete')}
-                    onPress={() => setConfirming(bookmark)}
-                    testID={`bookmark-delete:${bookmark.id}`}
-                  >
-                    <Icon name="trash" size={16} tone="destructive" />
-                  </Button>
+                  {canWrite ? (
+                    <>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        accessibilityLabel={t('records.bookmarks.edit')}
+                        onPress={() => setEditing(bookmark)}
+                        testID={`bookmark-edit:${bookmark.id}`}
+                      >
+                        <Icon name="pencil" size={16} tone="muted" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        accessibilityLabel={t('action.delete')}
+                        onPress={() => setConfirming(bookmark)}
+                        testID={`bookmark-delete:${bookmark.id}`}
+                      >
+                        <Icon name="trash" size={16} tone="destructive" />
+                      </Button>
+                    </>
+                  ) : null}
                 </View>
               </View>
             );
@@ -829,12 +836,14 @@ function NotesSection({
   const { language } = useDirection();
   const router = useRouter();
   const toast = useToast();
+  const flags = useFeatures();
   const query = useApiQuery(api.demo.notes.list, {});
   const create = useApiMutation(api.demo.notes.save);
   const update = useApiMutation(api.demo.notes.update);
   const remove = useApiMutation(api.demo.notes.remove);
   const [editing, setEditing] = useState<BackendNote | 'new' | null>(null);
   const [confirming, setConfirming] = useState<BackendNote | null>(null);
+  const canWrite = flags.view('quran.notes').writable;
 
   const rows = [...(query.data?.notes ?? [])].sort(
     (a, b) => b.createdAt - a.createdAt,
@@ -872,7 +881,7 @@ function NotesSection({
         description={t('records.notes.description')}
         actionLabel={t('records.notes.add')}
         onAction={() => setEditing('new')}
-        showAction={rows.length > 0}
+        showAction={rows.length > 0 && canWrite}
         testID="records-notes-add"
       />
 
@@ -890,8 +899,8 @@ function NotesSection({
         <EmptyState
           title={t('records.notes.empty.title')}
           description={t('records.notes.empty.description')}
-          actionLabel={t('records.notes.add')}
-          onAction={() => setEditing('new')}
+          actionLabel={canWrite ? t('records.notes.add') : undefined}
+          onAction={canWrite ? () => setEditing('new') : undefined}
         />
       ) : null}
 
@@ -932,24 +941,28 @@ function NotesSection({
                     >
                       <Icon name="book-open" size={16} tone="muted" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      accessibilityLabel={t('records.notes.edit')}
-                      onPress={() => setEditing(note)}
-                      testID={`note-edit:${note.id}`}
-                    >
-                      <Icon name="pencil" size={16} tone="muted" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      accessibilityLabel={t('action.delete')}
-                      onPress={() => setConfirming(note)}
-                      testID={`note-delete:${note.id}`}
-                    >
-                      <Icon name="trash" size={16} tone="destructive" />
-                    </Button>
+                    {canWrite ? (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          accessibilityLabel={t('records.notes.edit')}
+                          onPress={() => setEditing(note)}
+                          testID={`note-edit:${note.id}`}
+                        >
+                          <Icon name="pencil" size={16} tone="muted" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          accessibilityLabel={t('action.delete')}
+                          onPress={() => setConfirming(note)}
+                          testID={`note-delete:${note.id}`}
+                        >
+                          <Icon name="trash" size={16} tone="destructive" />
+                        </Button>
+                      </>
+                    ) : null}
                   </View>
                 </View>
 

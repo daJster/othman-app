@@ -30,12 +30,37 @@ export type ProfileCompletenessProps = {
   account: AccountData;
   onEdit: () => void;
   className?: string;
+  /** The drawer supplies its own footer action; the inline block owns this one. */
+  showAction?: boolean;
 };
+
+/**
+ * The three fields that make a profile complete, derived from the account.
+ *
+ * Exported because the drawer footer says "Finish profile" only while
+ * something is missing; computing that from the same three checks keeps the
+ * label and the stepper from disagreeing.
+ */
+export function profileCompletion(account: AccountData) {
+  const checks = [
+    Boolean(account.displayName?.trim()),
+    Boolean(account.photoURL),
+    Boolean(account.phoneNumber?.trim()),
+  ];
+  const done = checks.filter(Boolean).length;
+
+  return {
+    done,
+    total: checks.length,
+    complete: done === checks.length,
+  };
+}
 
 export function ProfileCompleteness({
   account,
   onEdit,
   className,
+  showAction = true,
 }: ProfileCompletenessProps) {
   const { t } = useTranslation();
 
@@ -57,7 +82,7 @@ export function ProfileCompleteness({
     },
   ] as const;
 
-  const done = fields.filter((field) => field.complete).length;
+  const { done, total } = profileCompletion(account);
   const firstMissing = fields.findIndex((field) => !field.complete);
 
   const steps: StepItem[] = fields.map((field, index) => ({
@@ -87,7 +112,7 @@ export function ProfileCompleteness({
           <Text variant="label">
             {t('account.completeness.progress', {
               done,
-              total: fields.length,
+              total,
             })}
           </Text>
         </View>
@@ -117,7 +142,7 @@ export function ProfileCompleteness({
         className="pt-1"
       />
 
-      {done < fields.length ? (
+      {showAction && done < total ? (
         <Button
           variant="link"
           size="sm"

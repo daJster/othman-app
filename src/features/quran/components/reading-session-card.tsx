@@ -215,7 +215,15 @@ function surahLabel(
   surah: number,
   metadata: SurahMetadata | null,
   language: 'ar' | 'en',
-  t: ReturnType<typeof useTranslation>['t'],
+  /*
+   * The concrete key, not `TFunction`: the whole locale is a literal union, and
+   * a generic `t` parameter here sent TypeScript into an unbounded instantiation
+   * as the locale grew.
+   */
+  t: (
+    key: 'pages.account.progress.surah',
+    options: { number: string },
+  ) => string,
 ): string {
   if (metadata === null) {
     return t('pages.account.progress.surah', {
@@ -250,7 +258,18 @@ function startOfDay(at: number): number {
   ).getTime();
 }
 
-type Translate = ReturnType<typeof useTranslation>['t'];
+/*
+ * The three keys this helper can reach, not `TFunction`: the locale is one big
+ * literal union, and a generic `t` parameter here sent TypeScript into an
+ * unbounded instantiation.
+ */
+type Translate = (
+  key:
+    | 'quran.resume.time.today'
+    | 'quran.resume.time.yesterday'
+    | 'quran.resume.time.days',
+  options?: { count?: number },
+) => string;
 
 function relativeDay(at: number, now: number, t: Translate): string {
   const days = daysAgo(at, now);

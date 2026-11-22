@@ -64,6 +64,10 @@ export class ApiError extends Error {
   static precondition(message: string): ApiError {
     return new ApiError('failed-precondition', message);
   }
+
+  static unavailable(message: string): ApiError {
+    return new ApiError('unavailable', message);
+  }
 }
 
 export type ErrorBody = {

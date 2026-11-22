@@ -1,6 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import type { MockApplication } from '../application.ts';
 import type { DomainEvent } from '../contracts.ts';
+import { assertFeatureWritable } from '../features.ts';
 import { ApiError, toErrorBody } from '../lib/errors.ts';
 import type {
   FunctionEvent,
@@ -289,6 +290,7 @@ export function createRequestListener(app: MockApplication) {
         const raw = await readBody(request);
 
         let handler: FunctionHandler | undefined;
+        let functionName: string | null = null;
         let params: Record<string, string> = {};
         let body = raw;
         let path = pathname;
@@ -301,6 +303,7 @@ export function createRequestListener(app: MockApplication) {
 
           handler = app.registry[name];
           callable = true;
+          functionName = name;
 
           if (!handler) {
             throw ApiError.notFound(`Unknown function "${name}"`);
@@ -338,6 +341,7 @@ export function createRequestListener(app: MockApplication) {
           }
 
           handler = app.registry[matched.route.name];
+          functionName = matched.route.name;
           params = matched.params;
           path = matched.route.path;
 
@@ -356,6 +360,12 @@ export function createRequestListener(app: MockApplication) {
           body,
           headers,
         };
+
+        // Defence in depth: a feature area that is not `on` refuses writes even
+        // when the client's cache is stale or the UI was bypassed.
+        if (functionName) {
+          assertFeatureWritable(method, functionName, context);
+        }
 
         const result = await dispatch(handler, event, context);
 

@@ -27,11 +27,14 @@ jest.mock('@/providers/language-provider', () => ({
 
 describe('PreferencesSection', () => {
   it('shows the theme and language rows with their current values', async () => {
-    await render(<PreferencesSection />);
+    await render(
+      <PreferencesSection onAppearance={jest.fn()} onLanguage={jest.fn()} />,
+    );
 
-    expect(screen.getByTestId('preferences-section')).toBeTruthy();
+    expect(screen.getByTestId('account-appearance-row')).toBeTruthy();
     expect(screen.getByText('Theme')).toBeTruthy();
     expect(screen.getByText('System')).toBeTruthy();
+    expect(screen.getByTestId('account-language-row')).toBeTruthy();
     expect(screen.getByText('Language')).toBeTruthy();
     expect(screen.getByText('English')).toBeTruthy();
   });

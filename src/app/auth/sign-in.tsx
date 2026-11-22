@@ -17,6 +17,10 @@ import {
 } from 'react-native';
 import type { AuthErrorCode } from '@/core/types';
 import { sanitizeReturnTo } from '@/features/auth/return-to';
+import {
+  DEV_SWITCHER_ENABLED,
+  DevAccountList,
+} from '@/features/auth/dev-accounts';
 import { GOOGLE_MARK } from '@/features/brand/assets';
 import { BrandMark } from '@/features/brand/brand-mark';
 import { useAuth } from '@/providers/auth-provider';
@@ -429,6 +433,25 @@ export default function SignInScreen() {
                 )}
               </CardContent>
             </Card>
+
+            {/*
+              Development only: one tap per seeded account. The block is outside
+              the sign-in card so it never looks like a product affordance, and
+              it disappears entirely in a release build.
+            */}
+            {DEV_SWITCHER_ENABLED ? (
+              <View className="gap-2">
+                <View className="gap-0.5">
+                  <Text variant="overline" tone="muted">
+                    {t('auth.dev.accountsTitle')}
+                  </Text>
+                  <Text variant="caption" tone="muted">
+                    {t('auth.dev.accountsHint')}
+                  </Text>
+                </View>
+                <DevAccountList />
+              </View>
+            ) : null}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

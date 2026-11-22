@@ -1,5 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { RequireRole } from '@/features/auth/require-role';
+import { FeatureScreen } from '@/features/flags/gates';
 import { MemberFormScreen } from '@/features/account/member-form-screen';
 
 /**
@@ -15,7 +16,9 @@ export default function MemberEditRoute() {
 
   return (
     <RequireRole>
-      <MemberFormScreen uid={memberUid} />
+      <FeatureScreen feature="admin.members.edit">
+        <MemberFormScreen uid={memberUid} />
+      </FeatureScreen>
     </RequireRole>
   );
 }

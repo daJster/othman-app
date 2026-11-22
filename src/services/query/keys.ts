@@ -24,6 +24,19 @@ export const queryKeys = {
   /** Everything the app has cached. Sign-out clears this (P3.3). */
   all: ['othman'] as const,
 
+  /**
+   * Remote configuration.
+   *
+   * Not under `backend`: it is app infrastructure (and, later, Remote Config),
+   * not the mock server's own surface. A `feature.updated` event invalidates
+   * this one key, so a switch reaches every mounted screen without refetching
+   * anything else.
+   */
+  config: {
+    root: ['othman', 'config'] as const,
+    features: ['othman', 'config', 'features'] as const,
+  },
+
   notices: {
     /** The inbox. Invalidated when a notice is marked read or the server list changes. */
     root: ['othman', 'notices'] as const,

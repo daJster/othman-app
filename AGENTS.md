@@ -16,6 +16,17 @@ key, fetching strategy and invalidation rule. Screens read it through
 state is TanStack Query. See [`docs/api.md`](docs/api.md) before adding a request
 or a `staleTime`.
 
+## Feature control
+
+Every route and write capability has a dotted feature key in
+`src/features/flags/registry.ts` (`meetings`, `meetings.create`,
+`quran.records`, `admin.members.edit`). A superadmin can move any of them to
+`read-only`, `maintenance` or `off` from `/admin/features`; the mock server
+stores the document and refuses writes in a restricted area. Inheritance is the
+dotted key itself, most restrictive wins. See
+[`docs/features.md`](docs/features.md) before adding a screen — a new page needs
+a registry path and two locale keys, nothing else.
+
 ## Dev environment (authoritative)
 
 Parts of this file still describe a retired Vite/web-only layout. The app is
