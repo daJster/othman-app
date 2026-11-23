@@ -108,6 +108,15 @@ export type ReaderScreenProps = {
    * account; the default keeps tests and any embedded reader on guest notes.
    */
   notesNamespace?: string;
+  /**
+   * Render the reader as a tab's own screen rather than the modal route.
+   *
+   * The modal is presented over something, so it owns an exit control that pops
+   * the stack. A tab has no stack to pop: the tab bar is the way out, and a
+   * close button there would either do nothing or fabricate a destination. The
+   * embedded reader therefore renders the header without it.
+   */
+  embedded?: boolean;
 };
 
 /**
@@ -123,6 +132,7 @@ export function ReaderScreen({
   initialSurah = null,
   initialAyah = null,
   notesNamespace = 'guest',
+  embedded = false,
 }: ReaderScreenProps) {
   const { t } = useTranslation();
   const router = useRouter();
@@ -422,7 +432,7 @@ export function ReaderScreen({
           ayahKey={ayahKey}
           page={page}
           editionName={chromeEdition?.name ?? null}
-          onExit={exit}
+          onExit={embedded ? undefined : exit}
           onOpenSurah={() => setSheet('surah')}
           onOpenEditions={() => setSheet('edition')}
           onOpenMenu={() => setSheet('menu')}

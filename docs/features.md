@@ -156,7 +156,6 @@ the registry is its executable form.
 | Home              | `home`               | area       | `/`                   | —                                     | notice                 | tab hidden                       |
 | Qur'an            | `quran`              | area       | `/quran`              | bookmark/note actions hidden          | notice                 | tab hidden                       |
 | Reader            | `quran.reader`       | page       | `/reader/[page]`      | —                                     | notice                 | blocked                          |
-| Mushaf history    | `quran.history`      | page       | `/quran/history`      | —                                     | notice                 | blocked                          |
 | Records           | `quran.records`      | page       | `/quran/records`      | rows readable, add/edit/delete hidden | notice                 | blocked                          |
 | Bookmarks         | `quran.bookmarks`    | capability | —                     | hidden                                | hidden                 | hidden                           |
 | Notes             | `quran.notes`        | capability | —                     | hidden                                | hidden                 | hidden                           |

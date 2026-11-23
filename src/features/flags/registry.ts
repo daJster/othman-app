@@ -27,7 +27,6 @@ export const FEATURE_KEYS = [
   'home',
   'quran',
   'quran.reader',
-  'quran.history',
   'quran.records',
   'quran.bookmarks',
   'quran.notes',
@@ -75,12 +74,6 @@ const NODES = {
     level: 'page',
     path: '/reader',
     icon: 'book-open',
-  },
-  'quran.history': {
-    key: 'quran.history',
-    level: 'page',
-    path: '/quran/history',
-    icon: 'clock',
   },
   'quran.records': {
     key: 'quran.records',

@@ -97,7 +97,6 @@ describe('feature registry', () => {
 describe('feature paths', () => {
   it('gives the deepest owned path the page', () => {
     expect(featureForPath('/quran')).toBe('quran');
-    expect(featureForPath('/quran/history')).toBe('quran.history');
     expect(featureForPath('/quran/records')).toBe('quran.records');
     expect(featureForPath('/account/edit')).toBe('account.edit');
     expect(featureForPath('/account/progress')).toBe('account.progress');

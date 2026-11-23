@@ -112,6 +112,25 @@ describe('ReaderHeader', () => {
     expect(handlers.onOpenMenu).toHaveBeenCalledTimes(1);
   });
 
+  it('omits the exit control when the reader cannot be dismissed', async () => {
+    await render(
+      <ReaderHeader
+        surah={SURAH}
+        ayahKey={null}
+        page={12}
+        editionName="Tajweed"
+        onOpenSurah={jest.fn()}
+        onOpenEditions={jest.fn()}
+        onOpenMenu={jest.fn()}
+      />,
+    );
+
+    // The Quran tab embeds the reader: the tab bar is the way out, so a dead
+    // close button would be worse than none.
+    expect(screen.queryByTestId('reader-back')).toBeNull();
+    expect(screen.getByTestId('reader-menu')).toBeTruthy();
+  });
+
   it('labels every action for a screen reader', async () => {
     await renderHeader().view;
 

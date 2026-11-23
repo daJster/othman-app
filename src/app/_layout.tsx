@@ -266,7 +266,6 @@ function RootNavigator() {
             name="admin/features"
             options={{ presentation: 'card' }}
           />
-          <Stack.Screen name="quran/history" />
           <Stack.Screen name="quran/records" />
           <Stack.Screen name="about" />
           <Stack.Screen

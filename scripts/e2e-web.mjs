@@ -616,20 +616,13 @@ async function main() {
       },
     ];
 
-    // The landing page is a reading column, not a content mirror: the band
-    // edges must land on the same physical coordinates in both languages. The
-    // history band is listed before its plan lands; `compare` skips a missing
-    // selector, so an absent module does not fail the guard.
+    // The Quran tab *is* the reader now, so the stable landmark is its header:
+    // it renders before the catalog resolves, while the mushaf body may still
+    // be loading. The nav bar is checked on the same page so the tab shell and
+    // the reader chrome are measured together.
     const quranLandmarks = [
       { selector: '[role="navigation"]', edges: ['left', 'right'] },
-      {
-        selector: '[data-testid="quran-resume-band"]',
-        edges: ['left', 'right'],
-      },
-      {
-        selector: '[data-testid="quran-history-band"]',
-        edges: ['left', 'right'],
-      },
+      { selector: '[data-testid="reader-header"]', edges: ['left', 'right'] },
     ];
 
     const measure = async (path, width, language, list) => {
@@ -687,8 +680,8 @@ async function main() {
       const enQuran = await measure('/quran', width, 'en', quranLandmarks);
       const arQuran = await measure('/quran', width, 'ar', quranLandmarks);
       check(
-        `the resume band is on the Quran page at ${width}`,
-        Boolean(enQuran['[data-testid="quran-resume-band"]']),
+        `the reader is on the Quran page at ${width}`,
+        Boolean(enQuran['[data-testid="reader-header"]']),
         JSON.stringify(Object.keys(enQuran)),
       );
       compare(width, quranLandmarks, enQuran, arQuran);
@@ -787,17 +780,21 @@ async function main() {
   await scenario('quran entry', async () => {
     const context = await makeContext(browser, { width: 768, height: 900 });
     const page = await context.newPage();
+    const errors = track(page);
     await goto(page, '/quran');
-    await page.locator('[data-testid="quran-session-card"]').first().click();
-    await page.waitForURL(/\/reader\/\d+/, { timeout: 15000 });
     await page.waitForSelector('[data-testid="reader-header"]', {
       timeout: 30000,
     });
     check(
-      'Quran tab opens the reader',
-      /\/reader\/\d+/.test(page.url()),
+      'the Quran tab opens the reader directly',
+      new URL(page.url()).pathname === '/quran',
       page.url(),
     );
+    check(
+      'the embedded reader has no modal exit',
+      (await page.locator('[data-testid="reader-back"]').count()) === 0,
+    );
+    check('no runtime errors', errors.length === 0, errors.join(' | '));
     await context.close();
   });
 

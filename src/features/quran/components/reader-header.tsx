@@ -20,10 +20,12 @@ import { formatReaderNumber } from '../format';
  *    picker, and the second line always carries the page plus — once one is
  *    selected — the ayah. That way a page turn and a bbox tap both produce a
  *    visible label change without adding a status bar.
- *  - **The exit control is labelled, not just an icon.** A full-screen modal has
- *    no system back gesture on iOS, so the reader's only way out has to be
- *    discoverable and screen-reader labelled. It dismisses with an X, the same
- *    shape as every other modal, rather than a back chevron.
+ *  - **The exit control is labelled, not just an icon — when it exists.** A
+ *    full-screen modal has no system back gesture on iOS, so the reader's only
+ *    way out has to be discoverable and screen-reader labelled. It dismisses
+ *    with an X, the same shape as every other modal, rather than a back
+ *    chevron. The embedded reader (the Quran tab) renders no exit at all: the
+ *    tab bar is the way out, and a dead button would be worse than none.
  *
  * Only the footer's previous/next arrows mirror in RTL because they are
  * reading-order actions; dismissals do not.
@@ -33,7 +35,8 @@ export type ReaderHeaderProps = {
   ayahKey: string | null;
   page: number;
   editionName: string | null;
-  onExit: () => void;
+  /** Omitted when the reader is a tab's own screen and cannot be dismissed. */
+  onExit?: () => void;
   onOpenSurah: () => void;
   onOpenEditions: () => void;
   onOpenMenu: () => void;
@@ -72,15 +75,17 @@ export function ReaderHeader({
       className="flex-row items-center gap-2 border-b border-glass-edge bg-glass px-2 pb-2"
       testID="reader-header"
     >
-      <Button
-        variant="ghost"
-        size="icon"
-        accessibilityLabel={t('reader.exit')}
-        onPress={onExit}
-        testID="reader-back"
-      >
-        <Icon name="close" size={20} />
-      </Button>
+      {onExit ? (
+        <Button
+          variant="ghost"
+          size="icon"
+          accessibilityLabel={t('reader.exit')}
+          onPress={onExit}
+          testID="reader-back"
+        >
+          <Icon name="close" size={20} />
+        </Button>
+      ) : null}
 
       <Pressable
         className="min-w-0 flex-1 gap-0.5 py-1"
