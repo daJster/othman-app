@@ -18,6 +18,8 @@ export const STORAGE_KEYS = {
   backendSession: 'backend:session',
   progressHideEmpty: 'progress:hide-empty',
   accountFeedback: 'account:feedback',
+  /** The local-first cache: account, progress and meeting windows. */
+  localData: 'local-data',
 } as const;
 
 export type StorageKey = (typeof STORAGE_KEYS)[keyof typeof STORAGE_KEYS];

@@ -5,12 +5,14 @@ import { useAppFonts } from '@/providers/font-provider';
 import { useAuth } from '@/providers/auth-provider';
 import { BootProvider } from '@/providers/boot-provider';
 import { useLanguage } from '@/providers/language-provider';
+import { useLocalData } from '@/providers/local-data-provider';
 import { useThemeMode } from '@/providers/theme-provider';
 
 /**
- * The gate has three inputs from three providers, so all are stubbed: the theme
- * and language hooks directly, the font hook through its module. The splash
- * screen is the observable side effect, which is what these tests assert.
+ * The gate has five inputs from five providers, so all are stubbed: the theme,
+ * language and local-cache hooks directly, the font hook through its module.
+ * The splash screen is the observable side effect, which is what these tests
+ * assert.
  */
 jest.mock('expo-splash-screen', () => ({
   preventAutoHideAsync: jest.fn(async () => true),
@@ -33,6 +35,10 @@ jest.mock('@/providers/auth-provider', () => ({
   useAuth: jest.fn(),
 }));
 
+jest.mock('@/providers/local-data-provider', () => ({
+  useLocalData: jest.fn(),
+}));
+
 const splash = SplashScreen as unknown as {
   hideAsync: jest.Mock;
 };
@@ -41,9 +47,15 @@ const themeMode = useThemeMode as unknown as jest.Mock;
 const language = useLanguage as unknown as jest.Mock;
 const appFonts = useAppFonts as unknown as jest.Mock;
 const auth = useAuth as unknown as jest.Mock;
+const localData = useLocalData as unknown as jest.Mock;
 
 function setState(
-  ready: { theme: boolean; language: boolean; auth?: boolean },
+  ready: {
+    theme: boolean;
+    language: boolean;
+    auth?: boolean;
+    localData?: boolean;
+  },
   fonts: readonly [boolean, Error | null],
 ) {
   themeMode.mockReturnValue({
@@ -61,6 +73,7 @@ function setState(
   auth.mockReturnValue({
     status: ready.auth === false ? 'restoring' : 'signed-out',
   });
+  localData.mockReturnValue({ ready: ready.localData ?? true });
   appFonts.mockReturnValue(fonts);
 }
 
@@ -121,7 +134,20 @@ describe('BootProvider', () => {
     expect(splash.hideAsync).not.toHaveBeenCalled();
   });
 
-  it('reveals the app once theme, language and fonts are all ready', async () => {
+  it('renders nothing while the local cache is still hydrating', async () => {
+    setState({ theme: true, language: true, localData: false }, [true, null]);
+
+    await render(
+      <BootProvider>
+        <Text>app</Text>
+      </BootProvider>,
+    );
+
+    expect(screen.queryByText('app')).toBeNull();
+    expect(splash.hideAsync).not.toHaveBeenCalled();
+  });
+
+  it('reveals the app once theme, language, fonts and the local cache are ready', async () => {
     setState({ theme: true, language: true }, [true, null]);
 
     await render(

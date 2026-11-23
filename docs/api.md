@@ -102,3 +102,12 @@ Zustand holds only what the server cannot: whether the event stream is
 connected, the last event, and the cursor. Server rows belong to TanStack Query
 and the session belongs to `AuthProvider`. Copying either into the store would
 recreate the two-sources-of-truth bug this layer exists to prevent.
+
+## Local-first cache
+
+A small, user-scoped slice of the query cache is persisted and revalidated by
+`src/services/local-data/` (account, progress, visited meeting windows). Reads
+still go through `useApiQuery`; the difference is that a relaunch hydrates the
+cache before the navigator mounts, and a sync replaces only entries whose
+checksum changed. The full strategy — states, scopes, retention, lifecycle — is
+in [`local-data.md`](local-data.md).

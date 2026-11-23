@@ -29,6 +29,7 @@ import { AUTH_GATING_ENABLED } from '@/features/auth/auth-policy';
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
 import { BootProvider } from '@/providers/boot-provider';
 import { LanguageProvider } from '@/providers/language-provider';
+import { LocalDataProvider } from '@/providers/local-data-provider';
 import { ThemeProvider, useThemeMode } from '@/providers/theme-provider';
 import { queryClient } from '@/services/query';
 import { ToastProvider } from '@/ui/panel';
@@ -125,15 +126,17 @@ function AppShell() {
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <FeatureFlagsProvider>
-            <BootProvider>
-              <ToastProvider>
-                <RootNavigator />
-                <ApiEventsBridge />
-                <PortalHost />
-              </ToastProvider>
-            </BootProvider>
-          </FeatureFlagsProvider>
+          <LocalDataProvider>
+            <FeatureFlagsProvider>
+              <BootProvider>
+                <ToastProvider>
+                  <RootNavigator />
+                  <ApiEventsBridge />
+                  <PortalHost />
+                </ToastProvider>
+              </BootProvider>
+            </FeatureFlagsProvider>
+          </LocalDataProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>
