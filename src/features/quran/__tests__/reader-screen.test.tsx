@@ -33,10 +33,18 @@ jest.mock('expo-haptics', () => ({
   ImpactFeedbackStyle: { Light: 'light' },
 }));
 
-// The menu's theme row belongs to the settings feature and needs the
-// ThemeProvider; this suite is about the reader, so the row is stubbed.
-jest.mock('@/features/settings/theme-dropdown', () => ({
-  ThemeDropdown: () => null,
+// The header's theme toggle reads the app theme provider; this suite is about
+// the reader, so the provider is stubbed with a fixed light mode.
+jest.mock('@/providers/theme-provider', () => ({
+  useThemeMode: () => ({
+    mode: 'light',
+    isDark: false,
+    ready: true,
+    setMode: () => undefined,
+  }),
+  // The loading frame and the ayah displayer read the *optional* variant so
+  // they can render outside the provider; the stub keeps that contract.
+  useOptionalThemeMode: () => null,
 }));
 
 // The sheets are native presentations; the interaction tests need their rows.
@@ -281,6 +289,11 @@ beforeEach(() => {
   readerStore.setState({ restored: true, preferredEditionKey: '1' });
 });
 
+async function openMushafPicker() {
+  await fireEvent.press(screen.getByTestId('reader-menu'));
+  await fireEvent.press(screen.getByTestId('reader-menu-edition'));
+}
+
 describe('ReaderScreen boot', () => {
   it('waits for the stored preference before asking for an edition', async () => {
     // A restore that never settles: the point is the frame *before* storage
@@ -496,13 +509,13 @@ describe('ReaderScreen deep link', () => {
     expect(readerStore.getState().page).toBe(1);
 
     // Edition 2 starts at page 4, so the switch clamps the position.
-    await fireEvent.press(screen.getByTestId('reader-edition'));
+    await openMushafPicker();
     await fireEvent.press(screen.getByTestId('edition-row:2'));
     await waitFor(() => expect(readerStore.getState().page).toBe(4));
 
     // Switching back must keep the reader's new position. A per-body link flag
     // would have been reset by the remount and jumped back to page 1.
-    await fireEvent.press(screen.getByTestId('reader-edition'));
+    await openMushafPicker();
     await fireEvent.press(screen.getByTestId('edition-row:1'));
     await waitFor(() => expect(readerStore.getState().editionKey).toBe('1'));
 
@@ -667,7 +680,7 @@ describe('ReaderScreen chrome', () => {
 
     const view = await render(<ReaderScreen />);
 
-    await fireEvent.press(screen.getByTestId('reader-edition'));
+    await openMushafPicker();
     await fireEvent.press(screen.getByTestId('edition-row:2'));
 
     // Still the old edition: the new one's boxes are not attached yet.
@@ -697,11 +710,11 @@ describe('ReaderScreen chrome', () => {
 
     const view = await render(<ReaderScreen />);
 
-    await fireEvent.press(screen.getByTestId('reader-edition'));
+    await openMushafPicker();
     await fireEvent.press(screen.getByTestId('edition-row:2'));
 
     // The reader changes their mind before edition 2 answers.
-    await fireEvent.press(screen.getByTestId('reader-edition'));
+    await openMushafPicker();
     await fireEvent.press(screen.getByTestId('edition-row:1'));
 
     expect(readerStore.getState().editionKey).toBe('1');

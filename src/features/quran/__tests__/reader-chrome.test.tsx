@@ -4,6 +4,18 @@ import { i18n, setLanguageState } from '@/i18n';
 import { ReaderFooter } from '../components/reader-footer';
 import { ReaderHeader } from '../components/reader-header';
 
+const mockSetMode = jest.fn();
+let mockIsDark = false;
+
+jest.mock('@/providers/theme-provider', () => ({
+  useThemeMode: () => ({
+    mode: mockIsDark ? 'dark' : 'light',
+    isDark: mockIsDark,
+    ready: true,
+    setMode: mockSetMode,
+  }),
+}));
+
 /**
  * The chrome's contract.
  *
@@ -29,6 +41,8 @@ async function resetLanguage() {
 }
 
 beforeEach(async () => {
+  mockIsDark = false;
+  mockSetMode.mockClear();
   await resetLanguage();
 });
 
@@ -42,7 +56,6 @@ function renderHeader(
   const handlers = {
     onExit: jest.fn(),
     onOpenSurah: jest.fn(),
-    onOpenEditions: jest.fn(),
     onOpenMenu: jest.fn(),
   };
 
@@ -53,7 +66,6 @@ function renderHeader(
         surah={SURAH}
         ayahKey={null}
         page={12}
-        editionName="Tajweed"
         {...handlers}
         {...overrides}
       />,
@@ -85,10 +97,8 @@ describe('ReaderHeader', () => {
         surah={SURAH}
         ayahKey={null}
         page={13}
-        editionName="Tajweed"
         onExit={jest.fn()}
         onOpenSurah={jest.fn()}
-        onOpenEditions={jest.fn()}
         onOpenMenu={jest.fn()}
       />,
     );
@@ -97,18 +107,16 @@ describe('ReaderHeader', () => {
     expect(screen.queryByText('Page 12')).toBeNull();
   });
 
-  it('exposes exit, surah, edition and menu actions', async () => {
+  it('exposes exit, surah and menu actions', async () => {
     const { view, handlers } = renderHeader();
     await view;
 
     await fireEvent.press(screen.getByTestId('reader-back'));
     await fireEvent.press(screen.getByTestId('reader-surah'));
-    await fireEvent.press(screen.getByTestId('reader-edition'));
     await fireEvent.press(screen.getByTestId('reader-menu'));
 
     expect(handlers.onExit).toHaveBeenCalledTimes(1);
     expect(handlers.onOpenSurah).toHaveBeenCalledTimes(1);
-    expect(handlers.onOpenEditions).toHaveBeenCalledTimes(1);
     expect(handlers.onOpenMenu).toHaveBeenCalledTimes(1);
   });
 
@@ -118,9 +126,7 @@ describe('ReaderHeader', () => {
         surah={SURAH}
         ayahKey={null}
         page={12}
-        editionName="Tajweed"
         onOpenSurah={jest.fn()}
-        onOpenEditions={jest.fn()}
         onOpenMenu={jest.fn()}
       />,
     );
@@ -131,6 +137,29 @@ describe('ReaderHeader', () => {
     expect(screen.getByTestId('reader-menu')).toBeTruthy();
   });
 
+  it('switches the theme in one tap, naming the destination', async () => {
+    await renderHeader().view;
+
+    const toggle = screen.getByTestId('reader-theme-toggle');
+    expect(toggle.props.accessibilityLabel).toBe('Switch to dark theme');
+
+    await fireEvent.press(toggle);
+
+    expect(mockSetMode).toHaveBeenCalledWith('dark');
+  });
+
+  it('offers light from the dark theme', async () => {
+    mockIsDark = true;
+    await renderHeader().view;
+
+    const toggle = screen.getByTestId('reader-theme-toggle');
+    expect(toggle.props.accessibilityLabel).toBe('Switch to light theme');
+
+    await fireEvent.press(toggle);
+
+    expect(mockSetMode).toHaveBeenCalledWith('light');
+  });
+
   it('labels every action for a screen reader', async () => {
     await renderHeader().view;
 
@@ -139,9 +168,6 @@ describe('ReaderHeader', () => {
     );
     expect(screen.getByTestId('reader-surah').props.accessibilityLabel).toBe(
       'Choose surah',
-    );
-    expect(screen.getByTestId('reader-edition').props.accessibilityLabel).toBe(
-      'Choose edition',
     );
     expect(screen.getByTestId('reader-menu').props.accessibilityLabel).toBe(
       'Reader menu',

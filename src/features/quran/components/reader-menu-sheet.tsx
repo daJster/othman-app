@@ -1,11 +1,9 @@
 import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import type { IconName } from '@/core/config';
-import { ThemeDropdown } from '@/features/settings/theme-dropdown';
 import { Icon } from '@/ui/icon';
 import { NativeSheetContent } from '@/ui/native-sheet-content';
 import { Pressable } from '@/ui/pressable';
-import { SheetHeader } from '@/ui/sheet-header';
 import { Text } from '@/ui/text';
 import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
 
@@ -19,9 +17,15 @@ import { ThemedBottomSheet } from '@/ui/themed-bottom-sheet';
  * than a sheet that behaves the same everywhere. The sheet is still native
  * (SwiftUI / Compose / vaul), so it keeps platform drag and backdrop behaviour.
  *
- * The menu is the only place that lists every destination; the header and
- * footer expose the two most-used ones directly, so nothing is more than one
- * tap away.
+ * **No title row.** It is a bottom drawer: the drag indicator and the backdrop
+ * are the dismissal, and a heading that only says "Reader menu" would spend a
+ * line on a name the reader already knows. The sheet opens straight onto its
+ * destinations.
+ *
+ * Theme is not here: day/night is a one-tap control in the header, and the
+ * three-way choice (including "follow the system") lives on Account. The menu
+ * is the only place that lists every destination; the header and footer expose
+ * the two most-used ones directly, so nothing is more than one tap away.
  */
 export type ReaderMenuAction =
   | 'surah'
@@ -37,7 +41,7 @@ const ACTIONS: readonly {
   id: ReaderMenuAction;
   labelKey:
     | 'reader.menuSurah'
-    | 'reader.menuEdition'
+    | 'reader.menuMushaf'
     | 'reader.menuRead'
     | 'reader.menuTafsir'
     | 'reader.menuNotes'
@@ -47,7 +51,7 @@ const ACTIONS: readonly {
   icon: IconName;
 }[] = [
   { id: 'surah', labelKey: 'reader.menuSurah', icon: 'book-open' },
-  { id: 'edition', labelKey: 'reader.menuEdition', icon: 'layers' },
+  { id: 'edition', labelKey: 'reader.menuMushaf', icon: 'layers' },
   { id: 'read', labelKey: 'reader.menuRead', icon: 'file-text' },
   { id: 'tafsir', labelKey: 'reader.menuTafsir', icon: 'search' },
   { id: 'notes', labelKey: 'reader.menuNotes', icon: 'pencil' },
@@ -90,16 +94,6 @@ export function ReaderMenuSheet({
     >
       <NativeSheetContent>
         <View className="gap-2">
-          <SheetHeader
-            title={t('reader.menuTitle')}
-            onClose={onDismiss}
-            closeTestID="reader-menu-close"
-          />
-
-          <View className="border-t border-glass-edge pt-2">
-            <ThemeDropdown testID="reader-theme-dropdown" />
-          </View>
-
           {actions.map((action) => (
             <Pressable
               key={action.id}

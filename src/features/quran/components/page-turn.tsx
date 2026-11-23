@@ -1,26 +1,37 @@
 import { type ReactNode, useLayoutEffect } from 'react';
 import { useWindowDimensions } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
+  Easing,
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 import { useCSSVariable } from 'uniwind';
+import { useSwipeGesture } from '@/ui/gestures/use-swipe-gesture';
+import { useReducedMotion } from '@/ui/motion';
 import { cssNumber } from '../css-value';
 import type { PageTurnDirection } from '../store/reader-store';
-import { resolveSwipe, type SwipeDirection } from '../swipe';
+import { pageTurnForSwipe, type PageTurnSwipe } from '../swipe';
 
 /**
  * The page-turn gesture and the entrance animation for the page inside it.
  *
- * The store changes `page` the moment a swipe commits, so this component cannot
- * animate the *outgoing* page: it is already gone. What it animates is the
- * incoming page sliding into place from the side the reader came from —
- * forward (the next page, to the left in a mushaf) enters from the left,
- * backward enters from the right. That is the same motion the web reader used,
- * and it needs one transform on one view.
+ * **The gesture is the app's shared swipe hook.** `useSwipeGesture` owns the
+ * activation thresholds and reports a physical direction; the reader maps it
+ * with `pageTurnForSwipe`, where a rightward thumb is next and a leftward thumb
+ * is previous in every language. The drag rubber band is the one reader-local
+ * addition: it is attached to the returned gesture, so direction feedback stays
+ * without forking the swipe contract.
+ *
+ * **The entrance is the reader's authored moment.** The store changes `page`
+ * the moment a swipe commits, so this component cannot animate the outgoing
+ * page: it is already gone. What it animates is the incoming page arriving from
+ * the side the reader came from — forward (the next page, to the left in a
+ * mushaf) enters from the left, backward enters from the right. A small
+ * exponential ease-out over the motion token is what makes the arrival read as
+ * a page settling rather than a frame swap.
  *
  * The parent remounts this component per page (`key={page}`), which is what
  * makes the first frame of a turn the start of the animation: `useLayoutEffect`
@@ -35,7 +46,7 @@ import { resolveSwipe, type SwipeDirection } from '../swipe';
 
 export type PageTurnProps = {
   direction: PageTurnDirection;
-  onSwipe: (direction: SwipeDirection) => void;
+  onSwipe: (direction: PageTurnSwipe) => void;
   /** The animation finished; clear the pending direction. */
   onSettled: () => void;
   children: ReactNode;
@@ -46,6 +57,9 @@ const DRAG_RATIO = 0.25;
 
 /** Time the band takes to return when a drag does not commit. */
 const DRAG_SETTLE = 140;
+
+/** Reduced motion keeps the turn and drops the travel: a short crossfade. */
+const REDUCED_MOTION_DURATION = 180;
 
 /** Default when the stylesheet has not loaded (`--motion-page-turn`). */
 const FALLBACK_DURATION = 260;
@@ -61,49 +75,75 @@ export function PageTurn({
   const { width } = useWindowDimensions();
   const [durationToken] = useCSSVariable(['--motion-page-turn']);
   const duration = cssNumber(durationToken, FALLBACK_DURATION);
+  const reducedMotion = useReducedMotion();
 
   const slide = useSharedValue(0);
+  const opacity = useSharedValue(1);
   const drag = useSharedValue(0);
 
   useLayoutEffect(() => {
     if (direction === null) {
       slide.value = 0;
+      opacity.value = 1;
+      return;
+    }
+
+    if (reducedMotion) {
+      slide.value = 0;
+      opacity.value = 0;
+      opacity.value = withTiming(
+        1,
+        { duration: REDUCED_MOTION_DURATION, easing: Easing.out(Easing.quad) },
+        (finished) => {
+          if (finished) runOnJS(onSettled)();
+        },
+      );
       return;
     }
 
     slide.value = direction === 'forward' ? -width : width;
-    slide.value = withTiming(0, { duration }, (finished) => {
-      if (finished) runOnJS(onSettled)();
-    });
-  }, [direction, duration, onSettled, slide, width]);
+    opacity.value = 1;
+    // Exponential ease-out: the page is on screen almost immediately and
+    // settles into place, instead of holding a blank frame while an ease-in
+    // accelerates.
+    slide.value = withTiming(
+      0,
+      { duration, easing: Easing.out(Easing.cubic) },
+      (finished) => {
+        if (finished) runOnJS(onSettled)();
+      },
+    );
+  }, [direction, duration, onSettled, opacity, reducedMotion, slide, width]);
 
-  // Recreated per render on purpose. `Gesture.Pan()` is a plain object and
-  // gesture-handler diffs the new gesture against the attached one by handler
-  // name and worklet-ness (`needsToReattach`), so a page turn updates callbacks
-  // rather than reattaching the handler. Memoising it would also mean passing
-  // the shared value to a hook as a dependency, and the React Compiler lint
-  // forbids mutating a value that has been handed to a hook — which is exactly
-  // what a shared value is for.
-  const pan = Gesture.Pan()
-    // A horizontal intent is required before the gesture claims the touch,
-    // so a vertical drag can still scroll (P5.4's chrome) instead of
-    // turning a page.
-    .activeOffsetX([-12, 12])
-    .failOffsetY([-24, 24])
-    // Named so `react-native-gesture-handler/jest-utils` can drive it in a
-    // test without reaching into internals.
-    .withTestId('page-turn')
+  // The shared hook returns the configured pan; the band is attached to it so
+  // the reader keeps direction feedback without hand-rolling the gesture. The
+  // hook's own `onEnd` commit is untouched — `onFinalize` only returns the
+  // rubber band (it also covers a cancelled drag).
+  const pan = useSwipeGesture({
+    axis: 'horizontal',
+    testID: 'page-turn',
+    onSwipe: (physical) => {
+      const turn = pageTurnForSwipe(physical);
+
+      if (turn) onSwipe(turn);
+    },
+  })
     .onUpdate((event) => {
+      'worklet';
+
       drag.value = event.translationX * DRAG_RATIO;
     })
-    .onEnd((event) => {
-      drag.value = withTiming(0, { duration: DRAG_SETTLE });
+    .onFinalize(() => {
+      'worklet';
 
-      const turn = resolveSwipe(event.translationX, event.velocityX);
-      if (turn) runOnJS(onSwipe)(turn);
+      drag.value = withTiming(0, {
+        duration: DRAG_SETTLE,
+        easing: Easing.out(Easing.quad),
+      });
     });
 
   const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
     transform: [{ translateX: slide.value + drag.value }],
   }));
 

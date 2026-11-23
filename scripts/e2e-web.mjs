@@ -311,11 +311,12 @@ async function readerTurnsAndRestore(browser) {
     .boundingBox();
   if (frame) {
     const y = frame.y + frame.height / 2;
-    await page.mouse.move(frame.x + frame.width * 0.85, y);
+    // Rightward drag = next page: the mushaf is Arabic in every UI language.
+    await page.mouse.move(frame.x + frame.width * 0.15, y);
     await page.mouse.down();
     for (let step = 1; step <= 10; step += 1) {
       await page.mouse.move(
-        frame.x + frame.width * (0.85 - 0.65 * (step / 10)),
+        frame.x + frame.width * (0.15 + 0.65 * (step / 10)),
         y,
       );
       await page.waitForTimeout(30);

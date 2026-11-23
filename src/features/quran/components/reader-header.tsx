@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 import type { SurahMetadata } from '@/core/types';
 import { useDirection } from '@/i18n';
+import { useThemeMode } from '@/providers/theme-provider';
 import { Button } from '@/ui/button';
 import { Icon } from '@/ui/icon';
 import { Pressable } from '@/ui/pressable';
@@ -11,7 +12,7 @@ import { formatReaderNumber } from '../format';
 /**
  * The reader's top chrome.
  *
- * Three decisions are worth stating because they are easy to regress:
+ * Five decisions are worth stating because they are easy to regress:
  *
  *  - **Inset, not overlay.** The header is a row in the column above the page,
  *    so it can never cover the scan. A floating header looks better in a
@@ -20,6 +21,15 @@ import { formatReaderNumber } from '../format';
  *    picker, and the second line always carries the page plus — once one is
  *    selected — the ayah. That way a page turn and a bbox tap both produce a
  *    visible label change without adding a status bar.
+ *  - **Theme is one tap, not a menu.** Day/night is the chrome change a reader
+ *    makes most, so it gets a direct ghost button showing the theme it will
+ *    switch to. The three-way choice (including "follow the system") remains
+ *    on Account; the reader never makes anyone open a sheet to keep reading.
+ *  - **The mushaf picker is not here.** Choosing a print (Tajweed, Warsh,
+ *    MedinaOld) is a rare, deliberate change, so it stays in the bottom
+ *    drawer with the other destinations; the top row is only what a page turn
+ *    needs. The surah name is the identity the reader is tracking, not the
+ *    print's.
  *  - **The exit control is labelled, not just an icon — when it exists.** A
  *    full-screen modal has no system back gesture on iOS, so the reader's only
  *    way out has to be discoverable and screen-reader labelled. It dismisses
@@ -34,11 +44,9 @@ export type ReaderHeaderProps = {
   surah: SurahMetadata | null;
   ayahKey: string | null;
   page: number;
-  editionName: string | null;
   /** Omitted when the reader is a tab's own screen and cannot be dismissed. */
   onExit?: () => void;
   onOpenSurah: () => void;
-  onOpenEditions: () => void;
   onOpenMenu: () => void;
 };
 
@@ -46,14 +54,14 @@ export function ReaderHeader({
   surah,
   ayahKey,
   page,
-  editionName,
   onExit,
   onOpenSurah,
-  onOpenEditions,
   onOpenMenu,
 }: ReaderHeaderProps) {
   const { t } = useTranslation();
   const { language } = useDirection();
+  const { isDark, setMode } = useThemeMode();
+  const nextTheme = isDark ? 'light' : 'dark';
 
   const surahName = surah
     ? language === 'ar'
@@ -107,16 +115,17 @@ export function ReaderHeader({
         </Text>
       </Pressable>
 
-      {editionName ? (
-        <Button
-          variant="outline"
-          size="sm"
-          label={editionName}
-          accessibilityLabel={t('reader.openEditionPicker')}
-          onPress={onOpenEditions}
-          testID="reader-edition"
-        />
-      ) : null}
+      <Button
+        variant="ghost"
+        size="icon"
+        accessibilityLabel={t(
+          isDark ? 'theme.switchToLight' : 'theme.switchToDark',
+        )}
+        onPress={() => setMode(nextTheme)}
+        testID="reader-theme-toggle"
+      >
+        <Icon name={isDark ? 'sun' : 'moon'} size={20} />
+      </Button>
 
       <Button
         variant="ghost"

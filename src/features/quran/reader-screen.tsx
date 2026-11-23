@@ -66,7 +66,7 @@ import { useEditionBboxes } from './use-edition-bboxes';
 import { usePagePrefetch } from './use-page-prefetch';
 import { usePageTurn } from './use-page-turn';
 import { useQuranCatalog } from './use-quran-catalog';
-import type { SwipeDirection } from './swipe';
+import type { PageTurnSwipe } from './swipe';
 
 /**
  * The mushaf reader.
@@ -431,10 +431,8 @@ export function ReaderScreen({
           surah={surah}
           ayahKey={ayahKey}
           page={page}
-          editionName={chromeEdition?.name ?? null}
           onExit={embedded ? undefined : exit}
           onOpenSurah={() => setSheet('surah')}
-          onOpenEditions={() => setSheet('edition')}
           onOpenMenu={() => setSheet('menu')}
         />
       ) : null}
@@ -568,7 +566,7 @@ function ReaderBody({ editions, edition, onToggleChrome }: ReaderBodyProps) {
   usePagePrefetch(edition, page);
 
   const handleSwipe = useCallback(
-    (turn: SwipeDirection) => {
+    (turn: PageTurnSwipe) => {
       if (turn === 'forward') {
         turnForward();
 

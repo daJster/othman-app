@@ -39,12 +39,6 @@ jest.mock('../components/tafsir-panel', () => ({
   },
 }));
 
-// The theme row belongs to the settings feature and needs the ThemeProvider;
-// this suite is about the menu's destinations, not the theme control.
-jest.mock('@/features/settings/theme-dropdown', () => ({
-  ThemeDropdown: () => null,
-}));
-
 const SURAHS: Record<string, SurahMetadata> = {
   '2': {
     number: 2,
@@ -194,13 +188,14 @@ describe('EditionPickerSheet', () => {
     );
 
     expect(screen.getByText('Tajweed')).toBeTruthy();
+    expect(screen.getByTestId('edition-preview:1')).toBeTruthy();
     expect(
       screen.getByTestId('edition-row:1').props.accessibilityState,
     ).toMatchObject({ selected: true });
     expect(
       screen.getByTestId('edition-row:2').props.accessibilityState,
     ).toMatchObject({ selected: false });
-    expect(screen.getByText('warsh · Pages 4–605')).toBeTruthy();
+    expect(screen.getByText('warsh · 605 pages')).toBeTruthy();
 
     await fireEvent.press(screen.getByTestId('edition-row:2'));
 

@@ -52,18 +52,18 @@ describe('PageTurn', () => {
     expect(screen.getByText('page')).toBeTruthy();
   });
 
-  it('turns forward on a leftward swipe', async () => {
+  it('turns forward on a rightward swipe', async () => {
     const { onSwipe } = await renderTurn();
 
-    swipe(-120);
+    swipe(120);
 
     expect(onSwipe).toHaveBeenCalledWith('forward');
   });
 
-  it('turns backward on a rightward swipe', async () => {
+  it('turns backward on a leftward swipe', async () => {
     const { onSwipe } = await renderTurn();
 
-    swipe(120);
+    swipe(-120);
 
     expect(onSwipe).toHaveBeenCalledWith('backward');
   });
@@ -79,7 +79,7 @@ describe('PageTurn', () => {
   it('accepts a quick flick', async () => {
     const { onSwipe } = await renderTurn();
 
-    swipe(-6, -900);
+    swipe(6, 900);
 
     expect(onSwipe).toHaveBeenCalledWith('forward');
   });
