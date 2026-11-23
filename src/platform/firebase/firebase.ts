@@ -1,6 +1,5 @@
 import { getApps, getApp, initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-import { getFunctions } from 'firebase/functions';
 
 /**
  * The single Firebase app instance, shared by `platform/auth` and every
@@ -30,4 +29,3 @@ const firebaseConfig = {
 export const firebaseApp =
   getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
 export const firestore = getFirestore(firebaseApp);
-export const cloudFunctions = getFunctions(firebaseApp);

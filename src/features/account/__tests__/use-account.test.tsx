@@ -17,7 +17,6 @@ jest.mock('@/services/profile', () => ({
   profileService: {
     getAccount: jest.fn(),
     update: jest.fn(),
-    findByEmail: jest.fn(),
   },
 }));
 
@@ -96,7 +95,10 @@ describe('useAccount', () => {
     expect(result.current.state.data).toEqual(ACCOUNT);
     // The service receives the auth user: merging is the service's job, not
     // the hook's, and passing a uid would lose the fallback display name.
-    expect(service.getAccount).toHaveBeenCalledWith(USER);
+    expect(service.getAccount).toHaveBeenCalledWith(
+      USER,
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
   });
 
   it('reports an error when the profile read fails', async () => {

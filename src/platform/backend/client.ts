@@ -1,8 +1,14 @@
-import type { HttpClient, HttpRequestInit } from '@/platform/http';
+import type {
+  HttpClient,
+  HttpRequestInit,
+  RequestOptions,
+} from '@/platform/http';
 import {
   HttpAbortError,
   HttpError,
   HttpTimeoutError,
+  PROBE_TIMEOUT_MS,
+  REQUEST_TIMEOUT_MS,
   defaultHttpClient,
 } from '@/platform/http';
 import { STORAGE_KEYS, storageService } from '@/platform/storage';
@@ -21,10 +27,7 @@ import {
   type BackendFeatureChange,
   type BackendFeatureConfig,
   type BackendHealth,
-  type BackendNote,
   type BackendRequestOptions,
-  type BackendSession,
-  type BackendUser,
   type BookmarkResponse,
   type BookmarksResponse,
   type CatalogResponse,
@@ -42,15 +45,19 @@ import {
 import type { Meeting, UserRole } from '@/core/types';
 
 /**
- * The single HTTP entrypoint to the backend.
+ * The single HTTP entrypoint to the mock backend.
  *
- * Everything the app sends goes through this class: token persistence, JSON
- * encoding, query strings, timeout policy and error normalization live here and
- * nowhere else. Repositories and hooks never call `fetch` directly.
+ * Everything the app sends to the backend goes through this class: token
+ * persistence, JSON encoding, query strings and error normalization live here
+ * and nowhere else. Repositories and hooks never call `fetch` directly.
+ *
+ * Reads accept `RequestOptions` so a query can cancel its request when the
+ * screen that asked for it goes away. Writes do not: a half-cancelled write is
+ * worse than a late one.
  *
  * The token is kept in memory after the first read. A cold start hydrates it
  * from `storageService`, which is AsyncStorage on native and localStorage on
- * web — the same persistence the Firebase SDK gives the real session.
+ * web, the same persistence the Firebase SDK gives the real session.
  */
 
 const VALID_CODES: readonly BackendErrorCode[] = [
@@ -169,7 +176,7 @@ export class BackendClient {
       body:
         options.body === undefined ? undefined : JSON.stringify(options.body),
       signal: options.signal,
-      timeoutMs: options.timeoutMs ?? 12_000,
+      timeoutMs: options.timeoutMs ?? REQUEST_TIMEOUT_MS,
     };
 
     try {
@@ -213,8 +220,8 @@ export class BackendClient {
     return this.request('POST', '/v1/auth/logout');
   }
 
-  session(): Promise<UserResponse> {
-    return this.request('GET', '/v1/auth/session');
+  session(options: RequestOptions = {}): Promise<UserResponse> {
+    return this.request('GET', '/v1/auth/session', { signal: options.signal });
   }
 
   updateAuthProfile(patch: {
@@ -227,12 +234,17 @@ export class BackendClient {
 
   /* ── accounts ─────────────────────────────────────────────────────── */
 
-  getAccount(uid: string): Promise<AccountResponse> {
-    return this.request('GET', `/v1/accounts/${encodeURIComponent(uid)}`);
+  getAccount(
+    uid: string,
+    options: RequestOptions = {},
+  ): Promise<AccountResponse> {
+    return this.request('GET', `/v1/accounts/${encodeURIComponent(uid)}`, {
+      signal: options.signal,
+    });
   }
 
-  getMyAccount(): Promise<AccountResponse> {
-    return this.request('GET', '/v1/accounts/me');
+  getMyAccount(options: RequestOptions = {}): Promise<AccountResponse> {
+    return this.request('GET', '/v1/accounts/me', { signal: options.signal });
   }
 
   updateMyAccount(patch: BackendAccountPatch): Promise<AccountResponse> {
@@ -246,8 +258,12 @@ export class BackendClient {
       limit?: number;
       offset?: number;
     } = {},
+    options: RequestOptions = {},
   ): Promise<AccountsResponse> {
-    return this.request('GET', '/v1/accounts', { query });
+    return this.request('GET', '/v1/accounts', {
+      query,
+      signal: options.signal,
+    });
   }
 
   createAccount(input: {
@@ -288,23 +304,36 @@ export class BackendClient {
 
   listMeetings(
     query: { date?: string; from?: string; to?: string } = {},
+    options: RequestOptions = {},
   ): Promise<MeetingsResponse> {
-    return this.request('GET', '/v1/meetings', { query });
+    return this.request('GET', '/v1/meetings', {
+      query,
+      signal: options.signal,
+    });
   }
 
   /**
    * The inbox, one page at a time. Deliberately the slowest read in the demo
-   * backend — the waiting state on the panel is a product surface, not an
-   * accident, and the paging spinner depends on it being slow.
+   * backend: the waiting state on the panel is a product surface, and the paging
+   * spinner depends on it being slow.
    */
   listNotices(
     query: { page?: number; limit?: number; extended?: boolean } = {},
+    options: RequestOptions = {},
   ): Promise<NoticesResponse> {
-    return this.request('GET', '/v1/notices', { query });
+    return this.request('GET', '/v1/notices', {
+      query,
+      signal: options.signal,
+    });
   }
 
-  getMeeting(id: number): Promise<MeetingResponse> {
-    return this.request('GET', `/v1/meetings/${id}`);
+  getMeeting(
+    id: number,
+    options: RequestOptions = {},
+  ): Promise<MeetingResponse> {
+    return this.request('GET', `/v1/meetings/${id}`, {
+      signal: options.signal,
+    });
   }
 
   createMeeting(
@@ -338,20 +367,32 @@ export class BackendClient {
 
   /* ── Qur'an ───────────────────────────────────────────────────────── */
 
-  getQuranCatalog(): Promise<CatalogResponse> {
-    return this.request('GET', '/v1/quran/catalog');
+  getQuranCatalog(options: RequestOptions = {}): Promise<CatalogResponse> {
+    return this.request('GET', '/v1/quran/catalog', { signal: options.signal });
   }
 
-  getSurah(number: number): Promise<SurahResponse> {
-    return this.request('GET', `/v1/quran/surahs/${number}`);
+  getSurah(
+    number: number,
+    options: RequestOptions = {},
+  ): Promise<SurahResponse> {
+    return this.request('GET', `/v1/quran/surahs/${number}`, {
+      signal: options.signal,
+    });
   }
 
-  getAyah(absoluteNumber: number): Promise<AyahResponse> {
-    return this.request('GET', `/v1/quran/ayahs/${absoluteNumber}`);
+  getAyah(
+    absoluteNumber: number,
+    options: RequestOptions = {},
+  ): Promise<AyahResponse> {
+    return this.request('GET', `/v1/quran/ayahs/${absoluteNumber}`, {
+      signal: options.signal,
+    });
   }
 
-  listProgress(): Promise<ProgressListResponse> {
-    return this.request('GET', '/v1/quran/progress');
+  listProgress(options: RequestOptions = {}): Promise<ProgressListResponse> {
+    return this.request('GET', '/v1/quran/progress', {
+      signal: options.signal,
+    });
   }
 
   putProgress(input: {
@@ -368,8 +409,10 @@ export class BackendClient {
     return this.request('DELETE', `/v1/quran/progress/${surahNumber}`);
   }
 
-  listBookmarks(): Promise<BookmarksResponse> {
-    return this.request('GET', '/v1/quran/bookmarks');
+  listBookmarks(options: RequestOptions = {}): Promise<BookmarksResponse> {
+    return this.request('GET', '/v1/quran/bookmarks', {
+      signal: options.signal,
+    });
   }
 
   createBookmark(input: {
@@ -400,9 +443,13 @@ export class BackendClient {
     );
   }
 
-  listNotes(absoluteNumber?: number): Promise<NotesResponse> {
+  listNotes(
+    absoluteNumber?: number,
+    options: RequestOptions = {},
+  ): Promise<NotesResponse> {
     return this.request('GET', '/v1/quran/notes', {
       query: absoluteNumber === undefined ? {} : { absoluteNumber },
+      signal: options.signal,
     });
   }
 
@@ -429,8 +476,12 @@ export class BackendClient {
 
   /* ── system ───────────────────────────────────────────────────────── */
 
-  health(): Promise<BackendHealth> {
-    return this.request('GET', '/health', { auth: false, timeoutMs: 4_000 });
+  health(options: RequestOptions = {}): Promise<BackendHealth> {
+    return this.request('GET', '/health', {
+      auth: false,
+      timeoutMs: PROBE_TIMEOUT_MS,
+      signal: options.signal,
+    });
   }
 
   /* ── remote feature control ───────────────────────────────────────── */
@@ -441,8 +492,13 @@ export class BackendClient {
    * Unauthenticated on purpose: a kill switch has to apply before sign-in, and
    * a signed-out client must be able to learn that sign-in itself is paused.
    */
-  getFeatureConfig(): Promise<BackendFeatureConfig> {
-    return this.request('GET', '/v1/config/features', { auth: false });
+  getFeatureConfig(
+    options: RequestOptions = {},
+  ): Promise<BackendFeatureConfig> {
+    return this.request('GET', '/v1/config/features', {
+      auth: false,
+      signal: options.signal,
+    });
   }
 
   saveFeatureChanges(
@@ -474,12 +530,29 @@ export class BackendClient {
     return response.result;
   }
 
-  /** Polling fallback/complement to SSE. `since` is the last event id seen. */
+  /** Polling transport. `since` is the last event id seen. */
   pollEvents(since: number, signal?: AbortSignal): Promise<EventsResponse> {
     return this.request('GET', '/v1/events', {
       query: { since },
       signal,
     });
+  }
+
+  /**
+   * The address of the server-sent event stream, or `null` without a session.
+   *
+   * `EventSource` cannot send an `Authorization` header, so the session token
+   * travels in the query string. That is a platform limit, recorded in
+   * `docs/external-requests.md`. The URL never reaches the request log (the
+   * stream is not an `HttpClient` request), and a real backend should replace
+   * it with a single-use stream ticket.
+   */
+  eventStreamUrl(since: number): string | null {
+    if (!this.token) return null;
+
+    return `${this.baseUrl}/v1/events/stream?token=${encodeURIComponent(
+      this.token,
+    )}&since=${since}`;
   }
 }
 
@@ -515,5 +588,3 @@ function toBackendError(error: unknown): never {
 }
 
 export const backendClient = new BackendClient();
-
-export type { BackendNote, BackendSession, BackendUser };

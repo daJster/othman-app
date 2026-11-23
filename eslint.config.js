@@ -106,6 +106,25 @@ const DOM_GLOBALS = [
   { name: 'Image', message: 'No DOM types in core/.' },
 ];
 
+/**
+ * The single-entry-point rule. Every network request the app makes goes through
+ * `src/platform/http` (directly, or through `BackendClient`, which wraps it).
+ * Anywhere else, a raw `fetch` is a request that bypasses the timeout policy,
+ * cancellation and the request log, so it is a lint error.
+ */
+const NETWORK_GLOBALS = [
+  {
+    name: 'fetch',
+    message:
+      'Only src/platform/http may call fetch. Route the request through the HTTP client (defaultHttpClient, or a repository that receives one).',
+  },
+  {
+    name: 'XMLHttpRequest',
+    message:
+      'Only src/platform/http may open network requests. Use the HTTP client.',
+  },
+];
+
 module.exports = defineConfig([
   expoConfig,
   {
@@ -238,23 +257,20 @@ module.exports = defineConfig([
     files: ['src/core/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': ['error', { patterns: CORE_FORBIDDEN_IMPORTS }],
-      'no-restricted-globals': ['error', ...DOM_GLOBALS],
+      'no-restricted-globals': ['error', ...DOM_GLOBALS, ...NETWORK_GLOBALS],
     },
   },
   {
-    // Only the transport layer inside core/ may touch the network.
-    files: ['src/core/**/*.{ts,tsx}'],
-    ignores: ['src/core/http/**'],
+    // Everything outside core/ and the transport itself. Core is covered by its
+    // own block above, which carries the same network rule.
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: [
+      'src/core/**/*.{ts,tsx}',
+      'src/platform/http/**/*.{ts,tsx}',
+      '**/__tests__/**/*.{ts,tsx}',
+    ],
     rules: {
-      'no-restricted-globals': [
-        'error',
-        ...DOM_GLOBALS,
-        {
-          name: 'fetch',
-          message:
-            'Only src/core/http may call fetch. Route requests through the http client.',
-        },
-      ],
+      'no-restricted-globals': ['error', ...NETWORK_GLOBALS],
     },
   },
 ]);

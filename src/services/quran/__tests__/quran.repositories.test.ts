@@ -47,13 +47,28 @@ describe('createEditionsRepository', () => {
 
     const editions = await createEditionsRepository(client).list();
 
-    expect(get).toHaveBeenCalledWith(QURAN_EDITIONS_URL);
+    expect(get).toHaveBeenCalledWith(QURAN_EDITIONS_URL, undefined);
     expect(Object.keys(editions)).toEqual(['1', '2']);
     expect(editions['1']).toMatchObject({
       key: '1',
       name: 'Tajweed',
       firstPage: 1,
       lastPage: 604,
+    });
+  });
+
+  it('passes the cancellation signal to the transport', async () => {
+    const { client, get } = clientFor({
+      [QURAN_EDITIONS_URL]: editionsFixture,
+    });
+    const controller = new AbortController();
+
+    await createEditionsRepository(client).list({
+      signal: controller.signal,
+    });
+
+    expect(get).toHaveBeenCalledWith(QURAN_EDITIONS_URL, {
+      signal: controller.signal,
     });
   });
 
@@ -74,7 +89,7 @@ describe('createMetadataRepository', () => {
 
     const surahs = await createMetadataRepository(client).list();
 
-    expect(get).toHaveBeenCalledWith(QURAN_METADATA_URL);
+    expect(get).toHaveBeenCalledWith(QURAN_METADATA_URL, undefined);
     expect(Object.keys(surahs)).toHaveLength(114);
     expect(surahs['1']).toMatchObject({
       number: 1,
@@ -104,8 +119,8 @@ describe('createBboxesRepository', () => {
 
     const bboxes = await createBboxesRepository(client).load(EDITION);
 
-    expect(get).toHaveBeenCalledWith(EDITION.bboxNormUrl);
-    expect(get).toHaveBeenCalledWith(EDITION.bboxReversedNormUrl);
+    expect(get).toHaveBeenCalledWith(EDITION.bboxNormUrl, undefined);
+    expect(get).toHaveBeenCalledWith(EDITION.bboxReversedNormUrl, undefined);
     expect(Object.keys(bboxes.bySurah)).toEqual(['1', '2']);
     expect(bboxes.bySurah['1']['1'].pageNumber).toBe(1);
     expect(bboxes.byPage['2']['1']).toMatchObject({
@@ -124,8 +139,25 @@ describe('createBboxesRepository', () => {
 
     // A waterfall would request the second file only after the first resolved.
     expect(get).toHaveBeenCalledTimes(2);
-    expect(get).toHaveBeenCalledWith(EDITION.bboxNormUrl);
-    expect(get).toHaveBeenCalledWith(EDITION.bboxReversedNormUrl);
+    expect(get).toHaveBeenCalledWith(EDITION.bboxNormUrl, undefined);
+    expect(get).toHaveBeenCalledWith(EDITION.bboxReversedNormUrl, undefined);
+  });
+
+  it('passes the cancellation signal to both table requests', async () => {
+    const get = jest.fn(() => new Promise<never>(() => {}));
+    const repository = createBboxesRepository({
+      get,
+    } as unknown as HttpClient);
+    const controller = new AbortController();
+
+    void repository.load(EDITION, { signal: controller.signal });
+
+    expect(get).toHaveBeenCalledWith(EDITION.bboxNormUrl, {
+      signal: controller.signal,
+    });
+    expect(get).toHaveBeenCalledWith(EDITION.bboxReversedNormUrl, {
+      signal: controller.signal,
+    });
   });
 
   it('rejects an empty bbox payload', async () => {
@@ -146,7 +178,7 @@ describe('createAyahContentRepository', () => {
 
     const ayah = await createAyahContentRepository(client).byAbsoluteNumber(1);
 
-    expect(get).toHaveBeenCalledWith(quranAyahUrl(1));
+    expect(get).toHaveBeenCalledWith(quranAyahUrl(1), undefined);
     expect(ayah).toMatchObject({
       absoluteNumber: 1,
       numberInSurah: 1,

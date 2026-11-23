@@ -2,6 +2,16 @@ import type { QueryKey } from '@tanstack/react-query';
 import type { FetchPolicyName } from './policies';
 
 /**
+ * What a query's `run` receives besides its parameters.
+ *
+ * TanStack Query creates an `AbortSignal` per fetch and aborts it when the
+ * query stops being observed (the screen unmounts) or is cancelled. Passing it
+ * down is what turns "the user left the screen" into "the request is cancelled"
+ * instead of "the request finishes and is thrown away".
+ */
+export type RequestContext = { readonly signal: AbortSignal };
+
+/**
  * What a command is, structurally.
  *
  * A *query* is a read the app may perform more than once; it owns a cache key
@@ -21,8 +31,11 @@ export type ApiQuery<P, R> = {
   readonly policy: FetchPolicyName;
   /** The cache key for one set of parameters. Same params, same key. */
   readonly key: (params: P) => QueryKey;
-  /** Where the data comes from. Never called without `key` having run. */
-  readonly run: (params: P) => Promise<R>;
+  /**
+   * Where the data comes from. Never called without `key` having run. Reads
+   * forward `context.signal` to the transport so a left screen cancels them.
+   */
+  readonly run: (params: P, context: RequestContext) => Promise<R>;
   /**
    * Whether the parameters describe a question that can be asked yet.
    * `false` leaves the query `pending` without a request, which is how "no ayah

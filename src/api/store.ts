@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import type { BackendEvent } from '@/platform/backend';
+import type { ConnectivityState } from '@/platform/http';
 
 /**
  * Client-local state for the request layer.
@@ -20,11 +21,14 @@ export type ApiConnection = 'idle' | 'connecting' | 'online' | 'offline';
 
 export type ApiStore = {
   connection: ApiConnection;
+  /** Internet reachability, as the connectivity monitor sees it. */
+  internet: ConnectivityState;
   cursor: number;
   lastEvent: BackendEvent | null;
   lastEventAt: number | null;
   eventsReceived: number;
   setConnection: (connection: ApiConnection) => void;
+  setInternet: (internet: ConnectivityState) => void;
   setCursor: (cursor: number) => void;
   recordEvent: (event: BackendEvent) => void;
   reset: () => void;
@@ -32,6 +36,7 @@ export type ApiStore = {
 
 const INITIAL = {
   connection: 'idle' as ApiConnection,
+  internet: 'unknown' as ConnectivityState,
   cursor: 0,
   lastEvent: null,
   lastEventAt: null,
@@ -42,6 +47,8 @@ export const useApiStore = create<ApiStore>()((set) => ({
   ...INITIAL,
 
   setConnection: (connection) => set({ connection }),
+
+  setInternet: (internet) => set({ internet }),
 
   setCursor: (cursor) =>
     set((state) => (cursor > state.cursor ? { cursor } : state)),

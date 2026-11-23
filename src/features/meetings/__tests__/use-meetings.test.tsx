@@ -91,7 +91,10 @@ describe('useMeetingsByDate', () => {
     if (result.current.state.status !== 'ready') throw new Error('unreachable');
 
     expect(result.current.state.data).toEqual([MEETING]);
-    expect(service.listByDate).toHaveBeenCalledWith('2026-10-24');
+    expect(service.listByDate).toHaveBeenCalledWith(
+      '2026-10-24',
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
   });
 
   it('reports empty when the day has no meetings', async () => {

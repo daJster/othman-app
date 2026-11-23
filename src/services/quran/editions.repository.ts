@@ -1,6 +1,6 @@
 import { QURAN_EDITIONS_URL } from '@/core/config';
 import { parseEditions } from '@/core/domain/quran/parse';
-import type { HttpClient } from '@/platform/http';
+import type { HttpClient, RequestOptions } from '@/platform/http';
 import type { EditionsRepository } from './quran.types';
 
 /**
@@ -15,8 +15,8 @@ export function createEditionsRepository(
   url: string = QURAN_EDITIONS_URL,
 ): EditionsRepository {
   return {
-    async list() {
-      const payload = await client.get<unknown>(url);
+    async list(options?: RequestOptions) {
+      const payload = await client.get<unknown>(url, options);
 
       return parseEditions(payload);
     },

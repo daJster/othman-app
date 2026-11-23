@@ -75,7 +75,10 @@ describe('useApiQuery', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(run).toHaveBeenCalledWith({ id: 1 });
+    expect(run).toHaveBeenCalledWith(
+      { id: 1 },
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
     expect(result.current.data).toBe('row-1');
     expect(client.getQueryData(['test', 'row', 1])).toBe('row-1');
   });
@@ -98,6 +101,33 @@ describe('useApiQuery', () => {
 
     expect(result.current.isPending).toBe(true);
     expect(run).not.toHaveBeenCalled();
+  });
+
+  it('aborts an in-flight read when the screen unmounts', async () => {
+    let signal: AbortSignal | undefined;
+    const slow: ApiQuery<{ id: number }, string> = {
+      id: 'test.slow',
+      policy: 'live',
+      key: ({ id }) => ['test', 'slow', id],
+      run: (_params, context) => {
+        signal = context.signal;
+
+        return new Promise<string>(() => {});
+      },
+    };
+
+    const { unmount } = await renderHook(() => useApiQuery(slow, { id: 1 }), {
+      wrapper: makeWrapper(client),
+    });
+
+    await waitFor(() => expect(signal).toBeDefined());
+    expect(signal?.aborted).toBe(false);
+
+    unmount();
+
+    // React runs the effect cleanup that detaches the observer asynchronously,
+    // and TanStack aborts the request once the last observer has left.
+    await waitFor(() => expect(signal?.aborted).toBe(true));
   });
 
   it('keeps demo-only endpoints disabled without the mock backend flag', async () => {

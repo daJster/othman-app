@@ -74,10 +74,20 @@ describe('useApiStore', () => {
 
     expect(useApiStore.getState()).toMatchObject({
       connection: 'idle',
+      internet: 'unknown',
       cursor: 0,
       lastEvent: null,
       lastEventAt: null,
       eventsReceived: 0,
     });
+  });
+
+  it('records the internet state separately from the stream connection', () => {
+    const store = useApiStore.getState();
+
+    store.setInternet('offline');
+
+    expect(useApiStore.getState().internet).toBe('offline');
+    expect(useApiStore.getState().connection).toBe('idle');
   });
 });

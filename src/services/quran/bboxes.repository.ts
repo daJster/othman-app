@@ -1,5 +1,5 @@
 import { parseEditionBboxes } from '@/core/domain/quran/parse';
-import type { HttpClient } from '@/platform/http';
+import type { HttpClient, RequestOptions } from '@/platform/http';
 import type { BboxesRepository } from './quran.types';
 
 /**
@@ -16,10 +16,10 @@ import type { BboxesRepository } from './quran.types';
  */
 export function createBboxesRepository(client: HttpClient): BboxesRepository {
   return {
-    async load(edition) {
+    async load(edition, options?: RequestOptions) {
       const [surahPayload, pagePayload] = await Promise.all([
-        client.get<unknown>(edition.bboxNormUrl),
-        client.get<unknown>(edition.bboxReversedNormUrl),
+        client.get<unknown>(edition.bboxNormUrl, options),
+        client.get<unknown>(edition.bboxReversedNormUrl, options),
       ]);
 
       return parseEditionBboxes(surahPayload, pagePayload, edition);

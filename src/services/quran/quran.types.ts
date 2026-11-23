@@ -4,15 +4,19 @@ import type {
   QuranEdition,
   SurahMetadata,
 } from '@/core/types';
+import type { RequestOptions } from '@/platform/http';
 
 /**
  * Where the reader's data comes from.
  *
- * Every repository is an interface rather than a concrete module for the same
- * reason meetings has one: the HTTP implementation can be replaced by a fixture
- * in a test (and by an offline bundle later) without the service or the screens
- * knowing. The transport is injected too, so a test asserts the URL that would
- * have been requested instead of mocking `fetch`.
+ * Every repository is an interface for the same reason meetings has one: the
+ * HTTP implementation can be replaced by a fixture in a test (and by an offline
+ * bundle later) without the service or the screens knowing. The transport is
+ * injected too, so a test asserts the URL that would have been requested
+ * instead of mocking `fetch`.
+ *
+ * Every read takes `RequestOptions` so a screen that leaves the reader cancels
+ * the download instead of finishing a multi-megabyte table for nobody.
  */
 
 export type EditionTable = Record<string, QuranEdition>;
@@ -21,22 +25,25 @@ export type SurahTable = Record<string, SurahMetadata>;
 
 /** `editions.json`. */
 export interface EditionsRepository {
-  list(): Promise<EditionTable>;
+  list(options?: RequestOptions): Promise<EditionTable>;
 }
 
-/** `quran.json` — the 114 surahs. */
+/** `quran.json`, the 114 surahs. */
 export interface MetadataRepository {
-  list(): Promise<SurahTable>;
+  list(options?: RequestOptions): Promise<SurahTable>;
 }
 
 /** Both bbox tables of one edition, fetched in parallel. */
 export interface BboxesRepository {
-  load(edition: QuranEdition): Promise<EditionBboxes>;
+  load(edition: QuranEdition, options?: RequestOptions): Promise<EditionBboxes>;
 }
 
-/** One ayah's text, by absolute number (1–6236). */
+/** One ayah's text, by absolute number (1 to 6236). */
 export interface AyahContentRepository {
-  byAbsoluteNumber(absoluteNumber: number): Promise<AyahContent>;
+  byAbsoluteNumber(
+    absoluteNumber: number,
+    options?: RequestOptions,
+  ): Promise<AyahContent>;
 }
 
 export type QuranRepositories = {
@@ -60,7 +67,13 @@ export interface QuranService {
    * full round trip before the reader could paint). Nothing here depends on the
    * other file, so one `Promise.all` is all the ordering the app needs.
    */
-  loadCatalog(): Promise<QuranCatalog>;
-  loadBboxes(edition: QuranEdition): Promise<EditionBboxes>;
-  loadAyah(absoluteNumber: number): Promise<AyahContent>;
+  loadCatalog(options?: RequestOptions): Promise<QuranCatalog>;
+  loadBboxes(
+    edition: QuranEdition,
+    options?: RequestOptions,
+  ): Promise<EditionBboxes>;
+  loadAyah(
+    absoluteNumber: number,
+    options?: RequestOptions,
+  ): Promise<AyahContent>;
 }

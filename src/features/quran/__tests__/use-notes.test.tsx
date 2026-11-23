@@ -89,7 +89,10 @@ describe('useAyahNotes', () => {
     if (result.current.state.status !== 'ready') throw new Error('unreachable');
 
     expect(result.current.state.data).toEqual([NOTE]);
-    expect(service.list).toHaveBeenCalledWith('guest');
+    expect(service.list).toHaveBeenCalledWith(
+      'guest',
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
   });
 
   it('reports empty when the ayah has no notes', async () => {
@@ -113,7 +116,10 @@ describe('useAyahNotes', () => {
 
     // The second read did not reuse the first namespace's cached empty list.
     expect(service.list).toHaveBeenCalledTimes(2);
-    expect(service.list).toHaveBeenLastCalledWith('user:b');
+    expect(service.list).toHaveBeenLastCalledWith(
+      'user:b',
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
     expect(client.getQueryData(queryKeys.notes.byAyah('user:a', 1))).toEqual(
       [],
     );

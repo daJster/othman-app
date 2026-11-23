@@ -1,16 +1,27 @@
 import type { AccountProfile } from '@/core/domain/account/merge-profile';
-import { backendClient } from '@/platform/backend';
-import type { BackendAccount, BackendAccountPatch } from '@/platform/backend';
+import {
+  BackendError,
+  backendClient,
+  type BackendAccount,
+  type BackendAccountPatch,
+  type BackendClient,
+} from '@/platform/backend';
+import { parseAccountResponse } from './backend-profile.wire';
 import type { ProfileRepository } from './profile.types';
 
 /**
  * Profile repository backed by the mock server.
  *
- * The backend account is a merge of a SQLite identity row and a JSON profile
- * document; the UI only ever needs the flat `AccountProfile` shape, so the
- * adapter flattens it here. `getByUid` maps a 404 to `null`, matching the
- * Firestore contract where a missing document is a normal "new user" state.
+ * The backend account merges an identity row with a profile document; the UI
+ * only needs the flat `AccountProfile`, so the adapter flattens it here. A 404
+ * maps to `null`, matching the Firestore contract where a missing document is a
+ * normal "new user" state. Every other failure propagates.
  */
+
+export type ProfileBackend = Pick<
+  BackendClient,
+  'getAccount' | 'updateAccount'
+>;
 
 function toProfile(account: BackendAccount): AccountProfile {
   return {
@@ -62,49 +73,32 @@ function toPatch(patch: Partial<AccountProfile>): BackendAccountPatch {
   return mapped;
 }
 
-export const backendProfileRepository: ProfileRepository = {
-  async getByUid(uid: string): Promise<AccountProfile | null> {
-    try {
-      const { account } = await backendClient.getAccount(uid);
+export function createBackendProfileRepository(
+  client: ProfileBackend = backendClient,
+): ProfileRepository {
+  return {
+    async getByUid(uid, options) {
+      try {
+        const account = parseAccountResponse(
+          await client.getAccount(uid, options),
+        );
 
-      return toProfile(account);
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        'status' in error &&
-        (error as { status?: number }).status === 404
-      ) {
-        return null;
+        return toProfile(account);
+      } catch (error) {
+        if (error instanceof BackendError && error.status === 404) return null;
+
+        throw error;
       }
+    },
 
-      throw error;
-    }
-  },
+    async update(uid, patch) {
+      const mapped = toPatch(patch);
 
-  async getByEmail(email: string): Promise<AccountProfile | null> {
-    try {
-      const { accounts } = await backendClient.listAccounts({
-        q: email,
-        limit: 1,
-      });
+      if (Object.keys(mapped).length === 0) return;
 
-      const match = accounts.find(
-        (account) => account.email.toLowerCase() === email.toLowerCase(),
-      );
+      await client.updateAccount(uid, mapped);
+    },
+  };
+}
 
-      return match ? toProfile({ ...match, profile: null }) : null;
-    } catch {
-      // Listing accounts is admin-only. A normal user asking "does this email
-      // exist?" gets `null` from the client, never a permission error the UI
-      // cannot act on.
-      return null;
-    }
-  },
-
-  async update(uid: string, patch: Partial<AccountProfile>): Promise<void> {
-    const mapped = toPatch(patch);
-    if (Object.keys(mapped).length === 0) return;
-
-    await backendClient.updateAccount(uid, mapped);
-  },
-};
+export const backendProfileRepository = createBackendProfileRepository();

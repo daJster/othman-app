@@ -27,7 +27,10 @@ const EMPTY_CONFIG: BackendFeatureConfig = {
  */
 const noConfigRepository: ConfigRepository = {
   getFeatures: async () => EMPTY_CONFIG,
-  saveFeatures: async () => EMPTY_CONFIG,
+  // A switch that never reached a server must not report "saved".
+  saveFeatures: async () => {
+    throw new Error('Feature switches need the mock backend');
+  },
 };
 
 export const configService = createConfigService(

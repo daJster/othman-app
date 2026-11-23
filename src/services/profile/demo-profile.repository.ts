@@ -46,15 +46,6 @@ export function createDemoProfileRepository(
       return uid === DEMO_ACCOUNT_UID ? { ...profile } : null;
     },
 
-    async getByEmail(email: string): Promise<AccountProfile | null> {
-      const stored = profile.email;
-      if (typeof stored !== 'string') return null;
-
-      return stored.toLowerCase() === email.toLowerCase()
-        ? { ...profile }
-        : null;
-    },
-
     async update(_uid: string, patch: Partial<AccountProfile>): Promise<void> {
       profile = { ...profile, ...patch };
     },

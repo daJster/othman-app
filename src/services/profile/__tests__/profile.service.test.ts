@@ -1,10 +1,9 @@
-import type { AccountProfile } from '@/core/domain/account/merge-profile';
 import type { AuthUser } from '@/core/types';
 import { createProfileService } from '@/services/profile/profile.service';
 import type { ProfileRepository } from '@/services/profile/profile.types';
 
 /**
- * A fake profile repository — the seam the service depends on. This is also
+ * A fake profile repository: the seam the service depends on. This is also
  * what lets the Firebase SDK stay out of the test process entirely.
  */
 function createFakeRepository(
@@ -15,7 +14,6 @@ function createFakeRepository(
   return {
     calls,
     getByUid: async () => null,
-    getByEmail: async () => null,
     update: async (uid, patch) => {
       calls.update.push([uid, patch]);
     },
@@ -32,7 +30,7 @@ const authUser: AuthUser = {
 
 describe('createProfileService', () => {
   describe('getAccount', () => {
-    it('merges the Firestore profile over the auth record', async () => {
+    it('merges the profile over the auth record', async () => {
       const service = createProfileService(
         createFakeRepository({
           getByUid: async () => ({
@@ -80,15 +78,16 @@ describe('createProfileService', () => {
       );
     });
 
-    it('looks the profile up by uid, not by email', async () => {
-      const getByEmail = jest.fn(async () => null);
-      const service = createProfileService(
-        createFakeRepository({ getByEmail }),
-      );
+    it('forwards the request options, including the cancellation signal', async () => {
+      const getByUid = jest.fn(async () => null);
+      const service = createProfileService(createFakeRepository({ getByUid }));
+      const controller = new AbortController();
 
-      await service.getAccount(authUser);
+      await service.getAccount(authUser, { signal: controller.signal });
 
-      expect(getByEmail).not.toHaveBeenCalled();
+      expect(getByUid).toHaveBeenCalledWith('uid-1', {
+        signal: controller.signal,
+      });
     });
   });
 
@@ -114,17 +113,6 @@ describe('createProfileService', () => {
       );
 
       await expect(service.update('uid-1', {})).rejects.toThrow('unavailable');
-    });
-  });
-
-  describe('findByEmail', () => {
-    it('delegates to the repository', async () => {
-      const profile: AccountProfile = { role: 'admin' };
-      const service = createProfileService(
-        createFakeRepository({ getByEmail: async () => profile }),
-      );
-
-      await expect(service.findByEmail('x@example.com')).resolves.toBe(profile);
     });
   });
 });

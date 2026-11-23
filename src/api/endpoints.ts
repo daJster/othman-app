@@ -17,25 +17,25 @@ import type {
   SurahInfoSection,
   UserRole,
 } from '@/core/types';
-import { backendClient } from '@/platform/backend';
-import type {
-  AccountResponse,
-  AccountsResponse,
-  AyahResponse,
-  BackendAccountPatch,
-  BackendFeatureChange,
-  BackendFeatureConfig,
-  BackendHealth,
-  BookmarkResponse,
-  BookmarksResponse,
-  CatalogResponse,
-  MeetingResponse,
-  MeetingsResponse,
-  NoteResponse,
-  NotesResponse,
-  ProgressListResponse,
-  ProgressResponse,
-  SurahResponse,
+import {
+  backendClient,
+  type AccountResponse,
+  type AccountsResponse,
+  type AyahResponse,
+  type BackendAccountPatch,
+  type BackendFeatureChange,
+  type BackendFeatureConfig,
+  type BackendHealth,
+  type BookmarkResponse,
+  type BookmarksResponse,
+  type CatalogResponse,
+  type MeetingResponse,
+  type MeetingsResponse,
+  type NoteResponse,
+  type NotesResponse,
+  type ProgressListResponse,
+  type ProgressResponse,
+  type SurahResponse,
 } from '@/platform/backend';
 import { circleService, type CircleItem } from '@/services/circle';
 import { configService } from '@/services/config';
@@ -44,7 +44,7 @@ import {
   noticesService,
   type Notice,
   type NoticesPage,
-} from '@/services/notices/notices.service';
+} from '@/services/notices';
 import { notesService } from '@/services/notes';
 import { practiceService } from '@/services/practice';
 import { profileService } from '@/services/profile';
@@ -55,38 +55,40 @@ import { tafsirService } from '@/services/tafsir';
 import type { ApiMutation, ApiQuery, NoParams } from './types';
 
 /**
- * The command registry.
+ * The command registry: every request the app can issue, declared once.
  *
- * Every HTTP request the app can issue is declared here exactly once: its cache
- * key, its strategy, its guard, where the bytes come from, and what a successful
- * write invalidates. Screens do not build query objects; they name a command:
+ * Each entry names its cache key, its strategy, its guard, where the bytes come
+ * from, and what a successful write invalidates. Screens name a command; they
+ * never build a query or a URL:
  *
  *     useApiQuery(api.meetings.byDate, { date })
- *     useApiMutation(api.accounts.update).mutate({ uid, patch })
+ *     useApiMutation(api.account.update).mutate({ uid, patch })
+ *
+ * Reads take the query's `context` and pass its `signal` down the chain
+ * (service, repository, `HttpClient`), so leaving the screen cancels the
+ * request. Writes do not take a signal: a half-cancelled write is worse than a
+ * late one.
  *
  * Two sources feed the registry, and the split is deliberate:
  *
- *  - **`api.*`** — what the *UI* reads. These call the service barrels, so the
- *    `EXPO_PUBLIC_MOCK_BACKEND` switch keeps working: a screen asks for "the
- *    circle" and the service decides whether that is a fixture or the server.
- *  - **`api.demo.*`** — the mock server's own surface (administration, health,
+ *  - **`api.*`** is what the UI reads. These call the service barrels, so
+ *    `EXPO_PUBLIC_MOCK_BACKEND` keeps working: a screen asks for "the meetings"
+ *    and the service decides whether that is a fixture or the mock server.
+ *  - **`api.demo.*`** is the mock server's own surface (administration, health,
  *    raw rows). Marked `demo: true`, which disables the query when the flag is
- *    off instead of producing a connection error. Nothing in the app depends on
- *    these yet; they exist so the demo server's contract has one typed home.
+ *    off instead of producing a connection error.
  *
- * Why a registry instead of one hook per endpoint: the fetching *strategy* was
- * previously reinvented in every hook, and invalidation rules lived in whichever
- * mutation happened to run. Both are facts about the command, not about the
- * screen, so both are written next to the command.
+ * Local-only commands (practice, notes, circle) have no network reads and so do
+ * not take a signal.
  */
 
 /** Both wires are needed: the absolute number keys the cache, the local pair is
  * what the book endpoints accept. */
 export type TafsirAyah = {
   surah: number;
-  /** Ayah-in-surah, 1-286. */
+  /** Ayah-in-surah, 1 to 286. */
   ayah: number;
-  /** Absolutely unique ayah, 1-6236. */
+  /** Absolutely unique ayah, 1 to 6236. */
   absoluteNumber: number;
 };
 
@@ -107,9 +109,9 @@ async function meetingWrite<T>(request: Promise<T>): Promise<T> {
   return result;
 }
 
-/** Identity helpers: they exist to give the object literal its type at the
- * declaration site, so a missing `run` or a wrong key is an error here rather
- * than at a screen three files away. */
+/** Identity helpers: they give the object literal its type at the declaration
+ * site, so a missing `run` or a wrong key is an error here rather than at a
+ * screen three files away. */
 function query<P, R>(endpoint: ApiQuery<P, R>): ApiQuery<P, R> {
   return endpoint;
 }
@@ -131,10 +133,10 @@ export const api = {
       policy: 'default',
       key: ({ user }) => queryKeys.account.byUid(user?.uid ?? ANONYMOUS),
       ready: ({ user }) => user !== null,
-      run: ({ user }) => {
+      run: ({ user }, context) => {
         if (!user) throw new Error('account requested without a session');
 
-        return profileService.getAccount(user);
+        return profileService.getAccount(user, context);
       },
     }),
 
@@ -159,7 +161,7 @@ export const api = {
       id: 'meetings.byDate',
       policy: 'live',
       key: ({ date }) => queryKeys.meetings.byDate(date),
-      run: ({ date }) => meetingsService.listByDate(date),
+      run: ({ date }, context) => meetingsService.listByDate(date, context),
     }),
 
     /** One read for the calendar's density window, not 42 per-day reads. */
@@ -167,7 +169,8 @@ export const api = {
       id: 'meetings.range',
       policy: 'live',
       key: ({ from, to }) => queryKeys.meetings.range(from, to),
-      run: ({ from, to }) => meetingsService.listByRange(from, to),
+      run: ({ from, to }, context) =>
+        meetingsService.listByRange(from, to, context),
     }),
   },
 
@@ -187,8 +190,12 @@ export const api = {
       id: 'notices.list',
       policy: 'live',
       key: () => queryKeys.notices.list,
-      run: () => noticesService.list().then((page) => page.notices),
+      run: (_params, context) =>
+        noticesService
+          .list(1, false, undefined, context)
+          .then((page) => page.notices),
     }),
+
     /** One page. The panel asks for the next one as the list reaches its end. */
     page: query<
       { page: number; extended?: boolean; limit?: number },
@@ -198,12 +205,12 @@ export const api = {
       policy: 'live',
       key: ({ page, extended, limit }) =>
         queryKeys.notices.page(page, extended === true, limit),
-      run: ({ page, extended, limit }) =>
-        noticesService.list(page, extended === true, limit),
+      run: ({ page, extended, limit }, context) =>
+        noticesService.list(page, extended === true, limit, context),
     }),
   },
 
-  /* ── progress ──────────────────────────────────────────────────────── */
+  /* ── practice (local) ──────────────────────────────────────────────── */
 
   practice: {
     byDay: query<{ day: string }, PracticeEntry>({
@@ -234,12 +241,14 @@ export const api = {
     }),
   },
 
+  /* ── progress ──────────────────────────────────────────────────────── */
+
   progress: {
     surah: query<NoParams, SurahProgress[]>({
       id: 'progress.surah',
       policy: 'session',
       key: () => queryKeys.progress.surah,
-      run: () => progressService.listSurahProgress(),
+      run: (_params, context) => progressService.listSurahProgress(context),
     }),
   },
 
@@ -250,19 +259,19 @@ export const api = {
       id: 'quran.catalog',
       policy: 'static',
       key: () => queryKeys.quran.catalog,
-      run: () => quranService.loadCatalog(),
+      run: (_params, context) => quranService.loadCatalog(context),
     }),
 
-    /** Both bbox tables of one edition — the multi-megabyte payloads. */
+    /** Both bbox tables of one edition: the multi-megabyte payloads. */
     bboxes: query<{ edition: QuranEdition | null }, EditionBboxes>({
       id: 'quran.bboxes',
       policy: 'static',
       key: ({ edition }) => queryKeys.quran.bboxes(edition?.key ?? 'none'),
       ready: ({ edition }) => edition !== null,
-      run: ({ edition }) => {
+      run: ({ edition }, context) => {
         if (!edition) throw new Error('bboxes requested without an edition');
 
-        return quranService.loadBboxes(edition);
+        return quranService.loadBboxes(edition, context);
       },
     }),
 
@@ -271,12 +280,12 @@ export const api = {
       policy: 'static',
       key: ({ absoluteNumber }) => queryKeys.quran.ayah(absoluteNumber ?? 0),
       ready: ({ absoluteNumber }) => absoluteNumber !== null,
-      run: ({ absoluteNumber }) => {
+      run: ({ absoluteNumber }, context) => {
         if (absoluteNumber === null) {
           throw new Error('ayah content requested without a selection');
         }
 
-        return quranService.loadAyah(absoluteNumber);
+        return quranService.loadAyah(absoluteNumber, context);
       },
     }),
   },
@@ -285,7 +294,7 @@ export const api = {
 
   tafsir: {
     /**
-     * Option lists. Keyed by type + absolute ayah: switching type starts a
+     * Option lists. Keyed by type and absolute ayah: switching type starts a
      * different query, so one type's list can never answer for another.
      */
     sources: query<
@@ -297,18 +306,21 @@ export const api = {
       key: ({ type, ayah }) =>
         queryKeys.tafsir.sources(type, ayah?.absoluteNumber ?? 0),
       ready: ({ type, ayah }) => ayah !== null && type !== 'surah',
-      run: ({ type, ayah }) => {
+      run: ({ type, ayah }, context) => {
         if (!ayah) throw new Error('sources requested without an ayah');
 
-        return tafsirService.sources(type as BookContentType, {
-          surah: ayah.surah,
-          ayah: ayah.ayah,
-        });
+        return tafsirService.sources(
+          type as BookContentType,
+          { surah: ayah.surah, ayah: ayah.ayah },
+          context,
+        );
       },
     }),
 
-    /** One source's body. A source id only means something inside its type, so
-     * the type is part of the key. */
+    /**
+     * One source's body. A source id only means something inside its type, so
+     * the type is part of the key.
+     */
     content: query<
       { type: ContentType; ayah: TafsirAyah | null; sourceId: number | null },
       ContentBody
@@ -323,18 +335,16 @@ export const api = {
         ),
       ready: ({ type, ayah, sourceId }) =>
         ayah !== null && type !== 'surah' && sourceId !== null,
-      run: ({ type, ayah, sourceId }) => {
+      run: ({ type, ayah, sourceId }, context) => {
         if (!ayah || sourceId === null) {
           throw new Error('content requested without a selection');
         }
 
         return tafsirService.content(
           type as BookContentType,
-          {
-            surah: ayah.surah,
-            ayah: ayah.ayah,
-          },
+          { surah: ayah.surah, ayah: ayah.ayah },
           sourceId,
+          context,
         );
       },
     }),
@@ -345,17 +355,17 @@ export const api = {
       policy: 'static',
       key: ({ surah }) => queryKeys.tafsir.surah(surah ?? 0),
       ready: ({ surah }) => surah !== null,
-      run: ({ surah }) => {
+      run: ({ surah }, context) => {
         if (surah === null) {
           throw new Error('surah information requested without a selection');
         }
 
-        return tafsirService.surahInfo(surah);
+        return tafsirService.surahInfo(surah, context);
       },
     }),
   },
 
-  /* ── notes ─────────────────────────────────────────────────────────── */
+  /* ── notes (local, with an optional mock-server mirror) ───────────── */
 
   notes: {
     /**
@@ -372,8 +382,8 @@ export const api = {
       key: ({ namespace, absoluteNumber }) =>
         queryKeys.notes.byAyah(namespace, absoluteNumber ?? 0),
       ready: ({ absoluteNumber }) => absoluteNumber !== null,
-      run: async ({ namespace, absoluteNumber }) => {
-        const notes = await notesService.list(namespace);
+      run: async ({ namespace, absoluteNumber }, context) => {
+        const notes = await notesService.list(namespace, context);
 
         return notes.filter(
           (note) => note.ayah.absoluteNumber === absoluteNumber,
@@ -406,7 +416,7 @@ export const api = {
       id: 'config.features',
       policy: 'live',
       key: () => queryKeys.config.features,
-      run: () => configService.features(),
+      run: (_params, context) => configService.features(context),
     }),
 
     saveFeatures: mutation<
@@ -427,7 +437,7 @@ export const api = {
       id: 'demo.health',
       policy: 'probe',
       key: () => queryKeys.backend.health,
-      run: () => backendClient.health(),
+      run: (_params, context) => backendClient.health(context),
       demo: true,
     }),
 
@@ -444,7 +454,7 @@ export const api = {
         id: 'demo.accounts.list',
         policy: 'session',
         key: (params) => queryKeys.backend.accounts(params),
-        run: (params) => backendClient.listAccounts(params),
+        run: (params, context) => backendClient.listAccounts(params, context),
         demo: true,
       }),
 
@@ -453,10 +463,10 @@ export const api = {
         policy: 'session',
         key: ({ uid }) => queryKeys.backend.account(uid ?? ANONYMOUS),
         ready: ({ uid }) => uid !== null,
-        run: ({ uid }) => {
+        run: ({ uid }, context) => {
           if (!uid) throw new Error('account requested without a uid');
 
-          return backendClient.getAccount(uid);
+          return backendClient.getAccount(uid, context);
         },
         demo: true,
       }),
@@ -509,7 +519,7 @@ export const api = {
         id: 'demo.accounts.me',
         policy: 'session',
         key: () => queryKeys.backend.account('me'),
-        run: () => backendClient.getMyAccount(),
+        run: (_params, context) => backendClient.getMyAccount(context),
         demo: true,
       }),
 
@@ -543,7 +553,7 @@ export const api = {
         id: 'demo.meetings.list',
         policy: 'session',
         key: (params) => queryKeys.backend.meetings(params),
-        run: (params) => backendClient.listMeetings(params),
+        run: (params, context) => backendClient.listMeetings(params, context),
         demo: true,
       }),
 
@@ -552,10 +562,10 @@ export const api = {
         policy: 'session',
         key: ({ id }) => queryKeys.backend.meeting(id ?? 0),
         ready: ({ id }) => id !== null,
-        run: ({ id }) => {
+        run: ({ id }, context) => {
           if (id === null) throw new Error('meeting requested without an id');
 
-          return backendClient.getMeeting(id);
+          return backendClient.getMeeting(id, context);
         },
         demo: true,
       }),
@@ -626,7 +636,7 @@ export const api = {
         id: 'demo.quran.catalog',
         policy: 'static',
         key: () => queryKeys.backend.quran.catalog,
-        run: () => backendClient.getQuranCatalog(),
+        run: (_params, context) => backendClient.getQuranCatalog(context),
         demo: true,
       }),
 
@@ -635,11 +645,12 @@ export const api = {
         policy: 'static',
         key: ({ number }) => queryKeys.backend.quran.surah(number ?? 0),
         ready: ({ number }) => number !== null,
-        run: ({ number }) => {
-          if (number === null)
+        run: ({ number }, context) => {
+          if (number === null) {
             throw new Error('surah requested without a number');
+          }
 
-          return backendClient.getSurah(number);
+          return backendClient.getSurah(number, context);
         },
         demo: true,
       }),
@@ -650,12 +661,12 @@ export const api = {
         key: ({ absoluteNumber }) =>
           queryKeys.backend.quran.ayah(absoluteNumber ?? 0),
         ready: ({ absoluteNumber }) => absoluteNumber !== null,
-        run: ({ absoluteNumber }) => {
+        run: ({ absoluteNumber }, context) => {
           if (absoluteNumber === null) {
             throw new Error('ayah requested without a number');
           }
 
-          return backendClient.getAyah(absoluteNumber);
+          return backendClient.getAyah(absoluteNumber, context);
         },
         demo: true,
       }),
@@ -664,7 +675,7 @@ export const api = {
         id: 'demo.quran.progress',
         policy: 'session',
         key: () => queryKeys.backend.quran.progress,
-        run: () => backendClient.listProgress(),
+        run: (_params, context) => backendClient.listProgress(context),
         demo: true,
       }),
 
@@ -698,7 +709,7 @@ export const api = {
         id: 'demo.bookmarks.list',
         policy: 'session',
         key: () => queryKeys.backend.quran.bookmarks,
-        run: () => backendClient.listBookmarks(),
+        run: (_params, context) => backendClient.listBookmarks(context),
         demo: true,
       }),
 
@@ -749,7 +760,8 @@ export const api = {
         policy: 'session',
         key: ({ absoluteNumber }) =>
           queryKeys.backend.quran.notes(absoluteNumber),
-        run: ({ absoluteNumber }) => backendClient.listNotes(absoluteNumber),
+        run: ({ absoluteNumber }, context) =>
+          backendClient.listNotes(absoluteNumber, context),
         demo: true,
       }),
 

@@ -145,7 +145,10 @@ describe('useEditionBboxes', () => {
 
     await waitFor(() => expect(result.current.state.status).toBe('ready'));
 
-    expect(service.loadBboxes).toHaveBeenCalledWith(EDITION);
+    expect(service.loadBboxes).toHaveBeenCalledWith(
+      EDITION,
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
     expect(result.current.state).toMatchObject({ data: BBOXES });
   });
 
@@ -174,8 +177,16 @@ describe('useEditionBboxes', () => {
     });
 
     expect(service.loadBboxes).toHaveBeenCalledTimes(2);
-    expect(service.loadBboxes).toHaveBeenNthCalledWith(1, EDITION);
-    expect(service.loadBboxes).toHaveBeenNthCalledWith(2, other);
+    expect(service.loadBboxes).toHaveBeenNthCalledWith(
+      1,
+      EDITION,
+      expect.anything(),
+    );
+    expect(service.loadBboxes).toHaveBeenNthCalledWith(
+      2,
+      other,
+      expect.anything(),
+    );
   });
 
   it('reports a failed download as retryable', async () => {
@@ -223,7 +234,10 @@ describe('useAyahContent', () => {
 
     await waitFor(() => expect(result.current.state.status).toBe('ready'));
 
-    expect(service.loadAyah).toHaveBeenCalledWith(8);
+    expect(service.loadAyah).toHaveBeenCalledWith(
+      8,
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
     expect(result.current.state).toMatchObject({ data: { text: 'الم' } });
   });
 

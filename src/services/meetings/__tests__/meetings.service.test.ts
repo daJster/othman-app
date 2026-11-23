@@ -51,7 +51,19 @@ describe('createMeetingsService', () => {
     await expect(service.listByDate(DAY)).resolves.toEqual([meeting(1)]);
 
     expect(repository.listByDate).toHaveBeenCalledTimes(1);
-    expect(repository.listByDate).toHaveBeenCalledWith(DAY);
+    expect(repository.listByDate).toHaveBeenCalledWith(DAY, undefined);
+  });
+
+  it('forwards the cancellation signal to the repository read', async () => {
+    const repository = createFakeRepository({ [DAY]: [meeting(1)] });
+    const service = createMeetingsService(repository);
+    const controller = new AbortController();
+
+    await service.listByDate(DAY, { signal: controller.signal });
+
+    expect(repository.listByDate).toHaveBeenCalledWith(DAY, {
+      signal: controller.signal,
+    });
   });
 
   it('caches each day separately', async () => {

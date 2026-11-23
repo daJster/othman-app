@@ -1,4 +1,5 @@
 import type { QuranNote } from '@/core/domain/notes/notes';
+import type { RequestOptions } from '@/platform/http';
 
 /**
  * Note persistence contract.
@@ -9,7 +10,8 @@ import type { QuranNote } from '@/core/domain/notes/notes';
  * account A's note into account B's list.
  */
 export interface NotesRepository {
-  list(namespace: string): Promise<QuranNote[]>;
+  /** Reads take `RequestOptions` so a left screen cancels a server read. */
+  list(namespace: string, options?: RequestOptions): Promise<QuranNote[]>;
   /** Idempotent by note id, so a retried save cannot duplicate. */
   save(namespace: string, note: QuranNote): Promise<void>;
 }

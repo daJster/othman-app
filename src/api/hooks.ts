@@ -76,7 +76,9 @@ export function useApiQuery<P, R>(
     ...policy,
     ...options,
     queryKey: endpoint.key(params),
-    queryFn: () => endpoint.run(params),
+    // Destructuring `signal` is what tells TanStack the query consumes it, so
+    // an unmounted screen aborts its in-flight request.
+    queryFn: ({ signal }) => endpoint.run(params, { signal }),
     // A disabled query is still a valid cache key: it simply never writes.
     enabled: (options?.enabled ?? true) && ready && demoReady,
   });

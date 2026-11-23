@@ -1,25 +1,34 @@
-import type { DateKey } from '@/core/types';
-import { backendClient } from '@/platform/backend';
+import { backendClient, type BackendClient } from '@/platform/backend';
+import { parseMeetingsResponse } from './backend-meetings.wire';
 import type { MeetingsRepository } from './meetings.types';
 
 /**
  * Meetings repository backed by the mock server.
  *
- * The wire response already matches `Meeting` (the server derives `status`), so
- * this adapter is intentionally thin. The service layer above it still owns the
- * per-day cache and the TanStack query still owns component subscriptions —
- * switching the data source does not change either.
+ * The adapter's only jobs are to name the request and to validate the answer.
+ * The service above owns the per-day cache, and TanStack Query owns the
+ * subscriptions, so switching the data source changes neither.
  */
-export const backendMeetingsRepository: MeetingsRepository = {
-  async listByDate(dateKey: DateKey) {
-    const { meetings } = await backendClient.listMeetings({ date: dateKey });
 
-    return meetings;
-  },
+/** The slice of the backend client this adapter uses. */
+export type MeetingsBackend = Pick<BackendClient, 'listMeetings'>;
 
-  async listByRange(from: DateKey, to: DateKey) {
-    const { meetings } = await backendClient.listMeetings({ from, to });
+export function createBackendMeetingsRepository(
+  client: MeetingsBackend = backendClient,
+): MeetingsRepository {
+  return {
+    async listByDate(dateKey, options) {
+      return parseMeetingsResponse(
+        await client.listMeetings({ date: dateKey }, options),
+      );
+    },
 
-    return meetings;
-  },
-};
+    async listByRange(from, to, options) {
+      return parseMeetingsResponse(
+        await client.listMeetings({ from, to }, options),
+      );
+    },
+  };
+}
+
+export const backendMeetingsRepository = createBackendMeetingsRepository();

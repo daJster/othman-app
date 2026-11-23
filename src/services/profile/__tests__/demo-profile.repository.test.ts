@@ -1,5 +1,4 @@
 import {
-  DEMO_ACCOUNT_EMAIL,
   DEMO_ACCOUNT_UID,
   DEMO_PROFILE,
   createDemoProfileRepository,
@@ -19,17 +18,6 @@ describe('createDemoProfileRepository', () => {
       DEMO_PROFILE,
     );
     await expect(repository.getByUid('someone-else')).resolves.toBeNull();
-  });
-
-  it('finds the profile by email, case-insensitively', async () => {
-    const repository = createDemoProfileRepository(DEMO_PROFILE);
-
-    await expect(
-      repository.getByEmail(DEMO_ACCOUNT_EMAIL.toUpperCase()),
-    ).resolves.toEqual(DEMO_PROFILE);
-    await expect(
-      repository.getByEmail('nope@example.test'),
-    ).resolves.toBeNull();
   });
 
   it('merges a partial write instead of replacing the document', async () => {

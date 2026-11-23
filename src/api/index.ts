@@ -32,6 +32,7 @@ export { currentCursor, useApiStore } from './store';
 export type { ApiConnection, ApiStore } from './store';
 
 export { ApiEventsBridge, useApiEvents } from './events';
+export { ConnectivityBridge, useConnectivityWatch } from './connectivity';
 
 export { backendMessageKey, isDuplicateAccount } from './messages';
 export type { BackendMessageKey } from './messages';

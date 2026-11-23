@@ -2,7 +2,6 @@ import { useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { useEffect } from 'react';
 import {
   MOCK_BACKEND_ENABLED,
-  backendBaseUrl,
   backendClient,
   type BackendEvent,
 } from '@/platform/backend';
@@ -15,26 +14,41 @@ import { currentCursor, useApiStore } from './store';
  * Live updates from the mock backend.
  *
  * A subscription, not a query: the server pushes, nothing is cached under a
- * key, and the only durable state is a cursor. That is why it is the one place
- * in this layer that talks to `backendClient` directly instead of going through
- * an endpoint.
+ * key, and the only durable state is a cursor. The bridge talks to
+ * `backendClient` directly because it owns a stream, not a command.
  *
  * Two transports, one handler:
  *
  *  - **SSE** where `EventSource` exists (web). The server sends every frame as a
  *    default message and the payload carries the event type, so there is one
  *    listener rather than one per domain.
- *  - **Polling** everywhere else (React Native has no EventSource). Five
- *    seconds is below the threshold where a demo meeting appearing feels stale
- *    and above the threshold where a phone polling in the background burns
- *    battery during a review session.
+ *  - **Polling** everywhere else (React Native has no EventSource). Healthy
+ *    polls run every `POLL_INTERVAL_MS`. Each consecutive failure doubles the
+ *    wait, up to `MAX_POLL_BACKOFF_MS`, so an offline phone stops retrying in a
+ *    tight loop and recovers on its own.
  *
- * Either way, the event is turned into a cache invalidation — never written
- * into the cache directly. The server remains the only writer of truth, which
- * keeps optimistic edits and event updates from fighting.
+ * Either way, an event becomes a cache invalidation, never a direct cache
+ * write. The server remains the only writer of truth.
  */
 
-const POLL_INTERVAL_MS = 5_000;
+export const POLL_INTERVAL_MS = 5_000;
+
+/** The longest wait between two polls while the server is unreachable. */
+export const MAX_POLL_BACKOFF_MS = 60_000;
+
+/**
+ * The delay before the next poll, given how many polls in a row have failed.
+ *
+ * Zero failures is the healthy cadence. Each failure doubles the wait, capped.
+ * The exponent is clamped so a long outage cannot overflow the arithmetic.
+ */
+export function nextPollDelay(consecutiveFailures: number): number {
+  if (consecutiveFailures <= 0) return POLL_INTERVAL_MS;
+
+  const exponent = Math.min(consecutiveFailures, 10);
+
+  return Math.min(MAX_POLL_BACKOFF_MS, POLL_INTERVAL_MS * 2 ** exponent);
+}
 
 /**
  * Which cached reads one server event makes stale.
@@ -44,11 +58,10 @@ const POLL_INTERVAL_MS = 5_000;
  * endpoint (`demo.meetings`, `demo.accounts`). Missing one half is how the
  * calendar updates while the diagnostics view keeps showing yesterday.
  *
- * Meetings are read through two caches — TanStack Query *and* the service's
- * per-day/range cache — so the service has to be dropped first. Without that,
+ * Meetings are read through two caches (TanStack Query *and* the service's
+ * per-day/range cache), so the service has to be dropped first. Without that,
  * the invalidation refetches from the domain cache and the screen keeps the
- * bytes it already had: the event arrived, the network call happened, and
- * nothing changed.
+ * bytes it already had.
  */
 export function invalidateForEvent(
   client: QueryClient,
@@ -125,7 +138,6 @@ export function useApiEvents(): void {
       return;
     }
 
-    const token = backendClient.getToken();
     let disposed = false;
     let source: EventSource | null = null;
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -148,15 +160,16 @@ export function useApiEvents(): void {
       invalidateForEvent(client, event);
     };
 
+    const streamUrl =
+      typeof EventSource !== 'undefined'
+        ? backendClient.eventStreamUrl(currentCursor())
+        : null;
+
     // Web: EventSource reconnects on its own after `retry: 3000`.
-    if (typeof EventSource !== 'undefined' && token) {
+    if (streamUrl) {
       setConnection('connecting');
 
-      source = new EventSource(
-        `${backendBaseUrl()}/v1/events/stream?token=${encodeURIComponent(
-          token,
-        )}&since=${currentCursor()}`,
-      );
+      source = new EventSource(streamUrl);
 
       source.onopen = () => setConnection('online');
       source.onmessage = (message) => {
@@ -176,6 +189,7 @@ export function useApiEvents(): void {
 
     // Native (or a browser without EventSource): cursor-based polling.
     let cursor = currentCursor();
+    let failures = 0;
 
     const poll = async (): Promise<void> => {
       if (disposed) return;
@@ -194,13 +208,17 @@ export function useApiEvents(): void {
         }
 
         if (response.events.length === 0) setCursor(response.cursor);
+        failures = 0;
         setConnection('online');
       } catch (error) {
         if (!(error instanceof Error && error.name === 'AbortError')) {
+          failures += 1;
           setConnection('offline');
         }
       } finally {
-        if (!disposed) timer = setTimeout(() => void poll(), POLL_INTERVAL_MS);
+        if (!disposed) {
+          timer = setTimeout(() => void poll(), nextPollDelay(failures));
+        }
       }
     };
 

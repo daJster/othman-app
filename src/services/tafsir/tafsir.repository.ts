@@ -6,7 +6,7 @@ import {
   parseContentSources,
   parseSurahInformation,
 } from '@/core/domain/quran/tafsir';
-import type { HttpClient } from '@/platform/http';
+import type { HttpClient, RequestOptions } from '@/platform/http';
 import type { LocalAyah, TafsirRepository } from './tafsir.types';
 
 /**
@@ -51,18 +51,19 @@ function requireSourceId(sourceId: number): number {
 
 export function createTafsirRepository(client: HttpClient): TafsirRepository {
   return {
-    async sources(type, ayah) {
+    async sources(type, ayah, options?: RequestOptions) {
       const local = requireLocalAyah(ayah);
       const payload = await client.get<unknown>(
         quranpediaUrl(
           `v1/ayah/${local.surah}/${local.ayah}/${SERVICE_PATH[type]}`,
         ),
+        options,
       );
 
       return parseContentSources(payload);
     },
 
-    async content(type, ayah, sourceId) {
+    async content(type, ayah, sourceId, options?: RequestOptions) {
       const local = requireLocalAyah(ayah);
       const id = requireSourceId(sourceId);
       // `type` is carried for the caller's cache identity; the book endpoint
@@ -70,18 +71,20 @@ export function createTafsirRepository(client: HttpClient): TafsirRepository {
       void type;
       const payload = await client.get<unknown>(
         quranpediaUrl(`v1/ayah/${local.surah}/${local.ayah}/book/${id}`),
+        options,
       );
 
       return parseBookContent(payload);
     },
 
-    async surahInfo(surah) {
+    async surahInfo(surah, options?: RequestOptions) {
       if (!isSurahNumber(surah)) {
         throw new RangeError(`Surah must be 1-114, received ${surah}`);
       }
 
       const payload = await client.get<unknown>(
         quranpediaUrl(`v1/surah/information/${surah}`),
+        options,
       );
 
       return parseSurahInformation(payload);

@@ -24,7 +24,7 @@ import { featureForPath } from '@/features/flags/registry';
 import { FeatureOverlay } from '@/features/flags/gates';
 import { FeatureFlagsProvider, useFeatures } from '@/features/flags/provider';
 import { useSessionRole } from '@/features/auth/use-session-role';
-import { ApiEventsBridge } from '@/api';
+import { ApiEventsBridge, ConnectivityBridge } from '@/api';
 import { AUTH_GATING_ENABLED } from '@/features/auth/auth-policy';
 import { AuthProvider, useAuth } from '@/providers/auth-provider';
 import { BootProvider } from '@/providers/boot-provider';
@@ -130,6 +130,8 @@ function AppShell() {
             <FeatureFlagsProvider>
               <BootProvider>
                 <ToastProvider>
+                  {/* Starts the internet probe before the screens ask for data. */}
+                  <ConnectivityBridge />
                   <RootNavigator />
                   <ApiEventsBridge />
                   <PortalHost />

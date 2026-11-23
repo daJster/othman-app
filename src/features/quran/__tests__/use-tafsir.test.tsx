@@ -100,14 +100,16 @@ describe('useTafsirPanel', () => {
 
     expect(result.current.type).toBe('tafsir');
     expect(result.current.sourceId).toBe(3);
-    expect(service.sources).toHaveBeenCalledWith('tafsir', {
-      surah: 2,
-      ayah: 262,
-    });
+    expect(service.sources).toHaveBeenCalledWith(
+      'tafsir',
+      { surah: 2, ayah: 262 },
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
     expect(service.content).toHaveBeenCalledWith(
       'tafsir',
       { surah: 2, ayah: 262 },
       3,
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
     );
   });
 
@@ -129,6 +131,7 @@ describe('useTafsirPanel', () => {
         'e3rab',
         { surah: 2, ayah: 262 },
         180,
+        expect.objectContaining({ signal: expect.any(AbortSignal) }),
       ),
     );
 
@@ -137,6 +140,7 @@ describe('useTafsirPanel', () => {
       'e3rab',
       expect.anything(),
       3,
+      expect.anything(),
     );
   });
 
@@ -173,7 +177,10 @@ describe('useTafsirPanel', () => {
       expect(result.current.surahInfo.state.status).toBe('ready'),
     );
 
-    expect(service.surahInfo).toHaveBeenCalledWith(2);
+    expect(service.surahInfo).toHaveBeenCalledWith(
+      2,
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
     expect(result.current.sourceId).toBeNull();
     expect(service.sources.mock.calls).toHaveLength(sourceCalls);
   });

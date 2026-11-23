@@ -1,6 +1,7 @@
 import type { QuranNote } from '@/core/domain/notes/notes';
 import { backendClient } from '@/platform/backend';
 import type { BackendClient } from '@/platform/backend';
+import type { RequestOptions } from '@/platform/http';
 import { NotesWriteError, type NotesRepository } from './notes.types';
 
 /**
@@ -41,14 +42,21 @@ export function createBackendNotesRepository(
   client: BackendClient = backendClient,
 ): NotesRepository {
   return {
-    async list(namespace: string): Promise<QuranNote[]> {
+    async list(
+      namespace: string,
+      options?: RequestOptions,
+    ): Promise<QuranNote[]> {
       if (!uidFromNamespace(namespace)) return local.list(namespace);
 
       try {
-        const { notes } = await client.listNotes();
+        const { notes } = await client.listNotes(undefined, options);
 
         return notes.map(toQuranNote);
-      } catch {
+      } catch (error) {
+        // A cancelled read is not an outage: the reader has left, so there is
+        // nothing to fall back to and no reason to read the device.
+        if (options?.signal?.aborted) throw error;
+
         // Offline should not hide notes the reader already has on the device.
         return local.list(namespace);
       }

@@ -1,3 +1,22 @@
+import { connectivityMonitor, type ConnectivityGate } from './connectivity';
+import { httpRequestLog, type HttpObserver, type HttpOutcome } from './observe';
+import { REQUEST_TIMEOUT_MS } from './policy';
+import { redactUrl } from './redact';
+
+/**
+ * The single transport for every non-SDK request the app makes.
+ *
+ * Backend calls reach it through `BackendClient`, third-party reads (Qur'an CDN,
+ * ayah text, tafsir) through their repositories. Nothing else calls `fetch`: the
+ * lint rule in `eslint.config.js` enforces that.
+ *
+ * What this class owns, and nothing else does:
+ *  - one timeout policy (`REQUEST_TIMEOUT_MS`, overridable per call),
+ *  - cancellation through `AbortSignal` (caller abort is distinct from timeout),
+ *  - error classification (`HttpError`, `HttpTimeoutError`, `HttpAbortError`),
+ *  - one observer event per settled request, with a redacted URL.
+ */
+
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD';
 
 export type HttpHeaders = Record<string, string>;
@@ -6,11 +25,18 @@ export interface HttpRequestInit {
   method?: HttpMethod;
   headers?: HttpHeaders;
   body?: unknown;
-  /** Caller-owned cancellation (e.g. component unmount, newer request). */
+  /** Caller-owned cancellation (e.g. component unmount, a newer request). */
   signal?: AbortSignal;
   /** Abort with `HttpTimeoutError` after this many ms. `0` disables it. */
   timeoutMs?: number;
 }
+
+/**
+ * What a read may pass through to the transport: cancellation only. Query
+ * functions receive one of these from TanStack Query and forward it, so an
+ * unmounted screen cancels its request.
+ */
+export type RequestOptions = { signal?: AbortSignal };
 
 /** The server answered, but not with a success status. */
 export class HttpError extends Error {
@@ -28,7 +54,7 @@ export class HttpError extends Error {
   }
 }
 
-/** The request exceeded `timeoutMs`. Different from a caller cancel. */
+/** The request exceeded its timeout. Different from a caller cancel. */
 export class HttpTimeoutError extends Error {
   readonly url: string;
   readonly timeoutMs: number;
@@ -52,6 +78,21 @@ export class HttpAbortError extends Error {
   }
 }
 
+/**
+ * The request never left the device: the connectivity monitor says the app is
+ * offline. Fails immediately, so nothing waits out a timeout to learn what the
+ * monitor already knew.
+ */
+export class HttpOfflineError extends Error {
+  readonly url: string;
+
+  constructor(url: string) {
+    super(`Request to ${url} was skipped: the app is offline`);
+    this.name = 'OfflineError';
+    this.url = url;
+  }
+}
+
 export interface HttpClient {
   request<T = unknown>(url: string, init?: HttpRequestInit): Promise<T>;
   get<T = unknown>(
@@ -65,14 +106,79 @@ export interface HttpClient {
   ): Promise<T>;
 }
 
+export type FetchHttpClientOptions = {
+  /** Timeout for any request that does not set its own. */
+  timeoutMs?: number;
+  /**
+   * Notified once per request, after it settles. An observer that throws is
+   * ignored: recording a request must never fail it.
+   */
+  observers?: readonly HttpObserver[];
+  /**
+   * Consulted before every request. When it reports offline the request is
+   * skipped (`HttpOfflineError`) instead of being attempted. Omitted means no
+   * gate, which is what a test and a one-off script want.
+   */
+  connectivity?: ConnectivityGate;
+};
+
+let nextEventId = 0;
+
 export class FetchHttpClient implements HttpClient {
+  private readonly timeoutMs: number;
+  private readonly observers: readonly HttpObserver[];
+  private readonly connectivity?: ConnectivityGate;
+
+  constructor({
+    timeoutMs = REQUEST_TIMEOUT_MS,
+    observers = [],
+    connectivity,
+  }: FetchHttpClientOptions = {}) {
+    this.timeoutMs = timeoutMs;
+    this.observers = observers;
+    this.connectivity = connectivity;
+  }
+
   async request<T = unknown>(url: string, init?: HttpRequestInit): Promise<T> {
-    const controller = new AbortController();
-    const timeoutMs = init?.timeoutMs ?? 10_000;
+    const method = init?.method ?? 'GET';
+    const timeoutMs = init?.timeoutMs ?? this.timeoutMs;
     const callerSignal = init?.signal;
+    const startedAt = Date.now();
+    const controller = new AbortController();
 
     let timedOut = false;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    let reported = false;
+
+    const report = (outcome: HttpOutcome, status: number | null) => {
+      if (reported) return;
+      reported = true;
+
+      const event = {
+        id: (nextEventId += 1),
+        method,
+        url: redactUrl(url),
+        status,
+        outcome,
+        durationMs: Date.now() - startedAt,
+        startedAt,
+      };
+
+      for (const observer of this.observers) {
+        try {
+          observer(event);
+        } catch {
+          // Observability is best-effort by contract.
+        }
+      }
+    };
+
+    // The gate runs before any timer is armed: an offline request fails now,
+    // not after a timeout, and never reaches `fetch`.
+    if (this.connectivity && !this.connectivity.isOnline()) {
+      report('offline', null);
+      throw new HttpOfflineError(url);
+    }
 
     // `AbortSignal.any` is not reliably available on Hermes, so the two abort
     // sources are combined by hand and torn down in `finally`.
@@ -84,6 +190,7 @@ export class FetchHttpClient implements HttpClient {
     }
 
     const onCallerAbort = () => controller.abort();
+
     if (callerSignal) {
       if (callerSignal.aborted) {
         controller.abort();
@@ -94,7 +201,7 @@ export class FetchHttpClient implements HttpClient {
 
     try {
       const res = await fetch(url, {
-        method: init?.method ?? 'GET',
+        method,
         headers: init?.headers ?? {},
         body: init?.body as BodyInit | undefined,
         signal: controller.signal,
@@ -104,38 +211,39 @@ export class FetchHttpClient implements HttpClient {
         // Read the error body before throwing: the backend puts its error code
         // in `{ error: { code, message } }`, and a status alone cannot tell
         // "wrong password" from "account disabled".
-        let body: unknown;
-        const contentType = res.headers.get('content-type');
-
-        if (contentType?.includes('application/json')) {
-          body = await res.json().catch(() => undefined);
-        }
+        const body = isJson(res)
+          ? await res.json().catch(() => undefined)
+          : undefined;
 
         throw new HttpError(res.status, url, undefined, body);
       }
 
-      const contentType = res.headers.get('content-type');
-      if (contentType?.includes('application/json')) {
-        return (await res.json()) as T;
-      }
+      const value = isJson(res)
+        ? ((await res.json()) as T)
+        : ((await res.text()) as unknown as T);
 
-      return (await res.text()) as unknown as T;
+      report('ok', res.status);
+
+      return value;
     } catch (error) {
-      if (
-        error instanceof HttpError ||
-        error instanceof HttpTimeoutError ||
-        error instanceof HttpAbortError
-      ) {
+      if (error instanceof HttpError) {
+        report('http-error', error.status);
         throw error;
       }
 
-      // Fetch rejects with a DOMException/Error named `AbortError` for both
-      // abort sources; only our own flag can tell them apart.
+      // Fetch rejects with an `AbortError` for both abort sources; only our own
+      // flag can tell a timeout from a caller cancel.
       if (error instanceof Error && error.name === 'AbortError') {
-        throw timedOut
-          ? new HttpTimeoutError(url, timeoutMs)
-          : new HttpAbortError(url);
+        if (timedOut) {
+          report('timeout', null);
+          throw new HttpTimeoutError(url, timeoutMs);
+        }
+
+        report('aborted', null);
+        throw new HttpAbortError(url);
       }
+
+      report('network-error', null);
 
       throw error instanceof Error ? error : new Error(String(error));
     } finally {
@@ -160,4 +268,11 @@ export class FetchHttpClient implements HttpClient {
   }
 }
 
-export const defaultHttpClient = new FetchHttpClient();
+function isJson(res: Response): boolean {
+  return res.headers.get('content-type')?.includes('application/json') ?? false;
+}
+
+export const defaultHttpClient = new FetchHttpClient({
+  observers: [httpRequestLog.record],
+  connectivity: connectivityMonitor,
+});

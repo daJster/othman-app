@@ -26,7 +26,8 @@ facts about the _command_, so they are declared next to it:
 | Cache key      | `key(params)` — same params, same key    |
 | Strategy       | `policy` — a name from `policies.ts`     |
 | Can it run yet | `ready(params)`                          |
-| Source of data | `run(params)` — a service, never `fetch` |
+| Source of data | `run(params, context)` — a service, never `fetch` |
+| Cancellation   | `context.signal`, forwarded to the transport |
 | What it stales | `invalidates(params)` on mutations       |
 
 ## Layers
@@ -41,10 +42,34 @@ src/api/messages.ts    error code -> user-facing copy
 src/api/index.ts       the only barrel the app imports
 ```
 
-The transport itself (`src/platform/backend`) still owns token persistence, JSON
-encoding, timeouts and error normalization. Nothing outside `src/api` should
-import it: a screen that reached for `backendClient` would bypass the strategy
-and the invalidation rule.
+Below the registry, `src/platform/http` owns the one transport: timeouts,
+cancellation, error classes and one request-log event per request.
+`src/platform/backend` wraps it with the session token and the mock server's
+routes. Nothing outside `src/api` should import the backend client: a screen
+that reached for `backendClient` would bypass the strategy and the invalidation
+rule. The full inventory and the request flow are in
+[`external-requests.md`](external-requests.md).
+
+## Cancellation
+
+A read's `run` receives a `context` whose `signal` TanStack Query aborts when the
+screen that asked for the data unmounts or the query is replaced. The registry
+forwards that signal down the chain, so the request is cancelled instead of
+finishing for nobody:
+
+```ts
+run: ({ date }, context) => meetingsService.listByDate(date, context),
+```
+
+Writes take no signal. A half-cancelled write is worse than a late one.
+
+## Connectivity
+
+An internet probe (`src/platform/http/connectivity.ts`) gates the transport and
+drives TanStack's `onlineManager`: while the device is offline queries pause
+rather than fail, and they resume when the probe reconnects. The backend's
+health probe is a different question (is the mock server up?). Details are in
+[`external-requests.md`](external-requests.md#connectivity-gate).
 
 ## Two namespaces
 
@@ -84,7 +109,7 @@ override both.
          id: 'meetings.byDate',
          policy: 'live',
          key: ({ date }) => queryKeys.meetings.byDate(date),
-         run: ({ date }) => meetingsService.listByDate(date),
+         run: ({ date }, context) => meetingsService.listByDate(date, context),
        }),
      },
    };

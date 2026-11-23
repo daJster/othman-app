@@ -54,7 +54,6 @@ jest.mock('@/services/profile', () => ({
   profileService: {
     getAccount: jest.fn(),
     update: jest.fn(),
-    findByEmail: jest.fn(),
   },
 }));
 

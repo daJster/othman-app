@@ -41,7 +41,7 @@ describe('createTafsirRepository', () => {
       LOCAL,
     );
 
-    expect(get).toHaveBeenCalledWith(url);
+    expect(get).toHaveBeenCalledWith(url, undefined);
     expect(sources.map((source) => source.id)).toEqual([3, 4, 136]);
     expect(sources[0].name).toBe('تيسير الكريم الرحمن');
     expect(sources[0].author).toBe('السعدي');
@@ -56,7 +56,7 @@ describe('createTafsirRepository', () => {
       LOCAL,
     );
 
-    expect(get).toHaveBeenCalledWith(url);
+    expect(get).toHaveBeenCalledWith(url, undefined);
     expect(sources[0]).toMatchObject({ id: 1947 });
   });
 
@@ -66,7 +66,7 @@ describe('createTafsirRepository', () => {
 
     await createTafsirRepository(client).sources('e3rab', LOCAL);
 
-    expect(get).toHaveBeenCalledWith(url);
+    expect(get).toHaveBeenCalledWith(url, undefined);
   });
 
   it('loads a tafsir body by local ayah and source id, as plain rtl text', async () => {
@@ -79,7 +79,7 @@ describe('createTafsirRepository', () => {
       3,
     );
 
-    expect(get).toHaveBeenCalledWith(url);
+    expect(get).toHaveBeenCalledWith(url, undefined);
     // Not `/2/269/`, the absolute number the reference mixed in.
     expect(get.mock.calls[0][0]).not.toContain('/2/269/');
     expect(body).toMatchObject({ status: 'ready', direction: 'rtl' });
@@ -122,7 +122,7 @@ describe('createTafsirRepository', () => {
 
     const sections = await createTafsirRepository(client).surahInfo(2);
 
-    expect(get).toHaveBeenCalledWith(url);
+    expect(get).toHaveBeenCalledWith(url, undefined);
     expect(sections.map((section) => section.key)).toEqual([
       'introduction',
       'surah_type',
@@ -146,6 +146,21 @@ describe('createTafsirRepository', () => {
     await expect(repository.surahInfo(115)).rejects.toBeInstanceOf(RangeError);
 
     expect(get).not.toHaveBeenCalled();
+  });
+
+  it('passes the cancellation signal through to the transport', async () => {
+    const { client, get } = clientFor({
+      [quranpediaUrl('v1/ayah/2/262/book/3')]: bookTafsir,
+    });
+    const controller = new AbortController();
+
+    await createTafsirRepository(client).content('tafsir', LOCAL, 3, {
+      signal: controller.signal,
+    });
+
+    expect(get).toHaveBeenCalledWith(quranpediaUrl('v1/ayah/2/262/book/3'), {
+      signal: controller.signal,
+    });
   });
 
   it('propagates transport failures instead of returning empty text', async () => {

@@ -25,7 +25,6 @@ jest.mock('@/services/profile', () => ({
   profileService: {
     getAccount: jest.fn(),
     update: jest.fn(),
-    findByEmail: jest.fn(),
   },
 }));
 
@@ -121,7 +120,10 @@ describe('AuthProvider', () => {
 
     expect(screen.getByTestId('uid')).toHaveTextContent('uid-a');
     expect(screen.getByTestId('account-name')).toHaveTextContent('Account A');
-    expect(service.getAccount).toHaveBeenCalledWith(USER_A);
+    expect(service.getAccount).toHaveBeenCalledWith(
+      USER_A,
+      expect.objectContaining({ signal: expect.any(AbortSignal) }),
+    );
   });
 
   it('settles to signed-out when there is no session', async () => {

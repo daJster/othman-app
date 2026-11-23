@@ -15,7 +15,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { api, useApiQuery } from '@/api';
 import { useDirection, numberLocale, type Language } from '@/i18n';
-import type { Notice } from '@/services/notices/notices.service';
+import type { Notice } from '@/services/notices';
 import { Spinner } from '@/ui/spinner';
 import { Text } from '@/ui/text';
 import { pickLocalized } from './circle-format';

@@ -112,7 +112,7 @@ describe('reader reads', () => {
     await expect(createQuranService(repos).loadBboxes(EDITION)).resolves.toBe(
       BBOXES,
     );
-    expect(loadBboxes).toHaveBeenCalledWith(EDITION);
+    expect(loadBboxes).toHaveBeenCalledWith(EDITION, undefined);
   });
 
   it('loads one ayah by absolute number', async () => {
@@ -121,6 +121,26 @@ describe('reader reads', () => {
     repos.content = { byAbsoluteNumber: loadAyah };
 
     await expect(createQuranService(repos).loadAyah(1)).resolves.toBe(AYAH);
-    expect(loadAyah).toHaveBeenCalledWith(1);
+    expect(loadAyah).toHaveBeenCalledWith(1, undefined);
+  });
+
+  it('forwards the cancellation signal to every read it starts', async () => {
+    const controller = new AbortController();
+    const options = { signal: controller.signal };
+    const repos = emptyRepositories();
+    repos.editions = { list: jest.fn().mockResolvedValue({}) };
+    repos.metadata = { list: jest.fn().mockResolvedValue({}) };
+    repos.bboxes = { load: jest.fn().mockResolvedValue(BBOXES) };
+    repos.content = { byAbsoluteNumber: jest.fn().mockResolvedValue(AYAH) };
+    const service = createQuranService(repos);
+
+    await service.loadCatalog(options);
+    await service.loadBboxes(EDITION, options);
+    await service.loadAyah(1, options);
+
+    expect(repos.editions.list).toHaveBeenCalledWith(options);
+    expect(repos.metadata.list).toHaveBeenCalledWith(options);
+    expect(repos.bboxes.load).toHaveBeenCalledWith(EDITION, options);
+    expect(repos.content.byAbsoluteNumber).toHaveBeenCalledWith(1, options);
   });
 });
